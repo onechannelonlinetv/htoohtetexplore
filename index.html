@@ -1,179 +1,115 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="my">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HTOO HTET EXPLORE | Motorcycle & Travel Stories</title>
-  <meta name="description" content="Official travel blog of Htoo Htet featuring Roads of Ayeyarwaddy, motorcycle travel, local food, and budget guides.">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            forest: '#1b3022',
-            cream: '#f7f4ee',
-            terracotta: '#c85a32',
-            charcoal: '#222523',
-          }
-        }
-      }
-    }
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Htoo Htet Explore - Travel Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-cream text-charcoal font-sans antialiased selection:bg-terracotta selection:text-white">
+<body class="bg-gray-100 text-gray-800 font-sans pb-12">
 
-  <!-- 1. SPONSOR BANNER (Top of Viewport) -->
-  <aside id="sponsor-banner" class="bg-forest text-white px-4 py-3 border-b border-emerald-900 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm">
-      <div class="flex items-center gap-3 text-center sm:text-left">
-        <span class="bg-amber-500/20 text-amber-300 font-semibold uppercase tracking-wider text-[10px] px-2 py-0.5 rounded border border-amber-500/30">
-          Official Supporter
-        </span>
-        <p class="font-medium text-emerald-100">
-          <strong class="text-white font-semibold" id="banner-headline">Proudly supported by Veezoom Myanmar</strong>
-          <span class="hidden md:inline text-emerald-300/80"> — Supporting the motorcycle journey across the roads of Ayeyarwaddy.</span>
-        </p>
-      </div>
-      <a id="banner-link" href="https://www.facebook.com/profile.php?id=61571522917135" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 font-semibold text-amber-300 hover:text-amber-200 transition-colors whitespace-nowrap underline underline-offset-4">
-        <span>Meet Our Sponsor ↗</span>
-      </a>
-    </div>
-  </aside>
-
-  <!-- 2. HEADER & NAVIGATION -->
-  <header class="bg-cream border-b border-stone-200 sticky top-[45px] z-40 backdrop-blur-md bg-cream/90">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      <a href="#" class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-forest text-cream flex items-center justify-center font-serif font-bold text-xl">H</div>
-        <div>
-          <span class="font-serif font-bold text-xl md:text-2xl tracking-tight text-forest block">HTOO HTET EXPLORE</span>
-          <span class="text-[10px] uppercase tracking-widest text-stone-500 block -mt-1">Motorcycle Travel & Guides</span>
+    <!-- Header & Social Icons -->
+    <header class="bg-emerald-700 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-wide">Htoo Htet Explore</h1>
+            <div class="flex space-x-4 text-xl" id="social-links">
+                <!-- Social links rendered dynamically -->
+                <a id="link-fb" href="#" target="_blank" class="hover:text-amber-300 transition"><i class="fa-brands fa-facebook"></i></a>
+                <a id="link-tt" href="#" target="_blank" class="hover:text-amber-300 transition"><i class="fa-brands fa-tiktok"></i></a>
+                <a id="link-yt" href="#" target="_blank" class="hover:text-amber-300 transition"><i class="fa-brands fa-youtube"></i></a>
+            </div>
         </div>
-      </a>
-      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-stone-700">
-        <a href="#ayeyarwaddy" class="hover:text-terracotta transition-colors">Roads of Ayeyarwaddy</a>
-        <a href="#stories" class="hover:text-terracotta transition-colors">Stories</a>
-        <a href="#budgets" class="hover:text-terracotta transition-colors">Travel Budgets</a>
-        <a href="#videos" class="hover:text-terracotta transition-colors">Videos</a>
-        <a href="#about" class="hover:text-terracotta transition-colors">About</a>
-      </nav>
-      <button onclick="toggleAdminModal()" class="text-xs bg-stone-200 hover:bg-stone-300 px-3 py-2 rounded-md font-semibold transition-colors">
-        ⚙️ Admin Login
-      </button>
-    </div>
-  </header>
+    </header>
 
-  <!-- 3. HERO SECTION -->
-  <section class="relative bg-forest text-cream py-24 md:py-32 px-4 overflow-hidden">
-    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-    <div class="max-w-4xl mx-auto text-center relative z-10">
-      <span class="inline-block px-3 py-1 bg-terracotta/20 text-terracotta border border-terracotta/30 text-xs font-semibold uppercase tracking-widest rounded-full mb-6">
-        Featured Travel Series
-      </span>
-      <h1 class="font-serif text-4xl sm:text-6xl md:text-7xl font-normal tracking-tight mb-6 leading-tight">
-        Exploring the Uncharted Roads of Ayeyarwaddy
-      </h1>
-      <p class="text-lg md:text-xl text-stone-300 max-w-2xl mx-auto font-light mb-10 leading-relaxed">
-        Join Htoo Htet on a long-distance motorcycle journey across Myanmar — uncovering local food, authentic culture, road trips, and practical travel guides.
-      </p>
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="#ayeyarwaddy" class="bg-terracotta hover:bg-terracotta/90 text-white px-8 py-3.5 rounded-md font-semibold transition-all shadow-lg hover:shadow-xl">
-          Watch The Journey
-        </a>
-        <a href="#stories" class="bg-white/10 hover:bg-white/20 text-white px-8 py-3.5 rounded-md font-semibold backdrop-blur-sm transition-all border border-white/20">
-          Read Travel Guides
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4. FEATURED JOURNEY: ROADS OF AYEYARWADDY -->
-  <section id="ayeyarwaddy" class="max-w-7xl mx-auto px-4 py-20">
-    <div class="border-b border-stone-300 pb-4 mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
-      <div>
-        <span class="text-terracotta font-semibold text-xs tracking-widest uppercase">Signature Expedition</span>
-        <h2 class="font-serif text-3xl md:text-5xl font-bold text-forest mt-1">Roads of Ayeyarwaddy</h2>
-      </div>
-      <p class="text-stone-600 text-sm max-w-md">Supported by Veezoom Myanmar. Documenting the towns, bridges, local markets, and river routes along Ayeyarwaddy.</p>
-    </div>
-
-    <div class="grid md:grid-cols-2 gap-10 items-center bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-stone-200">
-      <div class="space-y-6">
-        <span class="bg-forest/10 text-forest text-xs font-bold px-3 py-1 rounded-full uppercase">Episode 01 • Live Story</span>
-        <h3 class="font-serif text-2xl md:text-4xl font-bold text-stone-900">Riding Through Pyay to the Delta Plains</h3>
-        <p class="text-stone-600 leading-relaxed">
-          Starting from the historic riverbanks of Pyay, riding south towards Hinthada. 320 kilometers of rural asphalt, monsoon river views, and unexpected roadside noodle stalls.
-        </p>
-        <div class="grid grid-cols-2 gap-4 py-4 border-y border-stone-100 text-sm">
-          <div><strong class="block text-forest">Distance:</strong> 320 km</div>
-          <div><strong class="block text-forest">Bike:</strong> Veezoom Sponsored Ride</div>
-          <div><strong class="block text-forest">Fuel Cost:</strong> ~$12 USD</div>
-          <div><strong class="block text-forest">Duration:</strong> 3 Days</div>
+    <!-- Sponsor Banner Area -->
+    <div class="max-w-4xl mx-auto px-4 mt-6">
+        <div id="sponsor-container" class="hidden bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl p-4 shadow-lg flex flex-col md:flex-row items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <img id="sponsor-img" src="" alt="Sponsor" class="w-16 h-16 object-cover rounded-lg bg-white hidden">
+                <div>
+                    <span class="bg-amber-800 text-xs px-2 py-0.5 rounded uppercase font-bold tracking-wider">Official Sponsor</span>
+                    <h3 id="sponsor-title" class="text-lg font-bold mt-1">Veezoom Myanmar</h3>
+                    <p id="sponsor-desc" class="text-sm opacity-90">Roads of Ayeyarwaddy Series</p>
+                </div>
+            </div>
+            <a id="sponsor-link" href="#" target="_blank" class="mt-3 md:mt-0 bg-white text-orange-600 font-bold px-4 py-2 rounded-lg shadow hover:bg-amber-100 transition text-sm">
+                Visit Sponsor
+            </a>
         </div>
-      </div>
-      <div class="bg-stone-200 h-80 rounded-xl flex items-center justify-center text-stone-500 font-medium relative overflow-hidden group">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
-        <span class="relative z-20 text-white font-serif text-xl font-bold">🏍️ Motorcycle Route Photography Placeholder</span>
-      </div>
     </div>
-  </section>
 
-  <!-- 5. ABOUT HTOO HTET SECTION -->
-  <section id="about" class="bg-stone-200/60 py-20 px-4">
-    <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-12 items-center">
-      <div class="bg-stone-300 h-96 rounded-2xl flex items-center justify-center text-stone-600 font-serif font-bold text-xl shadow-inner">
-        Htoo Htet Portrait
-      </div>
-      <div class="md:col-span-2 space-y-6">
-        <span class="text-terracotta font-semibold text-xs tracking-widest uppercase">The Storyteller</span>
-        <h2 class="font-serif text-3xl md:text-4xl font-bold text-forest">Hi, I'm Htoo Htet</h2>
-        <p class="text-stone-700 leading-relaxed">
-          I am a Myanmar motorcycle traveler, storyteller, and guide creator. Htoo Htet Explore was born out of a passion for long-distance road trips, hidden local eateries, and sharing real travel costs with international visitors who want to experience authentic Myanmar.
-        </p>
-        <div class="flex items-center gap-4 pt-2">
-          <a href="https://facebook.com" target="_blank" class="bg-forest text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-forest/90">Follow on Facebook</a>
-          <a href="https://youtube.com" target="_blank" class="bg-stone-300 text-stone-800 px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-stone-400">YouTube Channel</a>
+    <!-- Main Content / Posts -->
+    <main class="max-w-4xl mx-auto px-4 mt-8">
+        <h2 class="text-xl font-bold mb-4 text-gray-700 border-b-2 border-emerald-600 pb-2">ခရီးသွား မှတ်တမ်းများ</h2>
+        <div id="blog-posts-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Dynamic Posts Will Appear Here -->
         </div>
-      </div>
-    </div>
-  </section>
+    </main>
 
-  <!-- 6. FOOTER -->
-  <footer class="bg-forest text-stone-300 py-12 px-4 border-t border-emerald-900">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
-      <div>
-        <span class="font-serif font-bold text-xl text-white block">HTOO HTET EXPLORE</span>
-        <p class="text-stone-400 text-xs mt-1">© 2026 Htoo Htet Explore. All rights reserved.</p>
-      </div>
-      <div class="flex gap-6 text-xs text-stone-400">
-        <a href="#" class="hover:text-white">Privacy Policy</a>
-        <a href="#" class="hover:text-white">Sponsor Disclosure</a>
-        <a href="#" class="hover:text-white">Contact</a>
-      </div>
-    </div>
-  </footer>
+    <!-- Hidden Secret Admin Access (Footer Click) -->
+    <footer class="mt-16 text-center text-xs text-gray-400">
+        <p>© 2026 Htoo Htet Explore. All rights reserved. <a href="admin.html" class="opacity-20 hover:opacity-100">[Admin]</a></p>
+    </footer>
 
-  <!-- 7. ADMIN MODAL (Quick Settings Control) -->
-  <div id="admin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-6">
-      <div class="flex justify-between items-center border-b pb-4">
-        <h3 class="font-bold text-lg text-forest">⚙️ Quick Admin Settings</h3>
-        <button onclick="toggleAdminModal()" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
-      </div>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Sponsor Headline</label>
-          <input type="text" id="admin-headline-input" value="Proudly supported by Veezoom Myanmar" class="w-full border p-2.5 rounded-md text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Sponsor Facebook Link</label>
-          <input type="text" id="admin-link-input" value="https://www.facebook.com/profile.php?id=61571522917135" class="w-full border p-2.5 rounded-md text-sm">
-        </div>
-        <div class="flex items-center gap-3">
-          <input type="checkbox" id="admin-banner-toggle" checked class="w-4 h-4 text-forest rounded">
-          <label for="admin-banner-toggle" class="text-sm font-semibold text-gray-800">Show Sponsor Banner (ON / OFF)</label>
-        </div>
-      </div>
-      <div class="pt-4 flex gap-3">
-        <button onclick="saveAdminSettings()" class="w-full bg-forest
+    <script>
+        // Load Dynamic Data from LocalStorage/Defaults
+        function loadBlogData() {
+            // 1. Social Links
+            const social = JSON.parse(localStorage.getItem('hh_social')) || {
+                fb: 'https://facebook.com',
+                tt: 'https://tiktok.com',
+                yt: 'https://youtube.com'
+            };
+            document.getElementById('link-fb').href = social.fb;
+            document.getElementById('link-tt').href = social.tt;
+            document.getElementById('link-yt').href = social.yt;
+
+            // 2. Sponsor Banner
+            const sponsor = JSON.parse(localStorage.getItem('hh_sponsor')) || {
+                active: true,
+                title: 'Veezoom Myanmar',
+                desc: 'Roads of Ayeyarwaddy စီးရီး၏ ပင်တိုင် Sponsor',
+                link: 'https://facebook.com',
+                img: ''
+            };
+            if (sponsor.active) {
+                document.getElementById('sponsor-container').classList.remove('hidden');
+                document.getElementById('sponsor-title').innerText = sponsor.title;
+                document.getElementById('sponsor-desc').innerText = sponsor.desc;
+                document.getElementById('sponsor-link').href = sponsor.link;
+                if(sponsor.img) {
+                    const imgEl = document.getElementById('sponsor-img');
+                    imgEl.src = sponsor.img;
+                    imgEl.classList.remove('hidden');
+                }
+            }
+
+            // 3. Blog Posts
+            const posts = JSON.parse(localStorage.getItem('hh_posts')) || [
+                {
+                    title: 'Roads of Ayeyarwaddy - ခရီးစဉ်စတင်ခြင်း',
+                    desc: 'ဧရာဝတီတိုင်းဒေသကြီး၏ လှပသော သဘာဝရှုခင်းများနှင့် ဒေသခံတို့၏ လူနေမှုဘဝများကို သွားရောက်ရိုက်ကူးထားသော မှတ်တမ်း...',
+                    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500'
+                }
+            ];
+
+            const postsContainer = document.getElementById('blog-posts-container');
+            postsContainer.innerHTML = '';
+            posts.forEach(post => {
+                postsContainer.innerHTML += `
+                    <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition">
+                        <img src="${post.img || 'https://via.placeholder.com/400x200'}" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg text-emerald-800">${post.title}</h3>
+                            <p class="text-sm text-gray-600 mt-2">${post.desc}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadBlogData);
+    </script>
+</body>
+</html>
