@@ -79,7 +79,37 @@
                 <button onclick="saveSponsor()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Save Sponsor Settings</button>
             </div>
 
-            <!-- 3. Add Travel Post -->
+            <!-- 3. Homepage Section Builder -->
+            <div class="bg-slate-900/60 p-6 rounded-2xl border border-violet-500/30 shadow-sm">
+                <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-violet-400"></i> Home Page Sections / Rows
+                </h2>
+                <p class="text-xs text-slate-400 mb-4">Home Page မှာ “Latest Travel Posts”, “Featured Places” စတဲ့ Row အသစ်တွေ ထည့်နိုင်ပါတယ်။</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-slate-400">Section Title</label>
+                        <input id="section-title" type="text" placeholder="ဥပမာ - Featured Destinations" class="w-full p-2.5 mt-1 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-100">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Small subtitle (optional)</label>
+                        <input id="section-subtitle" type="text" placeholder="ဥပမာ - Explore Myanmar" class="w-full p-2.5 mt-1 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-100">
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label class="text-xs text-slate-400">Display style</label>
+                    <select id="section-layout" class="w-full p-2.5 mt-1 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-100">
+                        <option value="grid">Card Grid (ကတ်ပုံစံ)</option>
+                        <option value="wide">Wide Row (အကျယ်တစ်တန်း)</option>
+                    </select>
+                </div>
+                <button onclick="addHomeSection()" class="mt-4 bg-violet-600 hover:bg-violet-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs">+ Add Home Page Row</button>
+                <div class="border-t border-slate-700 mt-5 pt-4">
+                    <h3 class="text-xs font-bold text-slate-300 mb-3">Created Home Page Rows</h3>
+                    <div id="home-sections-list" class="space-y-2"><p class="text-xs text-slate-500">Row မရှိသေးပါ။</p></div>
+                </div>
+            </div>
+
+            <!-- 4. Add Travel Post -->
             <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
                 <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square text-blue-400"></i> Add New Travel Post
@@ -87,6 +117,8 @@
                 <div class="space-y-4">
                     <input type="text" id="admin-post-title" placeholder="Post Title" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
                     <input type="text" id="admin-post-img" placeholder="Image URL (e.g. https://...)" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                    <input type="text" id="admin-post-location" placeholder="Location (e.g. Bagan, Ngapali)" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                    <div><label for="admin-post-section" class="block text-xs text-slate-400 mb-1">Show this post in</label><select id="admin-post-section" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200"><option value="latest">Latest Travel Posts (default)</option></select><p class="text-xs text-slate-500 mt-1">ကိုယ်ဖန်တီးထားတဲ့ Row ထဲမှာ ပြချင်ရင် ဒီနေရာက ရွေးပါ။</p></div>
                     <textarea id="admin-post-desc" placeholder="Post Story / Description" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 h-24 focus:outline-none focus:border-blue-500"></textarea>
                 </div>
                 <button onclick="addPost()" class="mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Publish Post</button>
@@ -118,6 +150,8 @@
             document.getElementById('admin-sponsor-desc').value = sponsor.desc;
             document.getElementById('admin-sponsor-link').value = sponsor.link;
             document.getElementById('admin-sponsor-img').value = sponsor.img;
+            renderHomeSectionsList();
+            refreshPostSectionOptions();
         }
 
         function saveSocial() {
@@ -143,20 +177,77 @@
         }
 
         function addPost() {
-            const title = document.getElementById('admin-post-title').value;
-            const img = document.getElementById('admin-post-img').value;
-            const desc = document.getElementById('admin-post-desc').value;
-
-            if(!title) return alert('Title ထည့်ပါ');
-
+            const title = document.getElementById('admin-post-title').value.trim();
+            const img = document.getElementById('admin-post-img').value.trim();
+            const desc = document.getElementById('admin-post-desc').value.trim();
+            const location = document.getElementById('admin-post-location').value.trim();
+            const sectionId = document.getElementById('admin-post-section').value;
+            if (!title) return alert('Post ခေါင်းစဉ် ထည့်ပေးပါ။');
             const posts = JSON.parse(localStorage.getItem('hh_posts')) || [];
-            posts.unshift({ title, img, desc });
+            posts.unshift({ id: Date.now(), title, img, desc, location, sectionId });
             localStorage.setItem('hh_posts', JSON.stringify(posts));
-            alert('Post Added Successfully!');
+            alert('Post ထည့်ပြီးပါပြီ။ Home Page ကို refresh လုပ်ပြီး စစ်ပါ။');
+            ['admin-post-title','admin-post-img','admin-post-location','admin-post-desc'].forEach(id => document.getElementById(id).value = '');
+        }
 
-            document.getElementById('admin-post-title').value = '';
-            document.getElementById('admin-post-img').value = '';
-            document.getElementById('admin-post-desc').value = '';
+        function getHomeSections() {
+            try { return JSON.parse(localStorage.getItem('hh_home_sections')) || []; }
+            catch (e) { return []; }
+        }
+        function refreshPostSectionOptions() {
+            const select = document.getElementById('admin-post-section');
+            if (!select) return;
+            const current = select.value || 'latest';
+            const sections = getHomeSections();
+            select.innerHTML = '<option value="latest">Latest Travel Posts (default)</option>' + sections.map(s => `<option value="${s.id}">${escapeHTML(s.title)}</option>`).join('');
+            if ([...select.options].some(o => o.value === current)) select.value = current;
+        }
+        function renderHomeSectionsList() {
+            const list = document.getElementById('home-sections-list');
+            if (!list) return;
+            const sections = getHomeSections();
+            if (!sections.length) { list.innerHTML = '<p class="text-xs text-slate-500">Row မရှိသေးပါ။ အပေါ်ကနေ Row အသစ်ထည့်ပါ။</p>'; refreshPostSectionOptions(); return; }
+            list.innerHTML = sections.map((s, i) => `
+                <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-800 border border-slate-700">
+                    <div class="min-w-0"><p class="text-sm font-semibold text-slate-100">${escapeHTML(s.title)}</p><p class="text-xs text-slate-400">${s.layout === 'wide' ? 'Wide Row' : 'Card Grid'}${s.subtitle ? ' · ' + escapeHTML(s.subtitle) : ''}</p></div>
+                    <div class="flex gap-1 shrink-0"><button onclick="moveHomeSection(${i},-1)" ${i===0?'disabled':''} class="px-2 py-2 rounded-lg bg-slate-700 text-slate-200 text-xs disabled:opacity-30" title="Move up">↑</button><button onclick="moveHomeSection(${i},1)" ${i===sections.length-1?'disabled':''} class="px-2 py-2 rounded-lg bg-slate-700 text-slate-200 text-xs disabled:opacity-30" title="Move down">↓</button><button onclick="deleteHomeSection(${i})" class="px-3 py-2 rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20 text-xs">Delete</button></div>
+                </div>`).join('');
+            refreshPostSectionOptions();
+        }
+        function escapeHTML(value) {
+            return String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function addHomeSection() {
+            const title = document.getElementById('section-title').value.trim();
+            const subtitle = document.getElementById('section-subtitle').value.trim();
+            const layout = document.getElementById('section-layout').value;
+            if (!title) return alert('Section Title ထည့်ပေးပါ။');
+            const sections = getHomeSections();
+            sections.push({ id: String(Date.now()), title, subtitle, layout });
+            localStorage.setItem('hh_home_sections', JSON.stringify(sections));
+            document.getElementById('section-title').value = '';
+            document.getElementById('section-subtitle').value = '';
+            renderHomeSectionsList();
+            alert('Home Page Row ထည့်ပြီးပါပြီ။ အောက်က Add Travel Post မှာ အဲဒီ Row ကိုရွေးပြီး post ထည့်နိုင်ပါပြီ။');
+        }
+        function moveHomeSection(index, direction) {
+            const sections = getHomeSections();
+            const next = index + direction;
+            if (next < 0 || next >= sections.length) return;
+            [sections[index], sections[next]] = [sections[next], sections[index]];
+            localStorage.setItem('hh_home_sections', JSON.stringify(sections));
+            renderHomeSectionsList();
+        }
+        function deleteHomeSection(index) {
+            if (!confirm('ဒီ Home Page Row ကို ဖျက်မှာ သေချာပါသလား။ အဲဒီ Row ထဲက post တွေက Latest Travel Posts မှာပဲ ဆက်ရှိနေပါမယ်။')) return;
+            const sections = getHomeSections();
+            const removed = String(sections[index]?.id);
+            sections.splice(index, 1);
+            localStorage.setItem('hh_home_sections', JSON.stringify(sections));
+            const posts = JSON.parse(localStorage.getItem('hh_posts')) || [];
+            posts.forEach(p => { if (String(p.sectionId) === removed) p.sectionId = 'latest'; });
+            localStorage.setItem('hh_posts', JSON.stringify(posts));
+            renderHomeSectionsList();
         }
     </script>
 </body>
