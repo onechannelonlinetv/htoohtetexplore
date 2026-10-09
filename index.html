@@ -99,6 +99,7 @@
     </section>
     </main>
 
+        <div id="extra-home-sections" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8"></div>
     <footer class="mt-10 border-t border-slate-200 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-slate-500">© <span id="footer-year"></span> Htoo Htet Explore · Explore Myanmar</div>
     </footer>
@@ -151,7 +152,7 @@
 
             const postsContainer = document.getElementById('blog-posts-container');
             postsContainer.innerHTML = '';
-            posts.forEach(post => {
+            posts.filter(post => !post.sectionId || post.sectionId === 'latest').forEach(post => {
                 postsContainer.innerHTML += `
                     <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col hover:shadow-md transition-shadow">
                         <div class="relative h-48 sm:h-44 lg:h-48 overflow-hidden bg-slate-100">
@@ -168,7 +169,31 @@
                 `;
             });
         }
-        document.addEventListener('DOMContentLoaded', loadBlogData);
+
+        function safeText(value) {
+            return String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function renderExtraHomeSections() {
+            const container = document.getElementById('extra-home-sections');
+            if (!container) return;
+            let sections = [], posts = [];
+            try { sections = JSON.parse(localStorage.getItem('hh_home_sections')) || []; } catch (e) {}
+            try { posts = JSON.parse(localStorage.getItem('hh_posts')) || []; } catch (e) {}
+            container.innerHTML = sections.map(section => {
+                const sectionPosts = posts.filter(post => String(post.sectionId) === String(section.id));
+                const cards = sectionPosts.length ? sectionPosts.map(post => `
+                    <article class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+                        <div class="relative h-48 overflow-hidden bg-slate-100"><img loading="lazy" src="${safeText(post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500')}" alt="${safeText(post.title)}" class="w-full h-full object-cover"><span class="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">${safeText(post.location || 'Myanmar')}</span></div>
+                        <div class="p-4"><h3 class="font-bold text-slate-900 text-base leading-snug">${safeText(post.title)}</h3><p class="text-xs text-slate-500 mt-1 leading-relaxed">${safeText(post.desc)}</p></div>
+                    </article>`).join('') : '<div class="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-500">ဒီ Row အတွက် Post မထည့်ရသေးပါ။ Admin မှာ Post ထည့်ပြီး ဒီ Row ကိုရွေးပါ။</div>';
+                return `
+                    <section class="rounded-2xl">
+                        <div class="mb-4 flex items-end justify-between gap-3"><div><h2 class="text-lg sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2"><span class="w-1.5 h-6 bg-emerald-700 rounded-full inline-block shrink-0"></span>${safeText(section.title)}</h2>${section.subtitle ? `<p class="text-sm text-slate-500 mt-1">${safeText(section.subtitle)}</p>` : ''}</div></div>
+                        <div class="${section.layout === 'wide' ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6'}">${cards}</div>
+                    </section>`;
+            }).join('');
+        }
+        document.addEventListener('DOMContentLoaded', () => { loadBlogData(); renderExtraHomeSections(); });
     </script>
 </body>
 </html>
