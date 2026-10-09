@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Htoo Htet Explore - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen p-4 md:p-8">
+
+    <!-- Passcode Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 p-6 rounded-xl max-w-sm w-full text-center border border-slate-700">
+            <h2 class="text-xl font-bold mb-4">⚙️ Admin Access Passcode</h2>
+            <input type="password" id="passcode" placeholder="PIN ထည့်ပါ (Default: 1234)" class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-center text-lg mb-4">
+            <button onclick="checkPasscode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded">Login</button>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Panel -->
+    <div id="dashboard" class="max-w-4xl mx-auto hidden">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
+            <h1 class="text-2xl font-bold text-emerald-400">⚙️ Htoo Htet Explore Admin Panel</h1>
+            <a href="index.html" target="_blank" class="bg-slate-700 px-3 py-1.5 rounded text-sm hover:bg-slate-600">View Live Blog ↗</a>
+        </div>
+
+        <div class="space-y-8">
+            <!-- 1. Social Links Control -->
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-bold mb-4 text-amber-400">🔗 Social Media Links Management</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-400">Facebook URL</label>
+                        <input type="text" id="admin-fb" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">TikTok URL</label>
+                        <input type="text" id="admin-tt" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">YouTube URL</label>
+                        <input type="text" id="admin-yt" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm mt-1">
+                    </div>
+                </div>
+                <button onclick="saveSocial()" class="mt-4 bg-emerald-600 px-4 py-2 rounded font-bold text-sm hover:bg-emerald-500">Save Social Links</button>
+            </div>
+
+            <!-- 2. Sponsor Banner Control -->
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-bold mb-4 text-amber-400">📢 Sponsor Banner Management</h2>
+                <div class="space-y-4">
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="admin-sponsor-active" class="w-4 h-4">
+                        <span>Show Sponsor Banner on Website</span>
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="admin-sponsor-title" placeholder="Sponsor Title (e.g. Veezoom Myanmar)" class="p-2 bg-slate-700 rounded border border-slate-600 text-sm">
+                        <input type="text" id="admin-sponsor-link" placeholder="Sponsor Link (e.g. https://...)" class="p-2 bg-slate-700 rounded border border-slate-600 text-sm">
+                    </div>
+                    <textarea id="admin-sponsor-desc" placeholder="Sponsor Description / Campaign Text" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm h-20"></textarea>
+                    <input type="text" id="admin-sponsor-img" placeholder="Sponsor Logo/Image URL" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm">
+                </div>
+                <button onclick="saveSponsor()" class="mt-4 bg-emerald-600 px-4 py-2 rounded font-bold text-sm hover:bg-emerald-500">Save Sponsor Banner</button>
+            </div>
+
+            <!-- 3. Add New Travel Post -->
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-bold mb-4 text-amber-400">📝 Add New Travel Post</h2>
+                <div class="space-y-4">
+                    <input type="text" id="admin-post-title" placeholder="Post Title" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm">
+                    <input type="text" id="admin-post-img" placeholder="Image URL" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm">
+                    <textarea id="admin-post-desc" placeholder="Post Description" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm h-24"></textarea>
+                </div>
+                <button onclick="addPost()" class="mt-4 bg-blue-600 px-4 py-2 rounded font-bold text-sm hover:bg-blue-500">Add Post</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkPasscode() {
+            const code = document.getElementById('passcode').value;
+            if(code === '1234') { // Default PIN
+                document.getElementById('login-modal').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                loadAdminData();
+            } else {
+                alert('PIN မှားယွင်းနေပါသည်။');
+            }
+        }
+
+        function loadAdminData() {
+            const social = JSON.parse(localStorage.getItem('hh_social')) || { fb: '', tt: '', yt: '' };
+            document.getElementById('admin-fb').value = social.fb;
+            document.getElementById('admin-tt').value = social.tt;
+            document.getElementById('admin-yt').value = social.yt;
+
+            const sponsor = JSON.parse(localStorage.getItem('hh_sponsor')) || { active: true, title: 'Veezoom Myanmar', desc: '', link: '', img: '' };
+            document.getElementById('admin-sponsor-active').checked = sponsor.active;
+            document.getElementById('admin-sponsor-title').value = sponsor.title;
+            document.getElementById('admin-sponsor-desc').value = sponsor.desc;
+            document.getElementById('admin-sponsor-link').value = sponsor.link;
+            document.getElementById('admin-sponsor-img').value = sponsor.img;
+        }
+
+        function saveSocial() {
+            const social = {
+                fb: document.getElementById('admin-fb').value,
+                tt: document.getElementById('admin-tt').value,
+                yt: document.getElementById('admin-yt').value
+            };
+            localStorage.setItem('hh_social', JSON.stringify(social));
+            alert('Social Links Saved!');
+        }
+
+        function saveSponsor() {
+            const sponsor = {
+                active: document.getElementById('admin-sponsor-active').checked,
+                title: document.getElementById('admin-sponsor-title').value,
+                desc: document.getElementById('admin-sponsor-desc').value,
+                link: document.getElementById('admin-sponsor-link').value,
+                img: document.getElementById('admin-sponsor-img').value
+            };
+            localStorage.setItem('hh_sponsor', JSON.stringify(sponsor));
+            alert('Sponsor Banner Saved!');
+        }
+
+        function addPost() {
+            const title = document.getElementById('admin-post-title').value;
+            const img = document.getElementById('admin-post-img').value;
+            const desc = document.getElementById('admin-post-desc').value;
+
+            if(!title) return alert('Title ထည့်ပါ');
+
+            const posts = JSON.parse(localStorage.getItem('hh_posts')) || [];
+            posts.unshift({ title, img, desc });
+            localStorage.setItem('hh_posts', JSON.stringify(posts));
+            alert('Post Added Successfully!');
+            
+            document.getElementById('admin-post-title').value = '';
+            document.getElementById('admin-post-img').value = '';
+            document.getElementById('admin-post-desc').value = '';
+        }
+    </script>
+</body>
+</html>
