@@ -7,68 +7,64 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans pb-24">
+<body class="bg-slate-50 text-slate-800 font-sans pb-24 md:pb-12">
 
     <!-- Top Header -->
     <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100">
-        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="#" class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-base shadow-sm">
+                <div class="w-9 h-9 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-lg shadow-sm">
                     <i class="fa-solid fa-compass"></i>
                 </div>
                 <div>
-                    <h1 class="font-black text-slate-900 text-base leading-none tracking-tight">Htoo Htet</h1>
+                    <h1 class="font-black text-slate-900 text-lg leading-none tracking-tight">Htoo Htet</h1>
                     <p class="text-[9px] font-bold tracking-wider text-slate-600 uppercase mt-0.5">Explore</p>
                 </div>
             </a>
-            <div class="flex items-center space-x-2 text-slate-600">
-                <a id="link-fb" href="#" target="_blank" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition"><i class="fa-brands fa-facebook-f text-xs"></i></a>
-                <a id="link-tt" href="#" target="_blank" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition"><i class="fa-brands fa-tiktok text-xs"></i></a>
-                <a id="link-yt" href="#" target="_blank" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition"><i class="fa-brands fa-youtube text-xs"></i></a>
-                <button class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-700"><i class="fa-solid fa-bars text-xs"></i></button>
+            <div class="flex items-center space-x-3 text-slate-600">
+                <a id="link-fb" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition"><i class="fa-brands fa-facebook-f text-xs"></i></a>
+                <a id="link-tt" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition"><i class="fa-brands fa-tiktok text-xs"></i></a>
+                <a id="link-yt" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition"><i class="fa-brands fa-youtube text-xs"></i></a>
+                <a href="admin.html" class="hidden md:flex items-center gap-1.5 bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:bg-emerald-800 transition">
+                    <i class="fa-solid fa-user-gear"></i> Admin
+                </a>
             </div>
         </div>
     </header>
 
-    <div class="max-w-md mx-auto px-4 pt-4 space-y-6">
+    <div class="max-w-6xl mx-auto px-4 pt-4 space-y-6 md:space-y-8">
 
-        <!-- Hero Section -->
-        <div class="relative rounded-3xl overflow-hidden shadow-md h-80 bg-slate-900 text-white flex flex-col justify-between p-6">
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800" class="absolute inset-0 w-full h-full object-cover opacity-60">
-            <div class="relative z-10">
-                <p class="text-amber-300 font-serif italic text-sm">Explore Myanmar</p>
-                <h2 class="text-3xl font-black mt-1 leading-tight tracking-tight">Discover<br>The Unseen<br>Beauty</h2>
-                <p class="text-xs text-slate-200 mt-2 max-w-[210px] leading-relaxed">Roads, people, culture and nature — all in one journey.</p>
-            </div>
-            <div class="relative z-10 flex items-center justify-between">
-                <a href="#" class="inline-flex items-center gap-2 bg-amber-400 text-slate-900 font-extrabold text-xs px-4 py-2.5 rounded-full shadow hover:bg-amber-300 transition">
-                    Explore More <i class="fa-solid fa-arrow-right text-xs"></i>
-                </a>
-                <div class="flex space-x-1.5">
-                    <span class="w-2.5 h-1.5 bg-amber-400 rounded-full"></span>
-                    <span class="w-1.5 h-1.5 bg-white/50 rounded-full"></span>
-                    <span class="w-1.5 h-1.5 bg-white/50 rounded-full"></span>
-                    <span class="w-1.5 h-1.5 bg-white/50 rounded-full"></span>
+        <!-- Hero & Sponsor Grid for Desktop -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+            <!-- Hero Section -->
+            <div class="md:col-span-2 relative rounded-3xl overflow-hidden shadow-md min-h-[300px] md:min-h-[340px] bg-slate-900 text-white flex flex-col justify-between p-6 md:p-8">
+                <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200" class="absolute inset-0 w-full h-full object-cover opacity-60">
+                <div class="relative z-10">
+                    <p class="text-amber-300 font-serif italic text-sm md:text-base">Explore Myanmar</p>
+                    <h2 class="text-3xl md:text-5xl font-black mt-1 leading-tight tracking-tight">Discover<br>The Unseen Beauty</h2>
+                    <p class="text-xs md:text-sm text-slate-200 mt-2 max-w-sm leading-relaxed">Roads, people, culture and nature — all in one journey.</p>
+                </div>
+                <div class="relative z-10 flex items-center justify-between mt-4">
+                    <a href="#" class="inline-flex items-center gap-2 bg-amber-400 text-slate-900 font-extrabold text-xs md:text-sm px-5 py-2.5 rounded-full shadow hover:bg-amber-300 transition">
+                        Explore More <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
                 </div>
             </div>
-        </div>
 
-        <!-- Official Sponsor Banner -->
-        <div id="sponsor-container" class="relative overflow-hidden bg-gradient-to-br from-teal-950 via-emerald-950 to-slate-950 text-white rounded-2xl p-5 shadow-md border border-emerald-800/40">
-            <div class="flex items-start justify-between gap-3">
-                <div class="space-y-1">
-                    <span class="bg-amber-400 text-slate-900 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider">Official Sponsor</span>
-                    <h3 id="sponsor-title" class="text-xl font-black text-white mt-1">Veezoom Myanmar</h3>
-                    <p id="sponsor-desc" class="text-xs text-slate-300">Roads of Ayeyarwaddy စီးရီး၏ ပင်တိုင် Sponsor</p>
-                    <div class="pt-2">
-                        <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 font-bold px-3.5 py-1.5 rounded-lg text-xs shadow hover:bg-amber-300 transition">
-                            Visit Sponsor <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                        </a>
+            <!-- Official Sponsor Banner -->
+            <div id="sponsor-container" class="relative overflow-hidden bg-gradient-to-br from-teal-950 via-emerald-950 to-slate-950 text-white rounded-3xl p-6 shadow-md border border-emerald-800/40 flex flex-col justify-between">
+                <div>
+                    <span class="bg-amber-400 text-slate-900 text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-wider">Official Sponsor</span>
+                    <h3 id="sponsor-title" class="text-2xl font-black text-white mt-3">Veezoom Myanmar</h3>
+                    <p id="sponsor-desc" class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed">Roads of Ayeyarwaddy စီးရီး၏ ပင်တိုင် Sponsor</p>
+                </div>
+                <div class="flex items-center justify-between gap-3 mt-6">
+                    <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs shadow hover:bg-amber-300 transition">
+                        Visit Sponsor <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                    <div class="w-16 h-16 rounded-2xl overflow-hidden bg-teal-900/50 border border-white/10 flex items-center justify-center shrink-0">
+                        <img id="sponsor-img" src="https://raw.githubusercontent.com/onechannelonlinetv/htoohtetexplore/main/veezoom-logo.jpg" alt="Veezoom Logo" class="w-full h-full object-cover" onError="this.onerror=null; this.src='https://via.placeholder.com/150/0f4c3a/ffffff?text=VEEZOOM';">
                     </div>
-                </div>
-                <!-- Veezoom Logo Box -->
-                <div class="w-16 h-16 rounded-xl overflow-hidden bg-teal-900/50 border border-white/10 flex items-center justify-center shrink-0">
-                    <img id="sponsor-img" src="https://raw.githubusercontent.com/onechannelonlinetv/htoohtetexplore/main/veezoom-logo.jpg" alt="Veezoom Logo" class="w-full h-full object-cover" onError="this.onerror=null; this.src='https://via.placeholder.com/150/0f4c3a/ffffff?text=VEEZOOM';">
                 </div>
             </div>
         </div>
@@ -76,39 +72,39 @@
         <!-- Up Comming Section -->
         <div>
             <div class="flex items-center justify-between mb-3">
-                <h2 class="text-lg font-serif font-bold text-slate-900 flex items-center gap-2">
-                    <span class="w-1.5 h-5 bg-emerald-700 rounded-full inline-block"></span>
+                <h2 class="text-lg md:text-xl font-serif font-bold text-slate-900 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-emerald-700 rounded-full inline-block"></span>
                     Up Comming --- November
                 </h2>
                 <a href="#" class="text-xs font-bold text-emerald-800 flex items-center gap-1">See All <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
             </div>
 
             <!-- Upcomming Banner Image -->
-            <div class="rounded-2xl overflow-hidden shadow-md border border-slate-200">
-                <img src="https://raw.githubusercontent.com/onechannelonlinetv/htoohtetexplore/main/roads-of-ayeyarwady-banner.jpg" alt="Roads of Ayeyarwady" class="w-full h-auto object-cover" onError="this.onerror=null; this.src='https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800';">
+            <div class="rounded-3xl overflow-hidden shadow-md border border-slate-200">
+                <img src="https://raw.githubusercontent.com/onechannelonlinetv/htoohtetexplore/main/roads-of-ayeyarwady-banner.jpg" alt="Roads of Ayeyarwady" class="w-full h-auto max-h-[450px] object-cover" onError="this.onerror=null; this.src='https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1200';">
             </div>
         </div>
 
         <!-- Latest Travel Posts Section -->
         <div>
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-base font-black text-slate-900 flex items-center gap-2">
-                    <span class="w-1.5 h-5 bg-emerald-700 rounded-full inline-block"></span>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg md:text-xl font-black text-slate-900 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-emerald-700 rounded-full inline-block"></span>
                     Latest Travel Posts
                 </h2>
                 <a href="#" class="text-xs font-bold text-emerald-800 flex items-center gap-1">See All <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
             </div>
 
-            <!-- 2-Column Grid -->
-            <div id="blog-posts-container" class="grid grid-cols-2 gap-3">
+            <!-- Responsive Grid: 2 cols on mobile, 4 cols on desktop -->
+            <div id="blog-posts-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 <!-- Posts will be loaded dynamically -->
             </div>
         </div>
 
     </div>
 
-    <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-50">
+    <!-- Bottom Navigation Bar for Mobile Only -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-50">
         <div class="max-w-md mx-auto flex justify-around items-center py-2 text-slate-400 text-[10px]">
             <a href="#" class="flex flex-col items-center text-emerald-800 font-bold">
                 <i class="fa-solid fa-house text-base mb-0.5"></i>
@@ -158,16 +154,14 @@
                     desc: 'မြန်မာနိုင်ငံ၏ သမိုင်းဝင်ပုဂံဒေသသို့ သွားရောက်လေ့လာခဲ့သည့်...',
                     img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500',
                     location: 'Bagan',
-                    category: 'TRAVEL STORY',
-                    date: 'May 12, 2025'
+                    category: 'TRAVEL STORY'
                 },
                 {
                     title: 'Ngapali – မြန်မာ့ကမ်းခြေအလှ',
                     desc: 'မြန်မာနိုင်ငံ၏ သမိုင်းဝင်ငပလီကမ်းခြေသို့ သွားရောက်လေ့လာခဲ့သည့်...',
                     img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500',
                     location: 'Ngapali',
-                    category: 'TRAVEL GUIDE',
-                    date: 'May 8, 2025'
+                    category: 'TRAVEL GUIDE'
                 }
             ];
 
@@ -175,36 +169,6 @@
             postsContainer.innerHTML = '';
             posts.forEach(post => {
                 postsContainer.innerHTML += `
-                    <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition">
                         <div>
-                            <div class="relative h-28 overflow-hidden bg-slate-100">
-                                <img src="${post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500'}" class="w-full h-full object-cover">
-                                <span class="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[9px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
-                                    <i class="fa-solid fa-location-dot text-emerald-400"></i> ${post.location || 'Myanmar'}
-                                </span>
-                                <span class="absolute bottom-2 left-2 bg-amber-400 text-slate-900 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">
-                                    ${post.category || 'TRAVEL STORY'}
-                                </span>
-                            </div>
-                            <div class="p-2.5">
-                                <h3 class="font-bold text-slate-900 text-xs leading-snug line-clamp-2">${post.title}</h3>
-                                <p class="text-[10px] text-slate-500 mt-1 line-clamp-2 leading-tight">${post.desc}</p>
-                            </div>
-                        </div>
-                        <div class="px-2.5 pb-2.5 flex items-center justify-between text-[9px] text-slate-400 pt-1 border-t border-slate-50">
-                            <div class="flex items-center gap-1">
-                                <div class="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[8px] font-bold">H</div>
-                                <span class="font-medium text-slate-600">Htoo Htet</span>
-                            </div>
-                            <div class="w-5 h-5 rounded-full bg-emerald-900 text-white flex items-center justify-center">
-                                <i class="fa-solid fa-arrow-right text-[8px]"></i>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-        document.addEventListener('DOMContentLoaded', loadBlogData);
-    </script>
-</body>
-</html>
+                            <div class="relative h-32 md:h-40 overflow-hidden
