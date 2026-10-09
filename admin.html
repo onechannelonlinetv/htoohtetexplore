@@ -1,254 +1,68 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Htoo Htet Explore</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Htoo Htet Explore | Admin Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{color-scheme:dark} body{background:#070d19;color:#e5edf7} .panel{background:#0d1728;border:1px solid #1c2a40;border-radius:18px}.field{width:100%;background:#101d30;border:1px solid #263750;border-radius:11px;padding:11px 13px;color:#eef5ff;outline:none}.field:focus{border-color:#10b981;box-shadow:0 0 0 3px #10b98120}.label{display:block;font-size:12px;color:#9eb0c9;margin-bottom:6px}.btn{border-radius:11px;padding:10px 14px;font-weight:700;font-size:13px;transition:.15s}.btn-green{background:#059669;color:white}.btn-green:hover{background:#10b981}.btn-muted{background:#1a2940;color:#dce8f7;border:1px solid #2b3c55}.btn-purple{background:#7c3aed;color:white}.btn-red{background:#3a1b2a;color:#fda4af;border:1px solid #572537}.navbtn{width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:11px 13px;border-radius:11px;color:#a7b7ce;font-size:13px;font-weight:650}.navbtn.active,.navbtn:hover{background:#12352f;color:#6ee7b7}.view{display:none}.view.active{display:block}.stat{background:linear-gradient(145deg,#101e32,#0c1626);border:1px solid #1c2d45;border-radius:16px;padding:17px}.tiny{font-size:11px;color:#92a5bf}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-12">
-
-    <!-- Passcode Modal -->
-    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 p-8 rounded-2xl max-w-sm w-full text-center border border-slate-800 shadow-2xl">
-            <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mx-auto mb-4 text-xl">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <h2 class="text-xl font-bold mb-1">Admin Access</h2>
-            <p class="text-xs text-slate-400 mb-6">ကျေးဇူးပြု၍ PIN ရိုက်ထည့်ပါ</p>
-            <input type="password" id="passcode" placeholder="••••" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-center text-xl font-bold tracking-widest mb-4 focus:outline-none focus:border-emerald-500 text-white">
-            <button onclick="checkPasscode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all">Login</button>
-        </div>
-    </div>
-
-    <!-- Main Admin Dashboard -->
-    <div id="dashboard" class="max-w-4xl mx-auto px-6 pt-10 hidden">
-        <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
-            <div>
-                <h1 class="text-2xl font-extrabold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-emerald-400"></i> Admin Management
-                </h1>
-                <p class="text-xs text-slate-400 mt-1">Htoo Htet Explore Website ကို ဤနေရာမှ ထိန်းချုပ်ပါ</p>
-            </div>
-            <a href="index.html" target="_blank" class="inline-flex items-center gap-2 bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition">
-                View Live Blog <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-        </div>
-
-        <div class="space-y-8">
-            <!-- 1. Social Media Links -->
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-share-nodes text-emerald-400"></i> Social Links Management
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="text-xs text-slate-400">Facebook URL</label>
-                        <input type="text" id="admin-fb" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm mt-1 focus:outline-none focus:border-emerald-500 text-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-xs text-slate-400">TikTok URL</label>
-                        <input type="text" id="admin-tt" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm mt-1 focus:outline-none focus:border-emerald-500 text-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-xs text-slate-400">YouTube URL</label>
-                        <input type="text" id="admin-yt" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm mt-1 focus:outline-none focus:border-emerald-500 text-slate-200">
-                    </div>
-                </div>
-                <button onclick="saveSocial()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Save Social Links</button>
-            </div>
-
-            <!-- 2. Sponsor Banner -->
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-rectangle-ad text-amber-400"></i> Sponsor Banner Management
-                </h2>
-                <div class="space-y-4">
-                    <label class="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" id="admin-sponsor-active" class="w-4 h-4 rounded accent-emerald-500">
-                        <span class="text-sm text-slate-300">Show Sponsor Banner on Main Page</span>
-                    </label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="admin-sponsor-title" placeholder="Sponsor Title (e.g. Veezoom Myanmar)" class="p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
-                        <input type="text" id="admin-sponsor-link" placeholder="Sponsor Link (e.g. https://...)" class="p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <textarea id="admin-sponsor-desc" placeholder="Sponsor Campaign Description" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 h-20 focus:outline-none focus:border-emerald-500"></textarea>
-                    <input type="text" id="admin-sponsor-img" placeholder="Sponsor Logo/Image URL (Optional)" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
-                </div>
-                <button onclick="saveSponsor()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Save Sponsor Settings</button>
-            </div>
-
-            <!-- 3. Homepage Section Builder -->
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-violet-500/30 shadow-sm">
-                <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group text-violet-400"></i> Home Page Sections / Rows
-                </h2>
-                <p class="text-xs text-slate-400 mb-4">Home Page မှာ “Latest Travel Posts”, “Featured Places” စတဲ့ Row အသစ်တွေ ထည့်နိုင်ပါတယ်။</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-xs text-slate-400">Section Title</label>
-                        <input id="section-title" type="text" placeholder="ဥပမာ - Featured Destinations" class="w-full p-2.5 mt-1 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-100">
-                    </div>
-                    <div>
-                        <label class="text-xs text-slate-400">Small subtitle (optional)</label>
-                        <input id="section-subtitle" type="text" placeholder="ဥပမာ - Explore Myanmar" class="w-full p-2.5 mt-1 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-100">
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <label class="text-xs text-slate-400">Display style</label>
-                    <select id="section-layout" class="w-full p-2.5 mt-1 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-100">
-                        <option value="grid">Card Grid (ကတ်ပုံစံ)</option>
-                        <option value="wide">Wide Row (အကျယ်တစ်တန်း)</option>
-                    </select>
-                </div>
-                <button onclick="addHomeSection()" class="mt-4 bg-violet-600 hover:bg-violet-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs">+ Add Home Page Row</button>
-                <div class="border-t border-slate-700 mt-5 pt-4">
-                    <h3 class="text-xs font-bold text-slate-300 mb-3">Created Home Page Rows</h3>
-                    <div id="home-sections-list" class="space-y-2"><p class="text-xs text-slate-500">Row မရှိသေးပါ။</p></div>
-                </div>
-            </div>
-
-            <!-- 4. Add Travel Post -->
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> Add New Travel Post
-                </h2>
-                <div class="space-y-4">
-                    <input type="text" id="admin-post-title" placeholder="Post Title" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-                    <input type="text" id="admin-post-img" placeholder="Image URL (e.g. https://...)" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-                    <input type="text" id="admin-post-location" placeholder="Location (e.g. Bagan, Ngapali)" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-                    <div><label for="admin-post-section" class="block text-xs text-slate-400 mb-1">Show this post in</label><select id="admin-post-section" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200"><option value="latest">Latest Travel Posts (default)</option></select><p class="text-xs text-slate-500 mt-1">ကိုယ်ဖန်တီးထားတဲ့ Row ထဲမှာ ပြချင်ရင် ဒီနေရာက ရွေးပါ။</p></div>
-                    <textarea id="admin-post-desc" placeholder="Post Story / Description" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 h-24 focus:outline-none focus:border-blue-500"></textarea>
-                </div>
-                <button onclick="addPost()" class="mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Publish Post</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function checkPasscode() {
-            const code = document.getElementById('passcode').value;
-            if(code === '1234') {
-                document.getElementById('login-modal').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                loadAdminData();
-            } else {
-                alert('PIN မှားယွင်းနေပါသည်။');
-            }
-        }
-
-        function loadAdminData() {
-            const social = JSON.parse(localStorage.getItem('hh_social')) || { fb: '', tt: '', yt: '' };
-            document.getElementById('admin-fb').value = social.fb;
-            document.getElementById('admin-tt').value = social.tt;
-            document.getElementById('admin-yt').value = social.yt;
-
-            const sponsor = JSON.parse(localStorage.getItem('hh_sponsor')) || { active: true, title: 'Veezoom Myanmar', desc: '', link: '', img: '' };
-            document.getElementById('admin-sponsor-active').checked = sponsor.active;
-            document.getElementById('admin-sponsor-title').value = sponsor.title;
-            document.getElementById('admin-sponsor-desc').value = sponsor.desc;
-            document.getElementById('admin-sponsor-link').value = sponsor.link;
-            document.getElementById('admin-sponsor-img').value = sponsor.img;
-            renderHomeSectionsList();
-            refreshPostSectionOptions();
-        }
-
-        function saveSocial() {
-            const social = {
-                fb: document.getElementById('admin-fb').value,
-                tt: document.getElementById('admin-tt').value,
-                yt: document.getElementById('admin-yt').value
-            };
-            localStorage.setItem('hh_social', JSON.stringify(social));
-            alert('Social Links Saved!');
-        }
-
-        function saveSponsor() {
-            const sponsor = {
-                active: document.getElementById('admin-sponsor-active').checked,
-                title: document.getElementById('admin-sponsor-title').value,
-                desc: document.getElementById('admin-sponsor-desc').value,
-                link: document.getElementById('admin-sponsor-link').value,
-                img: document.getElementById('admin-sponsor-img').value
-            };
-            localStorage.setItem('hh_sponsor', JSON.stringify(sponsor));
-            alert('Sponsor Settings Saved!');
-        }
-
-        function addPost() {
-            const title = document.getElementById('admin-post-title').value.trim();
-            const img = document.getElementById('admin-post-img').value.trim();
-            const desc = document.getElementById('admin-post-desc').value.trim();
-            const location = document.getElementById('admin-post-location').value.trim();
-            const sectionId = document.getElementById('admin-post-section').value;
-            if (!title) return alert('Post ခေါင်းစဉ် ထည့်ပေးပါ။');
-            const posts = JSON.parse(localStorage.getItem('hh_posts')) || [];
-            posts.unshift({ id: Date.now(), title, img, desc, location, sectionId });
-            localStorage.setItem('hh_posts', JSON.stringify(posts));
-            alert('Post ထည့်ပြီးပါပြီ။ Home Page ကို refresh လုပ်ပြီး စစ်ပါ။');
-            ['admin-post-title','admin-post-img','admin-post-location','admin-post-desc'].forEach(id => document.getElementById(id).value = '');
-        }
-
-        function getHomeSections() {
-            try { return JSON.parse(localStorage.getItem('hh_home_sections')) || []; }
-            catch (e) { return []; }
-        }
-        function refreshPostSectionOptions() {
-            const select = document.getElementById('admin-post-section');
-            if (!select) return;
-            const current = select.value || 'latest';
-            const sections = getHomeSections();
-            select.innerHTML = '<option value="latest">Latest Travel Posts (default)</option>' + sections.map(s => `<option value="${s.id}">${escapeHTML(s.title)}</option>`).join('');
-            if ([...select.options].some(o => o.value === current)) select.value = current;
-        }
-        function renderHomeSectionsList() {
-            const list = document.getElementById('home-sections-list');
-            if (!list) return;
-            const sections = getHomeSections();
-            if (!sections.length) { list.innerHTML = '<p class="text-xs text-slate-500">Row မရှိသေးပါ။ အပေါ်ကနေ Row အသစ်ထည့်ပါ။</p>'; refreshPostSectionOptions(); return; }
-            list.innerHTML = sections.map((s, i) => `
-                <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-800 border border-slate-700">
-                    <div class="min-w-0"><p class="text-sm font-semibold text-slate-100">${escapeHTML(s.title)}</p><p class="text-xs text-slate-400">${s.layout === 'wide' ? 'Wide Row' : 'Card Grid'}${s.subtitle ? ' · ' + escapeHTML(s.subtitle) : ''}</p></div>
-                    <div class="flex gap-1 shrink-0"><button onclick="moveHomeSection(${i},-1)" ${i===0?'disabled':''} class="px-2 py-2 rounded-lg bg-slate-700 text-slate-200 text-xs disabled:opacity-30" title="Move up">↑</button><button onclick="moveHomeSection(${i},1)" ${i===sections.length-1?'disabled':''} class="px-2 py-2 rounded-lg bg-slate-700 text-slate-200 text-xs disabled:opacity-30" title="Move down">↓</button><button onclick="deleteHomeSection(${i})" class="px-3 py-2 rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20 text-xs">Delete</button></div>
-                </div>`).join('');
-            refreshPostSectionOptions();
-        }
-        function escapeHTML(value) {
-            return String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-        }
-        function addHomeSection() {
-            const title = document.getElementById('section-title').value.trim();
-            const subtitle = document.getElementById('section-subtitle').value.trim();
-            const layout = document.getElementById('section-layout').value;
-            if (!title) return alert('Section Title ထည့်ပေးပါ။');
-            const sections = getHomeSections();
-            sections.push({ id: String(Date.now()), title, subtitle, layout });
-            localStorage.setItem('hh_home_sections', JSON.stringify(sections));
-            document.getElementById('section-title').value = '';
-            document.getElementById('section-subtitle').value = '';
-            renderHomeSectionsList();
-            alert('Home Page Row ထည့်ပြီးပါပြီ။ အောက်က Add Travel Post မှာ အဲဒီ Row ကိုရွေးပြီး post ထည့်နိုင်ပါပြီ။');
-        }
-        function moveHomeSection(index, direction) {
-            const sections = getHomeSections();
-            const next = index + direction;
-            if (next < 0 || next >= sections.length) return;
-            [sections[index], sections[next]] = [sections[next], sections[index]];
-            localStorage.setItem('hh_home_sections', JSON.stringify(sections));
-            renderHomeSectionsList();
-        }
-        function deleteHomeSection(index) {
-            if (!confirm('ဒီ Home Page Row ကို ဖျက်မှာ သေချာပါသလား။ အဲဒီ Row ထဲက post တွေက Latest Travel Posts မှာပဲ ဆက်ရှိနေပါမယ်။')) return;
-            const sections = getHomeSections();
-            const removed = String(sections[index]?.id);
-            sections.splice(index, 1);
-            localStorage.setItem('hh_home_sections', JSON.stringify(sections));
-            const posts = JSON.parse(localStorage.getItem('hh_posts')) || [];
-            posts.forEach(p => { if (String(p.sectionId) === removed) p.sectionId = 'latest'; });
-            localStorage.setItem('hh_posts', JSON.stringify(posts));
-            renderHomeSectionsList();
-        }
-    </script>
-</body>
-</html>
+<body class="min-h-screen">
+<div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 p-4">
+ <div class="panel w-full max-w-sm p-7 text-center shadow-2xl"><div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300 text-2xl"><i class="fa-solid fa-compass"></i></div><h1 class="text-xl font-black">Htoo Htet Explore</h1><p class="mt-1 mb-6 text-sm text-slate-400">Admin Studio · PIN ဖြည့်ပါ</p><input id="passcode" type="password" inputmode="numeric" placeholder="Admin PIN" class="field mb-3 text-center tracking-[.35em]" onkeydown="if(event.key==='Enter')checkPasscode()"><button onclick="checkPasscode()" class="btn btn-green w-full">Dashboard ဖွင့်မယ် <i class="fa-solid fa-arrow-right ml-1"></i></button><p class="tiny mt-4">မှတ်ချက် - ဒီ PIN သည် browser-side lock သာဖြစ်ပြီး လုံခြုံသော server authentication မဟုတ်သေးပါ။</p></div>
+</div>
+<div id="app" class="hidden min-h-screen">
+ <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-800 bg-[#091220] p-5 lg:block">
+  <a href="index.html" class="mb-8 flex items-center gap-3"><div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-700 text-xl"><i class="fa-solid fa-compass"></i></div><div><div class="font-black leading-tight">Htoo Htet</div><div class="text-sm font-bold text-emerald-300">Explore Studio</div></div></a>
+  <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
+  <nav class="space-y-1"><button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button><button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Homepage Builder</button><button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Travel Posts</button><button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Sponsor Banner</button><button class="navbtn" data-view="social" onclick="showView('social',this)"><i class="fa-solid fa-share-nodes w-4"></i> Social Links</button></nav>
+  <div class="absolute bottom-5 left-5 right-5"><a href="index.html" target="_blank" class="btn btn-muted block text-center"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>View Live Website</a><p class="tiny mt-3 text-center">GitHub Pages · Local preview mode</p></div>
+ </aside>
+ <main class="min-h-screen lg:ml-64">
+  <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8"><div><p class="tiny">HTOO HTET EXPLORE / ADMIN</p><h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1></div><div class="flex items-center gap-2"><button class="btn btn-muted lg:hidden" onclick="toggleMobileNav()"><i class="fa-solid fa-bars"></i></button><a href="index.html" target="_blank" class="btn btn-green"><i class="fa-solid fa-eye mr-1"></i><span class="hidden sm:inline">Live Website</span><span class="sm:hidden">Preview</span></a></div></header>
+  <div id="mobile-nav" class="hidden border-b border-slate-800 bg-[#091220] p-3 lg:hidden"><div class="grid grid-cols-2 gap-2"><button class="navbtn" onclick="showView('overview')">Overview</button><button class="navbtn" onclick="showView('sections')">Homepage Builder</button><button class="navbtn" onclick="showView('posts')">Travel Posts</button><button class="navbtn" onclick="showView('sponsor')">Sponsor</button><button class="navbtn" onclick="showView('social')">Social Links</button></div></div>
+  <div class="mx-auto max-w-7xl space-y-6 p-4 sm:p-8">
+   <section id="view-overview" class="view active space-y-6"><div class="overflow-hidden rounded-2xl border border-emerald-900/70 bg-gradient-to-r from-emerald-950 via-[#102d30] to-[#101b30] p-6 sm:p-8"><div class="max-w-2xl"><span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">Content control center</span><h2 class="mt-4 text-2xl font-black sm:text-3xl">မင်းရဲ့ Homepage ကို<br class="sm:hidden"> ဒီနေရာက စီမံပါ</h2><p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">Row အသစ်ဖန်တီး၊ Travel Post ထည့်၊ Sponsor နဲ့ Social Link ပြင်ဆင်နိုင်ပါတယ်။</p><button class="btn btn-green mt-5" onclick="showView('sections')"><i class="fa-solid fa-layer-group mr-2"></i>Homepage Builder သို့သွားမယ်</button></div></div>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3"><div class="stat"><div class="flex items-center justify-between"><span class="text-sm text-slate-400">Homepage Rows</span><i class="fa-solid fa-layer-group text-violet-300"></i></div><div id="stat-sections" class="mt-3 text-3xl font-black">0</div><p class="tiny mt-1">Custom sections</p></div><div class="stat"><div class="flex items-center justify-between"><span class="text-sm text-slate-400">Travel Posts</span><i class="fa-regular fa-newspaper text-sky-300"></i></div><div id="stat-posts" class="mt-3 text-3xl font-black">0</div><p class="tiny mt-1">Saved in this browser</p></div><div class="stat"><div class="flex items-center justify-between"><span class="text-sm text-slate-400">Sponsor Banner</span><i class="fa-solid fa-rectangle-ad text-amber-300"></i></div><div id="stat-sponsor" class="mt-3 text-xl font-black">Enabled</div><p class="tiny mt-1">Homepage display setting</p></div></div>
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2"><div class="panel p-5"><div class="mb-4 flex items-center justify-between"><h3 class="font-bold"><i class="fa-solid fa-layer-group mr-2 text-violet-300"></i>Homepage Rows</h3><button onclick="showView('sections')" class="text-xs font-bold text-emerald-300">Manage <i class="fa-solid fa-arrow-right ml-1"></i></button></div><div id="overview-rows" class="space-y-2"></div></div><div class="panel p-5"><div class="mb-4 flex items-center justify-between"><h3 class="font-bold"><i class="fa-regular fa-newspaper mr-2 text-sky-300"></i>Recent Posts</h3><button onclick="showView('posts')" class="text-xs font-bold text-emerald-300">Manage <i class="fa-solid fa-arrow-right ml-1"></i></button></div><div id="overview-posts" class="space-y-3"></div></div></div>
+    <div class="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100"><i class="fa-solid fa-circle-info mr-2 text-amber-300"></i><b>အရေးကြီး:</b> လက်ရှိစနစ်က localStorage သုံးထားတာကြောင့် ဒီ Browser ထဲမှာပဲ ပြောင်းလဲမှုတွေ သိမ်းပါတယ်။ ဖုန်း/ကွန်ပျူတာအားလုံးမှာ တူညီစေဖို့ Firebase ချိတ်ဆက်မှုကို သီးခြားလုပ်ရပါမယ်။</div>
+   </section>
+   <section id="view-sections" class="view space-y-5"><div class="flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-xl font-black">Homepage Builder</h2><p class="mt-1 text-sm text-slate-400">Home Page မှာပြမယ့် Row တွေ ဖန်တီးပြီး အစီအစဉ်ချပါ။</p></div><span class="rounded-full bg-violet-400/10 px-3 py-1 text-xs font-bold text-violet-200"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Section manager</span></div>
+    <div class="panel p-5 sm:p-6"><div class="mb-5 flex items-center gap-3"><div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-400/10 text-violet-300"><i class="fa-solid fa-plus"></i></div><div><h3 class="font-bold">Row အသစ်ဖန်တီးမယ်</h3><p class="tiny">ဥပမာ: Featured Destinations, Travel Guides, Food & Culture</p></div></div><div class="grid grid-cols-1 gap-4 md:grid-cols-2"><div><label class="label" for="section-title">Row ခေါင်းစဉ် *</label><input id="section-title" class="field" placeholder="ဥပမာ - Featured Destinations"></div><div><label class="label" for="section-subtitle">အောက်စာတန်း (ရှိမှထည့်)</label><input id="section-subtitle" class="field" placeholder="ဥပမာ - Explore Myanmar"></div><div><label class="label" for="section-layout">ပြသမယ့်ပုံစံ</label><select id="section-layout" class="field"><option value="grid">Card Grid — ကတ်များစွာ</option><option value="wide">Wide Row — အကျယ်တစ်တန်း</option></select></div></div><button onclick="addHomeSection()" class="btn btn-purple mt-4"><i class="fa-solid fa-plus mr-2"></i>Add Homepage Row</button></div>
+    <div class="panel p-5 sm:p-6"><div class="mb-4 flex items-center justify-between"><div><h3 class="font-bold">Created Rows</h3><p class="tiny mt-1">↑ ↓ ခလုတ်များဖြင့် အစီအစဉ်ပြောင်းနိုင်ပါတယ်။</p></div><span id="section-count" class="rounded-lg bg-slate-800 px-3 py-2 text-xs font-bold">0 rows</span></div><div id="home-sections-list" class="space-y-3"></div></div>
+   </section>
+   <section id="view-posts" class="view space-y-5"><div><h2 class="text-xl font-black">Travel Posts</h2><p class="mt-1 text-sm text-slate-400">Post အသစ်တင်၊ ရှိပြီးသား Post ပြင်/ဖျက်ပြီး Home Page Row ကိုရွေးပါ။</p></div><div class="panel p-5 sm:p-6"><h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3><input id="editing-post-id" type="hidden"><div class="grid grid-cols-1 gap-4 md:grid-cols-2"><div><label class="label">Post ခေါင်းစဉ် *</label><input id="admin-post-title" class="field" placeholder="Bagan - မြန်မာ့ရှေးဟောင်းအမွေအနှစ်"></div><div><label class="label">Location</label><input id="admin-post-location" class="field" placeholder="Bagan, Ngapali, Inle Lake"></div><div class="md:col-span-2"><label class="label">Image URL</label><input id="admin-post-img" class="field" placeholder="https://... image link"></div><div class="md:col-span-2"><label class="label">Description / Story</label><textarea id="admin-post-desc" class="field min-h-24" placeholder="ခရီးသွားအကြောင်း ရေးပါ..."></textarea></div><div class="md:col-span-2"><label class="label">ဒီ Post ကို ဘယ် Row မှာပြမလဲ?</label><select id="admin-post-section" class="field"><option value="latest">Latest Travel Posts (default)</option></select><p class="tiny mt-2">Row တစ်ခုထဲကို ထည့်လိုပါက ဒီစာရင်းကနေ ရွေးပါ။</p></div></div><div class="mt-4 flex flex-wrap gap-2"><button id="post-save-button" onclick="savePost()" class="btn btn-green"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Publish Post</button><button id="post-cancel-button" onclick="cancelPostEdit()" class="btn btn-muted hidden">Cancel edit</button></div></div><div class="panel p-5 sm:p-6"><div class="mb-4 flex items-center justify-between"><h3 class="font-bold">Saved Travel Posts</h3><span id="post-count" class="tiny">0 posts</span></div><div id="posts-list" class="space-y-3"></div></div></section>
+   <section id="view-sponsor" class="view space-y-5"><div><h2 class="text-xl font-black">Sponsor Banner</h2><p class="mt-1 text-sm text-slate-400">Home Page ရှိ Sponsor Banner ကို စီမံပါ။</p></div><div class="panel p-5 sm:p-6"><label class="mb-5 flex items-center gap-3"><input type="checkbox" id="admin-sponsor-active" class="h-4 w-4 accent-emerald-500"><span class="text-sm font-semibold">Home Page မှာ Sponsor Banner ပြမယ်</span></label><div class="grid grid-cols-1 gap-4 md:grid-cols-2"><div><label class="label">Sponsor Title</label><input id="admin-sponsor-title" class="field" placeholder="Veezoom Myanmar"></div><div><label class="label">Sponsor Link</label><input id="admin-sponsor-link" class="field" placeholder="https://..."></div><div class="md:col-span-2"><label class="label">Description</label><textarea id="admin-sponsor-desc" class="field min-h-20" placeholder="Sponsor campaign description"></textarea></div><div class="md:col-span-2"><label class="label">Logo / Image URL (optional)</label><input id="admin-sponsor-img" class="field" placeholder="https://..."></div></div><button onclick="saveSponsor()" class="btn btn-green mt-4"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Sponsor Settings</button></div></section>
+   <section id="view-social" class="view space-y-5"><div><h2 class="text-xl font-black">Social Links</h2><p class="mt-1 text-sm text-slate-400">Header ရှိ Facebook, TikTok, YouTube လင့်ခ်တွေကို ပြင်ပါ။</p></div><div class="panel p-5 sm:p-6"><div class="grid grid-cols-1 gap-4 md:grid-cols-3"><div><label class="label">Facebook URL</label><input id="admin-fb" class="field" placeholder="https://facebook.com/..."></div><div><label class="label">TikTok URL</label><input id="admin-tt" class="field" placeholder="https://tiktok.com/@..."></div><div><label class="label">YouTube URL</label><input id="admin-yt" class="field" placeholder="https://youtube.com/@..."></div></div><button onclick="saveSocial()" class="btn btn-green mt-4"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Social Links</button></div></section>
+   <footer class="border-t border-slate-800 pt-5 text-center text-xs text-slate-500">© <span id="footer-year"></span> Htoo Htet Explore Admin Studio</footer>
+  </div>
+ </main>
+</div>
+<script>
+const $=id=>document.getElementById(id);const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function read(key,fallback=[]){try{const v=JSON.parse(localStorage.getItem(key));return v??fallback}catch(e){return fallback}}
+function checkPasscode(){if($('passcode').value==='1234'){$('login-modal').classList.add('hidden');$('app').classList.remove('hidden');loadAll()}else alert('PIN မှားနေပါတယ်။')}
+function toggleMobileNav(){$('mobile-nav').classList.toggle('hidden')}
+const titles={overview:'Overview',sections:'Homepage Builder',posts:'Travel Posts',sponsor:'Sponsor Banner',social:'Social Links'};
+function showView(name,button){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('view-'+name).classList.add('active');document.querySelectorAll('.navbtn[data-view]').forEach(v=>v.classList.toggle('active',v.dataset.view===name));$('page-title').textContent=titles[name]||'Overview';$('mobile-nav').classList.add('hidden');if(name==='sections')renderHomeSectionsList();if(name==='posts')renderPostsList()}
+function loadAll(){ $('footer-year').textContent=new Date().getFullYear();const s=read('hh_social',{fb:'',tt:'',yt:''});$('admin-fb').value=s.fb||'';$('admin-tt').value=s.tt||'';$('admin-yt').value=s.yt||'';const sp=read('hh_sponsor',{active:true,title:'Veezoom Myanmar',desc:'',link:'',img:''});$('admin-sponsor-active').checked=sp.active!==false;$('admin-sponsor-title').value=sp.title||'';$('admin-sponsor-desc').value=sp.desc||'';$('admin-sponsor-link').value=sp.link||'';$('admin-sponsor-img').value=sp.img||'';renderHomeSectionsList();renderPostsList();renderOverview()}
+function saveSocial(){localStorage.setItem('hh_social',JSON.stringify({fb:$('admin-fb').value.trim(),tt:$('admin-tt').value.trim(),yt:$('admin-yt').value.trim()}));toast('Social Links သိမ်းပြီးပါပြီ။')}
+function saveSponsor(){localStorage.setItem('hh_sponsor',JSON.stringify({active:$('admin-sponsor-active').checked,title:$('admin-sponsor-title').value.trim(),desc:$('admin-sponsor-desc').value.trim(),link:$('admin-sponsor-link').value.trim(),img:$('admin-sponsor-img').value.trim()}));renderOverview();toast('Sponsor Settings သိမ်းပြီးပါပြီ။')}
+function getHomeSections(){return read('hh_home_sections',[])}function getPosts(){return read('hh_posts',[])}
+function refreshPostSectionOptions(){const sel=$('admin-post-section'),current=sel.value||'latest';sel.innerHTML='<option value="latest">Latest Travel Posts (default)</option>'+getHomeSections().map(s=>`<option value="${safe(s.id)}">${safe(s.title)}</option>`).join('');if([...sel.options].some(o=>o.value===current))sel.value=current}
+function addHomeSection(){const title=$('section-title').value.trim(),subtitle=$('section-subtitle').value.trim(),layout=$('section-layout').value;if(!title)return alert('Row ခေါင်းစဉ် အရင်ထည့်ပါ။');const sections=getHomeSections();sections.push({id:String(Date.now()),title,subtitle,layout});localStorage.setItem('hh_home_sections',JSON.stringify(sections));$('section-title').value='';$('section-subtitle').value='';renderHomeSectionsList();renderOverview();toast('Homepage Row အသစ်ထည့်ပြီးပါပြီ။')}
+function renderHomeSectionsList(){const list=$('home-sections-list'),sections=getHomeSections();$('section-count').textContent=sections.length+' rows';refreshPostSectionOptions();if(!sections.length){list.innerHTML='<div class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400"><i class="fa-solid fa-layer-group mb-2 block text-2xl text-slate-600"></i>Row မရှိသေးပါ။ အပေါ်က Form ကနေ ပထမဆုံး Row ထည့်ပါ။</div>';return}list.innerHTML=sections.map((s,i)=>`<div class="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-4 sm:flex-row sm:items-center sm:justify-between"><div class="flex min-w-0 items-start gap-3"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-400/10 font-black text-violet-200">${String(i+1).padStart(2,'0')}</div><div class="min-w-0"><p class="font-bold">${safe(s.title)}</p><p class="mt-1 text-xs text-slate-400">${s.layout==='wide'?'Wide Row':'Card Grid'}${s.subtitle?' · '+safe(s.subtitle):''} · ${getPosts().filter(p=>String(p.sectionId)===String(s.id)).length} posts</p></div></div><div class="flex flex-wrap gap-2"><button class="btn btn-muted" onclick="editSection(${i})"><i class="fa-solid fa-pen mr-1"></i>Edit</button><button class="btn btn-muted" onclick="moveHomeSection(${i},-1)" ${i===0?'disabled':''} title="Move up">↑</button><button class="btn btn-muted" onclick="moveHomeSection(${i},1)" ${i===sections.length-1?'disabled':''} title="Move down">↓</button><button class="btn btn-red" onclick="deleteHomeSection(${i})"><i class="fa-regular fa-trash-can mr-1"></i>Delete</button></div></div>`).join('')}
+function editSection(i){const a=getHomeSections(),s=a[i];if(!s)return;const title=prompt('Row ခေါင်းစဉ်',s.title);if(title===null)return;if(!title.trim())return alert('ခေါင်းစဉ်အလွတ်မဖြစ်ရပါ။');const subtitle=prompt('အောက်စာတန်း (မထည့်လိုပါက အလွတ်ထားပါ)',s.subtitle||'');if(subtitle===null)return;const layout=confirm('OK = Card Grid, Cancel = Wide Row')?'grid':'wide';a[i]={...s,title:title.trim(),subtitle:subtitle.trim(),layout};localStorage.setItem('hh_home_sections',JSON.stringify(a));renderHomeSectionsList();renderOverview();toast('Row ပြင်ပြီးပါပြီ။')}
+function moveHomeSection(i,d){const a=getHomeSections(),n=i+d;if(n<0||n>=a.length)return;[a[i],a[n]]=[a[n],a[i]];localStorage.setItem('hh_home_sections',JSON.stringify(a));renderHomeSectionsList();renderOverview()}
+function deleteHomeSection(i){const a=getHomeSections(),s=a[i];if(!s||!confirm('ဒီ Row ကို ဖျက်မှာ သေချာပါသလား? အဲဒီ Row ထဲက Post တွေကို Latest Travel Posts သို့ ပြောင်းပေးပါမယ်။'))return;a.splice(i,1);localStorage.setItem('hh_home_sections',JSON.stringify(a));const posts=getPosts();posts.forEach(p=>{if(String(p.sectionId)===String(s.id))p.sectionId='latest'});localStorage.setItem('hh_posts',JSON.stringify(posts));renderHomeSectionsList();renderPostsList();renderOverview();toast('Row ဖျက်ပြီးပါပြီ။')}
+function savePost(){const title=$('admin-post-title').value.trim();if(!title)return alert('Post ခေါင်းစဉ် ထည့်ပေးပါ။');const posts=getPosts(),id=$('editing-post-id').value;const data={title,img:$('admin-post-img').value.trim(),location:$('admin-post-location').value.trim(),desc:$('admin-post-desc').value.trim(),sectionId:$('admin-post-section').value};if(id){const i=posts.findIndex(p=>String(p.id)===String(id));if(i>=0)posts[i]={...posts[i],...data}}else posts.unshift({id:Date.now(),...data});localStorage.setItem('hh_posts',JSON.stringify(posts));cancelPostEdit();renderPostsList();renderOverview();toast(id?'Post ပြင်ပြီးပါပြီ။':'Post Publish လုပ်ပြီးပါပြီ။')}
+function editPost(id){const p=getPosts().find(x=>String(x.id)===String(id));if(!p)return;showView('posts');refreshPostSectionOptions();$('editing-post-id').value=p.id;$('admin-post-title').value=p.title||'';$('admin-post-img').value=p.img||'';$('admin-post-location').value=p.location||'';$('admin-post-desc').value=p.desc||'';$('admin-post-section').value=p.sectionId||'latest';$('post-form-heading').innerHTML='<i class="fa-solid fa-pen mr-2 text-sky-300"></i>Edit Travel Post';$('post-save-button').innerHTML='<i class="fa-solid fa-floppy-disk mr-2"></i>Save Changes';$('post-cancel-button').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function cancelPostEdit(){['editing-post-id','admin-post-title','admin-post-img','admin-post-location','admin-post-desc'].forEach(id=>$(id).value='');$('admin-post-section').value='latest';$('post-form-heading').innerHTML='<i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post';$('post-save-button').innerHTML='<i class="fa-solid fa-cloud-arrow-up mr-2"></i>Publish Post';$('post-cancel-button').classList.add('hidden')}
+function deletePost(id){if(!confirm('ဒီ Travel Post ကို ဖျက်မှာ သေချာပါသလား?'))return;localStorage.setItem('hh_posts',JSON.stringify(getPosts().filter(p=>String(p.id)!==String(id))));renderPostsList();renderOverview();toast('Post ဖျက်ပြီးပါပြီ။')}
+function renderPostsList(){const posts=getPosts();$('post-count').textContent=posts.length+' posts';refreshPostSectionOptions();if(!posts.length){$('posts-list').innerHTML='<p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Post မရှိသေးပါ။ အပေါ်က Form မှာ Post အသစ်ထည့်ပါ။</p>';return}$('posts-list').innerHTML=posts.map(p=>`<article class="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-3 sm:flex-row sm:items-center"><img src="${safe(p.img||'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=180')}" onerror="this.style.display='none'" class="h-20 w-full rounded-lg object-cover sm:w-28"><div class="min-w-0 flex-1"><h4 class="font-bold">${safe(p.title)}</h4><p class="mt-1 line-clamp-2 text-xs text-slate-400">${safe(p.desc||'Description မထည့်ရသေးပါ။')}</p><p class="mt-2 text-[11px] text-emerald-300">${safe(p.location||'Myanmar')} · ${p.sectionId==='latest'||!p.sectionId?'Latest Travel Posts':safe(getHomeSections().find(s=>String(s.id)===String(p.sectionId))?.title||'Custom Row')}</p></div><div class="flex gap-2"><button onclick="editPost('${safe(p.id)}')" class="btn btn-muted"><i class="fa-solid fa-pen mr-1"></i>Edit</button><button onclick="deletePost('${safe(p.id)}')" class="btn btn-red"><i class="fa-regular fa-trash-can"></i></button></div></article>`).join('')}
+function renderOverview(){const sections=getHomeSections(),posts=getPosts(),sp=read('hh_sponsor',{active:true});$('stat-sections').textContent=sections.length;$('stat-posts').textContent=posts.length;$('stat-sponsor').textContent=sp.active===false?'Disabled':'Enabled';$('overview-rows').innerHTML=sections.length?sections.slice(0,5).map((s,i)=>`<div class="flex items-center gap-3 rounded-lg bg-slate-800/60 p-3"><span class="text-xs font-black text-violet-300">${String(i+1).padStart(2,'0')}</span><span class="flex-1 truncate text-sm font-semibold">${safe(s.title)}</span><span class="tiny">${posts.filter(p=>String(p.sectionId)===String(s.id)).length} posts</span></div>`).join(''):'<p class="text-sm text-slate-400">Custom Row မရှိသေးပါ။ Homepage Builder ကနေ ထည့်နိုင်ပါတယ်။</p>';$('overview-posts').innerHTML=posts.length?posts.slice(0,4).map(p=>`<div class="flex items-center gap-3"><img src="${safe(p.img||'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100')}" onerror="this.style.display='none'" class="h-11 w-14 rounded-lg object-cover"><div class="min-w-0"><p class="truncate text-sm font-semibold">${safe(p.title)}</p><p class="tiny">${safe(p.location||'Myanmar')}</p></div></div>`).join(''):'<p class="text-sm text-slate-400">Post မရှိသေးပါ။ Travel Posts ကနေ ထည့်နိုင်ပါတယ်။</p>';}
+function toast(message){let t=$('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='fixed bottom-5 right-5 z-50 max-w-sm rounded-xl border border-emerald-500/30 bg-slate-900 px-4 py-3 text-sm font-semibold text-emerald-200 shadow-2xl';document.body.appendChild(t)}t.textContent=message;t.classList.remove('hidden');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.add('hidden'),2600)}
+</script>
+</body></html>
