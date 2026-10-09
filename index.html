@@ -7,65 +7,64 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans pb-12">
+<body class="bg-slate-50 text-slate-800 font-sans pb-16">
 
-    <!-- Header & Social Icons -->
-    <header class="bg-emerald-700 text-white shadow-md">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-wide">Htoo Htet Explore</h1>
-            <div class="flex space-x-4 text-xl" id="social-links">
-                <!-- Social links rendered dynamically -->
-                <a id="link-fb" href="#" target="_blank" class="hover:text-amber-300 transition"><i class="fa-brands fa-facebook"></i></a>
-                <a id="link-tt" href="#" target="_blank" class="hover:text-amber-300 transition"><i class="fa-brands fa-tiktok"></i></a>
-                <a id="link-yt" href="#" target="_blank" class="hover:text-amber-300 transition"><i class="fa-brands fa-youtube"></i></a>
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-black tracking-tight text-emerald-800 flex items-center gap-2">
+                <i class="fa-solid fa-compass text-emerald-600"></i> Htoo Htet Explore
+            </a>
+            <div class="flex items-center space-x-3 text-slate-600" id="social-links">
+                <a id="link-fb" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all"><i class="fa-brands fa-facebook-f text-sm"></i></a>
+                <a id="link-tt" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all"><i class="fa-brands fa-tiktok text-sm"></i></a>
+                <a id="link-yt" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all"><i class="fa-brands fa-youtube text-sm"></i></a>
             </div>
         </div>
     </header>
 
-    <!-- Sponsor Banner Area -->
-    <div class="max-w-4xl mx-auto px-4 mt-6">
-        <div id="sponsor-container" class="hidden bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl p-4 shadow-lg flex flex-col md:flex-row items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <img id="sponsor-img" src="" alt="Sponsor" class="w-16 h-16 object-cover rounded-lg bg-white hidden">
-                <div>
-                    <span class="bg-amber-800 text-xs px-2 py-0.5 rounded uppercase font-bold tracking-wider">Official Sponsor</span>
-                    <h3 id="sponsor-title" class="text-lg font-bold mt-1">Veezoom Myanmar</h3>
-                    <p id="sponsor-desc" class="text-sm opacity-90">Roads of Ayeyarwaddy Series</p>
+    <!-- Sponsor Hero Banner -->
+    <section class="max-w-5xl mx-auto px-6 mt-6">
+        <div id="sponsor-container" class="hidden relative overflow-hidden bg-gradient-to-r from-emerald-900 via-teal-800 to-slate-900 text-white rounded-2xl p-6 md:p-8 shadow-xl">
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center space-x-5">
+                    <img id="sponsor-img" src="" alt="Sponsor" class="w-20 h-20 object-cover rounded-xl border-2 border-white/20 bg-white shadow-md hidden">
+                    <div>
+                        <span class="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-widest">Official Sponsor</span>
+                        <h3 id="sponsor-title" class="text-2xl font-extrabold mt-1">Veezoom Myanmar</h3>
+                        <p id="sponsor-desc" class="text-slate-200 text-sm mt-1 max-w-xl opacity-90">Roads of Ayeyarwaddy Series</p>
+                    </div>
                 </div>
+                <a id="sponsor-link" href="#" target="_blank" class="whitespace-nowrap bg-amber-400 text-slate-900 font-bold px-6 py-3 rounded-xl shadow-lg hover:bg-amber-300 transition-all text-sm transform hover:-translate-y-0.5">
+                    Visit Sponsor <i class="fa-solid fa-arrow-up-right-from-square text-xs ml-1"></i>
+                </a>
             </div>
-            <a id="sponsor-link" href="#" target="_blank" class="mt-3 md:mt-0 bg-white text-orange-600 font-bold px-4 py-2 rounded-lg shadow hover:bg-amber-100 transition text-sm">
-                Visit Sponsor
-            </a>
         </div>
-    </div>
+    </section>
 
-    <!-- Main Content / Posts -->
-    <main class="max-w-4xl mx-auto px-4 mt-8">
-        <h2 class="text-xl font-bold mb-4 text-gray-700 border-b-2 border-emerald-600 pb-2">ခရီးသွား မှတ်တမ်းများ</h2>
-        <div id="blog-posts-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Dynamic Posts Will Appear Here -->
+    <!-- Main Content Section -->
+    <main class="max-w-5xl mx-auto px-6 mt-10">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-8">
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <span class="w-2 h-6 bg-emerald-600 rounded-full inline-block"></span> ခရီးသွား မှတ်တမ်းများ
+            </h2>
+        </div>
+        <div id="blog-posts-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Dynamic Posts Cards -->
         </div>
     </main>
 
-    <!-- Hidden Secret Admin Access (Footer Click) -->
-    <footer class="mt-16 text-center text-xs text-gray-400">
-        <p>© 2026 Htoo Htet Explore. All rights reserved. <a href="admin.html" class="opacity-20 hover:opacity-100">[Admin]</a></p>
+    <footer class="mt-20 border-t border-slate-200 py-8 text-center text-xs text-slate-400">
+        <p>© 2026 Htoo Htet Explore. All rights reserved.</p>
     </footer>
 
     <script>
-        // Load Dynamic Data from LocalStorage/Defaults
         function loadBlogData() {
-            // 1. Social Links
-            const social = JSON.parse(localStorage.getItem('hh_social')) || {
-                fb: 'https://facebook.com',
-                tt: 'https://tiktok.com',
-                yt: 'https://youtube.com'
-            };
+            const social = JSON.parse(localStorage.getItem('hh_social')) || { fb: 'https://facebook.com', tt: 'https://tiktok.com', yt: 'https://youtube.com' };
             document.getElementById('link-fb').href = social.fb;
             document.getElementById('link-tt').href = social.tt;
             document.getElementById('link-yt').href = social.yt;
 
-            // 2. Sponsor Banner
             const sponsor = JSON.parse(localStorage.getItem('hh_sponsor')) || {
                 active: true,
                 title: 'Veezoom Myanmar',
@@ -85,7 +84,6 @@
                 }
             }
 
-            // 3. Blog Posts
             const posts = JSON.parse(localStorage.getItem('hh_posts')) || [
                 {
                     title: 'Roads of Ayeyarwaddy - ခရီးစဉ်စတင်ခြင်း',
@@ -98,17 +96,18 @@
             postsContainer.innerHTML = '';
             posts.forEach(post => {
                 postsContainer.innerHTML += `
-                    <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition">
-                        <img src="${post.img || 'https://via.placeholder.com/400x200'}" class="w-full h-48 object-cover">
-                        <div class="p-4">
-                            <h3 class="font-bold text-lg text-emerald-800">${post.title}</h3>
-                            <p class="text-sm text-gray-600 mt-2">${post.desc}</p>
+                    <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
+                        <div class="relative h-48 overflow-hidden bg-slate-100">
+                            <img src="${post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500'}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="font-bold text-slate-900 text-lg leading-snug hover:text-emerald-700 transition">${post.title}</h3>
+                            <p class="text-xs text-slate-500 mt-2 line-clamp-3 leading-relaxed flex-grow">${post.desc}</p>
                         </div>
                     </div>
                 `;
             });
         }
-
         document.addEventListener('DOMContentLoaded', loadBlogData);
     </script>
 </body>
