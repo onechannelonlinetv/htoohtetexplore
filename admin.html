@@ -3,75 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Htoo Htet Explore - Admin Dashboard</title>
+    <title>Admin Dashboard - Htoo Htet Explore</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-900 text-white min-h-screen p-4 md:p-8">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-12">
 
     <!-- Passcode Modal -->
-    <div id="login-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 p-6 rounded-xl max-w-sm w-full text-center border border-slate-700">
-            <h2 class="text-xl font-bold mb-4">⚙️ Admin Access Passcode</h2>
-            <input type="password" id="passcode" placeholder="PIN ထည့်ပါ (Default: 1234)" class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-center text-lg mb-4">
-            <button onclick="checkPasscode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded">Login</button>
+    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 p-8 rounded-2xl max-w-sm w-full text-center border border-slate-800 shadow-2xl">
+            <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-1">Admin Access</h2>
+            <p class="text-xs text-slate-400 mb-6">ကျေးဇူးပြု၍ PIN ရိုက်ထည့်ပါ</p>
+            <input type="password" id="passcode" placeholder="••••" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-center text-xl font-bold tracking-widest mb-4 focus:outline-none focus:border-emerald-500 text-white">
+            <button onclick="checkPasscode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all">Login</button>
         </div>
     </div>
 
-    <!-- Main Dashboard Panel -->
-    <div id="dashboard" class="max-w-4xl mx-auto hidden">
-        <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
-            <h1 class="text-2xl font-bold text-emerald-400">⚙️ Htoo Htet Explore Admin Panel</h1>
-            <a href="index.html" target="_blank" class="bg-slate-700 px-3 py-1.5 rounded text-sm hover:bg-slate-600">View Live Blog ↗</a>
+    <!-- Main Admin Dashboard -->
+    <div id="dashboard" class="max-w-4xl mx-auto px-6 pt-10 hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-emerald-400"></i> Admin Management
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Htoo Htet Explore Website ကို ဤနေရာမှ ထိန်းချုပ်ပါ</p>
+            </div>
+            <a href="index.html" target="_blank" class="inline-flex items-center gap-2 bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition">
+                View Live Blog <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
         </div>
 
         <div class="space-y-8">
-            <!-- 1. Social Links Control -->
-            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                <h2 class="text-lg font-bold mb-4 text-amber-400">🔗 Social Media Links Management</h2>
+            <!-- 1. Social Media Links -->
+            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes text-emerald-400"></i> Social Links Management
+                </h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="text-xs text-gray-400">Facebook URL</label>
-                        <input type="text" id="admin-fb" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm mt-1">
+                        <label class="text-xs text-slate-400">Facebook URL</label>
+                        <input type="text" id="admin-fb" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm mt-1 focus:outline-none focus:border-emerald-500 text-slate-200">
                     </div>
                     <div>
-                        <label class="text-xs text-gray-400">TikTok URL</label>
-                        <input type="text" id="admin-tt" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm mt-1">
+                        <label class="text-xs text-slate-400">TikTok URL</label>
+                        <input type="text" id="admin-tt" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm mt-1 focus:outline-none focus:border-emerald-500 text-slate-200">
                     </div>
                     <div>
-                        <label class="text-xs text-gray-400">YouTube URL</label>
-                        <input type="text" id="admin-yt" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm mt-1">
+                        <label class="text-xs text-slate-400">YouTube URL</label>
+                        <input type="text" id="admin-yt" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm mt-1 focus:outline-none focus:border-emerald-500 text-slate-200">
                     </div>
                 </div>
-                <button onclick="saveSocial()" class="mt-4 bg-emerald-600 px-4 py-2 rounded font-bold text-sm hover:bg-emerald-500">Save Social Links</button>
+                <button onclick="saveSocial()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Save Social Links</button>
             </div>
 
-            <!-- 2. Sponsor Banner Control -->
-            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                <h2 class="text-lg font-bold mb-4 text-amber-400">📢 Sponsor Banner Management</h2>
+            <!-- 2. Sponsor Banner -->
+            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-rectangle-ad text-amber-400"></i> Sponsor Banner Management
+                </h2>
                 <div class="space-y-4">
-                    <label class="flex items-center space-x-2">
-                        <input type="checkbox" id="admin-sponsor-active" class="w-4 h-4">
-                        <span>Show Sponsor Banner on Website</span>
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" id="admin-sponsor-active" class="w-4 h-4 rounded accent-emerald-500">
+                        <span class="text-sm text-slate-300">Show Sponsor Banner on Main Page</span>
                     </label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="admin-sponsor-title" placeholder="Sponsor Title (e.g. Veezoom Myanmar)" class="p-2 bg-slate-700 rounded border border-slate-600 text-sm">
-                        <input type="text" id="admin-sponsor-link" placeholder="Sponsor Link (e.g. https://...)" class="p-2 bg-slate-700 rounded border border-slate-600 text-sm">
+                        <input type="text" id="admin-sponsor-title" placeholder="Sponsor Title (e.g. Veezoom Myanmar)" class="p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+                        <input type="text" id="admin-sponsor-link" placeholder="Sponsor Link (e.g. https://...)" class="p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
                     </div>
-                    <textarea id="admin-sponsor-desc" placeholder="Sponsor Description / Campaign Text" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm h-20"></textarea>
-                    <input type="text" id="admin-sponsor-img" placeholder="Sponsor Logo/Image URL" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm">
+                    <textarea id="admin-sponsor-desc" placeholder="Sponsor Campaign Description" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 h-20 focus:outline-none focus:border-emerald-500"></textarea>
+                    <input type="text" id="admin-sponsor-img" placeholder="Sponsor Logo/Image URL (Optional)" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
                 </div>
-                <button onclick="saveSponsor()" class="mt-4 bg-emerald-600 px-4 py-2 rounded font-bold text-sm hover:bg-emerald-500">Save Sponsor Banner</button>
+                <button onclick="saveSponsor()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Save Sponsor Settings</button>
             </div>
 
-            <!-- 3. Add New Travel Post -->
-            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                <h2 class="text-lg font-bold mb-4 text-amber-400">📝 Add New Travel Post</h2>
+            <!-- 3. Add Travel Post -->
+            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> Add New Travel Post
+                </h2>
                 <div class="space-y-4">
-                    <input type="text" id="admin-post-title" placeholder="Post Title" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm">
-                    <input type="text" id="admin-post-img" placeholder="Image URL" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm">
-                    <textarea id="admin-post-desc" placeholder="Post Description" class="w-full p-2 bg-slate-700 rounded border border-slate-600 text-sm h-24"></textarea>
+                    <input type="text" id="admin-post-title" placeholder="Post Title" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                    <input type="text" id="admin-post-img" placeholder="Image URL (e.g. https://...)" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                    <textarea id="admin-post-desc" placeholder="Post Story / Description" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 h-24 focus:outline-none focus:border-blue-500"></textarea>
                 </div>
-                <button onclick="addPost()" class="mt-4 bg-blue-600 px-4 py-2 rounded font-bold text-sm hover:bg-blue-500">Add Post</button>
+                <button onclick="addPost()" class="mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Publish Post</button>
             </div>
         </div>
     </div>
@@ -79,7 +97,7 @@
     <script>
         function checkPasscode() {
             const code = document.getElementById('passcode').value;
-            if(code === '1234') { // Default PIN
+            if(code === '1234') {
                 document.getElementById('login-modal').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 loadAdminData();
@@ -121,7 +139,7 @@
                 img: document.getElementById('admin-sponsor-img').value
             };
             localStorage.setItem('hh_sponsor', JSON.stringify(sponsor));
-            alert('Sponsor Banner Saved!');
+            alert('Sponsor Settings Saved!');
         }
 
         function addPost() {
@@ -135,7 +153,7 @@
             posts.unshift({ title, img, desc });
             localStorage.setItem('hh_posts', JSON.stringify(posts));
             alert('Post Added Successfully!');
-            
+
             document.getElementById('admin-post-title').value = '';
             document.getElementById('admin-post-img').value = '';
             document.getElementById('admin-post-desc').value = '';
