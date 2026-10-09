@@ -1,163 +1,102 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Htoo Htet Explore</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#064e42"><title>Admin Studio — Htoo Htet Explore</title>
+<script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--green:#08745b;--deep:#064e42;--gold:#ffd323}body{background:#f5f7f5;color:#172b28}.field{width:100%;border:1px solid #dbe4df;border-radius:12px;background:#fff;padding:11px 13px;font-size:14px;outline:none}.field:focus{border-color:#08745b;box-shadow:0 0 0 3px #08745b18}.label{display:block;font-size:12px;font-weight:700;color:#52635d;margin-bottom:6px}.btn{border-radius:999px;padding:10px 16px;font-size:13px;font-weight:800;transition:.15s}.green{background:#08745b;color:white}.green:hover{background:#064e42}.gold{background:#ffd323;color:#172b28}.card{background:white;border:1px solid #e3eae6;border-radius:18px;box-shadow:0 4px 18px #143d2c08}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-12">
-
-    <!-- Passcode Modal -->
-    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 p-8 rounded-2xl max-w-sm w-full text-center border border-slate-800 shadow-2xl">
-            <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mx-auto mb-4 text-xl">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <h2 class="text-xl font-bold mb-1">Admin Access</h2>
-            <p class="text-xs text-slate-400 mb-6">ကျေးဇူးပြု၍ PIN ရိုက်ထည့်ပါ</p>
-            <input type="password" id="passcode" placeholder="••••" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-center text-xl font-bold tracking-widest mb-4 focus:outline-none focus:border-emerald-500 text-white">
-            <button onclick="checkPasscode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all">Login</button>
-        </div>
-    </div>
-
-    <!-- Main Admin Dashboard -->
-    <div id="dashboard" class="max-w-4xl mx-auto px-6 pt-10 hidden">
-        <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
-            <div>
-                <h1 class="text-2xl font-extrabold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-emerald-400"></i> Admin Management
-                </h1>
-                <p class="text-xs text-slate-400 mt-1">Htoo Htet Explore Website ကို ဤနေရာမှ ထိန်းချုပ်ပါ</p>
-            </div>
-            <a href="index.html" target="_blank" class="inline-flex items-center gap-2 bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition">
-                View Live Blog <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-        </div>
-
-        <div class="space-y-8">
-            <!-- 1. Social Media Links -->
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-share-nodes text-emerald-400"></i> Social Links Management
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="text-xs text-slate-400">Facebook URL</label>
-                        <input type="text" id="admin-fb" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm mt-1 focus:outline-none focus:border-emerald-500 text-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-xs text-slate-400">TikTok URL</label>
-                        <input type="text" id="admin-tt" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm mt-1 focus:outline-none focus:border-emerald-500 text-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-xs text-slate-400">YouTube URL</label>
-                        <input type="text" id="admin-yt" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm mt-1 focus:outline-none focus:border-emerald-500 text-slate-200">
-                    </div>
-                </div>
-                <button onclick="saveSocial()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Save Social Links</button>
-            </div>
-
-            <!-- 2. Sponsor Banner -->
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-rectangle-ad text-amber-400"></i> Sponsor Banner Management
-                </h2>
-                <div class="space-y-4">
-                    <label class="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" id="admin-sponsor-active" class="w-4 h-4 rounded accent-emerald-500">
-                        <span class="text-sm text-slate-300">Show Sponsor Banner on Main Page</span>
-                    </label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="admin-sponsor-title" placeholder="Sponsor Title (e.g. Veezoom Myanmar)" class="p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
-                        <input type="text" id="admin-sponsor-link" placeholder="Sponsor Link (e.g. https://...)" class="p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <textarea id="admin-sponsor-desc" placeholder="Sponsor Campaign Description" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 h-20 focus:outline-none focus:border-emerald-500"></textarea>
-                    <input type="text" id="admin-sponsor-img" placeholder="Sponsor Logo/Image URL (Optional)" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
-                </div>
-                <button onclick="saveSponsor()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Save Sponsor Settings</button>
-            </div>
-
-            <!-- 3. Add Travel Post -->
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 shadow-sm">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> Add New Travel Post
-                </h2>
-                <div class="space-y-4">
-                    <input type="text" id="admin-post-title" placeholder="Post Title" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-                    <input type="text" id="admin-post-img" placeholder="Image URL (e.g. https://...)" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-                    <textarea id="admin-post-desc" placeholder="Post Story / Description" class="w-full p-2.5 bg-slate-800 rounded-xl border border-slate-700 text-sm text-slate-200 h-24 focus:outline-none focus:border-blue-500"></textarea>
-                </div>
-                <button onclick="addPost()" class="mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">Publish Post</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function checkPasscode() {
-            const code = document.getElementById('passcode').value;
-            if(code === '1234') {
-                document.getElementById('login-modal').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                loadAdminData();
-            } else {
-                alert('PIN မှားယွင်းနေပါသည်။');
-            }
-        }
-
-        function loadAdminData() {
-            const social = JSON.parse(localStorage.getItem('hh_social')) || { fb: '', tt: '', yt: '' };
-            document.getElementById('admin-fb').value = social.fb;
-            document.getElementById('admin-tt').value = social.tt;
-            document.getElementById('admin-yt').value = social.yt;
-
-            const sponsor = JSON.parse(localStorage.getItem('hh_sponsor')) || { active: true, title: 'Veezoom Myanmar', desc: '', link: '', img: '' };
-            document.getElementById('admin-sponsor-active').checked = sponsor.active;
-            document.getElementById('admin-sponsor-title').value = sponsor.title;
-            document.getElementById('admin-sponsor-desc').value = sponsor.desc;
-            document.getElementById('admin-sponsor-link').value = sponsor.link;
-            document.getElementById('admin-sponsor-img').value = sponsor.img;
-        }
-
-        function saveSocial() {
-            const social = {
-                fb: document.getElementById('admin-fb').value,
-                tt: document.getElementById('admin-tt').value,
-                yt: document.getElementById('admin-yt').value
-            };
-            localStorage.setItem('hh_social', JSON.stringify(social));
-            alert('Social Links Saved!');
-        }
-
-        function saveSponsor() {
-            const sponsor = {
-                active: document.getElementById('admin-sponsor-active').checked,
-                title: document.getElementById('admin-sponsor-title').value,
-                desc: document.getElementById('admin-sponsor-desc').value,
-                link: document.getElementById('admin-sponsor-link').value,
-                img: document.getElementById('admin-sponsor-img').value
-            };
-            localStorage.setItem('hh_sponsor', JSON.stringify(sponsor));
-            alert('Sponsor Settings Saved!');
-        }
-
-        function addPost() {
-            const title = document.getElementById('admin-post-title').value;
-            const img = document.getElementById('admin-post-img').value;
-            const desc = document.getElementById('admin-post-desc').value;
-
-            if(!title) return alert('Title ထည့်ပါ');
-
-            const posts = JSON.parse(localStorage.getItem('hh_posts')) || [];
-            posts.unshift({ title, img, desc });
-            localStorage.setItem('hh_posts', JSON.stringify(posts));
-            alert('Post Added Successfully!');
-
-            document.getElementById('admin-post-title').value = '';
-            document.getElementById('admin-post-img').value = '';
-            document.getElementById('admin-post-desc').value = '';
-        }
-    </script>
-</body>
-</html>
+<body class="min-h-screen">
+<div id="login-screen" class="min-h-screen flex items-center justify-center p-5 bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-950">
+  <form id="login-form" class="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl">
+    <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-2xl text-emerald-800"><i class="fa-solid fa-compass"></i></div>
+    <p class="text-center text-xs font-black uppercase tracking-[.2em] text-emerald-700">Htoo Htet Explore</p>
+    <h1 class="mt-2 text-center text-2xl font-black text-slate-900">Admin Studio</h1>
+    <p class="mt-2 mb-6 text-center text-sm text-slate-500">Website content management</p>
+    <label for="pin" class="label">Admin PIN</label><input id="pin" type="password" inputmode="numeric" autocomplete="current-password" class="field text-center text-xl tracking-[.5em]" placeholder="••••" required>
+    <p id="login-error" class="hidden mt-2 text-sm text-red-600">PIN မှားယွင်းနေပါသည်။</p>
+    <button class="btn green mt-4 w-full" type="submit">Sign in <i class="fa-solid fa-arrow-right ml-2"></i></button>
+    <p class="mt-5 text-center text-xs text-slate-400">Demo PIN: 1234 · Change this before public use</p>
+  </form>
+</div>
+<div id="app" class="hidden">
+<header class="sticky top-0 z-30 border-b border-emerald-950/10 bg-white/95 backdrop-blur">
+ <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-8">
+  <a href="index.html" class="flex items-center gap-3"><span class="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-800 text-xl text-white"><i class="fa-solid fa-compass"></i></span><span><strong class="block text-lg font-black text-emerald-950">Htoo Htet Explore</strong><small class="text-xs text-slate-500">Admin Studio</small></span></a>
+  <div class="flex gap-2"><a class="btn border border-slate-200 text-slate-700" href="index.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>View Website</a><button id="logout" class="btn bg-slate-100 text-slate-700">Log out</button></div>
+ </div>
+</header>
+<main class="mx-auto max-w-7xl px-4 py-7 md:px-8 md:py-10">
+ <div class="mb-8"><p class="text-xs font-black uppercase tracking-[.2em] text-emerald-700">Control room</p><h1 class="mt-2 text-3xl font-black text-slate-900 md:text-4xl">Manage your stories.</h1><p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Update your social links, sponsor banner and travel posts. Save changes to this browser's local storage.</p></div>
+ <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+  <div class="card p-5"><span class="text-xs font-bold uppercase tracking-wider text-slate-500">Published stories</span><p id="stat-posts" class="mt-2 text-3xl font-black text-emerald-900">0</p></div>
+  <div class="card p-5"><span class="text-xs font-bold uppercase tracking-wider text-slate-500">Sponsor banner</span><p id="stat-sponsor" class="mt-2 text-xl font-black text-emerald-900">Active</p></div>
+  <div class="card p-5"><span class="text-xs font-bold uppercase tracking-wider text-slate-500">Storage mode</span><p class="mt-2 text-xl font-black text-amber-700">Browser only</p></div>
+ </div>
+ <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+  <section class="card p-5 md:p-7">
+   <div class="mb-5 flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800"><i class="fa-solid fa-share-nodes"></i></span><div><h2 class="font-black text-slate-900">Social Media Links</h2><p class="text-xs text-slate-500">Facebook, TikTok and YouTube</p></div></div>
+   <div class="space-y-4">
+    <div><label class="label" for="admin-fb">Facebook URL</label><input id="admin-fb" class="field" type="url" placeholder="https://facebook.com/yourpage"></div>
+    <div><label class="label" for="admin-tt">TikTok URL</label><input id="admin-tt" class="field" type="url" placeholder="https://tiktok.com/@youraccount"></div>
+    <div><label class="label" for="admin-yt">YouTube URL</label><input id="admin-yt" class="field" type="url" placeholder="https://youtube.com/@yourchannel"></div>
+   </div><button id="save-social" class="btn green mt-5">Save social links</button>
+  </section>
+  <section class="card p-5 md:p-7">
+   <div class="mb-5 flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700"><i class="fa-solid fa-rectangle-ad"></i></span><div><h2 class="font-black text-slate-900">Sponsor Banner</h2><p class="text-xs text-slate-500">Manage the homepage sponsor</p></div></div>
+   <label class="mb-4 flex items-center gap-3 rounded-xl bg-slate-50 p-3 text-sm font-semibold"><input id="admin-sponsor-active" type="checkbox" class="h-4 w-4 accent-emerald-700"> Show sponsor banner on homepage</label>
+   <div class="space-y-4">
+    <div><label class="label" for="admin-sponsor-title">Sponsor name</label><input id="admin-sponsor-title" class="field" placeholder="Veezoom Myanmar"></div>
+    <div><label class="label" for="admin-sponsor-link">Sponsor website / social URL</label><input id="admin-sponsor-link" class="field" type="url" placeholder="https://..."></div>
+    <div><label class="label" for="admin-sponsor-desc">Campaign description</label><textarea id="admin-sponsor-desc" class="field" rows="3" placeholder="Short sponsor message"></textarea></div>
+    <div><label class="label" for="admin-sponsor-img">Logo image URL</label><input id="admin-sponsor-img" class="field" type="url" placeholder="https://.../logo.png"></div>
+   </div><button id="save-sponsor" class="btn green mt-5">Save sponsor settings</button>
+  </section>
+ </div>
+ <section class="card mt-6 p-5 md:p-7">
+  <div class="mb-6 flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700"><i class="fa-solid fa-pen-to-square"></i></span><div><h2 class="font-black text-slate-900">Create a Travel Post</h2><p class="text-xs text-slate-500">Add a story card to the homepage</p></div></div>
+  <form id="post-form" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+   <div><label class="label" for="admin-post-title">Post title *</label><input id="admin-post-title" class="field" required placeholder="e.g. Bagan at sunrise"></div>
+   <div><label class="label" for="admin-post-location">Location</label><input id="admin-post-location" class="field" placeholder="e.g. Bagan"></div>
+   <div><label class="label" for="admin-post-category">Category</label><select id="admin-post-category" class="field"><option>Travel Story</option><option>Travel Guide</option></select></div>
+   <div><label class="label" for="admin-post-date">Display date</label><input id="admin-post-date" class="field" placeholder="e.g. Oct 10, 2026"></div>
+   <div class="md:col-span-2"><label class="label" for="admin-post-img">Cover image URL</label><input id="admin-post-img" class="field" type="url" placeholder="https://..."></div>
+   <div class="md:col-span-2"><label class="label" for="admin-post-desc">Short description</label><textarea id="admin-post-desc" class="field" rows="3" placeholder="Short summary shown on the card"></textarea></div>
+   <div class="md:col-span-2"><label class="label" for="admin-post-content">Full story (optional)</label><textarea id="admin-post-content" class="field" rows="5" placeholder="Full article content"></textarea></div>
+   <div class="md:col-span-2 flex flex-wrap gap-3"><button class="btn green" type="submit"><i class="fa-solid fa-plus mr-2"></i>Publish post</button><button id="clear-post" class="btn bg-slate-100 text-slate-700" type="button">Clear form</button></div>
+  </form>
+ </section>
+ <section class="card mt-6 p-5 md:p-7">
+  <div class="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 class="font-black text-slate-900">Existing Travel Posts</h2><p class="text-xs text-slate-500">Remove posts you no longer want to display</p></div><span id="post-count" class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">0 posts</span></div>
+  <div id="posts-list" class="space-y-3"></div>
+ </section>
+ <div class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"><strong><i class="fa-solid fa-triangle-exclamation mr-2"></i>Important storage note:</strong> this version uses localStorage to preserve the existing setup. Data is stored only in the same browser and device. Visitors on other devices will not automatically see posts added here, and this PIN is not secure server-side authentication. A shared backend or GitHub-based publishing workflow is needed for a real public CMS.</div>
+</main>
+</div>
+<div id="toast" class="fixed bottom-5 left-1/2 z-50 hidden -translate-x-1/2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-xl" role="status"></div>
+<script>
+const $=id=>document.getElementById(id);
+const get=(key,fallback)=>{try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}};
+const set=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
+const DEFAULT_SOCIAL={fb:'https://facebook.com',tt:'https://tiktok.com',yt:'https://youtube.com'};
+const DEFAULT_SPONSOR={active:true,title:'Veezoom Myanmar',desc:'Roads of Ayeyarwaddy — Official Travel Partner',link:'https://facebook.com',img:'https://raw.githubusercontent.com/onechannelonlinetv/htoohtetexplore/main/veezoom-logo.jpg'};
+function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),2600)}
+function loadAdminData(){
+ const s=get('hh_social',DEFAULT_SOCIAL);$('admin-fb').value=s.fb||'';$('admin-tt').value=s.tt||'';$('admin-yt').value=s.yt||'';
+ const p=get('hh_sponsor',DEFAULT_SPONSOR);$('admin-sponsor-active').checked=p.active!==false;$('admin-sponsor-title').value=p.title||'';$('admin-sponsor-link').value=p.link||'';$('admin-sponsor-desc').value=p.desc||'';$('admin-sponsor-img').value=p.img||'';
+ renderPosts();
+}
+function validOrBlank(v){if(!v.trim())return true;try{return ['http:','https:'].includes(new URL(v).protocol)}catch{return false}}
+$('login-form').addEventListener('submit',e=>{e.preventDefault();if($('pin').value==='1234'){$('login-screen').classList.add('hidden');$('app').classList.remove('hidden');loadAdminData()}else{$('login-error').classList.remove('hidden');$('pin').select()}});
+$('pin').addEventListener('input',()=>$('login-error').classList.add('hidden'));
+$('logout').addEventListener('click',()=>{$('app').classList.add('hidden');$('login-screen').classList.remove('hidden');$('pin').value=''});
+$('save-social').addEventListener('click',()=>{const s={fb:$('admin-fb').value.trim(),tt:$('admin-tt').value.trim(),yt:$('admin-yt').value.trim()};if(!Object.values(s).every(validOrBlank))return toast('URL ကို ပြန်စစ်ပေးပါ။');set('hh_social',s);toast('Social links saved')});
+$('save-sponsor').addEventListener('click',()=>{const p={active:$('admin-sponsor-active').checked,title:$('admin-sponsor-title').value.trim(),link:$('admin-sponsor-link').value.trim(),desc:$('admin-sponsor-desc').value.trim(),img:$('admin-sponsor-img').value.trim()};if(!validOrBlank(p.link)||!validOrBlank(p.img))return toast('Sponsor URL ကို ပြန်စစ်ပေးပါ။');set('hh_sponsor',p);$('stat-sponsor').textContent=p.active?'Active':'Hidden';toast('Sponsor settings saved')});
+$('post-form').addEventListener('submit',e=>{e.preventDefault();const title=$('admin-post-title').value.trim();if(!title)return toast('ခေါင်းစဉ် ထည့်ပေးပါ။');const posts=get('hh_posts',[]);posts.unshift({title,location:$('admin-post-location').value.trim(),category:$('admin-post-category').value,date:$('admin-post-date').value.trim(),img:$('admin-post-img').value.trim(),desc:$('admin-post-desc').value.trim(),content:$('admin-post-content').value.trim(),createdAt:new Date().toLocaleDateString()});set('hh_posts',posts);e.target.reset();renderPosts();toast('Travel post published in this browser')});
+$('clear-post').addEventListener('click',()=>$('post-form').reset());
+function renderPosts(){let posts=get('hh_posts',[]);if(!Array.isArray(posts))posts=[];$('stat-posts').textContent=posts.length;$('post-count').textContent=posts.length+' posts';$('stat-sponsor').textContent=get('hh_sponsor',DEFAULT_SPONSOR).active===false?'Hidden':'Active';const box=$('posts-list');if(!posts.length){box.innerHTML='<p class="rounded-xl bg-slate-50 p-5 text-sm text-slate-500">No posts saved in this browser yet.</p>';return}box.innerHTML=posts.map((p,i)=>`<div class="flex flex-col gap-3 rounded-xl border border-slate-100 p-3 sm:flex-row sm:items-center"><img src="${esc(p.img||'')}" onerror="this.style.display='none'" alt="" class="h-16 w-24 rounded-lg bg-slate-100 object-cover"><div class="min-w-0 flex-1"><p class="font-bold text-slate-900">${esc(p.title||'Untitled')}</p><p class="mt-1 text-xs text-slate-500">${esc(p.location||'Myanmar')} · ${esc(p.category||'Travel Story')} · ${esc(p.date||p.createdAt||'')}</p></div><button class="btn border border-red-200 text-red-700" data-delete="${i}"><i class="fa-regular fa-trash-can mr-1"></i>Delete</button></div>`).join('');box.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>{const n=Number(b.dataset.delete);if(confirm('ဒီ post ကို ဖျက်မှာ သေချာပါသလား။')){const ps=get('hh_posts',[]);ps.splice(n,1);set('hh_posts',ps);renderPosts();toast('Post deleted')}}))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+</script>
+</body></html>
