@@ -8,6 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{color-scheme:dark}
@@ -29,6 +30,10 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 .tiny{font-size:11px;color:#92a5bf}
 .toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .toggle-row input[type=checkbox]{width:18px;height:18px;accent-color:#10b981}
+.upload-zone{border:2px dashed #2b3c55;border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:.15s;background:#0a1220}
+.upload-zone:hover{border-color:#10b981;background:#0d1a28}
+.upload-zone.dragging{border-color:#10b981;background:#0f2a22}
+.preview-thumb{max-height:80px;max-width:120px;border-radius:8px;object-fit:cover}
 </style>
 </head>
 <body class="min-h-screen">
@@ -116,7 +121,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
         <div class="overflow-hidden rounded-2xl border border-emerald-900/70 bg-gradient-to-r from-emerald-950 via-[#102d30] to-[#101b30] p-6 sm:p-8">
           <span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">Full CMS Control</span>
           <h2 class="mt-4 text-2xl font-black sm:text-3xl">Website အားလုံးကို<br class="sm:hidden"> ဒီနေရာက စီမံပါ</h2>
-          <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">Brand, Hero, Sponsors, Upcoming, Posts, YouTube, Menu — အကုန် Admin ကနေ ထိန်းနိုင်ပါတယ်။</p>
+          <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">Brand, Hero, Sponsors, Posts, Theme ၄ မျိုး (ဒီဇိုင်းကွဲ), ပုံ Upload, Font & အရွယ်အစား — အကုန် Admin ကနေ ထိန်းနိုင်ပါတယ်။</p>
         </div>
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div class="stat"><div class="text-sm text-slate-400">Posts</div><div id="stat-posts" class="mt-2 text-3xl font-black">0</div></div>
@@ -128,55 +133,115 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- BRAND & SETTINGS -->
       <section id="view-settings" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Brand & Settings</h2><p class="mt-1 text-sm text-slate-400">Theme, Logo, နာမည်, အရောင်, Contact</p></div>
+        <div><h2 class="text-xl font-black">Brand & Settings</h2><p class="mt-1 text-sm text-slate-400">Theme (၄ မျိုး ဒီဇိုင်းကွဲ), Logo, Font, အရောင်, အရွယ်အစား, Contact</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <div>
-            <label class="label mb-3">Website Theme</label>
+            <label class="label mb-3">Website Theme — ဒီဇိုင်း ၄ မျိုး ကွဲပြား</label>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="theme-selector">
               <button type="button" data-theme="forest" onclick="selectTheme('forest')" class="theme-card rounded-xl border-2 border-emerald-500 bg-slate-900/80 p-3 text-left transition hover:border-emerald-400">
                 <div class="h-16 rounded-lg mb-2 bg-gradient-to-br from-[#061510] to-[#0f2e24] border border-emerald-800 flex items-end p-2"><span class="w-8 h-2 rounded-full bg-[#f5c518]"></span></div>
                 <p class="font-bold text-sm">Forest Dark</p>
-                <p class="tiny">Deep green + gold</p>
+                <p class="tiny">Deep green + gold · rounded</p>
               </button>
               <button type="button" data-theme="ocean" onclick="selectTheme('ocean')" class="theme-card rounded-xl border-2 border-transparent bg-slate-900/80 p-3 text-left transition hover:border-cyan-500">
                 <div class="h-16 rounded-lg mb-2 bg-gradient-to-br from-[#0a1628] to-[#0e7490] border border-cyan-900 flex items-end p-2"><span class="w-8 h-2 rounded-full bg-[#22d3ee]"></span></div>
                 <p class="font-bold text-sm">Ocean Blue</p>
-                <p class="tiny">Navy + cyan</p>
+                <p class="tiny">Navy + cyan · soft curves</p>
               </button>
               <button type="button" data-theme="sunset" onclick="selectTheme('sunset')" class="theme-card rounded-xl border-2 border-transparent bg-slate-900/80 p-3 text-left transition hover:border-orange-500">
                 <div class="h-16 rounded-lg mb-2 bg-gradient-to-br from-[#1a120b] to-[#7c2d12] border border-orange-900 flex items-end p-2"><span class="w-8 h-2 rounded-full bg-[#f97316]"></span></div>
                 <p class="font-bold text-sm">Warm Sunset</p>
-                <p class="tiny">Brown + orange</p>
+                <p class="tiny">Brown + orange · serif</p>
               </button>
               <button type="button" data-theme="navy" onclick="selectTheme('navy')" class="theme-card rounded-xl border-2 border-transparent bg-slate-900/80 p-3 text-left transition hover:border-blue-400">
                 <div class="h-16 rounded-lg mb-2 bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0] border border-slate-300 flex items-end p-2"><span class="w-8 h-2 rounded-full bg-[#1e3a5f]"></span></div>
                 <p class="font-bold text-sm">Navy & White</p>
-                <p class="tiny">Clean minimal</p>
+                <p class="tiny">Clean minimal light</p>
               </button>
             </div>
             <input type="hidden" id="set-theme" value="forest">
           </div>
+
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Brand Name *</label><input id="set-brand-name" class="field" placeholder="HTOO HTET"></div>
-            <div><label class="label">Tagline (အောက်စာသေး)</label><input id="set-brand-tagline" class="field" placeholder="Travel Journal & Beyond"></div>
-            <div class="md:col-span-2"><label class="label">Logo Image URL</label><input id="set-logo-url" class="field" placeholder="https://... logo image"><p class="tiny mt-1">မထည့်ရင် default icon သုံးမယ်</p></div>
+            <div><label class="label">Tagline (Footer / optional under logo)</label><input id="set-brand-tagline" class="field" placeholder="Travel Journal & Beyond"></div>
+            <div class="md:col-span-2">
+              <label class="toggle-row mb-0"><input type="checkbox" id="set-show-tagline"><span class="text-sm">Logo အောက်မှာ Tagline ပြမယ် (ပုံမှန် = Menu ထဲသာ)</span></label>
+            </div>
+            <div class="md:col-span-2">
+              <label class="label">Logo Image</label>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input id="set-logo-url" class="field flex-1" placeholder="URL သို့မဟုတ် Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'set-logo-url')"></label>
+              </div>
+              <div id="set-logo-url-preview" class="mt-2"></div>
+            </div>
             <div><label class="label">Contact Email</label><input id="set-email" class="field" placeholder="htoohtet@gmail.com"></div>
             <div><label class="label">Contact Location</label><input id="set-location" class="field" placeholder="Yangon, Myanmar"></div>
             <div class="md:col-span-2"><label class="label">Footer Tagline</label><textarea id="set-footer-tagline" class="field min-h-16" placeholder="Good Vibes&#10;Better Journeys"></textarea></div>
             <div><label class="label">Stories Section Heading</label><input id="set-stories-heading" class="field" placeholder="Travel Stories"></div>
             <div><label class="label">Stories Subtitle</label><input id="set-stories-sub" class="field" placeholder="မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ"></div>
           </div>
+
+          <div class="border-t border-slate-700 pt-4 mt-2">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Font & Size Controls</p>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label class="label">Body Font</label>
+                <select id="set-font" class="field">
+                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter (default)</option>
+                  <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
+                  <option value="'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif">Space Grotesk</option>
+                  <option value="system-ui, -apple-system, 'Noto Sans Myanmar', sans-serif">System UI</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Heading Font</label>
+                <select id="set-heading-font" class="field">
+                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter (default)</option>
+                  <option value="'Playfair Display', 'Noto Sans Myanmar', serif">Playfair Display (serif)</option>
+                  <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
+                  <option value="'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif">Space Grotesk</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Hero Min Height (px)</label>
+                <input id="set-hero-height" type="number" min="320" max="900" class="field" placeholder="560">
+                <p class="tiny mt-1">ဥပမာ 480 / 560 / 640 / 720</p>
+              </div>
+              <div>
+                <label class="label">Card Image Height (rem)</label>
+                <input id="set-card-img-h" type="number" min="6" max="20" step="0.5" class="field" placeholder="11">
+                <p class="tiny mt-1">ဥပမာ 9 / 11 / 13 / 15</p>
+              </div>
+              <div>
+                <label class="label">Custom Accent Color</label>
+                <div class="flex gap-2">
+                  <input id="set-accent-color" type="color" class="h-11 w-14 rounded-lg border border-slate-600 cursor-pointer bg-transparent">
+                  <input id="set-accent-hex" class="field flex-1" placeholder="#f5c518" oninput="syncColorFromHex()">
+                </div>
+              </div>
+            </div>
+          </div>
+
           <button onclick="saveSettings()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Brand & Settings</button>
         </div>
       </section>
 
       <!-- HERO -->
       <section id="view-hero" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Hero Banner</h2><p class="mt-1 text-sm text-slate-400">Homepage အပေါ်ဆုံး banner</p></div>
+        <div><h2 class="text-xl font-black">Hero Banner</h2><p class="mt-1 text-sm text-slate-400">Homepage အပေါ်ဆုံး banner — ပုံ Upload သို့မဟုတ် URL</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="hero-active" checked><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div class="md:col-span-2"><label class="label">Background Image URL</label><input id="hero-image" class="field" placeholder="https://..."></div>
+            <div class="md:col-span-2">
+              <label class="label">Background Image</label>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input id="hero-image" class="field flex-1" placeholder="https://... သို့မဟုတ် Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'hero-image')"></label>
+              </div>
+              <div id="hero-image-preview" class="mt-2"></div>
+            </div>
             <div><label class="label">Small Label</label><input id="hero-label" class="field" placeholder="Travel Journal"></div>
             <div><label class="label">Signature</label><input id="hero-sign" class="field" placeholder="— Htoo Htet"></div>
             <div class="md:col-span-2"><label class="label">Title (HTML ok: &lt;br&gt;, &lt;span&gt;)</label><textarea id="hero-title" class="field min-h-20" placeholder="New Places.<br><span class='text-emerald-300'>Same Curiosity.</span>"></textarea></div>
@@ -190,7 +255,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- MENU -->
       <section id="view-menu" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Menu Items</h2><p class="mt-1 text-sm text-slate-400">Header နဲ့ Footer မှာ ပြမယ့် menu</p></div>
+        <div><h2 class="text-xl font-black">Menu Items</h2><p class="mt-1 text-sm text-slate-400">Header နဲ့ Footer မှာ ပြမယ့် menu (Brand tagline က Menu ထဲသာ — logo အောက်မပြ)</p></div>
         <div class="panel p-5 sm:p-6">
           <div class="grid grid-cols-1 gap-3 md:grid-cols-3 mb-4">
             <div><label class="label">Label</label><input id="menu-label" class="field" placeholder="Travel Stories"></div>
@@ -203,11 +268,17 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- PROUD SPONSORS -->
       <section id="view-proud" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Our Proud Sponsors bar — logo သို့မဟုတ် နာမည်</p></div>
+        <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Our Proud Sponsors bar — logo Upload သို့မဟုတ် နာမည်</p></div>
         <div class="panel p-5 sm:p-6">
           <div class="grid grid-cols-1 gap-3 md:grid-cols-4 mb-4">
             <div><label class="label">Name *</label><input id="proud-name" class="field" placeholder="AYA Bank"></div>
-            <div><label class="label">Logo URL</label><input id="proud-logo" class="field" placeholder="https://..."></div>
+            <div>
+              <label class="label">Logo</label>
+              <div class="flex gap-1">
+                <input id="proud-logo" class="field flex-1" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer px-3"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'proud-logo')"></label>
+              </div>
+            </div>
             <div><label class="label">Link</label><input id="proud-link" class="field" placeholder="https://..."></div>
             <div class="flex items-end"><button onclick="addProud()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add</button></div>
           </div>
@@ -217,15 +288,29 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- OFFICIAL SPONSOR -->
       <section id="view-sponsor" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Official Sponsor Banner</h2><p class="mt-1 text-sm text-slate-400">Homepage ရဲ့ Official Sponsor အကြီး</p></div>
+        <div><h2 class="text-xl font-black">Official Sponsor Banner</h2><p class="mt-1 text-sm text-slate-400">Homepage ရဲ့ Official Sponsor — ပုံ Upload ရနိုင်</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="admin-sponsor-active" checked><span class="text-sm font-semibold">Official Sponsor Banner ပြမယ်</span></label>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Sponsor Title</label><input id="admin-sponsor-title" class="field" placeholder="Veezoom Myanmar"></div>
             <div><label class="label">Sponsor Link</label><input id="admin-sponsor-link" class="field" placeholder="https://..."></div>
             <div class="md:col-span-2"><label class="label">Description</label><textarea id="admin-sponsor-desc" class="field min-h-20"></textarea></div>
-            <div><label class="label">Logo / Image URL</label><input id="admin-sponsor-img" class="field" placeholder="https://..."></div>
-            <div><label class="label">Background Image URL</label><input id="admin-sponsor-bg" class="field" placeholder="https://..."></div>
+            <div>
+              <label class="label">Logo / Image</label>
+              <div class="flex gap-2">
+                <input id="admin-sponsor-img" class="field flex-1" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-img')"></label>
+              </div>
+              <div id="admin-sponsor-img-preview" class="mt-2"></div>
+            </div>
+            <div>
+              <label class="label">Background Image</label>
+              <div class="flex gap-2">
+                <input id="admin-sponsor-bg" class="field flex-1" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-bg')"></label>
+              </div>
+              <div id="admin-sponsor-bg-preview" class="mt-2"></div>
+            </div>
           </div>
           <button onclick="saveSponsor()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Official Sponsor</button>
         </div>
@@ -233,14 +318,21 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- UPCOMING -->
       <section id="view-upcoming" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Upcoming Section</h2><p class="mt-1 text-sm text-slate-400">Official Sponsor ပြီးရင် ပြမယ့် Featured Journey</p></div>
+        <div><h2 class="text-xl font-black">Upcoming Section</h2><p class="mt-1 text-sm text-slate-400">Featured Journey — ပုံ Upload ရနိုင်</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="up-active" checked><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Section Heading</label><input id="up-heading" class="field" placeholder="Upcoming"></div>
             <div><label class="label">Label</label><input id="up-label" class="field" placeholder="Featured Journey"></div>
             <div><label class="label">Title *</label><input id="up-title" class="field" placeholder="Roads of Ayeyarwaddy"></div>
-            <div><label class="label">Image URL</label><input id="up-image" class="field" placeholder="https://..."></div>
+            <div>
+              <label class="label">Image</label>
+              <div class="flex gap-2">
+                <input id="up-image" class="field flex-1" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'up-image')"></label>
+              </div>
+              <div id="up-image-preview" class="mt-2"></div>
+            </div>
             <div class="md:col-span-2"><label class="label">Description</label><textarea id="up-desc" class="field min-h-16"></textarea></div>
           </div>
           <button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
@@ -249,16 +341,23 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- POSTS -->
       <section id="view-posts" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Travel Posts</h2><p class="mt-1 text-sm text-slate-400">Add / Edit / Delete — 4 card grid on website</p></div>
+        <div><h2 class="text-xl font-black">Travel Posts</h2><p class="mt-1 text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload ရနိုင်</p></div>
         <div class="panel p-5 sm:p-6">
           <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
           <input id="editing-post-id" type="hidden">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Title *</label><input id="admin-post-title" class="field" placeholder="Bagan - Ancient Temples" oninput="autoSlug()"></div>
             <div><label class="label">Slug * <span class="tiny">(URL)</span></label><input id="admin-post-slug" class="field" placeholder="bagan-ancient-temples" oninput="this.dataset.manual='1'"><p class="tiny mt-1">Title ကနေ auto ဖန်တီး — ကိုယ်တိုင်ပြင်လို့ရ</p></div>
-            <div class="md:col-span-2"><label class="label">Cover Image URL *</label><input id="admin-post-img" class="field" placeholder="https://..."></div>
+            <div class="md:col-span-2">
+              <label class="label">Cover Image *</label>
+              <div class="flex gap-2">
+                <input id="admin-post-img" class="field flex-1" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-post-img')"></label>
+              </div>
+              <div id="admin-post-img-preview" class="mt-2"></div>
+            </div>
             <div class="md:col-span-2"><label class="label">Short Description * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" placeholder="အကျဉ်းချုပ်..."></textarea></div>
-            <div class="md:col-span-2"><label class="label">Article Content * <span class="tiny">(စာ + ပုံ URL ရေးနိုင်)</span></label><textarea id="admin-post-content" class="field min-h-32" placeholder="အကြောင်းအရာ အပြည့်အစုံ...&#10;&#10;ပုံထည့်ချင်ရင်: [img]https://image-url.jpg[/img]"></textarea></div>
+            <div class="md:col-span-2"><label class="label">Article Content * <span class="tiny">(စာ + ပုံ: [img]url[/img])</span></label><textarea id="admin-post-content" class="field min-h-32" placeholder="အကြောင်းအရာ အပြည့်အစုံ...&#10;&#10;ပုံထည့်ချင်ရင်: [img]https://image-url.jpg[/img]"></textarea></div>
             <div><label class="label">Location *</label><input id="admin-post-location" class="field" placeholder="Bagan, Inle Lake..."></div>
             <div><label class="label">Category *</label>
               <select id="admin-post-category" class="field">
@@ -317,7 +416,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- YOUTUBE -->
       <section id="view-youtube" class="view space-y-5">
-        <div><h2 class="text-xl font-black">YouTube Section</h2><p class="mt-1 text-sm text-slate-400">Travel Stories ပြီးရင် ပြမယ့် YouTube block</p></div>
+        <div><h2 class="text-xl font-black">YouTube Section</h2><p class="mt-1 text-sm text-slate-400">YouTube block — Thumbnail / BG Upload ရနိုင်</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="yt-active" checked><span class="text-sm font-semibold">YouTube Section ပြမယ်</span></label>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -325,8 +424,22 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <div><label class="label">Channel Link</label><input id="yt-link" class="field" placeholder="https://youtube.com/..."></div>
             <div class="md:col-span-2"><label class="label">Title</label><textarea id="yt-title" class="field min-h-16" placeholder="ခရီးသွားမှတ်တမ်းများကို YouTube မှာ ကြည့်ရှုပါ"></textarea></div>
             <div class="md:col-span-2"><label class="label">Description</label><textarea id="yt-desc" class="field min-h-16"></textarea></div>
-            <div><label class="label">Thumbnail Image</label><input id="yt-thumb" class="field" placeholder="https://..."></div>
-            <div><label class="label">Background Image</label><input id="yt-bg" class="field" placeholder="https://..."></div>
+            <div>
+              <label class="label">Thumbnail Image</label>
+              <div class="flex gap-2">
+                <input id="yt-thumb" class="field flex-1" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'yt-thumb')"></label>
+              </div>
+              <div id="yt-thumb-preview" class="mt-2"></div>
+            </div>
+            <div>
+              <label class="label">Background Image</label>
+              <div class="flex gap-2">
+                <input id="yt-bg" class="field flex-1" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'yt-bg')"></label>
+              </div>
+              <div id="yt-bg-preview" class="mt-2"></div>
+            </div>
           </div>
           <button onclick="saveYoutube()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save YouTube Section</button>
         </div>
@@ -345,12 +458,13 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- SOCIAL -->
       <section id="view-social" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Social Links</h2><p class="mt-1 text-sm text-slate-400">Header / Footer မှာ အဖြူရောင် icon နဲ့ ပြမယ်</p></div>
+        <div><h2 class="text-xl font-black">Social Links</h2><p class="mt-1 text-sm text-slate-400">Search icon ဘေး + Header / Footer မှာ ပြမယ် (Facebook, YouTube, TikTok, Viber)</p></div>
         <div class="panel p-5 sm:p-6">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Facebook URL</label><input id="admin-fb" class="field" placeholder="https://facebook.com/..."></div>
             <div><label class="label">YouTube URL</label><input id="admin-yt" class="field" placeholder="https://youtube.com/..."></div>
             <div><label class="label">TikTok URL</label><input id="admin-tt" class="field" placeholder="https://tiktok.com/@..."></div>
+            <div><label class="label">Viber Link / Number</label><input id="admin-vb" class="field" placeholder="viber://chat?number=95xxxxxxxxx သို့မဟုတ် https://..."></div>
           </div>
           <button onclick="saveSocial()" class="btn btn-green mt-4"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Social Links</button>
         </div>
@@ -378,8 +492,13 @@ const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_spo
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let adminAuth, adminDb, adminUser = null, remoteSyncReady = false, remoteWriteQueue = Promise.resolve();
-try { firebase.initializeApp(firebaseConfig); adminAuth = firebase.auth(); adminDb = firebase.database(); } catch(e) { console.error(e); }
+let adminAuth, adminDb, adminStorage, adminUser = null, remoteSyncReady = false, remoteWriteQueue = Promise.resolve();
+try {
+  firebase.initializeApp(firebaseConfig);
+  adminAuth = firebase.auth();
+  adminDb = firebase.database();
+  adminStorage = firebase.storage();
+} catch(e) { console.error(e); }
 
 const originalSetItem = localStorage.setItem.bind(localStorage);
 localStorage.setItem = function(key, value) {
@@ -402,6 +521,57 @@ function togglePasswordVisibility() {
   const show = input.type === 'password';
   input.type = show ? 'text' : 'password';
   icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+}
+
+/* ---- Image Upload to Firebase Storage ---- */
+async function uploadImage(inputEl, targetInputId) {
+  const file = inputEl.files && inputEl.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    toast('Image ဖိုင်သာ ရွေးပါ။');
+    return;
+  }
+  if (file.size > 8 * 1024 * 1024) {
+    toast('ဖိုင်အရွယ် 8MB အောက် ထားပါ။');
+    return;
+  }
+  if (!adminUser || !adminStorage) {
+    toast('Login ဝင်ပြီးမှ Upload လုပ်ပါ။');
+    return;
+  }
+  const target = $(targetInputId);
+  const previewId = targetInputId + '-preview';
+  const previewBox = $(previewId);
+  toast('Upload လုပ်နေသည်…');
+  try {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = 'uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    const ref = adminStorage.ref(path);
+    const snapshot = await ref.put(file, { contentType: file.type });
+    const url = await snapshot.ref.getDownloadURL();
+    if (target) {
+      target.value = url;
+      target.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (previewBox) {
+      previewBox.innerHTML = `<img src="${safe(url)}" class="preview-thumb border border-slate-600" alt="preview"> <span class="tiny ml-2 text-emerald-300">Upload အောင်မြင်ပါပြီ</span>`;
+    }
+    toast('ပုံ Upload အောင်မြင်ပါပြီ။ Firebase Storage မှာ သိမ်းပြီးပါပြီ။');
+  } catch (err) {
+    console.error(err);
+    toast('Upload မအောင်မြင်ပါ: ' + (err.message || err.code || 'error'));
+  }
+  inputEl.value = '';
+}
+
+function showPreviewIfUrl(inputId) {
+  const el = $(inputId);
+  const box = $(inputId + '-preview');
+  if (!el || !box) return;
+  const v = el.value.trim();
+  if (v && /^https?:\/\//i.test(v)) {
+    box.innerHTML = `<img src="${safe(v)}" class="preview-thumb border border-slate-600" alt="preview" onerror="this.parentNode.innerHTML=''">`;
+  }
 }
 
 async function signInAdmin() {
@@ -427,7 +597,7 @@ async function signInAdmin() {
         const v = localStorage.getItem(k);
         if (v !== null) { try { seed[k] = JSON.parse(v); } catch { seed[k] = v; } }
       });
-      if (!seed.hh_social) seed.hh_social = { fb: '', tt: '', yt: '' };
+      if (!seed.hh_social) seed.hh_social = { fb: '', tt: '', yt: '', vb: '' };
       if (!seed.hh_sponsor) seed.hh_sponsor = { active: true, title: 'Veezoom Myanmar', desc: '', link: '', img: '' };
       if (!seed.hh_posts) seed.hh_posts = [];
       if (!seed.hh_home_sections) seed.hh_home_sections = [];
@@ -472,19 +642,27 @@ function showView(name, button) {
 function loadAll() {
   $('footer-year').textContent = new Date().getFullYear();
 
-  // Settings
   const s = read('hh_settings', {});
   $('set-brand-name').value = s.brandName || 'HTOO HTET';
   $('set-brand-tagline').value = s.brandTagline || 'Travel Journal & Beyond';
+  $('set-show-tagline').checked = s.showBrandTagline === true;
   $('set-logo-url').value = s.logoUrl || '';
   $('set-email').value = s.contactEmail || '';
   $('set-location').value = s.contactLocation || '';
   $('set-footer-tagline').value = s.footerTagline || '';
   $('set-stories-heading').value = s.storiesHeading || '';
   $('set-stories-sub').value = s.storiesSub || '';
+  $('set-font').value = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
+  $('set-heading-font').value = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
+  $('set-hero-height').value = s.heroHeight || 560;
+  $('set-card-img-h').value = s.cardImgHeight || 11;
+  if (s.accentColor) {
+    $('set-accent-color').value = s.accentColor;
+    $('set-accent-hex').value = s.accentColor;
+  }
   selectTheme(s.theme || 'forest');
+  showPreviewIfUrl('set-logo-url');
 
-  // Hero
   const h = read('hh_hero', {});
   $('hero-active').checked = h.active !== false;
   $('hero-image').value = h.image || '';
@@ -494,8 +672,8 @@ function loadAll() {
   $('hero-desc').value = h.desc || '';
   $('hero-btn-text').value = h.btnText || '';
   $('hero-btn-link').value = h.btnLink || '';
+  showPreviewIfUrl('hero-image');
 
-  // Sponsor
   const sp = read('hh_sponsor', {});
   $('admin-sponsor-active').checked = sp.active !== false;
   $('admin-sponsor-title').value = sp.title || '';
@@ -503,8 +681,9 @@ function loadAll() {
   $('admin-sponsor-link').value = sp.link || '';
   $('admin-sponsor-img').value = sp.img || '';
   $('admin-sponsor-bg').value = sp.bgImage || '';
+  showPreviewIfUrl('admin-sponsor-img');
+  showPreviewIfUrl('admin-sponsor-bg');
 
-  // Upcoming
   const up = read('hh_upcoming', {});
   $('up-active').checked = up.active !== false;
   $('up-heading').value = up.heading || '';
@@ -512,8 +691,8 @@ function loadAll() {
   $('up-title').value = up.title || '';
   $('up-desc').value = up.desc || '';
   $('up-image').value = up.image || '';
+  showPreviewIfUrl('up-image');
 
-  // YouTube
   const yt = read('hh_youtube', {});
   $('yt-active').checked = yt.active !== false;
   $('yt-label').value = yt.label || '';
@@ -522,18 +701,19 @@ function loadAll() {
   $('yt-link').value = yt.link || '';
   $('yt-thumb').value = yt.thumb || '';
   $('yt-bg').value = yt.bgImage || '';
+  showPreviewIfUrl('yt-thumb');
+  showPreviewIfUrl('yt-bg');
 
-  // About
   const ab = read('hh_about', {});
   $('about-active').checked = ab.active !== false;
   $('about-title').value = ab.title || '';
   $('about-desc').value = ab.desc || '';
 
-  // Social
   const social = read('hh_social', {});
   $('admin-fb').value = social.fb || '';
   $('admin-tt').value = social.tt || '';
   $('admin-yt').value = social.yt || '';
+  $('admin-vb').value = social.vb || '';
 
   renderMenuList();
   renderProudList();
@@ -542,7 +722,6 @@ function loadAll() {
   renderOverview();
 }
 
-/* ---- SAVE functions ---- */
 const THEME_PRESETS = {
   forest: { accentColor: '#f5c518', bgColor: '#061510', surfaceColor: '#0a1f18', cardColor: '#0f2e24' },
   ocean:  { accentColor: '#22d3ee', bgColor: '#0a1628', surfaceColor: '#0c1e36', cardColor: '#132f4c' },
@@ -555,26 +734,45 @@ function selectTheme(name) {
     c.classList.toggle('border-emerald-500', c.dataset.theme === name);
     c.classList.toggle('border-transparent', c.dataset.theme !== name);
   });
+  const preset = THEME_PRESETS[name];
+  if (preset && !$('set-accent-hex').value) {
+    $('set-accent-color').value = preset.accentColor;
+    $('set-accent-hex').value = preset.accentColor;
+  }
 }
+function syncColorFromHex() {
+  const hex = $('set-accent-hex').value.trim();
+  if (/^#[0-9A-Fa-f]{6}$/.test(hex)) $('set-accent-color').value = hex;
+}
+$('set-accent-color')?.addEventListener('input', () => {
+  $('set-accent-hex').value = $('set-accent-color').value;
+});
+
 function saveSettings() {
   const theme = $('set-theme').value || 'forest';
   const preset = THEME_PRESETS[theme] || THEME_PRESETS.forest;
+  const customAccent = $('set-accent-hex').value.trim() || $('set-accent-color').value;
   write('hh_settings', {
     theme,
     brandName: $('set-brand-name').value.trim() || 'HTOO HTET',
     brandTagline: $('set-brand-tagline').value.trim(),
+    showBrandTagline: $('set-show-tagline').checked,
     logoUrl: $('set-logo-url').value.trim(),
-    accentColor: preset.accentColor,
+    accentColor: customAccent || preset.accentColor,
     bgColor: preset.bgColor,
     surfaceColor: preset.surfaceColor,
     cardColor: preset.cardColor,
+    fontFamily: $('set-font').value,
+    headingFont: $('set-heading-font').value,
+    heroHeight: parseInt($('set-hero-height').value, 10) || 560,
+    cardImgHeight: parseFloat($('set-card-img-h').value) || 11,
     contactEmail: $('set-email').value.trim(),
     contactLocation: $('set-location').value.trim(),
     footerTagline: $('set-footer-tagline').value.trim(),
     storiesHeading: $('set-stories-heading').value.trim(),
     storiesSub: $('set-stories-sub').value.trim()
   });
-  toast('Brand & Settings သိမ်းပြီးပါပြီ။ Theme: ' + theme);
+  toast('Brand & Settings သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
 }
 function saveHero() {
   write('hh_hero', {
@@ -636,9 +834,10 @@ function saveSocial() {
   write('hh_social', {
     fb: $('admin-fb').value.trim(),
     tt: $('admin-tt').value.trim(),
-    yt: $('admin-yt').value.trim()
+    yt: $('admin-yt').value.trim(),
+    vb: $('admin-vb').value.trim()
   });
-  toast('Social Links သိမ်းပြီးပါပြီ။');
+  toast('Social Links သိမ်းပြီးပါပြီ။ (FB, YT, TikTok, Viber)');
 }
 
 /* ---- Menu ---- */
@@ -754,7 +953,7 @@ function savePost() {
   const category = $('admin-post-category').value;
   if (!title) return alert('Title ထည့်ပေးပါ။');
   if (!slug) return alert('Slug ထည့်ပေးပါ။');
-  if (!img) return alert('Cover Image URL ထည့်ပေးပါ။');
+  if (!img) return alert('Cover Image URL / Upload ထည့်ပေးပါ။');
   if (!desc) return alert('Short Description ထည့်ပေးပါ။');
   if (!content) return alert('Article Content ထည့်ပေးပါ။');
   if (!location) return alert('Location ထည့်ပေးပါ။');
@@ -802,6 +1001,7 @@ function editPost(id) {
   $('admin-post-seo-title').value = p.seoTitle || '';
   $('admin-post-meta').value = p.metaDesc || '';
   $('admin-post-section').value = p.sectionId || 'latest';
+  showPreviewIfUrl('admin-post-img');
   $('post-form-heading').innerHTML = '<i class="fa-solid fa-pen mr-2 text-sky-300"></i>Edit Travel Post';
   $('post-save-button').innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Save Changes';
   $('post-cancel-button').classList.remove('hidden');
@@ -813,6 +1013,7 @@ function cancelPostEdit() {
   $('admin-post-category').value = 'Travel Story';
   $('admin-post-section').value = 'latest';
   delete $('admin-post-slug').dataset.manual;
+  const prev = $('admin-post-img-preview'); if (prev) prev.innerHTML = '';
   $('post-form-heading').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post';
   $('post-save-button').innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i>Publish Post';
   $('post-cancel-button').classList.add('hidden');
@@ -917,7 +1118,7 @@ function toast(message) {
   t.textContent = message;
   t.classList.remove('hidden');
   clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => t.classList.add('hidden'), 2600);
+  window.toastTimer = setTimeout(() => t.classList.add('hidden'), 2800);
 }
 </script>
 </body>
