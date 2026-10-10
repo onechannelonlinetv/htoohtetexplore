@@ -963,6 +963,78 @@ const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_spo
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+/* ---- Content image short-refs (keeps textarea clean; Base64 not dumped into editor) ---- */
+window.contentImageStore = window.contentImageStore || {};
+function storeContentImage(dataUrl) {
+  const id = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  contentImageStore[id] = dataUrl;
+  return id;
+}
+function resolveContentUrl(url) {
+  if (!url) return '';
+  if (String(url).indexOf('cid:') === 0) {
+    const id = String(url).slice(4);
+    return contentImageStore[id] || url;
+  }
+  return url;
+}
+function expandContentCids(raw) {
+  return String(raw || '').replace(/\[img([^\]]*)\]\s*cid:([a-z0-9]+)\s*\[\/img\]/gi, function(m, attrs, id) {
+    const real = contentImageStore[id];
+    if (real) return '[img' + attrs + ']' + real + '[/img]';
+    return m;
+  });
+}
+/** Convert long data: URLs already in content into cid: short refs for cleaner editing */
+function compactContentDataUrls(raw) {
+  return String(raw || '').replace(/\[img([^\]]*)\]\s*(data:image\/[a-zA-Z+]+;base64,[A-Za-z0-9+/=]+)\s*\[\/img\]/gi, function(m, attrs, dataUrl) {
+    const id = storeContentImage(dataUrl);
+    return '[img' + attrs + ']cid:' + id + '[/img]';
+  });
+}
+
+/* ---- Image URL fields: hide long Base64 in the visible input ---- */
+function imageFieldValue(id) {
+  const el = $(id);
+  if (!el) return '';
+  return (el.dataset.fullUrl || el.value || '').trim();
+}
+function setImageFieldValue(id, url) {
+  const el = $(id);
+  if (!el) return;
+  const v = (url || '').trim();
+  if (v.startsWith('data:image') && v.length > 60) {
+    el.dataset.fullUrl = v;
+    el.value = 'data:image… (Base64 · Preview မှာပေါ်နေပါပြီ)';
+  } else {
+    delete el.dataset.fullUrl;
+    el.value = v;
+  }
+}
+function enableImageFieldEditing(id) {
+  const el = $(id);
+  if (!el || el._imgFieldReady) return;
+  el._imgFieldReady = true;
+  el.addEventListener('focus', function() {
+    if (el.dataset.fullUrl) {
+      el.value = el.dataset.fullUrl;
+    }
+  });
+  el.addEventListener('blur', function() {
+    const v = (el.value || '').trim();
+    if (v.startsWith('data:image') && v.length > 60) {
+      el.dataset.fullUrl = v;
+      el.value = 'data:image… (Base64 · Preview မှာပေါ်နေပါပြီ)';
+    } else if (!v.startsWith('data:')) {
+      delete el.dataset.fullUrl;
+    }
+  });
+  el.addEventListener('input', function() {
+    const v = (el.value || '').trim();
+    if (!v.startsWith('data:') || v.length < 60) delete el.dataset.fullUrl;
+  });
+}
+
 let adminAuth, adminDb, adminStorage, adminUser = null, remoteSyncReady = false, remoteWriteQueue = Promise.resolve();
 try {
   firebase.initializeApp(firebaseConfig);
@@ -1072,23 +1144,30 @@ async function insertImageInContent(inputEl) {
     const ta = $('admin-post-content');
     if (!ta) return;
     const sz = ($('content-img-size') && $('content-img-size').value) || 'md';
-    const tag = '\n[img size=' + sz + ']' + url + '[/img]\n';
+    // Use short cid: ref so Base64 does NOT flood the textarea
+    const cid = storeContentImage(url);
+    const tag = '\n[img size=' + sz + ']cid:' + cid + '[/img]\n';
     const pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
     ta.value = ta.value.slice(0, pos) + tag + ta.value.slice(pos);
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
     toast('ပုံ Preview ထဲ ပေါ်ပါပြီ');
     if (adminUser && adminStorage) {
-      const dataUrl = url;
       withTimeout(
         adminStorage.ref('uploads/content_' + Date.now() + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
         15000
       ).then(function(httpsUrl) {
-        if (!httpsUrl || ta.value.indexOf(dataUrl) === -1) return;
-        ta.value = ta.value.split(dataUrl).join(httpsUrl);
+        if (!httpsUrl) return;
+        // Update store + replace short ref in textarea with permanent https URL
+        contentImageStore[cid] = httpsUrl;
+        if (ta.value.indexOf('cid:' + cid) !== -1) {
+          ta.value = ta.value.split('cid:' + cid).join(httpsUrl);
+        }
         if (typeof updateContentPreview === 'function') updateContentPreview();
         toast('ပုံ Firebase သိမ်းပြီး');
-      }).catch(function() {});
+      }).catch(function(err) {
+        console.warn('Storage upload failed (using Base64 via cid):', err && err.message);
+      });
     }
   } catch (err) {
     toast('ပုံ မထည့်နိုင်: ' + (err.message || ''));
@@ -1118,15 +1197,16 @@ async function insertGalleryInContent(inputEl) {
   }
   toast('Gallery ပုံ ' + files.length + ' ခု ပြင်ဆင်နေသည်…');
   try {
-    var urls = [];
+    var cids = [];
     for (var i = 0; i < files.length; i++) {
       if (!files[i].type.startsWith('image/')) continue;
-      urls.push(await fileToCompressedDataURL(files[i]));
+      var dataUrl = await fileToCompressedDataURL(files[i]);
+      cids.push(storeContentImage(dataUrl));
     }
-    if (urls.length < 2) { toast('ပုံ 2 ခုအထက် လိုအပ်သည်'); inputEl.value = ''; return; }
+    if (cids.length < 2) { toast('ပုံ 2 ခုအထက် လိုအပ်သည်'); inputEl.value = ''; return; }
     var layout = ($('content-gallery-layout') && $('content-gallery-layout').value) || '1-2';
-    var inner = urls.map(function(u) { return '[img]' + u + '[/img]'; }).join('\\n');
-    var block = '\\n[gallery layout=' + layout + ']\\n' + inner + '\\n[/gallery]\\n';
+    var inner = cids.map(function(cid) { return '[img]cid:' + cid + '[/img]'; }).join('\n');
+    var block = '\n[gallery layout=' + layout + ']\n' + inner + '\n[/gallery]\n';
     var ta = $('admin-post-content');
     if (!ta) return;
     var pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
@@ -1265,7 +1345,7 @@ async function uploadImage(inputEl, targetInputId) {
     let finalUrl = await fileToDataURL(blob);
     setImagePreview(previewBox, finalUrl, '✓ Preview အဆင်သင့်');
     if (target) {
-      target.value = finalUrl;
+      setImageFieldValue(targetInputId, finalUrl);
       try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
       try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
     }
@@ -1278,8 +1358,11 @@ async function uploadImage(inputEl, targetInputId) {
         adminStorage.ref('uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
         15000
       ).then(function(httpsUrl) {
-        if (!httpsUrl || !target || target.value !== dataUrl) return;
-        target.value = httpsUrl;
+        if (!httpsUrl || !target) return;
+        // Only replace if still the same Base64 we uploaded
+        const current = imageFieldValue(targetInputId);
+        if (current !== dataUrl && current !== httpsUrl) return;
+        setImageFieldValue(targetInputId, httpsUrl);
         setImagePreview(previewBox, httpsUrl, 'Firebase ✓');
         try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
         refreshLivePreviewFor(targetInputId);
@@ -1299,7 +1382,7 @@ function showPreviewIfUrl(inputId) {
   const el = $(inputId);
   const box = $(inputId + '-preview');
   if (!el || !box) return;
-  const v = (el.value || '').trim();
+  const v = imageFieldValue(inputId);
   if (v && (v.startsWith('http') || v.startsWith('data:image'))) {
     setImagePreview(box, v, '');
   }
@@ -1384,7 +1467,7 @@ function loadAll() {
   $('set-brand-name').value = s.brandName || 'HTOO HTET';
   $('set-brand-tagline').value = s.brandTagline || 'Travel Journal & Beyond';
   $('set-show-tagline').checked = s.showBrandTagline === true;
-  $('set-logo-url').value = s.logoUrl || '';
+  setImageFieldValue('set-logo-url', s.logoUrl || '');
   $('set-email').value = s.contactEmail || '';
   $('set-location').value = s.contactLocation || '';
   $('set-footer-tagline').value = s.footerTagline || '';
@@ -1415,7 +1498,7 @@ function loadAll() {
 
   const h = read('hh_hero', {});
   $('hero-active').checked = h.active !== false;
-  $('hero-image').value = h.image || '';
+  setImageFieldValue('hero-image', h.image || '');
   $('hero-label').value = h.label || '';
   if ($('hero-label-color')) $('hero-label-color').value = h.labelColor || '#f5c518';
   if ($('hero-label-fs')) $('hero-label-fs').value = h.labelFs || 12;
@@ -1461,8 +1544,8 @@ function loadAll() {
   if ($('admin-sponsor-desc-fs')) $('admin-sponsor-desc-fs').value = sp.descFs || 12;
   $('admin-sponsor-desc').value = sp.desc || '';
   $('admin-sponsor-link').value = sp.link || '';
-  $('admin-sponsor-img').value = sp.img || '';
-  $('admin-sponsor-bg').value = sp.bgImage || '';
+  setImageFieldValue('admin-sponsor-img', sp.img || '');
+  setImageFieldValue('admin-sponsor-bg', sp.bgImage || '');
   showPreviewIfUrl('admin-sponsor-img');
   showPreviewIfUrl('admin-sponsor-bg');
 
@@ -1480,7 +1563,7 @@ function loadAll() {
   if ($('up-desc-fs')) $('up-desc-fs').value = up.descFs || 13;
   if ($('up-desc-color')) $('up-desc-color').value = up.descColor || '#cccccc';
   $('up-desc').value = up.desc || '';
-  $('up-image').value = up.image || '';
+  setImageFieldValue('up-image', up.image || '');
   if ($('up-label-x')) $('up-label-x').value = up.labelX != null ? up.labelX : 6;
   if ($('up-label-y')) $('up-label-y').value = up.labelY != null ? up.labelY : 40;
   if ($('up-title-x')) $('up-title-x').value = up.titleX != null ? up.titleX : 6;
@@ -1500,8 +1583,8 @@ function loadAll() {
   if ($('yt-title-fs')) $('yt-title-fs').value = yt.titleFs || 22;
   $('yt-desc').value = yt.desc || '';
   $('yt-link').value = yt.link || '';
-  $('yt-thumb').value = yt.thumb || '';
-  $('yt-bg').value = yt.bgImage || '';
+  setImageFieldValue('yt-thumb', yt.thumb || '');
+  setImageFieldValue('yt-bg', yt.bgImage || '');
   showPreviewIfUrl('yt-thumb');
   showPreviewIfUrl('yt-bg');
   if (typeof updateYoutubePreview === 'function') updateYoutubePreview();
@@ -1534,6 +1617,9 @@ function loadAll() {
   if (typeof renderPresetList === 'function') renderPresetList();
   const _sh = read('hh_settings', {}).sponsorHeight;
   if (_sh && $('admin-sponsor-height-local')) $('admin-sponsor-height-local').value = _sh;
+
+  // Enable friendly Base64 display for image URL fields
+  ['set-logo-url','hero-image','admin-sponsor-img','admin-sponsor-bg','up-image','admin-post-img','yt-thumb','yt-bg','proud-logo'].forEach(enableImageFieldEditing);
 }
 
 const THEME_PRESETS = {
@@ -1632,7 +1718,7 @@ function saveSettings() {
     brandName: $('set-brand-name').value.trim() || 'HTOO HTET',
     brandTagline: $('set-brand-tagline').value.trim(),
     showBrandTagline: $('set-show-tagline').checked,
-    logoUrl: $('set-logo-url').value.trim(),
+    logoUrl: imageFieldValue('set-logo-url'),
     accentColor: customAccent || preset.accentColor,
     bgColor: preset.bgColor,
     surfaceColor: preset.surfaceColor,
@@ -1708,7 +1794,7 @@ function updateHeroPreview() {
     sign.style.left = sx + '%'; sign.style.top = sy + '%';
     sign.style.display = (sign.textContent ? '' : 'none');
   }
-  const img = ($('hero-image')?.value || '').trim();
+  const img = imageFieldValue('hero-image');
   if (box) {
     applyLiveBg(box, img);
     if (!img) box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
@@ -1807,7 +1893,7 @@ function initHeroLineDrag() {
 function saveHero() {
   write('hh_hero', {
     active: $('hero-active').checked,
-    image: $('hero-image').value.trim(),
+    image: imageFieldValue('hero-image'),
     label: $('hero-label').value.trim(),
     labelColor: $('hero-label-color')?.value || '#f5c518',
     labelFs: parseInt($('hero-label-fs')?.value || '12', 10),
@@ -1876,9 +1962,9 @@ function updateSponsorPreview() {
     desc.style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
     if ($('val-sp-desc-fs')) $('val-sp-desc-fs').textContent = dfs + 'px';
   }
-  const imgUrl = ($('admin-sponsor-img')?.value || '').trim();
+  const imgUrl = imageFieldValue('admin-sponsor-img');
   applyLiveLogo(logo, logoIcon, imgUrl);
-  const bgUrl = ($('admin-sponsor-bg')?.value || '').trim();
+  const bgUrl = imageFieldValue('admin-sponsor-bg');
   if (box) {
     applyLiveBg(box, bgUrl);
     if (!bgUrl) box.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
@@ -1914,8 +2000,8 @@ function saveSponsor() {
     descColor: $('admin-sponsor-desc-color')?.value || '#cccccc',
     descFs: parseInt($('admin-sponsor-desc-fs')?.value || '12', 10),
     link: $('admin-sponsor-link').value.trim(),
-    img: $('admin-sponsor-img').value.trim(),
-    bgImage: $('admin-sponsor-bg').value.trim()
+    img: imageFieldValue('admin-sponsor-img'),
+    bgImage: imageFieldValue('admin-sponsor-bg')
   });
   renderOverview();
   updateSponsorPreview();
@@ -1968,7 +2054,7 @@ function updateUpcomingPreview() {
     desc.style.left = dx + '%'; desc.style.top = dy + '%';
   }
 
-  const img = ($('up-image')?.value || '').trim();
+  const img = imageFieldValue('up-image');
   if (box && typeof applyLiveBg === 'function') {
     applyLiveBg(box, img);
     if (!img) box.style.background = '#1a1a1a';
@@ -2057,7 +2143,7 @@ function saveUpcoming() {
     descX: parseInt($('up-desc-x')?.value || '6', 10),
     descY: parseInt($('up-desc-y')?.value || '72', 10),
     frameH: parseInt($('up-frame-h')?.value || '160', 10),
-    image: $('up-image').value.trim()
+    image: imageFieldValue('up-image')
   });
   updateUpcomingPreview();
   toast('Upcoming သိမ်းပြီးပါပြီ။');
@@ -2070,10 +2156,10 @@ function updateYoutubePreview() {
     $('yt-prev-title').style.fontWeight = $('yt-title-weight')?.value || '900';
   }
   if ($('yt-prev-desc')) $('yt-prev-desc').textContent = $('yt-desc')?.value || 'Description';
-  const bg = ($('yt-bg')?.value || '').trim();
+  const bg = imageFieldValue('yt-bg');
   const box = $('yt-live-preview');
   if (box) applyLiveBg(box, bg);
-  const thumb = ($('yt-thumb')?.value || '').trim();
+  const thumb = imageFieldValue('yt-thumb');
   // optional small thumb indicator in preview
 }
 function saveYoutube() {
@@ -2086,8 +2172,8 @@ function saveYoutube() {
     titleWeight: $('yt-title-weight')?.value || '900',
     desc: $('yt-desc').value.trim(),
     link: $('yt-link').value.trim(),
-    thumb: $('yt-thumb').value.trim(),
-    bgImage: $('yt-bg').value.trim()
+    thumb: imageFieldValue('yt-thumb'),
+    bgImage: imageFieldValue('yt-bg')
   });
   updateYoutubePreview();
   toast('YouTube Section သိမ်းပြီးပါပြီ။');
@@ -2298,7 +2384,9 @@ function defaultWidthForSize(size) {
 }
 function renderGalleryHtml(g, gIndex) {
   var layout = g.layout || '1-2';
-  var imgs = (g.imgs || []).filter(function(x) { return x && x.url; }).slice(0, 3);
+  var imgs = (g.imgs || []).filter(function(x) { return x && x.url; }).map(function(x) {
+    return { url: resolveContentUrl(x.url), size: x.size, w: x.w };
+  }).filter(function(x) { return x.url; }).slice(0, 3);
   if (!imgs.length) return '';
   var gridCss = '';
   var cellHtml = '';
@@ -2358,7 +2446,7 @@ function renderContentHtml(raw) {
     }
     var size = b.size || 'md';
     var w = b.w != null ? b.w : defaultWidthForSize(size);
-    var url = b.url || '';
+    var url = resolveContentUrl(b.url || '');
     var idx = imgIndex;
     out.push(
       '<div class="content-img-card" data-img-index="' + idx + '" style="margin:14px 0;position:relative;display:inline-block;max-width:100%;vertical-align:top;">' +
@@ -2477,9 +2565,9 @@ function updatePostPreview() {
   const desc = $('admin-post-desc')?.value || 'Short description…';
   const loc = $('admin-post-location')?.value || 'Location';
   const cat = $('admin-post-category')?.value || 'Category';
-  let img = ($('admin-post-img')?.value || '').trim();
-  // ignore broken blob leftovers
-  if (img.indexOf('blob:') === 0) img = '';
+  let img = imageFieldValue('admin-post-img');
+  // ignore broken blob leftovers / placeholder text
+  if (img.indexOf('blob:') === 0 || img.indexOf('data:image…') === 0) img = '';
   if ($('post-prev-title')) $('post-prev-title').textContent = title;
   if ($('post-prev-desc')) $('post-prev-desc').textContent = desc;
   if ($('post-prev-meta')) $('post-prev-meta').textContent = loc + ' · ' + cat;
@@ -2630,14 +2718,15 @@ function autoSlug() {
 function savePost() {
   const title = $('admin-post-title').value.trim();
   const slug = $('admin-post-slug').value.trim() || slugify(title);
-  const img = $('admin-post-img').value.trim();
+  const img = imageFieldValue('admin-post-img');
   const desc = $('admin-post-desc').value.trim();
-  const content = $('admin-post-content').value.trim();
+  // Expand short cid: refs back to real data URLs / https before saving
+  const content = expandContentCids($('admin-post-content').value.trim());
   const location = $('admin-post-location').value.trim();
   const category = $('admin-post-category').value;
   if (!title) return alert('Title ထည့်ပေးပါ။');
   if (!slug) return alert('Slug ထည့်ပေးပါ။');
-  if (!img || img.indexOf('blob:') === 0) return alert('Cover Image ကို Upload ခလုတ်နဲ့ ထည့်ပါ။ (ပြီးသည်အထိ စောင့်ပါ — blob မသုံးရ)');
+  if (!img || img.indexOf('blob:') === 0 || img.indexOf('data:image…') === 0) return alert('Cover Image ကို Upload ခလုတ်နဲ့ ထည့်ပါ။ (ပြီးသည်အထိ စောင့်ပါ — blob မသုံးရ)');
   if (!desc) return alert('Short Description ထည့်ပေးပါ။');
   if (!content) return alert('Article Content ထည့်ပေးပါ။');
   if (!location) return alert('Location ထည့်ပေးပါ။');
@@ -2675,10 +2764,11 @@ function editPost(id) {
   $('admin-post-title').value = p.title || '';
   $('admin-post-slug').value = p.slug || slugify(p.title || '');
   $('admin-post-slug').dataset.manual = '1';
-  $('admin-post-img').value = p.img || '';
+  setImageFieldValue('admin-post-img', p.img || '');
   $('admin-post-location').value = p.location || '';
   $('admin-post-desc').value = p.desc || '';
-  $('admin-post-content').value = p.content || '';
+  // Compact long Base64 already in content so textarea stays readable
+  $('admin-post-content').value = compactContentDataUrls(p.content || '');
   if (typeof updateContentPreview === 'function') updateContentPreview();
   $('admin-post-category').value = p.category || 'Travel Story';
   $('admin-post-travel-date').value = p.travelDate || '';
@@ -2693,7 +2783,8 @@ function editPost(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function cancelPostEdit() {
-  ['editing-post-id','admin-post-title','admin-post-slug','admin-post-img','admin-post-location','admin-post-desc','admin-post-content','admin-post-travel-date','admin-post-seo-title','admin-post-meta'].forEach(id => $(id).value = '');
+  ['editing-post-id','admin-post-title','admin-post-slug','admin-post-location','admin-post-desc','admin-post-content','admin-post-travel-date','admin-post-seo-title','admin-post-meta'].forEach(id => $(id).value = '');
+  setImageFieldValue('admin-post-img', '');
   $('admin-post-author').value = 'Htoo Htet';
   $('admin-post-category').value = 'Travel Story';
   $('admin-post-section').value = 'latest';
