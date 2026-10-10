@@ -2,920 +2,959 @@
 <html lang="my">
 <head>
 <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTOO HTET | Admin Studio</title>
+<title>HTOO HTET | Travel Journal & Beyond</title>
+<meta name="description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet.">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark}
-body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Myanmar",sans-serif}
-.panel{background:#0d1728;border:1px solid #1c2a40;border-radius:18px}
-.field{width:100%;background:#101d30;border:1px solid #263750;border-radius:11px;padding:11px 13px;color:#eef5ff;outline:none}
-.field:focus{border-color:#10b981;box-shadow:0 0 0 3px #10b98120}
-.label{display:block;font-size:12px;color:#9eb0c9;margin-bottom:6px}
-.btn{border-radius:11px;padding:10px 14px;font-weight:700;font-size:13px;transition:.15s;cursor:pointer}
-.btn-green{background:#059669;color:white}.btn-green:hover{background:#10b981}
-.btn-muted{background:#1a2940;color:#dce8f7;border:1px solid #2b3c55}.btn-muted:hover{background:#243650}
-.btn-purple{background:#7c3aed;color:white}.btn-purple:hover{background:#8b5cf6}
-.btn-red{background:#3a1b2a;color:#fda4af;border:1px solid #572537}.btn-red:hover{background:#4a2235}
-.btn-amber{background:#b45309;color:#fef3c7}.btn-amber:hover{background:#d97706}
-.navbtn{width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:11px 13px;border-radius:11px;color:#a7b7ce;font-size:13px;font-weight:650;cursor:pointer;border:none;background:transparent}
-.navbtn.active,.navbtn:hover{background:#12352f;color:#6ee7b7}
-.view{display:none}.view.active{display:block}
-.stat{background:linear-gradient(145deg,#101e32,#0c1626);border:1px solid #1c2d45;border-radius:16px;padding:17px}
-.tiny{font-size:11px;color:#92a5bf}
-.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.toggle-row input[type=checkbox]{width:18px;height:18px;accent-color:#10b981}
-.preview-thumb{max-height:72px;max-width:110px;border-radius:8px;object-fit:cover}
-.preview-box{background:#0a1220;border:1px solid #1c2a40;border-radius:12px;overflow:hidden;position:relative}
-.range-val{font-size:12px;color:#6ee7b7;font-weight:700;min-width:48px}
-.upload-zone{border:2px dashed #2b3c55;border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:.15s;background:#0a1220}
-.upload-zone:hover{border-color:#10b981;background:#0d1a28}
-.upload-zone.dragging{border-color:#10b981;background:#0f2a22}
-.preview-thumb{max-height:80px;max-width:120px;border-radius:8px;object-fit:cover}
+  :root {
+    --brand-bg: #061510;
+    --brand-surface: #0a1f18;
+    --brand-card: #0f2e24;
+    --brand-accent: #f5c518;
+    --brand-text: #ffffff;
+    --brand-muted: #6ee7b7;
+    --brand-font: 'Inter', 'Noto Sans Myanmar', system-ui, sans-serif;
+    --brand-heading-font: 'Inter', 'Noto Sans Myanmar', system-ui, sans-serif;
+    --hero-min-h: 480px;
+    --hero-max-w: 100%;
+    --card-img-h: 11rem;
+    --sponsor-min-h: 180px;
+    --upcoming-min-h: 200px;
+    --radius: 1rem;
+    --header-h: 64px;
+  }
+  body {
+    font-family: var(--brand-font);
+    background: var(--brand-bg);
+    color: var(--brand-text);
+    transition: background .3s, color .3s;
+  }
+  h1, h2, h3, .font-heading { font-family: var(--brand-heading-font); font-weight: var(--heading-weight, 700); font-style: var(--heading-style, normal); color: var(--heading-color, inherit); }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-hover { transition: transform .25s ease, box-shadow .25s ease; }
+  .card-hover:hover { transform: translateY(-4px); box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.45); }
+  .search-panel { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .28s ease, opacity .22s ease, padding .22s ease; }
+  .search-panel.open { max-height: 72px; opacity: 1; padding-top: .5rem; padding-bottom: .75rem; }
+  .accent-bg { background: var(--brand-accent); }
+  .accent-text { color: var(--brand-accent); }
+  .surface-bg { background: var(--brand-surface); }
+  .card-bg { background: var(--brand-card); }
 
-.live-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none!important}
-#sponsor-live-preview,#hero-live-preview,#up-live-preview,#yt-live-preview{position:relative!important;overflow:hidden}
-#hero-live-preview [id^="hero-prev-"]{z-index:10}
-#content-live-preview img{max-width:100%;border-radius:10px;display:block;margin:8px 0}
-#sp-prev-logo{width:100%!important;height:100%!important;object-fit:contain!important}
-.preview-thumb{max-height:140px!important;max-width:240px!important;object-fit:contain!important;display:block!important}
-</style>
+  /* ========== THEME: FOREST — classic dark green ========== */
+  body.theme-forest {
+    --radius: 1rem;
+  }
+  body.theme-forest #hero-section { border-radius: 0; }
+  body.theme-forest .card-bg { border-radius: 1rem; }
+  body.theme-forest .hero-overlay { background: linear-gradient(to right, rgba(0,0,0,.88), rgba(0,0,0,.45), transparent); }
+
+  /* ========== THEME: OCEAN — cyan, angled hero, glass cards ========== */
+  body.theme-ocean {
+    --radius: 1.5rem;
+    --brand-heading-font: 'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif;
+  }
+  body.theme-ocean header {
+    border-bottom: 1px solid rgba(34, 211, 238, 0.2);
+    backdrop-filter: blur(16px);
+  }
+  body.theme-ocean #hero-section {
+    clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+  }
+  body.theme-ocean .card-bg {
+    border-radius: 1.5rem;
+    border: 1px solid rgba(34, 211, 238, 0.15) !important;
+    background: linear-gradient(145deg, #0e2840, #0a1c30) !important;
+  }
+  body.theme-ocean .card-hover:hover {
+    box-shadow: 0 0 0 1px rgba(34,211,238,.4), 0 20px 50px -12px rgba(6,182,212,.35);
+  }
+  body.theme-ocean .hero-overlay {
+    background: linear-gradient(135deg, rgba(8,47,73,.92) 0%, rgba(8,47,73,.4) 50%, transparent 100%);
+  }
+  body.theme-ocean .accent-bg { border-radius: 999px; }
+  body.theme-ocean section h2 span.w-1 { background: linear-gradient(to bottom, #22d3ee, #0891b2) !important; }
+
+  /* ========== THEME: SUNSET — warm, sharp corners, serif, editorial ========== */
+  body.theme-sunset {
+    --radius: 0.25rem;
+    --brand-heading-font: 'Playfair Display', 'Noto Sans Myanmar', serif;
+  }
+  body.theme-sunset header { border-bottom: 2px solid rgba(249, 115, 22, 0.25); }
+  body.theme-sunset #hero-section { border-bottom: 4px solid var(--brand-accent); }
+  body.theme-sunset .card-bg {
+    border-radius: 0.25rem;
+    border: 1px solid rgba(249,115,22,.2) !important;
+  }
+  body.theme-sunset .card-hover:hover {
+    transform: none;
+    box-shadow: 6px 6px 0 rgba(249,115,22,.35);
+  }
+  body.theme-sunset .hero-overlay {
+    background: linear-gradient(to top, rgba(26,18,11,.95) 0%, rgba(26,18,11,.3) 50%, transparent 100%);
+  }
+  body.theme-sunset .accent-bg { border-radius: 0.25rem; }
+  body.theme-sunset #hero-title { font-style: italic; }
+  body.theme-sunset section h2 { letter-spacing: 0.02em; }
+
+  /* ========== THEME: NAVY — light minimal ========== */
+  body.theme-navy {
+    --radius: 0.75rem;
+    --brand-text: #0f172a;
+    --brand-heading-font: 'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif;
+    color: #0f172a;
+  }
+  body.theme-navy .surface-bg { background: #ffffff; }
+  body.theme-navy .card-bg {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  body.theme-navy header {
+    border-bottom: 1px solid #e2e8f0;
+    background: rgba(255,255,255,.97);
+  }
+  body.theme-navy footer { border-top-color: #e2e8f0; }
+  body.theme-navy .text-white:not(#hero-section *):not(#sponsor-container *):not(#upcoming-banner *):not(#youtube-section *) { color: #0f172a !important; }
+  body.theme-navy .text-emerald-100\/90,
+  body.theme-navy .text-emerald-100\/70,
+  body.theme-navy .text-emerald-100\/75,
+  body.theme-navy .text-emerald-100 { color: #475569 !important; }
+  body.theme-navy .text-emerald-400\/70,
+  body.theme-navy .text-emerald-400\/60,
+  body.theme-navy .text-emerald-400\/80,
+  body.theme-navy .text-emerald-300\/80,
+  body.theme-navy .text-emerald-500\/60,
+  body.theme-navy .text-emerald-500\/50,
+  body.theme-navy .text-emerald-500\/70 { color: #64748b !important; }
+  body.theme-navy .text-emerald-400,
+  body.theme-navy .text-emerald-300 { color: #1e3a5f !important; }
+  body.theme-navy .border-emerald-800\/40,
+  body.theme-navy .border-emerald-800\/50,
+  body.theme-navy .border-emerald-900\/50,
+  body.theme-navy .border-emerald-900\/40 { border-color: #e2e8f0 !important; }
+  body.theme-navy .bg-emerald-950\/80,
+  body.theme-navy .bg-emerald-950,
+  body.theme-navy .bg-emerald-900\/50,
+  body.theme-navy .bg-emerald-900\/60 { background: #f1f5f9 !important; color: #0f172a !important; }
+  body.theme-navy #hero-section .text-white,
+  body.theme-navy #sponsor-container .text-white,
+  body.theme-navy #upcoming-banner .text-white,
+  body.theme-navy #youtube-section .text-white { color: #ffffff !important; }
+  body.theme-navy #hero-section .text-emerald-300 { color: #93c5fd !important; }
+  body.theme-navy #hero-section .text-emerald-100\/80 { color: rgba(255,255,255,0.85) !important; }
+  body.theme-navy #hero-section .text-emerald-400\/60 { color: rgba(255,255,255,0.55) !important; }
+  body.theme-navy .accent-text { color: var(--brand-accent) !important; }
+  body.theme-navy .card-hover:hover { box-shadow: 0 12px 40px -10px rgba(15,23,42,.12); }
+  body.theme-navy .hero-overlay {
+    background: linear-gradient(to right, rgba(15,23,42,.85), rgba(15,23,42,.4), transparent);
+  }
+
+  /* Light mode override (pairs with any theme base colors flipped) */
+  body.mode-light {
+    --brand-bg: #f8fafc;
+    --brand-surface: #ffffff;
+    --brand-card: #ffffff;
+    --brand-text: #0f172a;
+    color: #0f172a;
+  }
+  body.mode-light .surface-bg { background: #ffffff; }
+  body.mode-light .card-bg { background: #ffffff; border-color: #e2e8f0 !important; }
+  body.mode-light header { background: rgba(255,255,255,.96); border-bottom-color: #e2e8f0; }
+  body.mode-light footer { border-top-color: #e2e8f0; }
+  body.mode-light .text-white:not(#hero-section *):not(#sponsor-container *):not(#upcoming-banner *):not(#youtube-section *):not(#article-modal *) { color: #0f172a !important; }
+  body.mode-light .text-emerald-100\/90,
+  body.mode-light .text-emerald-100\/70,
+  body.mode-light .text-emerald-100\/75 { color: #475569 !important; }
+  body.mode-light .text-emerald-400\/70,
+  body.mode-light .text-emerald-400\/60,
+  body.mode-light .text-emerald-500\/60 { color: #64748b !important; }
+  body.mode-light .text-emerald-400,
+  body.mode-light .text-emerald-300 { color: #0f766e !important; }
+  body.mode-light .border-emerald-800\/40,
+  body.mode-light .border-emerald-800\/50,
+  body.mode-light .border-emerald-900\/50 { border-color: #e2e8f0 !important; }
+  body.mode-light .bg-emerald-950\/80,
+  body.mode-light .bg-emerald-950,
+  body.mode-light .bg-emerald-900\/50 { background: #f1f5f9 !important; color: #0f172a !important; }
+  body.mode-light #hero-section .text-white,
+  body.mode-light #sponsor-container .text-white,
+  body.mode-light #upcoming-banner .text-white,
+  body.mode-light #youtube-section .text-white,
+  body.mode-light #article-modal .text-white { color: #ffffff !important; }
+
+  /* Custom typography from admin — win over Tailwind on mobile */
+  #hero-label, #hero-title, #hero-desc, #hero-sign,
+  #sponsor-badge, #sponsor-title, #sponsor-desc,
+  #upcoming-label, #upcoming-title, #upcoming-desc,
+  #youtube-title, #youtube-desc, #about-title, #about-desc {
+    line-height: 1.25;
+  }
+  #hero-text-box {
+    z-index: 5;
+    width: min(92%, var(--hero-text-maxw, 36rem));
+  }
+  @media (max-width: 640px) {
+    #hero-section, #hero-content-wrap {
+      min-height: var(--hero-min-h, 420px) !important;
+    }
+    #hero-label, #hero-title, #hero-desc, #hero-sign, #hero-btn-wrap {
+      max-width: 92% !important;
+    }
+  }
+
+  </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen antialiased theme-forest mode-dark">
 
-<!-- LOGIN -->
-<div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 p-4">
-  <div class="panel w-full max-w-sm p-7 text-center shadow-2xl">
-    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300 text-2xl"><i class="fa-solid fa-mountain-sun"></i></div>
-    <h1 class="text-xl font-black">HTOO HTET</h1>
-    <p class="mt-1 mb-6 text-sm text-slate-400">Admin Studio · Firebase Login</p>
-    <form onsubmit="event.preventDefault();signInAdmin()">
-      <label class="label text-left" for="admin-email">Admin Email</label>
-      <input id="admin-email" type="email" autocomplete="username" required placeholder="you@example.com" class="field mb-3">
-      <label class="label text-left" for="admin-password">Password</label>
-      <div class="relative mb-3">
-        <input id="admin-password" type="password" autocomplete="current-password" required placeholder="Password" class="field pr-12">
-        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 hover:text-emerald-300"><i id="password-eye-icon" class="fa-regular fa-eye"></i></button>
+<!-- ================= HEADER ================= -->
+<header class="sticky top-0 z-50 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 gap-3">
+      <!-- Logo + Brand name only -->
+      <a href="#home" class="flex items-center gap-2.5 shrink-0">
+        <div id="brand-logo-wrap" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg overflow-hidden">
+          <img id="brand-logo-img" src="" alt="Logo" class="w-full h-full object-cover hidden">
+          <i id="brand-logo-icon" class="fa-solid fa-mountain-sun text-white text-sm sm:text-base"></i>
+        </div>
+        <div class="leading-none">
+          <div id="brand-name" class="font-black text-white text-[15px] sm:text-lg tracking-tight">HTOO HTET</div>
+          <div id="brand-tagline" class="text-[9px] sm:text-[10px] font-semibold text-emerald-400 tracking-[0.12em] uppercase hidden"></div>
+        </div>
+      </a>
+
+      <!-- Right: social + search + hamburger (NO desktop nav links) -->
+      <div class="flex items-center gap-1 sm:gap-1.5">
+        <div class="hidden sm:flex items-center gap-1 text-[11px] font-bold text-emerald-300/80 border border-emerald-800/50 rounded-full px-2.5 py-1">
+          <button type="button" id="lang-en" class="accent-text">EN</button>
+          <span class="text-emerald-700">|</span>
+          <button type="button" id="lang-mm" class="hover:text-white transition">မြန်မာ</button>
+        </div>
+        <!-- Social icons (on/off controlled by admin) -->
+        <div class="flex items-center gap-0.5 sm:gap-1" id="social-links-header"></div>
+        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
+          <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+        <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
+          <i class="fa-solid fa-magnifying-glass text-sm"></i>
+        </button>
+        <!-- Hamburger always visible — menu holds Home, Stories, etc. -->
+        <button id="menu-toggle" type="button" aria-label="Menu" onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-emerald-900/50 text-white flex items-center justify-center">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
       </div>
-      <button id="login-button" type="submit" class="btn btn-green w-full">Login ဝင်မယ် <i class="fa-solid fa-arrow-right ml-1"></i></button>
-    </form>
-    <p id="login-error" class="mt-3 text-xs text-rose-300" role="alert"></p>
+    </div>
+
+    <div id="search-panel" class="search-panel">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500/70 text-sm"></i>
+        <input id="header-search-input" type="search" placeholder="ခေါင်းစဉ်၊ နေရာ ရှာရန်..." class="w-full rounded-xl border border-emerald-800/50 bg-emerald-950/80 py-2.5 pl-10 pr-10 text-sm text-white placeholder-emerald-500/50 outline-none focus:border-emerald-500 transition">
+        <button type="button" id="search-close" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full text-emerald-400 hover:bg-emerald-800 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer menu (all nav items live here) -->
+  <div id="drawer-overlay" class="fixed inset-0 z-40 bg-black/60 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
+  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out p-6 flex flex-col border-l border-emerald-900/50">
+    <div class="flex items-center justify-between mb-8">
+      <div id="mobile-brand-name" class="font-black text-white text-base">HTOO HTET</div>
+      <button type="button" onclick="closeMenu()" class="w-9 h-9 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <nav id="mobile-nav" class="flex flex-col gap-1 text-[15px] font-semibold text-emerald-100"></nav>
+    <div class="mt-auto pt-6 border-t border-emerald-900/50">
+      <div class="flex gap-2 mb-4 flex-wrap" id="social-links-mobile"></div>
+      <p id="mobile-tagline" class="text-[11px] text-emerald-500/70">Discover Myanmar, one journey at a time.</p>
+    </div>
+  </aside>
+</header>
+
+<main id="home">
+
+  <!-- HERO -->
+  <section id="hero-section" class="relative overflow-hidden mx-auto" style="min-height: var(--hero-min-h); max-width: var(--hero-max-w);">
+    <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
+    <div class="hero-overlay absolute inset-0"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15"></div>
+    <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
+      <div id="hero-text-box" class="absolute inset-0 pointer-events-none" style="z-index:5;">
+        <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%;">Travel Journal</span>
+        <h1 id="hero-title" class="hero-title absolute font-black leading-[1.15] tracking-tight text-white pointer-events-auto" style="left:8%; top:28%; font-size:clamp(1.4rem,5vw,2.5rem); max-width:90%;">
+          New Places.<br><span class="text-emerald-300">Same Curiosity.</span>
+        </h1>
+        <p id="hero-desc" class="absolute text-emerald-100/80 leading-relaxed pointer-events-auto" style="left:8%; top:55%; font-size:14px; max-width:min(90%,36rem);">
+          Traveling is not just about reaching a destination, it's about collecting stories, meeting people, and seeing the world with a different heart.
+        </p>
+        <div id="hero-btn-wrap" class="absolute pointer-events-auto" style="left:8%; top:72%;">
+          <a id="hero-btn" href="#stories" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full shadow-lg transition">
+            Explore My Journey <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
+        </div>
+        <p id="hero-sign" class="absolute text-emerald-400/60 text-sm italic font-medium pointer-events-auto" style="left:8%; top:85%;">— Htoo Htet</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROUD SPONSORS -->
+  <section id="proud-sponsors-section" class="surface-bg border-y border-emerald-900/40 hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
+        <span id="proud-label" class="text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/80 shrink-0">Our Proud Sponsors</span>
+        <div id="proud-sponsors-list" class="flex items-center gap-6 sm:gap-8 overflow-x-auto w-full justify-start sm:justify-center"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OFFICIAL SPONSOR -->
+  <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+    <div class="relative overflow-hidden rounded-2xl border border-emerald-800/40 shadow-xl" style="min-height: var(--sponsor-min-h);">
+      <img id="sponsor-bg" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&q=80" alt="" class="absolute inset-0 w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/25"></div>
+      <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 p-5 sm:p-7" style="min-height: var(--sponsor-min-h);">
+        <div class="flex-1 min-w-0">
+          <span id="sponsor-badge" class="inline-block accent-bg text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Official Sponsor</span>
+          <h2 id="sponsor-title" class="mt-2.5 text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">Veezoom Myanmar</h2>
+          <p id="sponsor-desc" class="mt-1.5 text-sm text-emerald-100/80 max-w-lg leading-relaxed"></p>
+          <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-2 mt-4 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition">
+            Visit Sponsor <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+          </a>
+        </div>
+        <div class="shrink-0">
+          <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden border-2 border-emerald-500/30 bg-black/40 backdrop-blur flex items-center justify-center shadow-xl">
+            <img id="sponsor-img" src="" alt="Sponsor" class="w-full h-full object-contain p-2" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPCOMING -->
+  <section id="upcoming-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 hidden">
+    <!-- Section heading ABOVE the banner (separated) -->
+    <div class="mb-3 sm:mb-4">
+      <h2 id="upcoming-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+        <span class="w-1 h-6 rounded-full accent-bg"></span><span id="upcoming-heading-text">Upcoming</span>
+      </h2>
+      <p id="upcoming-section-title" class="text-sm text-emerald-400/70 mt-1 ml-3 hidden"></p>
+    </div>
+    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40" style="min-height: var(--upcoming-min-h);">
+      <img id="upcoming-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200" alt="" class="absolute inset-0 w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
+      <div class="absolute inset-0 z-10" style="min-height: var(--upcoming-min-h);">
+        <span id="upcoming-label" class="absolute font-bold uppercase tracking-widest accent-text" style="left:6%; top:40%; font-size:10px;">Featured Journey</span>
+        <h3 id="upcoming-title" class="absolute text-white font-black" style="left:6%; top:55%; font-size:clamp(1rem,3.5vw,1.35rem); max-width:90%;"></h3>
+        <p id="upcoming-desc" class="absolute text-white/80" style="left:6%; top:72%; font-size:13px; max-width:min(90%,28rem);"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRAVEL STORIES -->
+  <section id="stories" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
+          <h2 id="stories-heading" class="text-xl sm:text-2xl font-black text-white">Travel Stories</h2>
+        </div>
+        <p id="stories-sub" class="text-xs sm:text-sm text-emerald-400/70">မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ</p>
+      </div>
+      <select id="story-category-filter" class="rounded-xl border border-emerald-800/50 bg-emerald-950 text-emerald-100 text-sm px-3 py-2 outline-none focus:border-emerald-500 w-full sm:w-auto">
+        <option value="">အမျိုးအစားအားလုံး</option>
+      </select>
+    </div>
+    <div id="blog-posts-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"></div>
+  </section>
+
+  <div id="extra-home-sections" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8"></div>
+
+  <!-- YOUTUBE -->
+  <section id="youtube-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10 hidden">
+    <div class="relative overflow-hidden rounded-2xl border border-emerald-800/40">
+      <img id="youtube-bg" src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1400&q=80" alt="" class="absolute inset-0 w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/55"></div>
+      <div class="relative z-10 flex flex-col lg:flex-row items-center gap-8 p-6 sm:p-9">
+        <div class="flex-1 text-center lg:text-left">
+          <div class="inline-flex items-center gap-2 mb-3">
+            <span class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+              <i class="fa-brands fa-youtube text-white text-lg"></i>
+            </span>
+            <span id="youtube-label" class="text-red-400 font-bold text-sm tracking-wide">Watch My YouTube Channel</span>
+          </div>
+          <h2 id="youtube-title" class="text-2xl sm:text-3xl font-black text-white leading-tight"></h2>
+          <p id="youtube-desc" class="mt-2 text-emerald-200/70 text-sm max-w-md mx-auto lg:mx-0"></p>
+          <a id="youtube-link" href="#" target="_blank" class="inline-flex items-center gap-2 mt-5 bg-red-600 hover:bg-red-500 text-white font-bold text-sm px-6 py-3 rounded-full transition shadow-lg">
+            Visit Channel <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
+        </div>
+        <div class="shrink-0">
+          <div class="w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative">
+            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70">
+            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+              <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl mb-2">
+                <i class="fa-solid fa-play text-white text-base ml-0.5"></i>
+              </div>
+              <span class="text-xs font-bold text-white/90">HTOO HTET</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+    <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
+      <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3">About Htoo Htet</h2>
+      <p id="about-desc" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl">
+        မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
+      </p>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer id="contact" class="border-t border-emerald-900/50 surface-bg mt-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div>
+        <div class="flex items-center gap-2.5 mb-4">
+          <div id="footer-logo-wrap" class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center overflow-hidden">
+            <img id="footer-logo-img" src="" alt="" class="w-full h-full object-cover hidden">
+            <i id="footer-logo-icon" class="fa-solid fa-mountain-sun text-white text-sm"></i>
+          </div>
+          <div>
+            <div id="footer-brand-name" class="font-black text-white text-sm">HTOO HTET</div>
+            <div id="footer-brand-tagline" class="text-[9px] text-emerald-400 tracking-wider uppercase">Travel Journal & Beyond</div>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-4 flex-wrap" id="footer-social"></div>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-4">Quick Links</h4>
+        <ul id="footer-links" class="space-y-2 text-sm text-emerald-100/70"></ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-4">Contact</h4>
+        <ul class="space-y-2.5 text-sm text-emerald-100/70">
+          <li class="flex items-center gap-2"><i class="fa-regular fa-envelope text-emerald-500 text-xs"></i><a id="contact-email" href="mailto:htoohtet@gmail.com" class="hover:text-yellow-400 transition">htoohtet@gmail.com</a></li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-emerald-500 text-xs"></i><span id="contact-location">Yangon, Myanmar</span></li>
+        </ul>
+      </div>
+      <div class="flex flex-col items-start sm:items-end">
+        <p id="footer-tagline" class="text-emerald-300/50 text-sm italic font-medium leading-relaxed text-left sm:text-right">Good Vibes<br>Better Journeys</p>
+      </div>
+    </div>
+    <div class="mt-8 pt-5 border-t border-emerald-900/50 text-[11px] text-emerald-500/50">
+      <span>© <span id="footer-year"></span> <span id="footer-copy-name">HTOO HTET</span>. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ARTICLE MODAL -->
+<div id="article-modal" class="fixed inset-0 z-[60] hidden">
+  <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeArticle()"></div>
+  <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+    <div class="surface-bg rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl border border-emerald-800/40">
+      <div class="relative">
+        <img id="article-image" src="" alt="" class="w-full h-48 sm:h-56 object-cover rounded-t-2xl">
+        <button type="button" onclick="closeArticle()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 sm:p-6">
+        <p id="article-location" class="text-xs font-bold text-emerald-400 uppercase tracking-wide"></p>
+        <h2 id="article-title" class="text-xl sm:text-2xl font-black text-white mt-1 leading-snug"></h2>
+        <div id="article-body" class="mt-4 text-sm text-emerald-100/70 leading-relaxed"></div>
+        <div class="mt-6 pt-4 border-t border-emerald-800/40">
+          <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-2">Related Stories</p>
+          <div id="related-stories" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- APP -->
-<div id="app" class="hidden min-h-screen">
-  <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-800 bg-[#091220] p-5 lg:block overflow-y-auto">
-    <a href="index.html" target="_blank" class="mb-6 flex items-center gap-3">
-      <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-700 text-xl"><i class="fa-solid fa-mountain-sun"></i></div>
-      <div><div class="font-black leading-tight">HTOO HTET</div><div class="text-sm font-bold text-emerald-300">Admin Studio</div></div>
-    </a>
-    <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
-    <nav class="space-y-0.5 pb-20">
-      <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
-      <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Layout</button>
-      <button class="navbtn" data-view="hero" onclick="showView('hero',this)"><i class="fa-solid fa-image w-4"></i> Hero Banner</button>
-      <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
-      <button class="navbtn" data-view="proud" onclick="showView('proud',this)"><i class="fa-solid fa-handshake w-4"></i> Proud Sponsors</button>
-      <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
-      <button class="navbtn" data-view="upcoming" onclick="showView('upcoming',this)"><i class="fa-solid fa-map-location-dot w-4"></i> Upcoming</button>
-      <button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Travel Posts</button>
-      <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
-      <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
-      <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
-      <button class="navbtn" data-view="social" onclick="showView('social',this)"><i class="fa-solid fa-share-nodes w-4"></i> Social Links</button>
-    </nav>
-    <div class="absolute bottom-5 left-5 right-5">
-      <a href="index.html" target="_blank" class="btn btn-muted block text-center"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>View Live Website</a>
-    </div>
-  </aside>
-
-  <main class="min-h-screen lg:ml-64">
-    <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
-      <div>
-        <p class="tiny">HTOO HTET / ADMIN</p>
-        <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="btn btn-muted lg:hidden" onclick="toggleMobileNav()"><i class="fa-solid fa-bars"></i></button>
-        <a href="index.html" target="_blank" class="btn btn-green"><i class="fa-solid fa-eye mr-1"></i><span class="hidden sm:inline">Live Website</span></a>
-      </div>
-    </header>
-
-    <div id="mobile-nav" class="hidden border-b border-slate-800 bg-[#091220] p-3 lg:hidden">
-      <div class="grid grid-cols-2 gap-2">
-        <button class="navbtn" onclick="showView('overview')">Overview</button>
-        <button class="navbtn" onclick="showView('settings')">Brand</button>
-        <button class="navbtn" onclick="showView('hero')">Hero</button>
-        <button class="navbtn" onclick="showView('menu')">Menu</button>
-        <button class="navbtn" onclick="showView('proud')">Proud Sponsors</button>
-        <button class="navbtn" onclick="showView('sponsor')">Official Sponsor</button>
-        <button class="navbtn" onclick="showView('upcoming')">Upcoming</button>
-        <button class="navbtn" onclick="showView('posts')">Posts</button>
-        <button class="navbtn" onclick="showView('sections')">Custom Rows</button>
-        <button class="navbtn" onclick="showView('youtube')">YouTube</button>
-        <button class="navbtn" onclick="showView('about')">About</button>
-        <button class="navbtn" onclick="showView('social')">Social</button>
-      </div>
-    </div>
-
-    <div class="mx-auto max-w-7xl space-y-6 p-4 sm:p-8">
-
-      <!-- OVERVIEW -->
-      <section id="view-overview" class="view active space-y-6">
-        <div class="overflow-hidden rounded-2xl border border-emerald-900/70 bg-gradient-to-r from-emerald-950 via-[#102d30] to-[#101b30] p-6 sm:p-8">
-          <span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">Full CMS Control</span>
-          <h2 class="mt-4 text-2xl font-black sm:text-3xl">Website အားလုံးကို<br class="sm:hidden"> ဒီနေရာက စီမံပါ</h2>
-          <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">Brand, Hero, Sponsors, Posts, Theme ၄ မျိုး (ဒီဇိုင်းကွဲ), ပုံ Upload, Font & အရွယ်အစား — အကုန် Admin ကနေ ထိန်းနိုင်ပါတယ်။</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div class="stat"><div class="text-sm text-slate-400">Posts</div><div id="stat-posts" class="mt-2 text-3xl font-black">0</div></div>
-          <div class="stat"><div class="text-sm text-slate-400">Custom Rows</div><div id="stat-sections" class="mt-2 text-3xl font-black">0</div></div>
-          <div class="stat"><div class="text-sm text-slate-400">Proud Sponsors</div><div id="stat-proud" class="mt-2 text-3xl font-black">0</div></div>
-          <div class="stat"><div class="text-sm text-slate-400">Official Sponsor</div><div id="stat-sponsor" class="mt-2 text-xl font-black">—</div></div>
-        </div>
-      </section>
-
-      <!-- BRAND & SETTINGS -->
-      <section id="view-settings" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Brand & Layout</h2><p class="mt-1 text-sm text-slate-400">Theme (၄ မျိုး ဒီဇိုင်းကွဲ), Logo, Font, အရောင်, အရွယ်အစား, Contact</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
-          <div>
-            <label class="label mb-3">Website Theme — ဒီဇိုင်း ၄ မျိုး ကွဲပြား</label>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="theme-selector">
-              <button type="button" data-theme="forest" onclick="selectTheme('forest')" class="theme-card rounded-xl border-2 border-emerald-500 bg-slate-900/80 p-3 text-left transition hover:border-emerald-400">
-                <div class="h-16 rounded-lg mb-2 bg-gradient-to-br from-[#061510] to-[#0f2e24] border border-emerald-800 flex items-end p-2"><span class="w-8 h-2 rounded-full bg-[#f5c518]"></span></div>
-                <p class="font-bold text-sm">Forest Dark</p>
-                <p class="tiny">Deep green + gold · rounded</p>
-              </button>
-              <button type="button" data-theme="ocean" onclick="selectTheme('ocean')" class="theme-card rounded-xl border-2 border-transparent bg-slate-900/80 p-3 text-left transition hover:border-cyan-500">
-                <div class="h-16 rounded-lg mb-2 bg-gradient-to-br from-[#0a1628] to-[#0e7490] border border-cyan-900 flex items-end p-2"><span class="w-8 h-2 rounded-full bg-[#22d3ee]"></span></div>
-                <p class="font-bold text-sm">Ocean Blue</p>
-                <p class="tiny">Navy + cyan · soft curves</p>
-              </button>
-              <button type="button" data-theme="sunset" onclick="selectTheme('sunset')" class="theme-card rounded-xl border-2 border-transparent bg-slate-900/80 p-3 text-left transition hover:border-orange-500">
-                <div class="h-16 rounded-lg mb-2 bg-gradient-to-br from-[#1a120b] to-[#7c2d12] border border-orange-900 flex items-end p-2"><span class="w-8 h-2 rounded-full bg-[#f97316]"></span></div>
-                <p class="font-bold text-sm">Warm Sunset</p>
-                <p class="tiny">Brown + orange · serif</p>
-              </button>
-              <button type="button" data-theme="navy" onclick="selectTheme('navy')" class="theme-card rounded-xl border-2 border-transparent bg-slate-900/80 p-3 text-left transition hover:border-blue-400">
-                <div class="h-16 rounded-lg mb-2 bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0] border border-slate-300 flex items-end p-2"><span class="w-8 h-2 rounded-full bg-[#1e3a5f]"></span></div>
-                <p class="font-bold text-sm">Navy & White</p>
-                <p class="tiny">Clean minimal light</p>
-              </button>
-            </div>
-            <input type="hidden" id="set-theme" value="forest">
-          </div>
-
-          <div>
-            <label class="label mb-2">Default Light / Dark (Website မှာ User ကိုယ်တိုင်လည်း ပြောင်းနိုင်)</label>
-            <div class="flex gap-2">
-              <button type="button" id="mode-dark-btn" onclick="selectMode('dark')" class="btn btn-green flex-1"><i class="fa-solid fa-moon mr-2"></i>Dark</button>
-              <button type="button" id="mode-light-btn" onclick="selectMode('light')" class="btn btn-muted flex-1"><i class="fa-solid fa-sun mr-2"></i>Light</button>
-            </div>
-            <p class="tiny mt-1">Website header မှာ 🌙/☀️ ခလုတ် ရှိပါတယ် — visitor ကိုယ်တိုင် ပြောင်းနိုင်</p>
-            <input type="hidden" id="set-mode" value="dark">
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Brand Name *</label><input id="set-brand-name" class="field" placeholder="HTOO HTET"></div>
-            <div><label class="label">Tagline (Footer / optional under logo)</label><input id="set-brand-tagline" class="field" placeholder="Travel Journal & Beyond"></div>
-            <div class="md:col-span-2">
-              <label class="toggle-row mb-0"><input type="checkbox" id="set-show-tagline"><span class="text-sm">Logo အောက်မှာ Tagline ပြမယ် (ပုံမှန် = Menu ထဲသာ)</span></label>
-            </div>
-            <div class="md:col-span-2">
-              <label class="label">Logo Image</label>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <input id="set-logo-url" class="field flex-1" placeholder="URL သို့မဟုတ် Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'set-logo-url')"></label>
-              </div>
-              <div id="set-logo-url-preview" class="mt-2"></div>
-            </div>
-            <div><label class="label">Contact Email</label><input id="set-email" class="field" placeholder="htoohtet@gmail.com"></div>
-            <div><label class="label">Contact Location</label><input id="set-location" class="field" placeholder="Yangon, Myanmar"></div>
-            <div class="md:col-span-2"><label class="label">Footer Tagline</label><textarea id="set-footer-tagline" class="field min-h-16" placeholder="Good Vibes&#10;Better Journeys"></textarea></div>
-            <div><label class="label">Stories Section Heading</label><input id="set-stories-heading" class="field" placeholder="Travel Stories"></div>
-            <div><label class="label">Stories Subtitle</label><input id="set-stories-sub" class="field" placeholder="မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ"></div>
-          </div>
-
-          <div class="border-t border-slate-700 pt-4 mt-2 space-y-5">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">🎨 Visual Layout Studio — ကိုယ်တိုင် ချိန်ပါ</p>
-            <p class="tiny">အောက်က preview box မှာ အရွယ် / စာနေရာ ကို တိုက်ရိုက် မြင်ရပါတယ်။ Save လုပ်မှ website မှာ သက်ရောက်မယ်။</p>
-
-            <!-- LIVE PREVIEW BOX -->
-            <div class="rounded-xl border-2 border-dashed border-emerald-700/50 bg-[#050a12] p-3">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero Banner</span>
-                <span class="tiny" id="preview-dims">480 × full</span>
-              </div>
-              <div id="layout-preview" class="relative mx-auto overflow-hidden rounded-lg border border-slate-700 bg-cover bg-center transition-all"
-                   style="height:160px; max-width:100%; background-image:linear-gradient(135deg,#0a1f18,#061510);">
-                <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent"></div>
-                <div id="layout-preview-inner" class="relative z-10 h-full flex flex-col p-4" style="justify-content:center;">
-                  <div id="layout-preview-text" style="text-align:left; max-width:60%;">
-                    <div class="text-[9px] font-bold uppercase tracking-widest text-yellow-400 mb-1">Travel Journal</div>
-                    <div class="text-sm font-black text-white leading-tight">New Places.<br>Same Curiosity.</div>
-                    <div class="text-[10px] text-white/60 mt-1 line-clamp-2">Stories, people, and the road ahead.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label class="label flex justify-between">Hero Height <span class="range-val" id="val-hero-h">480px</span></label>
-                <input type="range" id="set-hero-height" min="280" max="800" step="20" value="480" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Hero Max Width <span class="range-val" id="val-hero-w">100%</span></label>
-                <input type="range" id="set-hero-maxw" min="600" max="1400" step="50" value="1400" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label">စာသား အလျားလိုက် နေရာ (Text Align)</label>
-                <div class="flex gap-2">
-                  <button type="button" class="btn btn-muted flex-1 align-btn" data-align="left" onclick="setHeroAlign('left')">◀ Left</button>
-                  <button type="button" class="btn btn-muted flex-1 align-btn" data-align="center" onclick="setHeroAlign('center')">● Center</button>
-                  <button type="button" class="btn btn-muted flex-1 align-btn" data-align="right" onclick="setHeroAlign('right')">Right ▶</button>
-                </div>
-                <input type="hidden" id="set-hero-text-align" value="left">
-              </div>
-              <div>
-                <label class="label">စာသား ဒေါင်လိုက် နေရာ (Vertical)</label>
-                <div class="flex gap-2">
-                  <button type="button" class="btn btn-muted flex-1 valign-btn" data-valign="top" onclick="setHeroVAlign('top')">⬆ Top</button>
-                  <button type="button" class="btn btn-muted flex-1 valign-btn" data-valign="center" onclick="setHeroVAlign('center')">● Middle</button>
-                  <button type="button" class="btn btn-muted flex-1 valign-btn" data-valign="bottom" onclick="setHeroVAlign('bottom')">⬇ Bottom</button>
-                </div>
-                <input type="hidden" id="set-hero-v-align" value="center">
-              </div>
-              <div>
-                <label class="label flex justify-between">Text Box Max Width <span class="range-val" id="val-text-mw">36rem</span></label>
-                <input type="range" id="set-hero-text-maxw" min="16" max="48" step="1" value="36" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-                <p class="tiny mt-1">စာကော်လံ အကျဉ်း/အကျယ်</p>
-              </div>
-              <div>
-                <label class="label flex justify-between">Sponsor Banner Height <span class="range-val" id="val-sp-h">180px</span></label>
-                <input type="range" id="set-sponsor-height" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Upcoming Banner Height <span class="range-val" id="val-up-h">200px</span></label>
-                <input type="range" id="set-upcoming-height" min="120" max="400" step="10" value="200" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Card Image Height <span class="range-val" id="val-card-h">11rem</span></label>
-                <input type="range" id="set-card-img-h" min="6" max="18" step="0.5" value="11" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label">Body Font</label>
-                <select id="set-font" class="field">
-                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
-                  <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
-                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
-                  <option value="'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif">Space Grotesk</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Heading Font</label>
-                <select id="set-heading-font" class="field">
-                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
-                  <option value="'Playfair Display', 'Noto Sans Myanmar', serif">Playfair (serif)</option>
-                  <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
-                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Default Heading Weight</label>
-                <select id="set-heading-weight" class="field">
-                  <option value="400">Regular</option>
-                  <option value="600">Semi Bold</option>
-                  <option value="700" selected>Bold</option>
-                  <option value="900">Black</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Default Heading Style</label>
-                <select id="set-heading-style" class="field">
-                  <option value="normal">Normal</option>
-                  <option value="italic">Italic</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Body Text အရောင် (optional)</label>
-                <input id="set-body-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent">
-              </div>
-              <div>
-                <label class="label">Heading Text အရောင် (optional)</label>
-                <input id="set-heading-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent">
-              </div>
-              <div>
-                <label class="label">Custom Accent Color</label>
-                <div class="flex gap-2">
-                  <input id="set-accent-color" type="color" class="h-11 w-14 rounded-lg border border-slate-600 cursor-pointer bg-transparent">
-                  <input id="set-accent-hex" class="field flex-1" placeholder="#f5c518" oninput="syncColorFromHex()">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button onclick="saveSettings()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Brand & Layout</button>
-
-          <!-- CUSTOM THEME PRESETS -->
-          <div class="border-t border-slate-700 pt-5 mt-2 space-y-3">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">💾 My Theme Presets — ပြင်ထားသမျှ Save / ပြန်သုံး</p>
-            <p class="tiny">လက်ရှိ Layout + Hero/Sponsor/Upcoming/YouTube/About on-off + အရောင်/အရွယ် အားလုံးကို နာမည်ပေးပြီး သိမ်းနိုင်ပါတယ်။ နောက်မှ Load ပြန်လုပ်ရင် အတိုင်းအတာ ပြန်ရမယ်။</p>
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input id="preset-name" class="field flex-1" placeholder="Theme နာမည် ဥပမာ: My Travel Look">
-              <button type="button" onclick="saveThemePreset()" class="btn btn-purple shrink-0"><i class="fa-solid fa-floppy-disk mr-1"></i>Save as Theme</button>
-            </div>
-            <div id="preset-list" class="space-y-2"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- HERO -->
-      <section id="view-hero" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Hero Banner</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန် · စာအရောင် · Font weight</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
-
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero</span>
-            <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 select-none" style="height:200px; background:#0a1f18;">
-              <div class="absolute inset-0 pointer-events-none" style="z-index:1;background:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.25) 50%,rgba(0,0,0,.1) 100%);"></div>
-              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">စာတစ်ကြောင်းချင်း ဖိဆွဲပါ</p>
-              <div id="hero-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%; top:18%; color:#f5c518; font-size:10px; touch-action:none; max-width:80%;">Travel Journal</div>
-              <div id="hero-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%; top:32%; font-size:16px; touch-action:none; max-width:85%;">New Places.</div>
-              <div id="hero-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1.5 py-0.5 line-clamp-3" style="left:8%; top:55%; color:rgba(255,255,255,0.75); font-size:11px; touch-action:none; max-width:80%;">Description…</div>
-              <div id="hero-prev-sign" class="absolute z-10 cursor-move border border-dashed border-emerald-400/30 rounded px-1.5 py-0.5 text-[10px]" style="left:8%; top:78%; color:#6ee7b7; touch-action:none;"></div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div class="md:col-span-2">
-              <label class="label">Background Image</label>
-              <div class="flex gap-2">
-                <input id="hero-image" class="field flex-1" placeholder="URL / Upload" oninput="updateHeroPreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'hero-image'); setTimeout(updateHeroPreview,800)"></label>
-              </div>
-              <div id="hero-image-preview" class="mt-2"></div>
-            </div>
-            <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
-              <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Label / Title / Desc / Sign — တစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
-              <p class="tiny">နေရာရွှေ့ပြီး Save Hero နှိပ်ပါ။ Slider နဲ့လည်း ချိန်နိုင်ပါတယ်။</p>
-              <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
-                <div>Label X <input type="range" id="hero-label-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hlx">8</span>%</div>
-                <div>Label Y <input type="range" id="hero-label-y" min="0" max="90" value="18" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hly">18</span>%</div>
-                <div>Title X <input type="range" id="hero-title-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-htx">8</span>%</div>
-                <div>Title Y <input type="range" id="hero-title-y" min="0" max="90" value="32" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hty">32</span>%</div>
-                <div>Desc X <input type="range" id="hero-desc-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdx">8</span>%</div>
-                <div>Desc Y <input type="range" id="hero-desc-y" min="0" max="90" value="55" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdy">55</span>%</div>
-                <div>Sign X <input type="range" id="hero-sign-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsx">8</span>%</div>
-                <div>Sign Y <input type="range" id="hero-sign-y" min="0" max="90" value="78" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsy">78</span>%</div>
-              </div>
-              <input type="hidden" id="hero-text-x" value="8"><input type="hidden" id="hero-text-y" value="35">
-            </div>
-            <div>
-              <label class="label">Small Label</label>
-              <input id="hero-label" class="field" placeholder="Travel Journal" oninput="updateHeroPreview()">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="label">Label အရောင်</label>
-                <input id="hero-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Label Size <span class="range-val" id="val-hero-label-fs">12px</span></label>
-                <input type="range" id="hero-label-fs" min="8" max="24" value="12" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
-              </div>
-            </div>
-            <div class="md:col-span-2">
-              <label class="label">Title (HTML ok)</label>
-              <textarea id="hero-title" class="field min-h-16" oninput="updateHeroPreview()" placeholder="New Places.<br><span>Same Curiosity.</span>"></textarea>
-            </div>
-            <div>
-              <label class="label">Title အရောင်</label>
-              <input id="hero-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
-            </div>
-            <div>
-              <label class="label flex justify-between">Title Size <span class="range-val" id="val-hero-title-fs">28px</span></label>
-              <input type="range" id="hero-title-fs" min="14" max="56" value="28" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
-            </div>
-            <div>
-              <label class="label">Title Font Weight</label>
-              <select id="hero-title-weight" class="field" onchange="updateHeroPreview()">
-                <option value="400">Regular</option>
-                <option value="600">Semi Bold</option>
-                <option value="700">Bold</option>
-                <option value="900" selected>Black</option>
-              </select>
-            </div>
-            <div>
-              <label class="label">Title Style</label>
-              <select id="hero-title-style" class="field" onchange="updateHeroPreview()">
-                <option value="normal">Normal</option>
-                <option value="italic">Italic</option>
-              </select>
-            </div>
-            <div class="md:col-span-2">
-              <label class="label">Description</label>
-              <textarea id="hero-desc" class="field min-h-16" oninput="updateHeroPreview()"></textarea>
-            </div>
-            <div>
-              <label class="label">Description အရောင်</label>
-              <input id="hero-desc-color" type="color" value="#a7f3d0" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
-            </div>
-            <div>
-              <label class="label flex justify-between">Desc Size <span class="range-val" id="val-hero-desc-fs">14px</span></label>
-              <input type="range" id="hero-desc-fs" min="10" max="28" value="14" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
-            </div>
-            <div>
-              <label class="label">Signature</label>
-              <input id="hero-sign" class="field" placeholder="— Htoo Htet" oninput="updateHeroPreview()">
-            </div>
-            <div>
-              <label class="label">Sign အရောင်</label>
-              <input id="hero-sign-color" type="color" value="#6ee7b7" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
-            </div>
-            <div>
-              <label class="label">Button Text</label>
-              <input id="hero-btn-text" class="field" placeholder="Explore My Journey">
-            </div>
-            <div>
-              <label class="label">Button Link</label>
-              <input id="hero-btn-link" class="field" placeholder="#stories">
-            </div>
-          </div>
-          <button onclick="saveHero()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Hero</button>
-        </div>
-      </section>
-
-      <!-- MENU -->
-      <section id="view-menu" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Menu Items</h2><p class="mt-1 text-sm text-slate-400">Hamburger menu ထဲမှာ ပြမယ်</p></div>
-        <div class="panel p-5 sm:p-6">
-          <div class="rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Preview · Menu Drawer</span>
-            <div id="menu-preview-box" class="mt-2 space-y-1 text-sm text-emerald-100"></div>
-          </div>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-3 mb-4">
-            <div><label class="label">Label</label><input id="menu-label" class="field" placeholder="Travel Stories"></div>
-            <div><label class="label">Link (href)</label><input id="menu-href" class="field" placeholder="#stories"></div>
-            <div class="flex items-end"><button onclick="addMenuItem()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add Menu</button></div>
-          </div>
-          <div id="menu-list" class="space-y-2"></div>
-        </div>
-      </section>
-
-      <!-- PROUD SPONSORS -->
-      <section id="view-proud" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ကြည့် · logo Upload</p></div>
-        <div class="panel p-5 sm:p-6">
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Proud Bar</span>
-            <div id="proud-preview-bar" class="mt-2 flex flex-wrap items-center gap-4 min-h-[40px]"></div>
-          </div>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-4 mb-4">
-            <div><label class="label">Name *</label><input id="proud-name" class="field" placeholder="AYA Bank"></div>
-            <div>
-              <label class="label">Logo</label>
-              <div class="flex gap-1">
-                <input id="proud-logo" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer px-3"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'proud-logo')"></label>
-              </div>
-            </div>
-            <div><label class="label">Link</label><input id="proud-link" class="field" placeholder="https://..."></div>
-            <div class="flex items-end"><button onclick="addProud()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add</button></div>
-          </div>
-          <div id="proud-list" class="space-y-2"></div>
-        </div>
-      </section>
-
-      <!-- OFFICIAL SPONSOR -->
-      <section id="view-sponsor" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Official Sponsor Banner</h2><p class="mt-1 text-sm text-slate-400">Badge အရောင် · Preview နဲ့ ချိန် · ပုံ Upload</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="admin-sponsor-active" checked onchange="updateSponsorPreview()"><span class="text-sm font-semibold">Sponsor Banner ပြမယ်</span></label>
-
-          <!-- Live Sponsor Preview -->
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Sponsor</span>
-              <span class="tiny" id="sponsor-preview-dims">180px</span>
-            </div>
-            <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700" style="min-height:120px; background:#1a1a1a;">
-              <div class="absolute inset-0 pointer-events-none" style="z-index:1;background:linear-gradient(90deg,rgba(0,0,0,.7) 0%,rgba(0,0,0,.35) 55%,rgba(0,0,0,.15) 100%);"></div>
-              <div class="relative z-10 flex items-center justify-between gap-3 p-4" style="min-height:120px;">
-                <div class="min-w-0 flex-1">
-                  <span id="sp-prev-badge" class="inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black">Official Sponsor</span>
-                  <div id="sp-prev-title" class="mt-1.5 text-base font-black text-white truncate">Sponsor Title</div>
-                  <div id="sp-prev-desc" class="text-[11px] text-white/60 mt-0.5 line-clamp-2">Description…</div>
-                </div>
-                <div id="sp-prev-logo-wrap" class="w-16 h-16 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
-                  <img id="sp-prev-logo" src="" class="w-full h-full object-contain hidden" alt="">
-                  <i class="fa-solid fa-image text-white/30 text-lg" id="sp-prev-logo-icon"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label class="label">Badge Text</label>
-              <input id="admin-sponsor-badge" class="field" placeholder="Exclusive Partner" oninput="updateSponsorPreview()">
-              <p class="tiny mt-1">Official · Exclusive Partner · Main · Co Sponsor</p>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="label">Badge နောက်ခံအရောင်</label>
-                <input id="admin-sponsor-badge-bg" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
-              </div>
-              <div>
-                <label class="label">Badge စာအရောင်</label>
-                <input id="admin-sponsor-badge-color" type="color" value="#000000" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Badge Padding <span class="range-val" id="val-badge-pad">8px</span></label>
-                <input type="range" id="admin-sponsor-badge-pad" min="4" max="20" step="1" value="8" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Badge Font Size <span class="range-val" id="val-badge-fs">10px</span></label>
-                <input type="range" id="admin-sponsor-badge-fs" min="8" max="16" step="1" value="10" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Badge Radius <span class="range-val" id="val-badge-radius">999px</span></label>
-                <input type="range" id="admin-sponsor-badge-radius" min="0" max="24" step="1" value="24" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-                <p class="tiny mt-1">0 = စတုရန်း · 24 = အဝိုင်း</p>
-              </div>
-              <div>
-                <label class="label">Badge Font Weight</label>
-                <select id="admin-sponsor-badge-weight" class="field" onchange="updateSponsorPreview()">
-                  <option value="400">Regular</option>
-                  <option value="600">Semi Bold</option>
-                  <option value="700">Bold</option>
-                  <option value="900" selected>Black</option>
-                </select>
-              </div>
-            </div>
-            <div>
-              <label class="label">Sponsor Title</label>
-              <input id="admin-sponsor-title" class="field" placeholder="Veezoom Myanmar" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label">Sponsor Link</label>
-              <input id="admin-sponsor-link" class="field" placeholder="https://...">
-            </div>
-            <div>
-              <label class="label">Title အရောင်</label>
-              <input id="admin-sponsor-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label flex justify-between">Title Size <span class="range-val" id="val-sp-title-fs">22px</span></label>
-              <input type="range" id="admin-sponsor-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label">Title Weight</label>
-              <select id="admin-sponsor-title-weight" class="field" onchange="updateSponsorPreview()">
-                <option value="400">Regular</option>
-                <option value="600">Semi Bold</option>
-                <option value="700">Bold</option>
-                <option value="900" selected>Black</option>
-              </select>
-            </div>
-            <div class="md:col-span-2">
-              <label class="label">Description</label>
-              <textarea id="admin-sponsor-desc" class="field min-h-16" oninput="updateSponsorPreview()"></textarea>
-            </div>
-            <div>
-              <label class="label">Desc အရောင်</label>
-              <input id="admin-sponsor-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label flex justify-between">Desc Size <span class="range-val" id="val-sp-desc-fs">12px</span></label>
-              <input type="range" id="admin-sponsor-desc-fs" min="10" max="22" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label">Logo / Image</label>
-              <div class="flex gap-2">
-                <input id="admin-sponsor-img" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-img')"></label>
-              </div>
-              <div id="admin-sponsor-img-preview" class="mt-2"></div>
-            </div>
-            <div>
-              <label class="label">Background Image</label>
-              <div class="flex gap-2">
-                <input id="admin-sponsor-bg" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-bg')"></label>
-              </div>
-              <div id="admin-sponsor-bg-preview" class="mt-2"></div>
-            </div>
-            <div class="md:col-span-2">
-              <label class="label flex justify-between">Banner Height <span class="range-val" id="val-sp-h-local">180px</span></label>
-              <input type="range" id="admin-sponsor-height-local" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="document.getElementById('set-sponsor-height') &amp;&amp; (document.getElementById('set-sponsor-height').value=this.value); updateSponsorPreview(); if(typeof updateSizePreview==='function') updateSizePreview();">
-              <p class="tiny mt-1">Brand &amp; Layout မှာလည်း ရှိ — ဒီမှာ တိုက်ရိုက် ချိန်လို့ရ</p>
-            </div>
-          </div>
-          <button onclick="saveSponsor()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Official Sponsor</button>
-        </div>
-      </section>
-
-      <!-- UPCOMING -->
-      <section id="view-upcoming" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Upcoming Section</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန် · စာအရောင်</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="up-active" checked onchange="updateUpcomingPreview()"><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
-
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Upcoming</span>
-            <div class="mt-2 mb-1 text-xs font-bold text-white" id="up-prev-heading">Upcoming</div>
-            <div class="text-[10px] text-emerald-400/70 mb-2" id="up-prev-section-title"></div>
-            <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700" style="min-height:110px; background:linear-gradient(90deg,#1a1a1a,#333);">
-              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-              <div class="relative z-10 p-4 flex flex-col justify-end" style="min-height:110px;">
-                <span id="up-prev-label" class="text-[9px] font-bold uppercase tracking-widest" style="color:#f5c518;">Featured</span>
-                <div id="up-prev-title" class="text-sm font-black text-white mt-0.5">Title</div>
-                <div id="up-prev-desc" class="text-[10px] text-white/70 mt-0.5 line-clamp-2">Desc</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Section Heading</label><input id="up-heading" class="field" placeholder="Upcoming" oninput="updateUpcomingPreview()"></div>
-            <div><label class="label">Section Subtitle</label><input id="up-section-title" class="field" placeholder="Next adventure…" oninput="updateUpcomingPreview()"></div>
-            <div><label class="label">On-image Label</label><input id="up-label" class="field" placeholder="Featured Journey" oninput="updateUpcomingPreview()"></div>
-            <div>
-              <label class="label">Label အရောင်</label>
-              <input id="up-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
-            </div>
-            <div><label class="label">On-image Title *</label><input id="up-title" class="field" placeholder="Roads of Ayeyarwaddy" oninput="updateUpcomingPreview()"></div>
-            <div>
-              <label class="label">Title အရောင်</label>
-              <input id="up-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label flex justify-between">Title Size <span class="range-val" id="val-up-title-fs">22px</span></label>
-              <input type="range" id="up-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label">Title Weight</label>
-              <select id="up-title-weight" class="field" onchange="updateUpcomingPreview()">
-                <option value="400">Regular</option>
-                <option value="600">Semi Bold</option>
-                <option value="700">Bold</option>
-                <option value="900" selected>Black</option>
-              </select>
-            </div>
-            <div>
-              <label class="label">Label Size</label>
-              <input type="range" id="up-label-fs" min="8" max="20" value="11" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label">Desc Size</label>
-              <input type="range" id="up-desc-fs" min="10" max="22" value="13" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label">Desc အရောင်</label>
-              <input id="up-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label">Image</label>
-              <div class="flex gap-2">
-                <input id="up-image" class="field flex-1" oninput="updateUpcomingPreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'up-image'); setTimeout(updateUpcomingPreview,800)"></label>
-              </div>
-              <div id="up-image-preview" class="mt-2"></div>
-            </div>
-            <div class="md:col-span-2"><label class="label">Description</label><textarea id="up-desc" class="field min-h-14" oninput="updateUpcomingPreview()"></textarea></div>
-          </div>
-          <button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
-        </div>
-      </section>
-
-      <section id="view-posts" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Travel Posts</h2><p class="mt-1 text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload ရနိုင်</p></div>
-        <div class="panel p-5 sm:p-6">
-          <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Post Card</span>
-            <div id="post-live-preview" class="mt-2 max-w-xs rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
-              <div id="post-prev-img-wrap" class="h-28 bg-slate-800 flex items-center justify-center overflow-hidden">
-                <img id="post-prev-img" src="" class="w-full h-full object-cover hidden" alt="">
-                <i class="fa-solid fa-image text-slate-600 text-2xl" id="post-prev-img-icon"></i>
-              </div>
-              <div class="p-3">
-                <div id="post-prev-title" class="font-bold text-sm text-white line-clamp-2">Post Title</div>
-                <div id="post-prev-desc" class="text-[11px] text-slate-400 mt-1 line-clamp-2">Short description…</div>
-                <div id="post-prev-meta" class="text-[10px] text-emerald-400 mt-2">Location · Category</div>
-              </div>
-            </div>
-          </div>
-          <input id="editing-post-id" type="hidden">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Title *</label><input id="admin-post-title" class="field" placeholder="Bagan - Ancient Temples" oninput="autoSlug();updatePostPreview()"></div>
-            <div><label class="label">Slug * <span class="tiny">(URL)</span></label><input id="admin-post-slug" class="field" placeholder="bagan-ancient-temples" oninput="this.dataset.manual='1'"><p class="tiny mt-1">Title ကနေ auto ဖန်တီး — ကိုယ်တိုင်ပြင်လို့ရ</p></div>
-            <div class="md:col-span-2">
-              <label class="label">Cover Image *</label>
-              <div class="flex gap-2">
-                <input id="admin-post-img" class="field flex-1" oninput="updatePostPreview()" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-post-img')"></label>
-              </div>
-              <div id="admin-post-img-preview" class="mt-2"></div>
-            </div>
-            <div class="md:col-span-2"><label class="label">Short Description * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" oninput="updatePostPreview()" placeholder="အကျဉ်းချုပ်..."></textarea></div>
-            <div class="md:col-span-2">
-              <label class="label">Article Content *</label>
-              <div class="flex gap-2 mb-2 flex-wrap">
-                <label class="btn btn-muted cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>စာထဲ ပုံ Upload ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
-                <span class="tiny self-center">Upload ပြီး [img]url[/img] အလိုအလျောက် ထည့်ပေးမယ်</span>
-              </div>
-              <textarea id="admin-post-content" class="field min-h-32" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="ခေါင်းစဉ် / စာသား ရေးပါ&#10;&#10;ပုံထည့်ရန် အပေါ်က Upload ခလုတ် သုံးပါ&#10;[img]...[/img]" oninput="updateContentPreview()"></textarea>
-              <div class="mt-3 rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-                <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Article Content</span>
-                <div id="content-live-preview" class="mt-2 prose prose-invert max-w-none text-sm text-slate-200 space-y-3 min-h-[60px]"></div>
-              </div>
-            </div>
-            <div><label class="label">Location *</label><input id="admin-post-location" class="field" oninput="updatePostPreview()" placeholder="Bagan, Inle Lake..."></div>
-            <div><label class="label">Category *</label>
-              <select id="admin-post-category" class="field" onchange="updatePostPreview()">
-                <option value="Travel Story">Travel Story</option>
-                <option value="Guide">Guide</option>
-                <option value="Food">Food</option>
-                <option value="Culture">Culture</option>
-                <option value="Adventure">Adventure</option>
-              </select>
-            </div>
-            <div><label class="label">Travel Date</label><input id="admin-post-travel-date" type="date" class="field"></div>
-            <div><label class="label">Author</label><input id="admin-post-author" class="field" placeholder="Htoo Htet" value="Htoo Htet"></div>
-            <div class="md:col-span-2"><label class="label">ဘယ် Row မှာပြမလဲ?</label>
-              <select id="admin-post-section" class="field"><option value="latest">Latest Travel Posts (default)</option></select>
-            </div>
-            <div class="md:col-span-2 border-t border-slate-700 pt-4 mt-2">
-              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">SEO (optional)</p>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label class="label">SEO Title</label><input id="admin-post-seo-title" class="field" placeholder="ဗလာထားရင် Title သုံးမယ်"></div>
-                <div><label class="label">Meta Description</label><input id="admin-post-meta" class="field" placeholder="ဗလာထားရင် Short Description သုံးမယ်"></div>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 flex flex-wrap gap-2">
-            <button id="post-save-button" onclick="savePost()" class="btn btn-green"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Publish Post</button>
-            <button id="post-cancel-button" onclick="cancelPostEdit()" class="btn btn-muted hidden">Cancel</button>
-          </div>
-        </div>
-        <div class="panel p-5 sm:p-6">
-          <div class="mb-4 flex items-center justify-between"><h3 class="font-bold">Saved Posts</h3><span id="post-count" class="tiny">0 posts</span></div>
-          <div id="posts-list" class="space-y-3"></div>
-        </div>
-      </section>
-
-      <!-- CUSTOM ROWS -->
-      <section id="view-sections" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Custom Rows / Sections</h2><p class="mt-1 text-sm text-slate-400">Homepage မှာ extra row တွေ ထည့်နိုင်တယ်</p></div>
-        <div class="panel p-5 sm:p-6">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Row ခေါင်းစဉ် *</label><input id="section-title" class="field" placeholder="Featured Destinations"></div>
-            <div><label class="label">Subtitle</label><input id="section-subtitle" class="field" placeholder="Explore more"></div>
-            <div><label class="label">Layout</label>
-              <select id="section-layout" class="field">
-                <option value="grid">Card Grid (4 columns)</option>
-                <option value="wide">Wide Row</option>
-              </select>
-            </div>
-          </div>
-          <button onclick="addHomeSection()" class="btn btn-purple mt-4"><i class="fa-solid fa-plus mr-2"></i>Add Row</button>
-        </div>
-        <div class="panel p-5 sm:p-6">
-          <div class="mb-4 flex items-center justify-between"><h3 class="font-bold">Created Rows</h3><span id="section-count" class="tiny">0 rows</span></div>
-          <div id="home-sections-list" class="space-y-3"></div>
-        </div>
-      </section>
-
-      <!-- YOUTUBE -->
-      <section id="view-youtube" class="view space-y-5">
-        <div><h2 class="text-xl font-black">YouTube Section</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန်</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="yt-active" checked onchange="updateYoutubePreview()"><span class="text-sm font-semibold">YouTube Section ပြမယ်</span></label>
-
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · YouTube</span>
-            <div id="yt-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 p-4" style="min-height:100px; background:linear-gradient(90deg,#1a0505,#000);">
-              <div class="flex items-center gap-2 mb-2">
-                <span class="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center"><i class="fa-brands fa-youtube text-white text-xs"></i></span>
-                <span id="yt-prev-label" class="text-red-400 text-xs font-bold">Watch My YouTube</span>
-              </div>
-              <div id="yt-prev-title" class="text-sm font-black text-white">Channel Title</div>
-              <div id="yt-prev-desc" class="text-[10px] text-white/60 mt-1 line-clamp-2">Description</div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Label</label><input id="yt-label" class="field" oninput="updateYoutubePreview()"></div>
-            <div><label class="label">Channel Link</label><input id="yt-link" class="field"></div>
-            <div class="md:col-span-2"><label class="label">Title</label><textarea id="yt-title" class="field min-h-14" oninput="updateYoutubePreview()"></textarea></div>
-            <div>
-              <label class="label">Title အရောင်</label>
-              <input id="yt-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateYoutubePreview()">
-            </div>
-            <div>
-              <label class="label flex justify-between">Title Size <span class="range-val" id="val-yt-title-fs">22px</span></label>
-              <input type="range" id="yt-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateYoutubePreview()">
-            </div>
-            <div>
-              <label class="label">Title Weight</label>
-              <select id="yt-title-weight" class="field" onchange="updateYoutubePreview()">
-                <option value="400">Regular</option>
-                <option value="600">Semi Bold</option>
-                <option value="700">Bold</option>
-                <option value="900" selected>Black</option>
-              </select>
-            </div>
-            <div class="md:col-span-2"><label class="label">Description</label><textarea id="yt-desc" class="field min-h-14" oninput="updateYoutubePreview()"></textarea></div>
-            <div>
-              <label class="label">Thumbnail</label>
-              <div class="flex gap-2">
-                <input id="yt-thumb" class="field flex-1" oninput="updateYoutubePreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'yt-thumb'); setTimeout(updateYoutubePreview,800)"></label>
-              </div>
-              <div id="yt-thumb-preview" class="mt-2"></div>
-            </div>
-            <div>
-              <label class="label">Background</label>
-              <div class="flex gap-2">
-                <input id="yt-bg" class="field flex-1" oninput="updateYoutubePreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'yt-bg'); setTimeout(updateYoutubePreview,800)"></label>
-              </div>
-              <div id="yt-bg-preview" class="mt-2"></div>
-            </div>
-          </div>
-          <button onclick="saveYoutube()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save YouTube Section</button>
-        </div>
-      </section>
-
-      <section id="view-about" class="view space-y-5">
-        <div><h2 class="text-xl font-black">About Section</h2><p class="mt-1 text-sm text-slate-400">Preview · စာအရောင် · Font weight</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="about-active" checked onchange="updateAboutPreview()"><span class="text-sm font-semibold">About ပြမယ်</span></label>
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-4">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · About</span>
-            <div class="mt-3 rounded-xl border border-slate-700 p-4 bg-slate-900/50">
-              <h3 id="about-prev-title" class="text-lg font-black text-white">About Htoo Htet</h3>
-              <p id="about-prev-desc" class="mt-2 text-sm text-slate-300 leading-relaxed">Description…</p>
-            </div>
-          </div>
-          <div><label class="label">Title</label><input id="about-title" class="field" placeholder="About Htoo Htet" oninput="updateAboutPreview()"></div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="label">Title အရောင်</label><input id="about-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateAboutPreview()"></div>
-            <div><label class="label flex justify-between">Title Size <span class="range-val" id="val-about-fs">24px</span></label>
-              <input type="range" id="about-title-fs" min="14" max="40" value="24" class="w-full accent-emerald-500" oninput="updateAboutPreview()">
-            </div>
-            <div><label class="label">Title Weight</label>
-              <select id="about-title-weight" class="field" onchange="updateAboutPreview()">
-                <option value="400">Regular</option><option value="600">Semi Bold</option><option value="700" selected>Bold</option><option value="900">Black</option>
-              </select>
-            </div>
-          </div>
-          <div><label class="label">Description</label><textarea id="about-desc" class="field min-h-28" oninput="updateAboutPreview()"></textarea></div>
-          <div><label class="label">Description အရောင်</label><input id="about-desc-color" type="color" value="#a7f3d0" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateAboutPreview()"></div>
-          <button onclick="saveAbout()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save About</button>
-        </div>
-      </section>
-
-      <section id="view-social" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Social Links</h2><p class="mt-1 text-sm text-slate-400">Search icon ဘေး + Header / Footer မှာ ပြမယ် (Facebook, YouTube, TikTok, Viber)</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label class="toggle-row mb-1"><input type="checkbox" id="social-show-fb" checked><span class="text-sm font-semibold">Facebook ပြမယ်</span></label>
-              <input id="admin-fb" class="field" placeholder="https://facebook.com/...">
-            </div>
-            <div>
-              <label class="toggle-row mb-1"><input type="checkbox" id="social-show-yt" checked><span class="text-sm font-semibold">YouTube ပြမယ်</span></label>
-              <input id="admin-yt" class="field" placeholder="https://youtube.com/...">
-            </div>
-            <div>
-              <label class="toggle-row mb-1"><input type="checkbox" id="social-show-tt" checked><span class="text-sm font-semibold">TikTok ပြမယ်</span></label>
-              <input id="admin-tt" class="field" placeholder="https://tiktok.com/@...">
-            </div>
-            <div>
-              <label class="toggle-row mb-1"><input type="checkbox" id="social-show-vb" checked><span class="text-sm font-semibold">Viber ပြမယ်</span></label>
-              <input id="admin-vb" class="field" placeholder="viber://chat?number=95... သို့မဟုတ် https://...">
-            </div>
-          </div>
-          <button onclick="saveSocial()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Social Links</button>
-        </div>
-      </section>
-
-      <footer class="border-t border-slate-800 pt-5 text-center text-xs text-slate-500">© <span id="footer-year"></span> HTOO HTET Admin Studio</footer>
-    </div>
-  </main>
-</div>
-
 <script>
+const $ = id => document.getElementById(id);
+function setStyle(el, prop, val) { if (!el || val == null || val === '') return; el.style.setProperty(prop, String(val), 'important'); }
+const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let allStoryPosts = [];
+let siteSettings = {};
+let siteMenu = [];
+
+function toggleMenu() {
+  const menu = $('site-menu'), overlay = $('drawer-overlay');
+  const open = menu.classList.contains('translate-x-full');
+  menu.classList.toggle('translate-x-full', !open);
+  overlay.classList.toggle('opacity-0', !open);
+  overlay.classList.toggle('pointer-events-none', !open);
+  document.body.classList.toggle('overflow-hidden', open);
+}
+function closeMenu() {
+  $('site-menu').classList.add('translate-x-full');
+  $('drawer-overlay').classList.add('opacity-0', 'pointer-events-none');
+  document.body.classList.remove('overflow-hidden');
+}
+
+const searchPanel = $('search-panel');
+const searchInput = $('header-search-input');
+$('search-toggle').addEventListener('click', () => {
+  searchPanel.classList.toggle('open');
+  if (searchPanel.classList.contains('open')) setTimeout(() => searchInput.focus(), 50);
+});
+$('search-close').addEventListener('click', () => {
+  searchPanel.classList.remove('open');
+  searchInput.value = '';
+  renderStoryCards();
+});
+searchInput.addEventListener('input', () => renderStoryCards());
+
+function read(key, fallback) {
+  try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
+}
+
+function applyThemeClass(theme, mode) {
+  document.body.classList.remove('theme-forest', 'theme-ocean', 'theme-sunset', 'theme-navy', 'mode-light', 'mode-dark');
+  document.body.classList.add('theme-' + (theme || 'forest'));
+  document.body.classList.add(mode === 'light' ? 'mode-light' : 'mode-dark');
+  const icon = document.getElementById('mode-toggle-icon');
+  if (icon) icon.className = mode === 'light' ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
+}
+
+function toggleUserMode() {
+  const isLight = document.body.classList.contains('mode-light');
+  const next = isLight ? 'dark' : 'light';
+  localStorage.setItem('hh_user_mode', next);
+  document.body.classList.remove('mode-light', 'mode-dark');
+  document.body.classList.add(next === 'light' ? 'mode-light' : 'mode-dark');
+  const icon = document.getElementById('mode-toggle-icon');
+  if (icon) icon.className = next === 'light' ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
+}
+
+function applyHeroLayout(s) {
+  const root = document.documentElement;
+  // vertical: top | center | bottom
+  const vMap = { top: 'flex-start', center: 'center', bottom: 'flex-end' };
+  root.style.setProperty('--hero-v-align', vMap[s.heroVAlign] || 'center');
+  // horizontal text: left | center | right
+  const align = s.heroTextAlign || 'left';
+  root.style.setProperty('--hero-text-align', align);
+  if (align === 'center') {
+    root.style.setProperty('--hero-ml', 'auto');
+    root.style.setProperty('--hero-mr', 'auto');
+  } else if (align === 'right') {
+    root.style.setProperty('--hero-ml', 'auto');
+    root.style.setProperty('--hero-mr', '0');
+  } else {
+    root.style.setProperty('--hero-ml', '0');
+    root.style.setProperty('--hero-mr', 'auto');
+  }
+  if (s.heroTextMaxW) root.style.setProperty('--hero-text-maxw', s.heroTextMaxW + 'rem');
+}
+
+function applyColors(s) {
+  if (s.accentColor) document.documentElement.style.setProperty('--brand-accent', s.accentColor);
+  if (s.bgColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-bg', s.bgColor);
+  if (s.surfaceColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-surface', s.surfaceColor);
+  if (s.cardColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-card', s.cardColor);
+  if (s.fontFamily) document.documentElement.style.setProperty('--brand-font', s.fontFamily);
+  if (s.headingFont) document.documentElement.style.setProperty('--brand-heading-font', s.headingFont);
+  if (s.headingWeight) document.documentElement.style.setProperty('--heading-weight', s.headingWeight);
+  if (s.headingStyle) document.documentElement.style.setProperty('--heading-style', s.headingStyle);
+  if (s.bodyColor) document.documentElement.style.setProperty('--brand-text', s.bodyColor);
+  if (s.headingColor) document.documentElement.style.setProperty('--heading-color', s.headingColor);
+  if (s.heroHeight) document.documentElement.style.setProperty('--hero-min-h', s.heroHeight + 'px');
+  if (s.heroMaxWidth) document.documentElement.style.setProperty('--hero-max-w', s.heroMaxWidth === 100 ? '100%' : s.heroMaxWidth + 'px');
+  if (s.cardImgHeight) document.documentElement.style.setProperty('--card-img-h', s.cardImgHeight + 'rem');
+  if (s.sponsorHeight) document.documentElement.style.setProperty('--sponsor-min-h', s.sponsorHeight + 'px');
+  if (s.upcomingHeight) document.documentElement.style.setProperty('--upcoming-min-h', s.upcomingHeight + 'px');
+  // User preference overrides admin default for light/dark
+  const userMode = localStorage.getItem('hh_user_mode');
+  const mode = userMode || s.mode || 'dark';
+  applyThemeClass(s.theme, mode);
+  applyHeroLayout(s);
+}
+
+function setLogo(url) {
+  ['brand-logo-img', 'footer-logo-img'].forEach(id => {
+    const img = $(id);
+    const icon = $(id.replace('-img', '-icon'));
+    if (!img) return;
+    if (url) {
+      img.src = url; img.classList.remove('hidden');
+      if (icon) icon.classList.add('hidden');
+    } else {
+      img.classList.add('hidden');
+      if (icon) icon.classList.remove('hidden');
+    }
+  });
+}
+
+function renderSocial(containerId, social, flags) {
+  const el = $(containerId);
+  if (!el) return;
+  const items = [
+    { key: 'fb', icon: 'fa-facebook-f', hover: 'hover:bg-blue-600', flag: 'showFb' },
+    { key: 'yt', icon: 'fa-youtube', hover: 'hover:bg-red-600', flag: 'showYt' },
+    { key: 'tt', icon: 'fa-tiktok', hover: 'hover:bg-black', flag: 'showTt' },
+    { key: 'vb', icon: 'fa-viber', hover: 'hover:bg-purple-600', flag: 'showVb' }
+  ];
+  el.innerHTML = items.map(i => {
+    const url = social[i.key];
+    const on = flags[i.flag] !== false && url;
+    if (!on) return '';
+    return `<a href="${safe(url)}" target="_blank" rel="noopener" class="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center ${i.hover} hover:text-white transition text-xs"><i class="fa-brands ${i.icon}"></i></a>`;
+  }).join('');
+}
+
+function renderMenu() {
+  const menu = siteMenu.length ? siteMenu : [
+    { label: 'Home', href: '#home' },
+    { label: 'Travel Stories', href: '#stories' },
+    { label: 'YouTube', href: '#youtube-section' },
+    { label: 'About', href: '#about-section' },
+    { label: 'Contact', href: '#contact' }
+  ];
+  const mob = $('mobile-nav');
+  const foot = $('footer-links');
+  if (mob) mob.innerHTML = menu.map(m => `<a href="${safe(m.href)}" onclick="closeMenu()" class="rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3"><i class="fa-solid fa-chevron-right text-[10px] opacity-40"></i>${safe(m.label)}</a>`).join('');
+  if (foot) foot.innerHTML = menu.map(m => `<li><a href="${safe(m.href)}" class="hover:text-yellow-400 transition">${safe(m.label)}</a></li>`).join('');
+}
+
+function loadBlogData() {
+  $('footer-year').textContent = new Date().getFullYear();
+  siteSettings = read('hh_settings', {});
+  applyColors(siteSettings);
+
+  const brand = siteSettings.brandName || 'HTOO HTET';
+  const tagline = siteSettings.brandTagline || 'Travel Journal & Beyond';
+  ['brand-name', 'footer-brand-name', 'mobile-brand-name', 'footer-copy-name'].forEach(id => { if ($(id)) $(id).textContent = brand; });
+  const showTagline = siteSettings.showBrandTagline === true;
+  const bt = $('brand-tagline');
+  if (bt) { bt.textContent = tagline; bt.classList.toggle('hidden', !showTagline); }
+  $('footer-brand-tagline').textContent = tagline;
+  setLogo(siteSettings.logoUrl || '');
+  if (siteSettings.contactEmail) {
+    const a = $('contact-email');
+    if (a) { a.textContent = siteSettings.contactEmail; a.href = 'mailto:' + siteSettings.contactEmail; }
+  }
+  if (siteSettings.contactLocation) $('contact-location').textContent = siteSettings.contactLocation;
+  if (siteSettings.footerTagline) $('footer-tagline').innerHTML = siteSettings.footerTagline.replace(/\n/g, '<br>');
+
+  const hero = read('hh_hero', {});
+  if (hero.image) $('hero-img').src = hero.image;
+  if (hero.label) $('hero-label').textContent = hero.label;
+  if (hero.labelColor) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
+  if (hero.labelFs) setStyle($('hero-label'), 'font-size', hero.labelFs + 'px');
+  if (hero.title) $('hero-title').innerHTML = hero.title;
+  if (hero.titleColor) setStyle($('hero-title'), 'color', hero.titleColor);
+  if (hero.titleFs) setStyle($('hero-title'), 'font-size', 'clamp(1.2rem, 4vw, ' + hero.titleFs + 'px)');
+  if (hero.titleWeight) setStyle($('hero-title'), 'font-weight', hero.titleWeight);
+  if (hero.titleStyle) setStyle($('hero-title'), 'font-style', hero.titleStyle);
+  if (hero.desc) $('hero-desc').textContent = hero.desc;
+  if (hero.descColor) setStyle($('hero-desc'), 'color', hero.descColor);
+  if (hero.descFs) setStyle($('hero-desc'), 'font-size', hero.descFs + 'px');
+  if (hero.sign != null && $('hero-sign')) {
+    $('hero-sign').textContent = hero.sign;
+    if (hero.signColor) setStyle($('hero-sign'), 'color', hero.signColor);
+  }
+  function posEl(id, x, y) {
+    const el = $(id);
+    if (!el) return;
+    if (x != null) setStyle(el, 'left', x + '%');
+    if (y != null) setStyle(el, 'top', y + '%');
+  }
+  posEl('hero-label', hero.labelX != null ? hero.labelX : (hero.textX != null ? hero.textX : 8), hero.labelY != null ? hero.labelY : 18);
+  posEl('hero-title', hero.titleX != null ? hero.titleX : (hero.textX != null ? hero.textX : 8), hero.titleY != null ? hero.titleY : 28);
+  posEl('hero-desc', hero.descX != null ? hero.descX : 8, hero.descY != null ? hero.descY : 55);
+  posEl('hero-sign', hero.signX != null ? hero.signX : 8, hero.signY != null ? hero.signY : 85);
+  // button sits under desc
+  const by = hero.descY != null ? Math.min(88, hero.descY + 18) : 72;
+  posEl('hero-btn-wrap', hero.descX != null ? hero.descX : 8, by);
+  if (hero.btnText) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
+  if (hero.btnLink) $('hero-btn').href = hero.btnLink;
+  if (hero.sign) $('hero-sign').textContent = hero.sign;
+  $('hero-section').classList.toggle('hidden', hero.active === false);
+
+  siteMenu = read('hh_menu', []);
+  renderMenu();
+
+  const social = read('hh_social', {});
+  const flags = {
+    showFb: social.showFb !== false,
+    showYt: social.showYt !== false,
+    showTt: social.showTt !== false,
+    showVb: social.showVb !== false
+  };
+  renderSocial('social-links-header', social, flags);
+  renderSocial('social-links-mobile', social, flags);
+  renderSocial('footer-social', social, flags);
+  if (social.yt) { const yl = $('youtube-link'); if (yl) yl.href = social.yt; }
+
+  const proud = read('hh_proud_sponsors', []);
+  const proudSec = $('proud-sponsors-section');
+  if (proud.length && proud.some(p => p.active !== false)) {
+    proudSec.classList.remove('hidden');
+    $('proud-sponsors-list').innerHTML = proud.filter(p => p.active !== false).map(p => {
+      if (p.logo) return `<a href="${safe(p.link || '#')}" target="_blank" class="shrink-0 opacity-80 hover:opacity-100 transition"><img src="${safe(p.logo)}" alt="${safe(p.name)}" class="h-7 sm:h-8 object-contain"></a>`;
+      return `<span class="text-white/90 font-bold text-sm shrink-0 opacity-80">${safe(p.name)}</span>`;
+    }).join('');
+  } else proudSec.classList.add('hidden');
+
+  const sponsor = read('hh_sponsor', {});
+  const sc = $('sponsor-container');
+  if (sponsor.active === false || (!sponsor.title && !sponsor.img)) {
+    sc.classList.add('hidden');
+  } else {
+    sc.classList.remove('hidden');
+    const badge = $('sponsor-badge');
+    badge.textContent = sponsor.badge || 'Official Sponsor';
+    if (sponsor.badgeBg) {
+      badge.style.background = sponsor.badgeBg;
+      badge.classList.remove('accent-bg');
+    } else {
+      badge.style.background = '';
+      badge.classList.add('accent-bg');
+    }
+    if (sponsor.badgeColor) badge.style.color = sponsor.badgeColor;
+    else badge.style.color = '';
+    if (sponsor.badgePad) badge.style.padding = Math.round(sponsor.badgePad/2) + 'px ' + sponsor.badgePad + 'px';
+    if (sponsor.badgeFs) badge.style.fontSize = sponsor.badgeFs + 'px';
+    if (sponsor.badgeRadius != null) badge.style.borderRadius = (sponsor.badgeRadius >= 24 ? '9999px' : sponsor.badgeRadius + 'px');
+    if (sponsor.badgeWeight) badge.style.fontWeight = sponsor.badgeWeight;
+    if (sponsor.title) $('sponsor-title').textContent = sponsor.title;
+    if (sponsor.titleColor) setStyle($('sponsor-title'), 'color', sponsor.titleColor);
+    if (sponsor.titleFs) setStyle($('sponsor-title'), 'font-size', 'clamp(1rem, 3.5vw, ' + sponsor.titleFs + 'px)');
+    if (sponsor.titleWeight) setStyle($('sponsor-title'), 'font-weight', sponsor.titleWeight);
+    if (sponsor.desc) {
+      const d = $('sponsor-desc');
+      if (d) {
+        d.textContent = sponsor.desc;
+        if (sponsor.descColor) setStyle(d, 'color', sponsor.descColor);
+        if (sponsor.descFs) setStyle(d, 'font-size', sponsor.descFs + 'px');
+      }
+    }
+    if (sponsor.desc) $('sponsor-desc').textContent = sponsor.desc;
+    if (sponsor.link) $('sponsor-link').href = sponsor.link;
+    if (sponsor.img) { $('sponsor-img').src = sponsor.img; $('sponsor-img').style.display = ''; }
+    if (sponsor.bgImage) $('sponsor-bg').src = sponsor.bgImage;
+  }
+
+  const up = read('hh_upcoming', {});
+  const upSec = $('upcoming-section');
+  if (up.active === false || !up.title) {
+    upSec.classList.add('hidden');
+  } else {
+    upSec.classList.remove('hidden');
+    $('upcoming-heading-text').textContent = up.heading || 'Upcoming';
+    // Optional section subtitle ABOVE banner (separate from on-image title)
+    const secTitle = $('upcoming-section-title');
+    if (up.sectionTitle) {
+      secTitle.textContent = up.sectionTitle;
+      secTitle.classList.remove('hidden');
+    } else {
+      secTitle.classList.add('hidden');
+    }
+    if (up.label) $('upcoming-label').textContent = up.label;
+    if (up.labelColor) { setStyle($('upcoming-label'), 'color', up.labelColor); $('upcoming-label').classList.remove('accent-text'); }
+    if (up.labelFs) setStyle($('upcoming-label'), 'font-size', up.labelFs + 'px');
+    if (up.title) $('upcoming-title').textContent = up.title;
+    if (up.titleColor) setStyle($('upcoming-title'), 'color', up.titleColor);
+    if (up.titleFs) setStyle($('upcoming-title'), 'font-size', 'clamp(1rem, 3.5vw, ' + up.titleFs + 'px)');
+    if (up.titleWeight) setStyle($('upcoming-title'), 'font-weight', up.titleWeight);
+    if (up.desc) $('upcoming-desc').textContent = up.desc;
+    if (up.descColor) setStyle($('upcoming-desc'), 'color', up.descColor);
+    if (up.descFs) setStyle($('upcoming-desc'), 'font-size', up.descFs + 'px');
+    function upPos(id, x, y) {
+      const el = $(id); if (!el) return;
+      if (x != null) setStyle(el, 'left', x + '%');
+      if (y != null) setStyle(el, 'top', y + '%');
+    }
+    upPos('upcoming-label', up.labelX != null ? up.labelX : 6, up.labelY != null ? up.labelY : 40);
+    upPos('upcoming-title', up.titleX != null ? up.titleX : 6, up.titleY != null ? up.titleY : 55);
+    upPos('upcoming-desc', up.descX != null ? up.descX : 6, up.descY != null ? up.descY : 72);
+    if (up.frameH) {
+      setStyle($('upcoming-banner'), 'min-height', up.frameH + 'px');
+      document.documentElement.style.setProperty('--upcoming-min-h', up.frameH + 'px');
+    }
+    if (up.image) $('upcoming-img').src = up.image;
+  }
+
+  const yt = read('hh_youtube', {});
+  const ytSec = $('youtube-section');
+  if (yt.active === false) ytSec.classList.add('hidden');
+  else {
+    ytSec.classList.remove('hidden');
+    if (yt.label) $('youtube-label').textContent = yt.label;
+    if (yt.title) $('youtube-title').innerHTML = yt.title;
+    if (yt.titleColor) setStyle($('youtube-title'), 'color', yt.titleColor);
+    if (yt.titleFs) setStyle($('youtube-title'), 'font-size', 'clamp(1rem, 3.5vw, ' + yt.titleFs + 'px)');
+    if (yt.titleWeight) setStyle($('youtube-title'), 'font-weight', yt.titleWeight);
+    if (yt.desc) $('youtube-desc').textContent = yt.desc;
+    if (yt.link) $('youtube-link').href = yt.link;
+    else if (social.yt) $('youtube-link').href = social.yt;
+    if (yt.thumb) $('youtube-thumb').src = yt.thumb;
+    if (yt.bgImage) $('youtube-bg').src = yt.bgImage;
+  }
+
+  const about = read('hh_about', {});
+  if (about.title) $('about-title').textContent = about.title;
+  if (about.titleColor) setStyle($('about-title'), 'color', about.titleColor);
+  if (about.titleFs) setStyle($('about-title'), 'font-size', 'clamp(1.1rem, 3vw, ' + about.titleFs + 'px)');
+  if (about.titleWeight) setStyle($('about-title'), 'font-weight', about.titleWeight);
+  if (about.desc) $('about-desc').textContent = about.desc;
+  if (about.descColor) $('about-desc').style.color = about.descColor;
+  $('about-section').classList.toggle('hidden', about.active === false);
+
+  if (siteSettings.storiesHeading) $('stories-heading').textContent = siteSettings.storiesHeading;
+  if (siteSettings.storiesSub) $('stories-sub').textContent = siteSettings.storiesSub;
+
+  allStoryPosts = read('hh_posts', []);
+  const cats = [...new Set(allStoryPosts.map(p => p.category || p.type || p.location || '').filter(Boolean))];
+  const sel = $('story-category-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">အမျိုးအစားအားလုံး</option>' + cats.map(c => `<option value="${safe(c)}">${safe(c)}</option>`).join('');
+  if (cats.includes(cur)) sel.value = cur;
+
+  renderStoryCards();
+  renderExtraHomeSections();
+}
+
+function formatDate(ts) {
+  if (!ts) return '';
+  try {
+    const d = new Date(typeof ts === 'number' ? ts : ts);
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch { return ''; }
+}
+
+function renderStoryCards() {
+  const q = (searchInput?.value || '').trim().toLowerCase();
+  const category = $('story-category-filter')?.value || '';
+  const posts = allStoryPosts.filter(p => {
+    const isLatest = !p.sectionId || p.sectionId === 'latest';
+    if (!isLatest) return false;
+    if (category && (p.category || p.type || p.location || '') !== category) return false;
+    if (!q) return true;
+    return [p.title, p.desc, p.location, p.category, p.type].some(v => String(v || '').toLowerCase().includes(q));
+  });
+  const box = $('blog-posts-container');
+  if (!posts.length) {
+    box.innerHTML = `<div class="col-span-full rounded-2xl border border-dashed border-emerald-800/50 bg-emerald-950/40 p-10 text-center">
+      <i class="fa-solid fa-book-open text-3xl text-emerald-700 mb-3 block"></i>
+      <p class="text-sm text-emerald-400/70">Story မရှိသေးပါ။ Admin မှ Post ထည့်ပါ။</p>
+    </div>`;
+    return;
+  }
+  const imgH = siteSettings.cardImgHeight ? siteSettings.cardImgHeight + 'rem' : '11rem';
+  box.innerHTML = posts.map(post => {
+    const idx = allStoryPosts.indexOf(post);
+    const tag = (post.location || post.category || post.type || 'MYANMAR').toUpperCase();
+    const dateStr = formatDate(post.publishedDate) || formatDate(post.id) || '';
+    return `
+    <button type="button" onclick="openArticle(${idx})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
+      <div class="relative overflow-hidden bg-emerald-950" style="height: ${imgH}">
+        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600')}" alt="${safe(post.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        <span class="absolute top-3 left-3 bg-black/75 backdrop-blur-sm accent-text text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase">${safe(tag)}</span>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2 group-hover:text-emerald-300 transition">${safe(post.title)}</h3>
+        <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2 leading-relaxed flex-1">${safe(post.desc || '')}</p>
+        <div class="mt-3 flex items-center justify-between text-[11px] text-emerald-500/60">
+          <span>${dateStr}</span>
+          <span class="accent-text font-bold flex items-center gap-1">Read <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
+        </div>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+function formatArticleBody(raw) {
+  if (!raw) return '';
+  let t = String(raw).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  t = t.replace(/\[img(?:\s+size=(sm|md|lg|full))?\]([\s\S]*?)\[\/img\]/gi, function(_, size, u) {
+    u = (u||'').trim().replace(/&amp;/g,'&');
+    size = size || 'md';
+    var maxH = { sm:'160px', md:'280px', lg:'420px', full:'none' }[size] || '280px';
+    var maxW = size === 'sm' ? '60%' : (size === 'md' ? '85%' : '100%');
+    return '<img src="'+u.replace(/"/g,'&quot;')+'" alt="" style="max-width:'+maxW+';width:100%;border-radius:12px;margin:1rem 0;display:block;max-height:'+maxH+';object-fit:contain;background:rgba(0,0,0,.4)">';
+  });
+  t = t.replace(/^### (.+)$/gm, '<h4 class="text-base font-bold text-white mt-4 mb-1">$1</h4>');
+  t = t.replace(/^## (.+)$/gm, '<h3 class="text-lg font-bold text-white mt-4 mb-1">$1</h3>');
+  t = t.replace(/^# (.+)$/gm, '<h2 class="text-xl font-black text-white mt-4 mb-2">$1</h2>');
+  t = t.replace(/\n/g, '<br>');
+  return t;
+}
+function openArticle(index) {
+  const post = allStoryPosts[index];
+  if (!post) return;
+  $('article-image').src = post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000';
+  $('article-title').textContent = post.title || 'Travel Story';
+  $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ');
+  let body = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
+  $('article-body').innerHTML = formatArticleBody(body);
+  const related = allStoryPosts.filter((_, i) => i !== index).slice(0, 3);
+  $('related-stories').innerHTML = related.length
+    ? related.map(p => `<button onclick="openArticle(${allStoryPosts.indexOf(p)})" class="w-full text-left flex gap-3 rounded-xl border border-emerald-800/40 p-2 hover:bg-emerald-900/40 transition">
+        <img src="${safe(p.img || '')}" class="w-16 h-12 object-cover rounded-lg shrink-0" alt="" onerror="this.style.display='none'">
+        <span class="text-sm font-semibold text-emerald-100 self-center line-clamp-2">${safe(p.title)}</span>
+      </button>`).join('')
+    : '<p class="text-sm text-emerald-500/50">ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။</p>';
+  $('article-modal').classList.remove('hidden');
+  document.body.classList.add('overflow-hidden');
+}
+function closeArticle() {
+  $('article-modal').classList.add('hidden');
+  document.body.classList.remove('overflow-hidden');
+}
+
+function renderExtraHomeSections() {
+  const container = $('extra-home-sections');
+  if (!container) return;
+  const sections = read('hh_home_sections', []);
+  const posts = read('hh_posts', []);
+  if (!sections.length) { container.innerHTML = ''; return; }
+  const imgH = siteSettings.cardImgHeight ? siteSettings.cardImgHeight + 'rem' : '11rem';
+  container.innerHTML = sections.map(section => {
+    const sectionPosts = posts.filter(p => String(p.sectionId) === String(section.id));
+    const cards = sectionPosts.length
+      ? sectionPosts.map(post => {
+          const idx = allStoryPosts.indexOf(post);
+          return `<button type="button" onclick="openArticle(${idx >= 0 ? idx : 0})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
+            <div class="relative overflow-hidden" style="height: ${imgH}">
+              <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500')}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              <span class="absolute top-2.5 left-2.5 bg-black/75 accent-text text-[10px] font-black px-2 py-0.5 rounded-md uppercase">${safe(post.location || 'Myanmar')}</span>
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2">${safe(post.title)}</h3>
+              <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2">${safe(post.desc || '')}</p>
+            </div>
+          </button>`;
+        }).join('')
+      : '<div class="col-span-full rounded-xl border border-dashed border-emerald-800/40 p-6 text-sm text-emerald-500/50 text-center">ဒီ Row အတွက် Post မထည့်ရသေးပါ။</div>';
+    return `<section class="py-3">
+      <div class="mb-4">
+        <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+          <span class="w-1 h-6 rounded-full accent-bg"></span>${safe(section.title)}
+        </h2>
+        ${section.subtitle ? `<p class="text-xs text-emerald-400/60 mt-1 ml-3">${safe(section.subtitle)}</p>` : ''}
+      </div>
+      <div class="${section.layout === 'wide' ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5'}">${cards}</div>
+    </section>`;
+  }).join('');
+}
+
 const firebaseConfig = {
   apiKey: "AIzaSyCCYJQXip_GTPTZ6DQg2_RhV_jSr2Tq-4s",
   authDomain: "htoo-htet-explore.firebaseapp.com",
@@ -926,1381 +965,29 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
 const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
-
-const $ = id => document.getElementById(id);
-const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-let adminAuth, adminDb, adminStorage, adminUser = null, remoteSyncReady = false, remoteWriteQueue = Promise.resolve();
+let publicFirebaseReady = false;
 try {
   firebase.initializeApp(firebaseConfig);
-  adminAuth = firebase.auth();
-  adminDb = firebase.database();
-  adminStorage = firebase.storage();
-} catch(e) { console.error(e); }
-
-const originalSetItem = localStorage.setItem.bind(localStorage);
-localStorage.setItem = function(key, value) {
-  originalSetItem(key, value);
-  if (remoteSyncReady && adminUser && DATA_KEYS.includes(key)) {
-    let parsed; try { parsed = JSON.parse(value); } catch { parsed = value; }
-    remoteWriteQueue = remoteWriteQueue.then(() => adminDb.ref('siteData/' + key).set(parsed)).catch(err => {
-      console.error(err); toast('Firebase သိမ်းမရပါ: ' + err.message);
+  const publicDb = firebase.database();
+  publicDb.ref('siteData').on('value', snap => {
+    const data = snap.val() || {};
+    DATA_KEYS.forEach(key => {
+      if (Object.prototype.hasOwnProperty.call(data, key)) localStorage.setItem(key, JSON.stringify(data[key]));
+      else localStorage.removeItem(key);
     });
-  }
-};
+    publicFirebaseReady = true;
+    loadBlogData();
+  }, err => { console.error(err); loadBlogData(); });
+} catch (e) { console.error(e); }
 
-function read(key, fallback = []) {
-  try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
-}
-function write(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
-
-function togglePasswordVisibility() {
-  const input = $('admin-password'), icon = $('password-eye-icon');
-  const show = input.type === 'password';
-  input.type = show ? 'text' : 'password';
-  icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
-}
-
-/* ---- Image Upload to Firebase Storage ---- */
-async function insertImageInContent(inputEl) {
-  const file = inputEl.files && inputEl.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) return toast('Image ဖိုင်သာ။');
-  toast('စာထဲ ပုံ ပြင်ဆင်နေသည်…');
-  try {
-    let blob = file;
-    try { blob = await compressImageFile(file, 1400, 0.8); } catch(e) {}
-    let url = null;
-    if (adminUser && adminStorage) {
-      try {
-        const ref = adminStorage.ref('uploads/content_' + Date.now() + '.jpg');
-        const snapshot = await ref.put(blob, { contentType: 'image/jpeg' });
-        url = await snapshot.ref.getDownloadURL();
-      } catch (err) {
-        console.warn(err);
-        toast('Storage မရ — ဒေတာပုံ သုံးမယ်');
-      }
-    }
-    if (!url) url = await fileToDataURL(blob);
-    const ta = $('admin-post-content');
-    if (!ta) return;
-    const tag = '\n[img]' + url + '[/img]\n';
-    const start = ta.selectionStart || ta.value.length;
-    ta.value = ta.value.slice(0, start) + tag + ta.value.slice(start);
-    ta.focus();
-    if (typeof updateContentPreview === 'function') updateContentPreview();
-    toast('စာထဲ ပုံ ထည့်ပြီးပါပြီ။');
-  } catch (err) { toast('Upload မအောင်မြင်: ' + (err.message || '')); }
-  inputEl.value = '';
-}
-function compressImageFile(file, maxW, quality) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      let w = img.width, h = img.height;
-      const max = maxW || 1600;
-      if (w > max) { h = Math.round(h * max / w); w = max; }
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      canvas.toBlob(blob => {
-        if (!blob) return reject(new Error('compress failed'));
-        resolve(blob);
-      }, 'image/jpeg', quality || 0.82);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
-    img.src = url;
-  });
-}
-function fileToDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
-function setImagePreview(previewBox, url, msg) {
-  if (!previewBox) return;
-  previewBox.innerHTML = '<img src="' + String(url).replace(/"/g, '&quot;') + '" class="preview-thumb border border-slate-600" alt="preview" style="max-height:120px;max-width:220px;object-fit:contain;border-radius:8px;display:block;">' +
-    (msg ? '<div class="tiny mt-1 text-emerald-300">' + msg + '</div>' : '');
-}
-/** Put image into a live-preview container as real <img> (works with data-URL + http) */
-function applyLiveBg(container, url) {
-  if (!container) return;
-  container.style.position = 'relative';
-  container.style.overflow = 'hidden';
-  let img = container.querySelector('.live-bg-img');
-  if (!img) {
-    img = document.createElement('img');
-    img.className = 'live-bg-img';
-    img.alt = 'preview';
-    container.insertBefore(img, container.firstChild);
-  }
-  img.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;';
-  Array.from(container.children).forEach(function(ch) {
-    if (ch === img || ch.classList.contains('live-bg-img')) return;
-    var z = window.getComputedStyle(ch).zIndex;
-    if (!z || z === 'auto' || z === '0') ch.style.zIndex = '2';
-  });
-  if (url) {
-    img.style.display = 'block';
-    img.src = url;
-    // backup: also set CSS background so something always shows
-    try {
-      container.style.backgroundImage = 'url("' + String(url).replace(/"/g, '') + '")';
-      container.style.backgroundSize = 'cover';
-      container.style.backgroundPosition = 'center';
-    } catch (e) {}
-  } else {
-    img.removeAttribute('src');
-    img.style.display = 'none';
-    container.style.backgroundImage = '';
-  }
-}
-function applyLiveLogo(imgEl, iconEl, url) {
-  if (!imgEl) return;
-  if (url) {
-    imgEl.src = url;
-    imgEl.classList.remove('hidden');
-    imgEl.style.cssText = (imgEl.style.cssText || '') + ';display:block!important;width:100%;height:100%;object-fit:contain;';
-    if (iconEl) { iconEl.classList.add('hidden'); iconEl.style.display = 'none'; }
-  } else {
-    imgEl.removeAttribute('src');
-    imgEl.classList.add('hidden');
-    imgEl.style.display = 'none';
-    if (iconEl) { iconEl.classList.remove('hidden'); iconEl.style.display = ''; }
-  }
-}
-function refreshLivePreviewFor(inputId) {
-  try {
-    if (inputId === 'hero-image' && typeof updateHeroPreview === 'function') updateHeroPreview();
-    if ((inputId === 'admin-sponsor-img' || inputId === 'admin-sponsor-bg') && typeof updateSponsorPreview === 'function') updateSponsorPreview();
-    if (inputId === 'up-image' && typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
-    if ((inputId === 'yt-thumb' || inputId === 'yt-bg') && typeof updateYoutubePreview === 'function') updateYoutubePreview();
-    if (inputId === 'admin-post-img' && typeof updatePostPreview === 'function') updatePostPreview();
-  } catch (e) { console.warn(e); }
-}
-async function uploadImage(inputEl, targetInputId) {
-  const file = inputEl.files && inputEl.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) {
-    toast('Image ဖိုင်သာ ရွေးပါ။');
-    inputEl.value = '';
-    return;
-  }
-  if (file.size > 12 * 1024 * 1024) {
-    toast('ဖိုင်အရွယ် 12MB အောက် ထားပါ။');
-    inputEl.value = '';
-    return;
-  }
-  const target = $(targetInputId);
-  const previewBox = $(targetInputId + '-preview');
-  toast('ပုံ ပြင်ဆင်နေသည်…');
-
-  try {
-    // 1) IMMEDIATE local preview (blob URL) — Live Preview + thumbnail
-    const localUrl = URL.createObjectURL(file);
-    setImagePreview(previewBox, localUrl, 'Preview…');
-    if (target) {
-      target.value = localUrl;
-      try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
-    }
-    refreshLivePreviewFor(targetInputId);
-
-    // 2) Compress for permanent storage
-    let blob = file;
-    try { blob = await compressImageFile(file, 1400, 0.8); } catch (e) { console.warn('compress', e); }
-
-    let finalUrl = null;
-
-    // 3) Try Firebase Storage
-    if (adminUser && adminStorage) {
-      try {
-        const path = 'uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg';
-        const ref = adminStorage.ref(path);
-        const snapshot = await ref.put(blob, { contentType: 'image/jpeg' });
-        finalUrl = await snapshot.ref.getDownloadURL();
-        setImagePreview(previewBox, finalUrl, 'Firebase Storage ✓');
-        toast('ပုံ Upload အောင်မြင်ပါပြီ (Firebase Storage)');
-      } catch (err) {
-        console.warn('Storage upload failed', err);
-        toast('Storage မရ — ဒေတာပုံ သိမ်းမယ်');
-      }
-    }
-
-    // 4) Fallback data URL (permanent, works offline)
-    if (!finalUrl) {
-      finalUrl = await fileToDataURL(blob);
-      setImagePreview(previewBox, finalUrl, 'Local ✓ — Save လုပ်ပါ');
-      toast('ပုံ အဆင်သင့် — Save နှိပ်ပါ');
-    }
-
-    if (target) {
-      target.value = finalUrl;
-      try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
-      try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
-    }
-    refreshLivePreviewFor(targetInputId);
-    setTimeout(function () { refreshLivePreviewFor(targetInputId); }, 100);
-  } catch (err) {
-    console.error(err);
-    toast('Upload မအောင်မြင်ပါ: ' + (err.message || err.code || 'error'));
-  }
-  inputEl.value = '';
-}
-
-function showPreviewIfUrl(inputId) {
-  const el = $(inputId);
-  const box = $(inputId + '-preview');
-  if (!el || !box) return;
-  const v = (el.value || '').trim();
-  if (v && (v.startsWith('http') || v.startsWith('data:image'))) {
-    setImagePreview(box, v, '');
-  }
-}
-
-async function signInAdmin() {
-  const email = $('admin-email').value.trim(), password = $('admin-password').value;
-  $('login-error').textContent = '';
-  $('login-button').disabled = true;
-  $('login-button').textContent = 'ဝင်နေသည်…';
-  try {
-    const credential = await adminAuth.signInWithEmailAndPassword(email, password);
-    if (credential.user.uid !== FIREBASE_ADMIN_UID) {
-      await adminAuth.signOut();
-      throw new Error('ဒီအကောင့်ကို Admin အဖြစ် ခွင့်မပြုထားပါ။');
-    }
-    adminUser = credential.user;
-    const snap = await adminDb.ref('siteData').once('value');
-    const data = snap.val();
-    remoteSyncReady = false;
-    if (data) {
-      Object.keys(data).forEach(k => { if (DATA_KEYS.includes(k)) originalSetItem(k, JSON.stringify(data[k])); });
-    } else {
-      const seed = {};
-      DATA_KEYS.forEach(k => {
-        const v = localStorage.getItem(k);
-        if (v !== null) { try { seed[k] = JSON.parse(v); } catch { seed[k] = v; } }
-      });
-      if (!seed.hh_social) seed.hh_social = { fb: '', tt: '', yt: '', vb: '' };
-      if (!seed.hh_sponsor) seed.hh_sponsor = { active: true, title: 'Veezoom Myanmar', desc: '', link: '', img: '' };
-      if (!seed.hh_posts) seed.hh_posts = [];
-      if (!seed.hh_home_sections) seed.hh_home_sections = [];
-      if (!seed.hh_settings) seed.hh_settings = { brandName: 'HTOO HTET', brandTagline: 'Travel Journal & Beyond' };
-      if (!seed.hh_proud_sponsors) seed.hh_proud_sponsors = [];
-      if (!seed.hh_menu) seed.hh_menu = [];
-      await adminDb.ref('siteData').set(seed);
-      Object.keys(seed).forEach(k => originalSetItem(k, JSON.stringify(seed[k])));
-    }
-    remoteSyncReady = true;
-    $('login-modal').classList.add('hidden');
-    $('app').classList.remove('hidden');
-    loadAll();
-  } catch (e) {
-    $('login-error').textContent = e.message || 'Login မအောင်မြင်ပါ။';
-  } finally {
-    $('login-button').disabled = false;
-    $('login-button').innerHTML = 'Login ဝင်မယ် <i class="fa-solid fa-arrow-right ml-1"></i>';
-  }
-}
-adminAuth?.onAuthStateChanged(user => { if (!user) { adminUser = null; remoteSyncReady = false; } });
-
-function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
-
-const titles = {
-  overview: 'Overview', settings: 'Brand & Layout', hero: 'Hero Banner', menu: 'Menu Items',
-  proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Travel Posts',
-  sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
-};
-function showView(name, button) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const view = $('view-' + name);
-  if (view) view.classList.add('active');
-  document.querySelectorAll('.navbtn[data-view]').forEach(v => v.classList.toggle('active', v.dataset.view === name));
-  $('page-title').textContent = titles[name] || 'Overview';
-  $('mobile-nav').classList.add('hidden');
-  if (name === 'sections') renderHomeSectionsList();
-  if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
-  if (name === 'menu') renderMenuList();
-  if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
-  if (name === 'hero' && typeof updateHeroPreview === 'function') updateHeroPreview();
-  if (name === 'sponsor' && typeof updateSponsorPreview === 'function') updateSponsorPreview();
-  if (name === 'upcoming' && typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
-  if (name === 'youtube' && typeof updateYoutubePreview === 'function') updateYoutubePreview();
-  if (name === 'about' && typeof updateAboutPreview === 'function') updateAboutPreview();
-  if (name === 'settings' && typeof updateSizePreview === 'function') updateSizePreview();
-}
-
-function loadAll() {
-  $('footer-year').textContent = new Date().getFullYear();
-
-  const s = read('hh_settings', {});
-  $('set-brand-name').value = s.brandName || 'HTOO HTET';
-  $('set-brand-tagline').value = s.brandTagline || 'Travel Journal & Beyond';
-  $('set-show-tagline').checked = s.showBrandTagline === true;
-  $('set-logo-url').value = s.logoUrl || '';
-  $('set-email').value = s.contactEmail || '';
-  $('set-location').value = s.contactLocation || '';
-  $('set-footer-tagline').value = s.footerTagline || '';
-  $('set-stories-heading').value = s.storiesHeading || '';
-  $('set-stories-sub').value = s.storiesSub || '';
-  $('set-font').value = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
-  $('set-heading-font').value = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
-  if ($('set-heading-weight')) $('set-heading-weight').value = s.headingWeight || '700';
-  if ($('set-heading-style')) $('set-heading-style').value = s.headingStyle || 'normal';
-  if ($('set-body-color')) $('set-body-color').value = s.bodyColor || '#ffffff';
-  if ($('set-heading-color')) $('set-heading-color').value = s.headingColor || '#ffffff';
-  $('set-hero-height').value = s.heroHeight || 480;
-  if ($('set-hero-maxw')) $('set-hero-maxw').value = (s.heroMaxWidth === 100 || !s.heroMaxWidth) ? 1400 : s.heroMaxWidth;
-  if ($('set-sponsor-height')) $('set-sponsor-height').value = s.sponsorHeight || 180;
-  if ($('set-upcoming-height')) $('set-upcoming-height').value = s.upcomingHeight || 200;
-  $('set-card-img-h').value = s.cardImgHeight || 11;
-  if ($('set-hero-text-maxw')) $('set-hero-text-maxw').value = s.heroTextMaxW || 36;
-  if (s.accentColor) {
-    $('set-accent-color').value = s.accentColor;
-    $('set-accent-hex').value = s.accentColor;
-  }
-  selectTheme(s.theme || 'forest');
-  if (typeof selectMode === 'function') selectMode(s.mode || 'dark');
-  if (typeof setHeroAlign === 'function') setHeroAlign(s.heroTextAlign || 'left');
-  if (typeof setHeroVAlign === 'function') setHeroVAlign(s.heroVAlign || 'center');
-  if (typeof updateSizePreview === 'function') updateSizePreview();
-  showPreviewIfUrl('set-logo-url');
-
-  const h = read('hh_hero', {});
-  $('hero-active').checked = h.active !== false;
-  $('hero-image').value = h.image || '';
-  $('hero-label').value = h.label || '';
-  if ($('hero-label-color')) $('hero-label-color').value = h.labelColor || '#f5c518';
-  if ($('hero-label-fs')) $('hero-label-fs').value = h.labelFs || 12;
-  $('hero-sign').value = h.sign || '';
-  if ($('hero-sign-color')) $('hero-sign-color').value = h.signColor || '#6ee7b7';
-  $('hero-title').value = h.title || '';
-  if ($('hero-title-color')) $('hero-title-color').value = h.titleColor || '#ffffff';
-  if ($('hero-title-fs')) $('hero-title-fs').value = h.titleFs || 28;
-  if ($('hero-title-weight')) $('hero-title-weight').value = h.titleWeight || '900';
-  if ($('hero-title-style')) $('hero-title-style').value = h.titleStyle || 'normal';
-  $('hero-desc').value = h.desc || '';
-  if ($('hero-desc-color')) $('hero-desc-color').value = h.descColor || '#a7f3d0';
-  if ($('hero-desc-fs')) $('hero-desc-fs').value = h.descFs || 14;
-  if ($('hero-label-x')) $('hero-label-x').value = h.labelX != null ? h.labelX : (h.textX != null ? h.textX : 8);
-  if ($('hero-label-y')) $('hero-label-y').value = h.labelY != null ? h.labelY : 18;
-  if ($('hero-title-x')) $('hero-title-x').value = h.titleX != null ? h.titleX : (h.textX != null ? h.textX : 8);
-  if ($('hero-title-y')) $('hero-title-y').value = h.titleY != null ? h.titleY : (h.textY != null ? h.textY : 32);
-  if ($('hero-desc-x')) $('hero-desc-x').value = h.descX != null ? h.descX : 8;
-  if ($('hero-desc-y')) $('hero-desc-y').value = h.descY != null ? h.descY : 55;
-  if ($('hero-sign-x')) $('hero-sign-x').value = h.signX != null ? h.signX : 8;
-  if ($('hero-sign-y')) $('hero-sign-y').value = h.signY != null ? h.signY : 78;
-  if ($('hero-text-x')) $('hero-text-x').value = h.textX != null ? h.textX : 8;
-  if ($('hero-text-y')) $('hero-text-y').value = h.textY != null ? h.textY : 35;
-  $('hero-btn-text').value = h.btnText || '';
-  $('hero-btn-link').value = h.btnLink || '';
-  showPreviewIfUrl('hero-image');
-  if (typeof updateHeroPreview === 'function') updateHeroPreview();
-
-  const sp = read('hh_sponsor', {});
-  $('admin-sponsor-active').checked = sp.active !== false;
-  if ($('admin-sponsor-badge')) $('admin-sponsor-badge').value = sp.badge || 'Official Sponsor';
-  if ($('admin-sponsor-badge-bg')) $('admin-sponsor-badge-bg').value = sp.badgeBg || '#f5c518';
-  if ($('admin-sponsor-badge-color')) $('admin-sponsor-badge-color').value = sp.badgeColor || '#000000';
-  if ($('admin-sponsor-badge-pad')) $('admin-sponsor-badge-pad').value = sp.badgePad || 8;
-  if ($('admin-sponsor-badge-fs')) $('admin-sponsor-badge-fs').value = sp.badgeFs || 10;
-  if ($('admin-sponsor-badge-radius')) $('admin-sponsor-badge-radius').value = sp.badgeRadius != null ? sp.badgeRadius : 24;
-  if ($('admin-sponsor-badge-weight')) $('admin-sponsor-badge-weight').value = sp.badgeWeight || '900';
-  $('admin-sponsor-title').value = sp.title || '';
-  if ($('admin-sponsor-title-color')) $('admin-sponsor-title-color').value = sp.titleColor || '#ffffff';
-  if ($('admin-sponsor-title-fs')) $('admin-sponsor-title-fs').value = sp.titleFs || 22;
-  if ($('admin-sponsor-title-weight')) $('admin-sponsor-title-weight').value = sp.titleWeight || '900';
-  if ($('admin-sponsor-desc-color')) $('admin-sponsor-desc-color').value = sp.descColor || '#cccccc';
-  if ($('admin-sponsor-desc-fs')) $('admin-sponsor-desc-fs').value = sp.descFs || 12;
-  $('admin-sponsor-desc').value = sp.desc || '';
-  $('admin-sponsor-link').value = sp.link || '';
-  $('admin-sponsor-img').value = sp.img || '';
-  $('admin-sponsor-bg').value = sp.bgImage || '';
-  showPreviewIfUrl('admin-sponsor-img');
-  showPreviewIfUrl('admin-sponsor-bg');
-
-  const up = read('hh_upcoming', {});
-  $('up-active').checked = up.active !== false;
-  $('up-heading').value = up.heading || '';
-  if ($('up-section-title')) $('up-section-title').value = up.sectionTitle || '';
-  $('up-label').value = up.label || '';
-  if ($('up-label-color')) $('up-label-color').value = up.labelColor || '#f5c518';
-  $('up-title').value = up.title || '';
-  if ($('up-title-color')) $('up-title-color').value = up.titleColor || '#ffffff';
-  if ($('up-title-weight')) $('up-title-weight').value = up.titleWeight || '900';
-  if ($('up-title-fs')) $('up-title-fs').value = up.titleFs || 22;
-  if ($('up-label-fs')) $('up-label-fs').value = up.labelFs || 11;
-  if ($('up-desc-fs')) $('up-desc-fs').value = up.descFs || 13;
-  if ($('up-desc-color')) $('up-desc-color').value = up.descColor || '#cccccc';
-  $('up-desc').value = up.desc || '';
-  $('up-image').value = up.image || '';
-  showPreviewIfUrl('up-image');
-  if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
-
-  const yt = read('hh_youtube', {});
-  $('yt-active').checked = yt.active !== false;
-  $('yt-label').value = yt.label || '';
-  $('yt-title').value = yt.title || '';
-  if ($('yt-title-color')) $('yt-title-color').value = yt.titleColor || '#ffffff';
-  if ($('yt-title-weight')) $('yt-title-weight').value = yt.titleWeight || '900';
-  if ($('yt-title-fs')) $('yt-title-fs').value = yt.titleFs || 22;
-  $('yt-desc').value = yt.desc || '';
-  $('yt-link').value = yt.link || '';
-  $('yt-thumb').value = yt.thumb || '';
-  $('yt-bg').value = yt.bgImage || '';
-  showPreviewIfUrl('yt-thumb');
-  showPreviewIfUrl('yt-bg');
-  if (typeof updateYoutubePreview === 'function') updateYoutubePreview();
-
-  const ab = read('hh_about', {});
-  $('about-active').checked = ab.active !== false;
-  $('about-title').value = ab.title || '';
-  if ($('about-title-color')) $('about-title-color').value = ab.titleColor || '#ffffff';
-  if ($('about-title-weight')) $('about-title-weight').value = ab.titleWeight || '700';
-  $('about-desc').value = ab.desc || '';
-  if ($('about-desc-color')) $('about-desc-color').value = ab.descColor || '#a7f3d0';
-  if (typeof updateAboutPreview === 'function') updateAboutPreview();
-
-  const social = read('hh_social', {});
-  $('admin-fb').value = social.fb || '';
-  $('admin-tt').value = social.tt || '';
-  $('admin-yt').value = social.yt || '';
-  $('admin-vb').value = social.vb || '';
-  if ($('social-show-fb')) $('social-show-fb').checked = social.showFb !== false;
-  if ($('social-show-yt')) $('social-show-yt').checked = social.showYt !== false;
-  if ($('social-show-tt')) $('social-show-tt').checked = social.showTt !== false;
-  if ($('social-show-vb')) $('social-show-vb').checked = social.showVb !== false;
-
-  renderMenuList();
-  renderProudList();
-  renderHomeSectionsList();
-  renderPostsList();
-  renderOverview();
-  if (typeof updateSponsorPreview === 'function') updateSponsorPreview();
-  if (typeof renderPresetList === 'function') renderPresetList();
-  const _sh = read('hh_settings', {}).sponsorHeight;
-  if (_sh && $('admin-sponsor-height-local')) $('admin-sponsor-height-local').value = _sh;
-}
-
-const THEME_PRESETS = {
-  forest: { accentColor: '#f5c518', bgColor: '#061510', surfaceColor: '#0a1f18', cardColor: '#0f2e24' },
-  ocean:  { accentColor: '#22d3ee', bgColor: '#0a1628', surfaceColor: '#0c1e36', cardColor: '#132f4c' },
-  sunset: { accentColor: '#f97316', bgColor: '#1a120b', surfaceColor: '#241810', cardColor: '#2d2015' },
-  navy:   { accentColor: '#1e3a5f', bgColor: '#f8fafc', surfaceColor: '#ffffff', cardColor: '#ffffff' }
-};
-function selectTheme(name) {
-  $('set-theme').value = name;
-  document.querySelectorAll('.theme-card').forEach(c => {
-    c.classList.toggle('border-emerald-500', c.dataset.theme === name);
-    c.classList.toggle('border-transparent', c.dataset.theme !== name);
-  });
-  const preset = THEME_PRESETS[name];
-  if (preset) {
-    $('set-accent-color').value = preset.accentColor;
-    $('set-accent-hex').value = preset.accentColor;
-  }
-}
-function selectMode(mode) {
-  $('set-mode').value = mode;
-  const darkBtn = $('mode-dark-btn'), lightBtn = $('mode-light-btn');
-  if (darkBtn) darkBtn.className = 'btn flex-1 ' + (mode === 'dark' ? 'btn-green' : 'btn-muted');
-  if (lightBtn) lightBtn.className = 'btn flex-1 ' + (mode === 'light' ? 'btn-green' : 'btn-muted');
-}
-function updateSizePreview() {
-  const hh = parseInt($('set-hero-height')?.value || 480, 10);
-  const hw = parseInt($('set-hero-maxw')?.value || 1400, 10);
-  const sh = $('set-sponsor-height')?.value || 180;
-  const uh = $('set-upcoming-height')?.value || 200;
-  const ch = $('set-card-img-h')?.value || 11;
-  const tmw = $('set-hero-text-maxw')?.value || 36;
-  if ($('val-hero-h')) $('val-hero-h').textContent = hh + 'px';
-  if ($('val-hero-w')) $('val-hero-w').textContent = (hw >= 1350) ? '100%' : hw + 'px';
-  if ($('val-sp-h')) $('val-sp-h').textContent = sh + 'px';
-  if ($('val-up-h')) $('val-up-h').textContent = uh + 'px';
-  if ($('val-card-h')) $('val-card-h').textContent = ch + 'rem';
-  if ($('val-text-mw')) $('val-text-mw').textContent = tmw + 'rem';
-  if ($('preview-dims')) $('preview-dims').textContent = hh + 'px × ' + ((hw >= 1350) ? 'full' : hw + 'px');
-
-  // Live visual box
-  const box = $('layout-preview');
-  const inner = $('layout-preview-inner');
-  const text = $('layout-preview-text');
-  if (box) {
-    // scale height for preview (max ~220px in admin)
-    const prevH = Math.max(80, Math.min(220, Math.round(hh / 3.2)));
-    box.style.height = prevH + 'px';
-    box.style.maxWidth = (hw >= 1350) ? '100%' : Math.min(100, Math.round(hw / 14)) + '%';
-  }
-  if (inner) {
-    const v = $('set-hero-v-align')?.value || 'center';
-    const vMap = { top: 'flex-start', center: 'center', bottom: 'flex-end' };
-    inner.style.justifyContent = vMap[v] || 'center';
-  }
-  if (text) {
-    const a = $('set-hero-text-align')?.value || 'left';
-    text.style.textAlign = a;
-    text.style.maxWidth = Math.min(90, Math.round((parseInt(tmw,10) / 48) * 90)) + '%';
-    if (a === 'center') { text.style.marginLeft = 'auto'; text.style.marginRight = 'auto'; }
-    else if (a === 'right') { text.style.marginLeft = 'auto'; text.style.marginRight = '0'; }
-    else { text.style.marginLeft = '0'; text.style.marginRight = 'auto'; }
-  }
-}
-function setHeroAlign(align) {
-  if ($('set-hero-text-align')) $('set-hero-text-align').value = align;
-  document.querySelectorAll('.align-btn').forEach(b => {
-    b.className = 'btn flex-1 align-btn ' + (b.dataset.align === align ? 'btn-green' : 'btn-muted');
-  });
-  updateSizePreview();
-}
-function setHeroVAlign(v) {
-  if ($('set-hero-v-align')) $('set-hero-v-align').value = v;
-  document.querySelectorAll('.valign-btn').forEach(b => {
-    b.className = 'btn flex-1 valign-btn ' + (b.dataset.valign === v ? 'btn-green' : 'btn-muted');
-  });
-  updateSizePreview();
-}
-function syncColorFromHex() {
-  const hex = $('set-accent-hex').value.trim();
-  if (/^#[0-9A-Fa-f]{6}$/.test(hex)) $('set-accent-color').value = hex;
-}
-$('set-accent-color')?.addEventListener('input', () => {
-  $('set-accent-hex').value = $('set-accent-color').value;
+document.addEventListener('DOMContentLoaded', () => {
+  $('story-category-filter')?.addEventListener('change', renderStoryCards);
+  if (!publicFirebaseReady) loadBlogData();
 });
-
-function saveSettings() {
-  const theme = $('set-theme').value || 'forest';
-  const preset = THEME_PRESETS[theme] || THEME_PRESETS.forest;
-  const customAccent = $('set-accent-hex').value.trim() || $('set-accent-color').value;
-  const heroMaxW = parseInt($('set-hero-maxw')?.value || '1400', 10);
-  write('hh_settings', {
-    theme,
-    mode: $('set-mode')?.value || 'dark',
-    brandName: $('set-brand-name').value.trim() || 'HTOO HTET',
-    brandTagline: $('set-brand-tagline').value.trim(),
-    showBrandTagline: $('set-show-tagline').checked,
-    logoUrl: $('set-logo-url').value.trim(),
-    accentColor: customAccent || preset.accentColor,
-    bgColor: preset.bgColor,
-    surfaceColor: preset.surfaceColor,
-    cardColor: preset.cardColor,
-    fontFamily: $('set-font').value,
-    headingFont: $('set-heading-font').value,
-    headingWeight: $('set-heading-weight')?.value || '700',
-    headingStyle: $('set-heading-style')?.value || 'normal',
-    bodyColor: $('set-body-color')?.value || '',
-    headingColor: $('set-heading-color')?.value || '',
-    heroHeight: parseInt($('set-hero-height').value, 10) || 480,
-    heroMaxWidth: heroMaxW >= 1350 ? 100 : heroMaxW,
-    heroTextAlign: $('set-hero-text-align')?.value || 'left',
-    heroVAlign: $('set-hero-v-align')?.value || 'center',
-    heroTextMaxW: parseInt($('set-hero-text-maxw')?.value || '36', 10),
-    sponsorHeight: parseInt($('set-sponsor-height')?.value || '180', 10),
-    upcomingHeight: parseInt($('set-upcoming-height')?.value || '200', 10),
-    cardImgHeight: parseFloat($('set-card-img-h').value) || 11,
-    contactEmail: $('set-email').value.trim(),
-    contactLocation: $('set-location').value.trim(),
-    footerTagline: $('set-footer-tagline').value.trim(),
-    storiesHeading: $('set-stories-heading').value.trim(),
-    storiesSub: $('set-stories-sub').value.trim()
-  });
-  toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
-}
-function updateHeroPreview() {
-  const box = $('hero-live-preview');
-  const label = $('hero-prev-label');
-  const title = $('hero-prev-title');
-  const desc = $('hero-prev-desc');
-  const sign = $('hero-prev-sign');
-  const pos = (id, def) => parseInt($(id)?.value || def, 10);
-  const lx = pos('hero-label-x', 8), ly = pos('hero-label-y', 18);
-  const tx = pos('hero-title-x', 8), ty = pos('hero-title-y', 32);
-  const dx = pos('hero-desc-x', 8), dy = pos('hero-desc-y', 55);
-  const sx = pos('hero-sign-x', 8), sy = pos('hero-sign-y', 78);
-  const setVal = (id, v) => { if ($(id)) $(id).textContent = v; };
-  setVal('val-hlx', lx); setVal('val-hly', ly);
-  setVal('val-htx', tx); setVal('val-hty', ty);
-  setVal('val-hdx', dx); setVal('val-hdy', dy);
-  setVal('val-hsx', sx); setVal('val-hsy', sy);
-
-  const lfs = pos('hero-label-fs', 12), tfs = pos('hero-title-fs', 28), dfs = pos('hero-desc-fs', 14);
-  if ($('val-hero-label-fs')) $('val-hero-label-fs').textContent = lfs + 'px';
-  if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
-  if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
-
-  if (label) {
-    label.textContent = $('hero-label')?.value || 'Travel Journal';
-    label.style.color = $('hero-label-color')?.value || '#f5c518';
-    label.style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
-    label.style.left = lx + '%'; label.style.top = ly + '%';
-  }
-  if (title) {
-    const raw = $('hero-title')?.value || 'New Places.';
-    title.innerHTML = raw.replace(/\n/g, '<br>');
-    title.style.color = $('hero-title-color')?.value || '#ffffff';
-    title.style.fontWeight = $('hero-title-weight')?.value || '900';
-    title.style.fontStyle = $('hero-title-style')?.value || 'normal';
-    title.style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
-    title.style.left = tx + '%'; title.style.top = ty + '%';
-  }
-  if (desc) {
-    desc.textContent = $('hero-desc')?.value || 'Description…';
-    desc.style.color = $('hero-desc-color')?.value || 'rgba(255,255,255,0.7)';
-    desc.style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
-    desc.style.left = dx + '%'; desc.style.top = dy + '%';
-  }
-  if (sign) {
-    sign.textContent = $('hero-sign')?.value || '';
-    sign.style.color = $('hero-sign-color')?.value || '#6ee7b7';
-    sign.style.left = sx + '%'; sign.style.top = sy + '%';
-    sign.style.display = (sign.textContent ? '' : 'none');
-  }
-  const img = ($('hero-image')?.value || '').trim();
-  if (box) {
-    applyLiveBg(box, img);
-    if (!img) box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
-  }
-  initHeroLineDrag();
-}
-let _heroDragState = null;
-
-function initHeroLineDrag() {
-  const box = $('hero-live-preview');
-  if (!box || box._dragReady) return;
-  box._dragReady = true;
-
-  const map = {
-    'hero-prev-label': { xi: 'hero-label-x', yi: 'hero-label-y', vx: 'val-hlx', vy: 'val-hly' },
-    'hero-prev-title': { xi: 'hero-title-x', yi: 'hero-title-y', vx: 'val-htx', vy: 'val-hty' },
-    'hero-prev-desc':  { xi: 'hero-desc-x',  yi: 'hero-desc-y',  vx: 'val-hdx', vy: 'val-hdy' },
-    'hero-prev-sign':  { xi: 'hero-sign-x',  yi: 'hero-sign-y',  vx: 'val-hsx', vy: 'val-hsy' }
-  };
-
-  Object.keys(map).forEach(id => {
-    const el = $(id);
-    if (!el) return;
-    el.style.cursor = 'grab';
-    el.style.userSelect = 'none';
-    el.style.touchAction = 'none';
-    el.style.zIndex = '20';
-  });
-
-  function getPt(e) {
-    if (e.touches && e.touches[0]) return e.touches[0];
-    if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
-    return e;
-  }
-
-  function onDown(e) {
-    const el = e.currentTarget;
-    const cfg = map[el.id];
-    if (!cfg) return;
-    const pt = getPt(e);
-    const rect = box.getBoundingClientRect();
-    _heroDragState = {
-      el, cfg,
-      startX: pt.clientX, startY: pt.clientY,
-      origL: parseFloat(el.style.left) || 0,
-      origT: parseFloat(el.style.top) || 0,
-      rectW: rect.width, rectH: rect.height
-    };
-    el.style.cursor = 'grabbing';
-    el.style.borderColor = 'rgba(34,211,238,0.9)';
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  function onMove(e) {
-    if (!_heroDragState) return;
-    const pt = getPt(e);
-    const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
-    const nx = Math.max(0, Math.min(90, origL + ((pt.clientX - startX) / rectW) * 100));
-    const ny = Math.max(0, Math.min(90, origT + ((pt.clientY - startY) / rectH) * 100));
-    el.style.left = nx + '%';
-    el.style.top = ny + '%';
-    if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
-    if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
-    if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
-    if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
-    e.preventDefault();
-  }
-
-  function onUp(e) {
-    if (!_heroDragState) return;
-    _heroDragState.el.style.cursor = 'grab';
-    _heroDragState.el.style.borderColor = '';
-    _heroDragState = null;
-  }
-
-  Object.keys(map).forEach(id => {
-    const el = $(id);
-    if (!el || el._boundDrag) return;
-    el._boundDrag = true;
-    el.addEventListener('mousedown', onDown);
-    el.addEventListener('touchstart', onDown, { passive: false });
-  });
-
-  // single window listeners
-  if (!window._heroDragWin) {
-    window._heroDragWin = true;
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('mouseup', onUp);
-    window.addEventListener('touchend', onUp);
-    window.addEventListener('touchcancel', onUp);
-  }
-}
-
-function saveHero() {
-  write('hh_hero', {
-    active: $('hero-active').checked,
-    image: $('hero-image').value.trim(),
-    label: $('hero-label').value.trim(),
-    labelColor: $('hero-label-color')?.value || '#f5c518',
-    labelFs: parseInt($('hero-label-fs')?.value || '12', 10),
-    labelX: parseInt($('hero-label-x')?.value || '8', 10),
-    labelY: parseInt($('hero-label-y')?.value || '18', 10),
-    sign: $('hero-sign').value.trim(),
-    signColor: $('hero-sign-color')?.value || '#6ee7b7',
-    signX: parseInt($('hero-sign-x')?.value || '8', 10),
-    signY: parseInt($('hero-sign-y')?.value || '78', 10),
-    title: $('hero-title').value.trim(),
-    titleColor: $('hero-title-color')?.value || '#ffffff',
-    titleFs: parseInt($('hero-title-fs')?.value || '28', 10),
-    titleWeight: $('hero-title-weight')?.value || '900',
-    titleStyle: $('hero-title-style')?.value || 'normal',
-    titleX: parseInt($('hero-title-x')?.value || '8', 10),
-    titleY: parseInt($('hero-title-y')?.value || '32', 10),
-    desc: $('hero-desc').value.trim(),
-    descColor: $('hero-desc-color')?.value || '#a7f3d0',
-    descFs: parseInt($('hero-desc-fs')?.value || '14', 10),
-    descX: parseInt($('hero-desc-x')?.value || '8', 10),
-    descY: parseInt($('hero-desc-y')?.value || '55', 10),
-    textX: parseInt($('hero-label-x')?.value || '8', 10),
-    textY: parseInt($('hero-title-y')?.value || '32', 10),
-    btnText: $('hero-btn-text').value.trim(),
-    btnLink: $('hero-btn-link').value.trim()
-  });
-  updateHeroPreview();
-  toast('Hero သိမ်းပြီးပါပြီ။ Live site / ဖုန်းမှာ refresh လုပ်ပါ။');
-}
-function updateSponsorPreview() {
-  const badge = $('sp-prev-badge');
-  const title = $('sp-prev-title');
-  const desc = $('sp-prev-desc');
-  const logo = $('sp-prev-logo');
-  const logoIcon = $('sp-prev-logo-icon');
-  const box = $('sponsor-live-preview');
-  if (!badge) return;
-  badge.textContent = $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor';
-  const bg = $('admin-sponsor-badge-bg')?.value || '#f5c518';
-  const fg = $('admin-sponsor-badge-color')?.value || '#000000';
-  const pad = $('admin-sponsor-badge-pad')?.value || 8;
-  const fs = $('admin-sponsor-badge-fs')?.value || 10;
-  const rad = $('admin-sponsor-badge-radius')?.value || 24;
-  const wt = $('admin-sponsor-badge-weight')?.value || 900;
-  badge.style.background = bg;
-  badge.style.color = fg;
-  badge.style.padding = Math.round(pad/2) + 'px ' + pad + 'px';
-  badge.style.fontSize = fs + 'px';
-  badge.style.borderRadius = (parseInt(rad,10) >= 24 ? '999px' : rad + 'px');
-  badge.style.fontWeight = wt;
-  if ($('val-badge-pad')) $('val-badge-pad').textContent = pad + 'px';
-  if ($('val-badge-fs')) $('val-badge-fs').textContent = fs + 'px';
-  if ($('val-badge-radius')) $('val-badge-radius').textContent = (parseInt(rad,10) >= 24 ? 'pill' : rad + 'px');
-  if (title) {
-    title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
-    title.style.color = $('admin-sponsor-title-color')?.value || '#ffffff';
-    const tfs = $('admin-sponsor-title-fs')?.value || 22;
-    title.style.fontSize = Math.max(11, Math.round(tfs * 0.65)) + 'px';
-    title.style.fontWeight = $('admin-sponsor-title-weight')?.value || '900';
-    if ($('val-sp-title-fs')) $('val-sp-title-fs').textContent = tfs + 'px';
-  }
-  if (desc) {
-    desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
-    desc.style.color = $('admin-sponsor-desc-color')?.value || '#cccccc';
-    const dfs = $('admin-sponsor-desc-fs')?.value || 12;
-    desc.style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
-    if ($('val-sp-desc-fs')) $('val-sp-desc-fs').textContent = dfs + 'px';
-  }
-  const imgUrl = ($('admin-sponsor-img')?.value || '').trim();
-  applyLiveLogo(logo, logoIcon, imgUrl);
-  const bgUrl = ($('admin-sponsor-bg')?.value || '').trim();
-  if (box) {
-    applyLiveBg(box, bgUrl);
-    if (!bgUrl) box.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
-  }
-  const h = $('admin-sponsor-height-local')?.value || $('set-sponsor-height')?.value || 180;
-  if ($('val-sp-h-local')) $('val-sp-h-local').textContent = h + 'px';
-  if (box) box.style.minHeight = Math.max(80, Math.round(parseInt(h,10) / 1.5)) + 'px';
-  if ($('sponsor-preview-dims')) $('sponsor-preview-dims').textContent = h + 'px';
-}
-function saveSponsor() {
-  const hLocal = $('admin-sponsor-height-local')?.value;
-  if (hLocal && $('set-sponsor-height')) {
-    $('set-sponsor-height').value = hLocal;
-    // also persist height into settings
-    const s = read('hh_settings', {});
-    s.sponsorHeight = parseInt(hLocal, 10);
-    write('hh_settings', s);
-  }
-  write('hh_sponsor', {
-    active: $('admin-sponsor-active').checked,
-    badge: $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor',
-    badgeBg: $('admin-sponsor-badge-bg')?.value || '#f5c518',
-    badgeColor: $('admin-sponsor-badge-color')?.value || '#000000',
-    badgePad: parseInt($('admin-sponsor-badge-pad')?.value || '8', 10),
-    badgeFs: parseInt($('admin-sponsor-badge-fs')?.value || '10', 10),
-    badgeRadius: parseInt($('admin-sponsor-badge-radius')?.value || '24', 10),
-    badgeWeight: $('admin-sponsor-badge-weight')?.value || '900',
-    title: $('admin-sponsor-title').value.trim(),
-    titleColor: $('admin-sponsor-title-color')?.value || '#ffffff',
-    titleFs: parseInt($('admin-sponsor-title-fs')?.value || '22', 10),
-    titleWeight: $('admin-sponsor-title-weight')?.value || '900',
-    desc: $('admin-sponsor-desc').value.trim(),
-    descColor: $('admin-sponsor-desc-color')?.value || '#cccccc',
-    descFs: parseInt($('admin-sponsor-desc-fs')?.value || '12', 10),
-    link: $('admin-sponsor-link').value.trim(),
-    img: $('admin-sponsor-img').value.trim(),
-    bgImage: $('admin-sponsor-bg').value.trim()
-  });
-  renderOverview();
-  updateSponsorPreview();
-  toast('Official Sponsor သိမ်းပြီးပါပြီ။');
-}
-function updateUpcomingPreview() {
-  if ($('up-prev-heading')) $('up-prev-heading').textContent = $('up-heading')?.value || 'Upcoming';
-  const st = $('up-section-title')?.value || '';
-  if ($('up-prev-section-title')) { $('up-prev-section-title').textContent = st; $('up-prev-section-title').style.display = st ? '' : 'none'; }
-  if ($('up-prev-label')) {
-    $('up-prev-label').textContent = $('up-label')?.value || 'Featured';
-    $('up-prev-label').style.color = $('up-label-color')?.value || '#f5c518';
-  }
-  if ($('up-prev-title')) {
-    $('up-prev-title').textContent = $('up-title')?.value || 'Title';
-    $('up-prev-title').style.color = $('up-title-color')?.value || '#ffffff';
-    $('up-prev-title').style.fontWeight = $('up-title-weight')?.value || '900';
-    const tfs = $('up-title-fs')?.value || 22;
-    $('up-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.6)) + 'px';
-    if ($('val-up-title-fs')) $('val-up-title-fs').textContent = tfs + 'px';
-  }
-  if ($('up-prev-label')) {
-    const lfs = $('up-label-fs')?.value || 11;
-    $('up-prev-label').style.fontSize = lfs + 'px';
-  }
-  if ($('up-prev-desc')) {
-    $('up-prev-desc').textContent = $('up-desc')?.value || 'Desc';
-    $('up-prev-desc').style.color = $('up-desc-color')?.value || '#cccccc';
-    const dfs = $('up-desc-fs')?.value || 13;
-    $('up-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
-  }
-  const img = ($('up-image')?.value || '').trim();
-  const box = $('up-live-preview');
-  if (box) {
-    applyLiveBg(box, img);
-    if (!img) box.style.backgroundImage = 'linear-gradient(90deg,#1a1a1a,#333)';
-  }
-}
-function saveUpcoming() {
-  write('hh_upcoming', {
-    active: $('up-active').checked,
-    heading: $('up-heading').value.trim(),
-    sectionTitle: $('up-section-title')?.value.trim() || '',
-    label: $('up-label').value.trim(),
-    labelColor: $('up-label-color')?.value || '#f5c518',
-    labelFs: parseInt($('up-label-fs')?.value || '11', 10),
-    title: $('up-title').value.trim(),
-    titleColor: $('up-title-color')?.value || '#ffffff',
-    titleFs: parseInt($('up-title-fs')?.value || '22', 10),
-    titleWeight: $('up-title-weight')?.value || '900',
-    desc: $('up-desc').value.trim(),
-    descColor: $('up-desc-color')?.value || '#cccccc',
-    descFs: parseInt($('up-desc-fs')?.value || '13', 10),
-    image: $('up-image').value.trim()
-  });
-  updateUpcomingPreview();
-  toast('Upcoming သိမ်းပြီးပါပြီ။');
-}
-function updateYoutubePreview() {
-  if ($('yt-prev-label')) $('yt-prev-label').textContent = $('yt-label')?.value || 'Watch My YouTube';
-  if ($('yt-prev-title')) {
-    $('yt-prev-title').textContent = $('yt-title')?.value || 'Channel Title';
-    $('yt-prev-title').style.color = $('yt-title-color')?.value || '#ffffff';
-    $('yt-prev-title').style.fontWeight = $('yt-title-weight')?.value || '900';
-  }
-  if ($('yt-prev-desc')) $('yt-prev-desc').textContent = $('yt-desc')?.value || 'Description';
-  const bg = ($('yt-bg')?.value || '').trim();
-  const box = $('yt-live-preview');
-  if (box) applyLiveBg(box, bg);
-  const thumb = ($('yt-thumb')?.value || '').trim();
-  // optional small thumb indicator in preview
-}
-function saveYoutube() {
-  write('hh_youtube', {
-    active: $('yt-active').checked,
-    label: $('yt-label').value.trim(),
-    title: $('yt-title').value.trim(),
-    titleColor: $('yt-title-color')?.value || '#ffffff',
-    titleFs: parseInt($('yt-title-fs')?.value || '22', 10),
-    titleWeight: $('yt-title-weight')?.value || '900',
-    desc: $('yt-desc').value.trim(),
-    link: $('yt-link').value.trim(),
-    thumb: $('yt-thumb').value.trim(),
-    bgImage: $('yt-bg').value.trim()
-  });
-  updateYoutubePreview();
-  toast('YouTube Section သိမ်းပြီးပါပြီ။');
-}
-function updateAboutPreview() {
-  const t = $('about-prev-title'), d = $('about-prev-desc');
-  if (t) {
-    t.textContent = $('about-title')?.value || 'About Htoo Htet';
-    t.style.color = $('about-title-color')?.value || '#ffffff';
-    t.style.fontWeight = $('about-title-weight')?.value || '700';
-  }
-  if (d) {
-    d.textContent = $('about-desc')?.value || 'Description…';
-    d.style.color = $('about-desc-color')?.value || '#a7f3d0';
-  }
-}
-function saveAbout() {
-  write('hh_about', {
-    active: $('about-active').checked,
-    title: $('about-title').value.trim(),
-    titleColor: $('about-title-color')?.value || '#ffffff',
-    titleFs: parseInt($('about-title-fs')?.value || '24', 10),
-    titleWeight: $('about-title-weight')?.value || '700',
-    desc: $('about-desc').value.trim(),
-    descColor: $('about-desc-color')?.value || '#a7f3d0'
-  });
-  updateAboutPreview();
-  toast('About သိမ်းပြီးပါပြီ။');
-}
-function renderContentHtml(raw) {
-  if (!raw) return '<p class="text-slate-500 text-xs">စာ / ပုံ ရေးသွင်းပါ — ဒီမှာ preview ပေါ်မယ်</p>';
-  let html = String(raw)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  // [img]url[/img]
-  html = html.replace(/\[img\]([\s\S]*?)\[\/img\]/gi, function(_, url) {
-    url = url.trim().replace(/&amp;/g, '&');
-    if (!url) return '';
-    return '<div style="margin:10px 0;"><img src="' + url.replace(/"/g, '&quot;') + '" alt="" style="max-width:100%;border-radius:10px;display:block;max-height:280px;object-fit:contain;background:#111;border:1px solid #333;"></div>';
-  });
-  // simple headings: lines starting with # 
-  html = html.replace(/^###\s+(.+)$/gm, '<h4 class="text-base font-bold text-white mt-3">$1</h4>');
-  html = html.replace(/^##\s+(.+)$/gm, '<h3 class="text-lg font-bold text-white mt-3">$1</h3>');
-  html = html.replace(/^#\s+(.+)$/gm, '<h2 class="text-xl font-black text-white mt-3">$1</h2>');
-  // paragraphs
-  html = html.split(/\n\n+/).map(function(block) {
-    if (block.indexOf('<img') === 0 || block.indexOf('<h') === 0) return block;
-    return '<p class="leading-relaxed text-slate-300">' + block.replace(/\n/g, '<br>') + '</p>';
-  }).join('');
-  return html;
-}
-function updateContentPreview() {
-  const box = $('content-live-preview');
-  if (!box) return;
-  box.innerHTML = renderContentHtml($('admin-post-content')?.value || '');
-}
-function updatePostPreview() {
-  const title = $('admin-post-title')?.value || 'Post Title';
-  const desc = $('admin-post-desc')?.value || 'Short description…';
-  const loc = $('admin-post-location')?.value || 'Location';
-  const cat = $('admin-post-category')?.value || 'Category';
-  const img = $('admin-post-img')?.value.trim();
-  if ($('post-prev-title')) $('post-prev-title').textContent = title;
-  if ($('post-prev-desc')) $('post-prev-desc').textContent = desc;
-  if ($('post-prev-meta')) $('post-prev-meta').textContent = loc + ' · ' + cat;
-  const pi = $('post-prev-img'), icon = $('post-prev-img-icon');
-  applyLiveLogo(pi, icon, img);
-  if (typeof updateContentPreview === 'function') updateContentPreview();
-}
-function updateProudPreview() {
-  const bar = $('proud-preview-bar');
-  if (!bar) return;
-  const items = getProud().filter(p => p.active !== false);
-  if (!items.length) {
-    bar.innerHTML = '<span class="text-xs text-slate-500">Sponsor မရှိသေး</span>';
-    return;
-  }
-  bar.innerHTML = items.map(p => {
-    if (p.logo) return '<img src="'+safe(p.logo)+'" class="h-8 object-contain opacity-90" alt="'+safe(p.name)+'" onerror="this.style.display=\'none\'">';
-    return '<span class="text-white/90 font-bold text-sm">'+safe(p.name)+'</span>';
-  }).join('');
-}
-function saveSocial() {
-  write('hh_social', {
-    fb: $('admin-fb').value.trim(),
-    tt: $('admin-tt').value.trim(),
-    yt: $('admin-yt').value.trim(),
-    vb: $('admin-vb').value.trim(),
-    showFb: $('social-show-fb')?.checked !== false,
-    showYt: $('social-show-yt')?.checked !== false,
-    showTt: $('social-show-tt')?.checked !== false,
-    showVb: $('social-show-vb')?.checked !== false
-  });
-  toast('Social Links သိမ်းပြီးပါပြီ။');
-}
-
-/* ---- Menu ---- */
-function getMenu() { return read('hh_menu', []); }
-function renderMenuList() {
-  const list = $('menu-list');
-  const items = getMenu();
-  const prev = $('menu-preview-box');
-  if (prev) {
-    const show = items.length ? items : [{label:'Home'},{label:'Travel Stories'},{label:'YouTube'},{label:'About'},{label:'Contact'}];
-    prev.innerHTML = show.map(m => '<div class="rounded-lg px-3 py-2 hover:bg-emerald-900/40">› ' + safe(m.label) + '</div>').join('');
-  }
-  if (!items.length) {
-    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Menu မရှိသေး — Default menu သုံးနေပါတယ်။</p>';
-    return;
-  }
-  list.innerHTML = items.map((m, i) => `
-    <div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-      <span class="text-xs font-black text-violet-300 w-6">${String(i+1).padStart(2,'0')}</span>
-      <div class="flex-1 min-w-0"><p class="font-bold truncate">${safe(m.label)}</p><p class="tiny truncate">${safe(m.href)}</p></div>
-      <button class="btn btn-muted" onclick="moveMenu(${i},-1)" ${i===0?'disabled':''}>↑</button>
-      <button class="btn btn-muted" onclick="moveMenu(${i},1)" ${i===items.length-1?'disabled':''}>↓</button>
-      <button class="btn btn-red" onclick="deleteMenu(${i})"><i class="fa-regular fa-trash-can"></i></button>
-    </div>`).join('');
-}
-function addMenuItem() {
-  const label = $('menu-label').value.trim(), href = $('menu-href').value.trim();
-  if (!label || !href) return alert('Label နဲ့ Link ထည့်ပါ။');
-  const items = getMenu();
-  items.push({ label, href });
-  write('hh_menu', items);
-  $('menu-label').value = ''; $('menu-href').value = '';
-  renderMenuList(); toast('Menu ထည့်ပြီးပါပြီ။');
-}
-function moveMenu(i, d) {
-  const a = getMenu(), n = i + d;
-  if (n < 0 || n >= a.length) return;
-  [a[i], a[n]] = [a[n], a[i]];
-  write('hh_menu', a); renderMenuList();
-}
-function deleteMenu(i) {
-  if (!confirm('ဖျက်မှာ သေချာပါသလား?')) return;
-  const a = getMenu(); a.splice(i, 1); write('hh_menu', a); renderMenuList(); toast('ဖျက်ပြီးပါပြီ။');
-}
-
-/* ---- Proud Sponsors ---- */
-function getProud() { return read('hh_proud_sponsors', []); }
-function renderProudList() {
-  const list = $('proud-list');
-  const items = getProud();
-  if (typeof updateProudPreview === 'function') updateProudPreview();
-  $('stat-proud') && ($('stat-proud').textContent = items.length);
-  if (!items.length) {
-    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Proud Sponsor မရှိသေးပါ။</p>';
-    return;
-  }
-  list.innerHTML = items.map((p, i) => `
-    <div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-      ${p.logo ? `<img src="${safe(p.logo)}" class="h-8 w-12 object-contain rounded bg-white/10" onerror="this.style.display='none'">` : ''}
-      <div class="flex-1 min-w-0"><p class="font-bold">${safe(p.name)}</p><p class="tiny">${p.active === false ? 'Hidden' : 'Visible'}</p></div>
-      <button class="btn btn-muted" onclick="toggleProud(${i})">${p.active === false ? 'Show' : 'Hide'}</button>
-      <button class="btn btn-muted" onclick="moveProud(${i},-1)" ${i===0?'disabled':''}>↑</button>
-      <button class="btn btn-muted" onclick="moveProud(${i},1)" ${i===items.length-1?'disabled':''}>↓</button>
-      <button class="btn btn-red" onclick="deleteProud(${i})"><i class="fa-regular fa-trash-can"></i></button>
-    </div>`).join('');
-}
-function addProud() {
-  const name = $('proud-name').value.trim();
-  if (!name) return alert('Name ထည့်ပါ။');
-  const items = getProud();
-  items.push({ id: Date.now(), name, logo: $('proud-logo').value.trim(), link: $('proud-link').value.trim(), active: true });
-  write('hh_proud_sponsors', items);
-  $('proud-name').value = ''; $('proud-logo').value = ''; $('proud-link').value = '';
-  renderProudList(); renderOverview(); toast('Proud Sponsor ထည့်ပြီးပါပြီ။');
-}
-function toggleProud(i) {
-  const a = getProud(); a[i].active = a[i].active === false ? true : false;
-  write('hh_proud_sponsors', a); renderProudList();
-}
-function moveProud(i, d) {
-  const a = getProud(), n = i + d;
-  if (n < 0 || n >= a.length) return;
-  [a[i], a[n]] = [a[n], a[i]];
-  write('hh_proud_sponsors', a); renderProudList();
-}
-function deleteProud(i) {
-  if (!confirm('ဖျက်မှာ သေချာပါသလား?')) return;
-  const a = getProud(); a.splice(i, 1); write('hh_proud_sponsors', a); renderProudList(); renderOverview(); toast('ဖျက်ပြီးပါပြီ။');
-}
-
-/* ---- Posts ---- */
-function getPosts() { return read('hh_posts', []); }
-function getHomeSections() { return read('hh_home_sections', []); }
-function refreshPostSectionOptions() {
-  const sel = $('admin-post-section'), current = sel.value || 'latest';
-  sel.innerHTML = '<option value="latest">Latest Travel Posts (default)</option>' +
-    getHomeSections().map(s => `<option value="${safe(s.id)}">${safe(s.title)}</option>`).join('');
-  if ([...sel.options].some(o => o.value === current)) sel.value = current;
-}
-function slugify(text) {
-  return String(text || '').toLowerCase()
-    .replace(/[^\w\u1000-\u109f\s-]/g, '')
-    .replace(/[\s_]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '') || 'post';
-}
-function autoSlug() {
-  const title = $('admin-post-title').value;
-  const slugEl = $('admin-post-slug');
-  if (!slugEl.dataset.manual) slugEl.value = slugify(title);
-}
-function savePost() {
-  const title = $('admin-post-title').value.trim();
-  const slug = $('admin-post-slug').value.trim() || slugify(title);
-  const img = $('admin-post-img').value.trim();
-  const desc = $('admin-post-desc').value.trim();
-  const content = $('admin-post-content').value.trim();
-  const location = $('admin-post-location').value.trim();
-  const category = $('admin-post-category').value;
-  if (!title) return alert('Title ထည့်ပေးပါ။');
-  if (!slug) return alert('Slug ထည့်ပေးပါ။');
-  if (!img) return alert('Cover Image URL / Upload ထည့်ပေးပါ။');
-  if (!desc) return alert('Short Description ထည့်ပေးပါ။');
-  if (!content) return alert('Article Content ထည့်ပေးပါ။');
-  if (!location) return alert('Location ထည့်ပေးပါ။');
-  if (!category) return alert('Category ရွေးပေးပါ။');
-
-  const posts = getPosts(), id = $('editing-post-id').value;
-  const author = $('admin-post-author').value.trim() || 'Htoo Htet';
-  const seoTitle = $('admin-post-seo-title').value.trim() || title;
-  const metaDesc = $('admin-post-meta').value.trim() || desc;
-  const data = {
-    title, slug, img, desc, content, location, category, author,
-    travelDate: $('admin-post-travel-date').value || '',
-    seoTitle, metaDesc,
-    sectionId: $('admin-post-section').value,
-    publishedDate: id ? (posts.find(p => String(p.id) === String(id))?.publishedDate || Date.now()) : Date.now()
-  };
-  if (id) {
-    const i = posts.findIndex(p => String(p.id) === String(id));
-    if (i >= 0) posts[i] = { ...posts[i], ...data };
-  } else {
-    posts.unshift({ id: Date.now(), ...data });
-  }
-  write('hh_posts', posts);
-  cancelPostEdit();
-  renderPostsList();
-  renderOverview();
-  toast(id ? 'Post ပြင်ပြီးပါပြီ။' : 'Post Publish လုပ်ပြီးပါပြီ။');
-}
-function editPost(id) {
-  const p = getPosts().find(x => String(x.id) === String(id));
-  if (!p) return;
-  showView('posts');
-  refreshPostSectionOptions();
-  $('editing-post-id').value = p.id;
-  $('admin-post-title').value = p.title || '';
-  $('admin-post-slug').value = p.slug || slugify(p.title || '');
-  $('admin-post-slug').dataset.manual = '1';
-  $('admin-post-img').value = p.img || '';
-  $('admin-post-location').value = p.location || '';
-  $('admin-post-desc').value = p.desc || '';
-  $('admin-post-content').value = p.content || '';
-  if (typeof updateContentPreview === 'function') updateContentPreview();
-  $('admin-post-category').value = p.category || 'Travel Story';
-  $('admin-post-travel-date').value = p.travelDate || '';
-  $('admin-post-author').value = p.author || 'Htoo Htet';
-  $('admin-post-seo-title').value = p.seoTitle || '';
-  $('admin-post-meta').value = p.metaDesc || '';
-  $('admin-post-section').value = p.sectionId || 'latest';
-  showPreviewIfUrl('admin-post-img');
-  $('post-form-heading').innerHTML = '<i class="fa-solid fa-pen mr-2 text-sky-300"></i>Edit Travel Post';
-  $('post-save-button').innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Save Changes';
-  $('post-cancel-button').classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function cancelPostEdit() {
-  ['editing-post-id','admin-post-title','admin-post-slug','admin-post-img','admin-post-location','admin-post-desc','admin-post-content','admin-post-travel-date','admin-post-seo-title','admin-post-meta'].forEach(id => $(id).value = '');
-  $('admin-post-author').value = 'Htoo Htet';
-  $('admin-post-category').value = 'Travel Story';
-  $('admin-post-section').value = 'latest';
-  delete $('admin-post-slug').dataset.manual;
-  const prev = $('admin-post-img-preview'); if (prev) prev.innerHTML = '';
-  $('post-form-heading').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post';
-  $('post-save-button').innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i>Publish Post';
-  $('post-cancel-button').classList.add('hidden');
-}
-function deletePost(id) {
-  if (!confirm('ဒီ Post ကို ဖျက်မှာ သေချာပါသလား?')) return;
-  write('hh_posts', getPosts().filter(p => String(p.id) !== String(id)));
-  renderPostsList(); renderOverview(); toast('Post ဖျက်ပြီးပါပြီ။');
-}
-function renderPostsList() {
-  const posts = getPosts();
-  $('post-count').textContent = posts.length + ' posts';
-  refreshPostSectionOptions();
-  if (!posts.length) {
-    $('posts-list').innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Post မရှိသေးပါ။</p>';
-    return;
-  }
-  $('posts-list').innerHTML = posts.map(p => {
-    const dateStr = p.publishedDate ? new Date(p.publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
-    return `<article class="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-3 sm:flex-row sm:items-center">
-      <img src="${safe(p.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=180')}" onerror="this.style.display='none'" class="h-20 w-full rounded-lg object-cover sm:w-28">
-      <div class="min-w-0 flex-1">
-        <h4 class="font-bold">${safe(p.title)}</h4>
-        <p class="mt-1 line-clamp-2 text-xs text-slate-400">${safe(p.desc || '')}</p>
-        <p class="mt-2 text-[11px] text-emerald-300">${safe(p.location || 'Myanmar')} · ${safe(p.category || 'Travel Story')} · ${safe(p.author || 'Htoo Htet')}${dateStr ? ' · ' + dateStr : ''}</p>
-        <p class="tiny mt-0.5">/${safe(p.slug || '')}</p>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="editPost('${safe(p.id)}')" class="btn btn-muted"><i class="fa-solid fa-pen mr-1"></i>Edit</button>
-        <button onclick="deletePost('${safe(p.id)}')" class="btn btn-red"><i class="fa-regular fa-trash-can"></i></button>
-      </div>
-    </article>`;
-  }).join('');
-}
-
-/* ---- Home Sections ---- */
-function addHomeSection() {
-  const title = $('section-title').value.trim();
-  if (!title) return alert('Row ခေါင်းစဉ် ထည့်ပါ။');
-  const sections = getHomeSections();
-  sections.push({ id: String(Date.now()), title, subtitle: $('section-subtitle').value.trim(), layout: $('section-layout').value });
-  write('hh_home_sections', sections);
-  $('section-title').value = ''; $('section-subtitle').value = '';
-  renderHomeSectionsList(); renderOverview(); toast('Row ထည့်ပြီးပါပြီ။');
-}
-function renderHomeSectionsList() {
-  const list = $('home-sections-list'), sections = getHomeSections();
-  $('section-count').textContent = sections.length + ' rows';
-  refreshPostSectionOptions();
-  if (!sections.length) {
-    list.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Row မရှိသေးပါ။</div>';
-    return;
-  }
-  list.innerHTML = sections.map((s, i) => `
-    <div class="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex min-w-0 items-start gap-3">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-400/10 font-black text-violet-200">${String(i+1).padStart(2,'0')}</div>
-        <div class="min-w-0">
-          <p class="font-bold">${safe(s.title)}</p>
-          <p class="mt-1 text-xs text-slate-400">${s.layout === 'wide' ? 'Wide' : 'Grid'} · ${getPosts().filter(p => String(p.sectionId) === String(s.id)).length} posts</p>
-        </div>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button class="btn btn-muted" onclick="moveHomeSection(${i},-1)" ${i===0?'disabled':''}>↑</button>
-        <button class="btn btn-muted" onclick="moveHomeSection(${i},1)" ${i===sections.length-1?'disabled':''}>↓</button>
-        <button class="btn btn-red" onclick="deleteHomeSection(${i})"><i class="fa-regular fa-trash-can mr-1"></i>Delete</button>
-      </div>
-    </div>`).join('');
-}
-function moveHomeSection(i, d) {
-  const a = getHomeSections(), n = i + d;
-  if (n < 0 || n >= a.length) return;
-  [a[i], a[n]] = [a[n], a[i]];
-  write('hh_home_sections', a); renderHomeSectionsList();
-}
-function deleteHomeSection(i) {
-  const a = getHomeSections(), s = a[i];
-  if (!s || !confirm('ဒီ Row ကို ဖျက်မှာ သေချာပါသလား?')) return;
-  a.splice(i, 1); write('hh_home_sections', a);
-  const posts = getPosts();
-  posts.forEach(p => { if (String(p.sectionId) === String(s.id)) p.sectionId = 'latest'; });
-  write('hh_posts', posts);
-  renderHomeSectionsList(); renderPostsList(); renderOverview(); toast('Row ဖျက်ပြီးပါပြီ။');
-}
-
-function renderOverview() {
-  const posts = getPosts(), sections = getHomeSections(), proud = getProud(), sp = read('hh_sponsor', {});
-  $('stat-posts').textContent = posts.length;
-  $('stat-sections').textContent = sections.length;
-  $('stat-proud').textContent = proud.length;
-  $('stat-sponsor').textContent = sp.active === false ? 'Off' : (sp.title || 'On');
-}
-
-/* ---- Theme Presets (full layout snapshot) ---- */
-function getPresets() { return read('hh_theme_presets', []); }
-function saveThemePreset() {
-  const name = ($('preset-name')?.value || '').trim();
-  if (!name) return alert('Theme နာမည် ထည့်ပါ။');
-  // Ensure current form values are written first
-  try { saveSettings(); } catch(e) {}
-  const snapshot = {
-    id: Date.now(),
-    name,
-    savedAt: new Date().toISOString(),
-    hh_settings: read('hh_settings', {}),
-    hh_hero: read('hh_hero', {}),
-    hh_sponsor: read('hh_sponsor', {}),
-    hh_upcoming: read('hh_upcoming', {}),
-    hh_youtube: read('hh_youtube', {}),
-    hh_about: read('hh_about', {}),
-    hh_social: read('hh_social', {})
-  };
-  const list = getPresets();
-  list.unshift(snapshot);
-  write('hh_theme_presets', list);
-  if ($('preset-name')) $('preset-name').value = '';
-  renderPresetList();
-  toast('Theme "' + name + '" သိမ်းပြီးပါပြီ။');
-}
-function loadThemePreset(id) {
-  const p = getPresets().find(x => String(x.id) === String(id));
-  if (!p) return alert('Theme မတွေ့ပါ။');
-  if (!confirm('"' + p.name + '" ကို Load မယ် — လက်ရှိ layout အချို့ ပြောင်းသွားမယ်။')) return;
-  const keys = ['hh_settings','hh_hero','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social'];
-  keys.forEach(k => { if (p[k] != null) write(k, p[k]); });
-  loadAll();
-  toast('Theme "' + p.name + '" Load ပြီးပါပြီ။');
-}
-function deleteThemePreset(id) {
-  if (!confirm('ဒီ Theme ကို ဖျက်မလား?')) return;
-  write('hh_theme_presets', getPresets().filter(x => String(x.id) !== String(id)));
-  renderPresetList();
-  toast('Theme ဖျက်ပြီးပါပြီ။');
-}
-function renderPresetList() {
-  const box = $('preset-list');
-  if (!box) return;
-  const list = getPresets();
-  if (!list.length) {
-    box.innerHTML = '<p class="text-sm text-slate-500 border border-dashed border-slate-700 rounded-xl p-4 text-center">သိမ်းထားသော Theme မရှိသေးပါ။ Layout ပြင်ပြီး "Save as Theme" နှိပ်ပါ။</p>';
-    return;
-  }
-  box.innerHTML = list.map(p => {
-    const d = p.savedAt ? new Date(p.savedAt).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) : '';
-    const theme = (p.hh_settings && p.hh_settings.theme) || '—';
-    const mode = (p.hh_settings && p.hh_settings.mode) || 'dark';
-    return `<div class="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-      <div class="flex-1 min-w-0">
-        <p class="font-bold truncate">${safe(p.name)}</p>
-        <p class="tiny">${safe(theme)} · ${safe(mode)} · ${d}</p>
-      </div>
-      <div class="flex gap-2">
-        <button class="btn btn-green" onclick="loadThemePreset('${p.id}')"><i class="fa-solid fa-download mr-1"></i>Load</button>
-        <button class="btn btn-red" onclick="deleteThemePreset('${p.id}')"><i class="fa-regular fa-trash-can"></i></button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toast(message) {
-  let t = $('toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'toast';
-    t.className = 'fixed bottom-5 right-5 z-50 max-w-sm rounded-xl border border-emerald-500/30 bg-slate-900 px-4 py-3 text-sm font-semibold text-emerald-200 shadow-2xl';
-    document.body.appendChild(t);
-  }
-  t.textContent = message;
-  t.classList.remove('hidden');
-  clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => t.classList.add('hidden'), 2800);
-}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeMenu(); closeArticle(); searchPanel.classList.remove('open'); }
+});
 </script>
 </body>
 </html>
