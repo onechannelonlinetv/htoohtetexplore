@@ -2,6 +2,8 @@
 <html lang="my">
 <head>
 <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HTOO HTET | Travel Journal & Beyond</title>
 <meta name="description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet.">
@@ -206,11 +208,8 @@
     #hero-section, #hero-content-wrap {
       min-height: var(--hero-min-h, 420px) !important;
     }
-    #hero-text-box {
-      left: var(--hero-text-x, 5%) !important;
-      top: var(--hero-text-y, 28%) !important;
+    #hero-label, #hero-title, #hero-desc, #hero-sign, #hero-btn-wrap {
       max-width: 92% !important;
-      padding-right: 0.5rem;
     }
   }
 
@@ -290,20 +289,20 @@
     <div class="hero-overlay absolute inset-0"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15"></div>
     <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
-      <div id="hero-text-box" class="max-w-xl" style="position:absolute; left:var(--hero-text-x, 8%); top:var(--hero-text-y, 35%); max-width: var(--hero-text-maxw, 36rem); text-align: var(--hero-text-align, left);">
-        <span id="hero-label" class="inline-block accent-text font-bold tracking-[0.2em] uppercase mb-2" style="font-size:12px;">Travel Journal</span>
-        <h1 id="hero-title" class="hero-title font-black leading-[1.15] tracking-tight text-white" style="font-size:clamp(1.5rem,5vw,2.5rem);">
+      <div id="hero-text-box" class="absolute inset-0 pointer-events-none" style="z-index:5;">
+        <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%;">Travel Journal</span>
+        <h1 id="hero-title" class="hero-title absolute font-black leading-[1.15] tracking-tight text-white pointer-events-auto" style="left:8%; top:28%; font-size:clamp(1.4rem,5vw,2.5rem); max-width:90%;">
           New Places.<br><span class="text-emerald-300">Same Curiosity.</span>
         </h1>
-        <p id="hero-desc" class="mt-3 text-emerald-100/80 leading-relaxed max-w-md" style="font-size:14px;">
+        <p id="hero-desc" class="absolute text-emerald-100/80 leading-relaxed pointer-events-auto" style="left:8%; top:55%; font-size:14px; max-width:min(90%,36rem);">
           Traveling is not just about reaching a destination, it's about collecting stories, meeting people, and seeing the world with a different heart.
         </p>
-        <div class="mt-6 sm:mt-7">
+        <div id="hero-btn-wrap" class="absolute pointer-events-auto" style="left:8%; top:72%;">
           <a id="hero-btn" href="#stories" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full shadow-lg transition">
             Explore My Journey <i class="fa-solid fa-arrow-right text-xs"></i>
           </a>
         </div>
-        <p id="hero-sign" class="mt-6 text-emerald-400/60 text-sm italic font-medium">— Htoo Htet</p>
+        <p id="hero-sign" class="absolute text-emerald-400/60 text-sm italic font-medium pointer-events-auto" style="left:8%; top:85%;">— Htoo Htet</p>
       </div>
     </div>
   </section>
@@ -665,26 +664,23 @@ function loadBlogData() {
   if (hero.desc) $('hero-desc').textContent = hero.desc;
   if (hero.descColor) setStyle($('hero-desc'), 'color', hero.descColor);
   if (hero.descFs) setStyle($('hero-desc'), 'font-size', hero.descFs + 'px');
-  if (hero.sign) {
-    let s = $('hero-sign');
-    if (!s) {
-      s = document.createElement('p');
-      s.id = 'hero-sign';
-      s.className = 'mt-3 text-sm font-medium';
-      $('hero-text-box').appendChild(s);
-    }
-    s.textContent = hero.sign;
-    if (hero.signColor) setStyle(s, 'color', hero.signColor);
+  if (hero.sign != null && $('hero-sign')) {
+    $('hero-sign').textContent = hero.sign;
+    if (hero.signColor) setStyle($('hero-sign'), 'color', hero.signColor);
   }
-  const tx = hero.textX != null ? hero.textX : 8;
-  const ty = hero.textY != null ? hero.textY : 35;
-  document.documentElement.style.setProperty('--hero-text-x', tx + '%');
-  document.documentElement.style.setProperty('--hero-text-y', ty + '%');
-  const htb = $('hero-text-box');
-  if (htb) {
-    setStyle(htb, 'left', tx + '%');
-    setStyle(htb, 'top', ty + '%');
+  function posEl(id, x, y) {
+    const el = $(id);
+    if (!el) return;
+    if (x != null) setStyle(el, 'left', x + '%');
+    if (y != null) setStyle(el, 'top', y + '%');
   }
+  posEl('hero-label', hero.labelX != null ? hero.labelX : (hero.textX != null ? hero.textX : 8), hero.labelY != null ? hero.labelY : 18);
+  posEl('hero-title', hero.titleX != null ? hero.titleX : (hero.textX != null ? hero.textX : 8), hero.titleY != null ? hero.titleY : 28);
+  posEl('hero-desc', hero.descX != null ? hero.descX : 8, hero.descY != null ? hero.descY : 55);
+  posEl('hero-sign', hero.signX != null ? hero.signX : 8, hero.signY != null ? hero.signY : 85);
+  // button sits under desc
+  const by = hero.descY != null ? Math.min(88, hero.descY + 18) : 72;
+  posEl('hero-btn-wrap', hero.descX != null ? hero.descX : 8, by);
   if (hero.btnText) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
   if (hero.btnLink) $('hero-btn').href = hero.btnLink;
   if (hero.sign) $('hero-sign').textContent = hero.sign;
