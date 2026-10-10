@@ -265,8 +265,8 @@
     <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
     <div class="hero-overlay absolute inset-0"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15"></div>
-    <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col py-12 sm:py-16" style="min-height: var(--hero-min-h); justify-content: var(--hero-v-align, center);">
-      <div id="hero-text-box" class="max-w-xl" style="max-width: var(--hero-text-maxw, 36rem); margin-left: var(--hero-ml, 0); margin-right: var(--hero-mr, auto); text-align: var(--hero-text-align, left);">
+    <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
+      <div id="hero-text-box" class="max-w-xl" style="position:absolute; left:var(--hero-text-x, 8%); top:var(--hero-text-y, 35%); max-width: var(--hero-text-maxw, 36rem); text-align: var(--hero-text-align, left);">
         <span id="hero-label" class="inline-block accent-text text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-3">Travel Journal</span>
         <h1 id="hero-title" class="hero-title text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.15] tracking-tight text-white">
           New Places.<br><span class="text-emerald-300">Same Curiosity.</span>
@@ -631,12 +631,18 @@ function loadBlogData() {
   if (hero.image) $('hero-img').src = hero.image;
   if (hero.label) $('hero-label').textContent = hero.label;
   if (hero.labelColor) { $('hero-label').style.color = hero.labelColor; $('hero-label').classList.remove('accent-text'); }
+  if (hero.labelFs) $('hero-label').style.fontSize = hero.labelFs + 'px';
   if (hero.title) $('hero-title').innerHTML = hero.title;
   if (hero.titleColor) $('hero-title').style.color = hero.titleColor;
+  if (hero.titleFs) $('hero-title').style.fontSize = 'clamp(1.25rem, 2vw + 0.5rem, ' + hero.titleFs + 'px)';
   if (hero.titleWeight) $('hero-title').style.fontWeight = hero.titleWeight;
   if (hero.titleStyle) $('hero-title').style.fontStyle = hero.titleStyle;
   if (hero.desc) $('hero-desc').textContent = hero.desc;
   if (hero.descColor) $('hero-desc').style.color = hero.descColor;
+  if (hero.descFs) $('hero-desc').style.fontSize = hero.descFs + 'px';
+  if (hero.sign) { const s = $('hero-sign'); if (s) { s.textContent = hero.sign; if (hero.signColor) s.style.color = hero.signColor; } }
+  if (hero.textX != null) document.documentElement.style.setProperty('--hero-text-x', hero.textX + '%');
+  if (hero.textY != null) document.documentElement.style.setProperty('--hero-text-y', hero.textY + '%');
   if (hero.btnText) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
   if (hero.btnLink) $('hero-btn').href = hero.btnLink;
   if (hero.sign) $('hero-sign').textContent = hero.sign;
@@ -689,6 +695,10 @@ function loadBlogData() {
     if (sponsor.badgeRadius != null) badge.style.borderRadius = (sponsor.badgeRadius >= 24 ? '9999px' : sponsor.badgeRadius + 'px');
     if (sponsor.badgeWeight) badge.style.fontWeight = sponsor.badgeWeight;
     if (sponsor.title) $('sponsor-title').textContent = sponsor.title;
+    if (sponsor.titleColor) $('sponsor-title').style.color = sponsor.titleColor;
+    if (sponsor.titleFs) $('sponsor-title').style.fontSize = 'clamp(1rem, 1.5vw + 0.5rem, ' + sponsor.titleFs + 'px)';
+    if (sponsor.titleWeight) $('sponsor-title').style.fontWeight = sponsor.titleWeight;
+    if (sponsor.desc) { const d = $('sponsor-desc'); if (d) { d.textContent = sponsor.desc; if (sponsor.descColor) d.style.color = sponsor.descColor; if (sponsor.descFs) d.style.fontSize = sponsor.descFs + 'px'; } }
     if (sponsor.desc) $('sponsor-desc').textContent = sponsor.desc;
     if (sponsor.link) $('sponsor-link').href = sponsor.link;
     if (sponsor.img) { $('sponsor-img').src = sponsor.img; $('sponsor-img').style.display = ''; }
