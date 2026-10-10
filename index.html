@@ -882,9 +882,47 @@ function renderStoryCards() {
 
 function formatArticleBody(raw) {
   if (!raw) return '';
-  let t = String(raw).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function renderImgsInGallery(inner, layout) {
+    var imgs = [];
+    var re = /\[img(?:[^\]]*)\]([\s\S]*?)\[\/img\]/gi;
+    var m;
+    while ((m = re.exec(inner)) !== null) {
+      var u = (m[1]||'').trim();
+      if (u) imgs.push(u);
+    }
+    imgs = imgs.slice(0, 3);
+    if (!imgs.length) return '';
+    layout = layout || '1-2';
+    function cell(u) {
+      return '<div style="border-radius:14px;overflow:hidden;min-height:0;"><img src="'+u.replace(/"/g,'&quot;')+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
+    }
+    if (layout === '1-2' && imgs.length >= 3) {
+      return '<div style="display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;">' +
+        '<div style="grid-row:1/3;border-radius:14px;overflow:hidden;">'+cell(imgs[0]).replace(/^<div/, '<div').replace('min-height:0','height:100%')+'</div>' +
+        cell(imgs[1]) + cell(imgs[2]) + '</div>';
+    }
+    if (layout === '2-1' && imgs.length >= 3) {
+      return '<div style="display:grid;grid-template-columns:1fr 1.2fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;">' +
+        cell(imgs[0]) +
+        '<div style="grid-row:1/3;grid-column:2;border-radius:14px;overflow:hidden;"><img src="'+imgs[1].replace(/"/g,'&quot;')+'" style="width:100%;height:100%;object-fit:cover;display:block;"></div>' +
+        cell(imgs[2]) + '</div>';
+    }
+    if (layout === '3' || imgs.length >= 3) {
+      return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:min(280px,40vw);margin:1.25rem 0;">' +
+        imgs.slice(0,3).map(cell).join('') + '</div>';
+    }
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;height:min(300px,42vw);margin:1.25rem 0;">' +
+      imgs.slice(0,2).map(cell).join('') + '</div>';
+  }
+  let t = String(raw);
+  // galleries first (before escaping)
+  t = t.replace(/\[gallery(?:\s+layout=([^\s\]]+))?\]([\s\S]*?)\[\/gallery\]/gi, function(_, layout, inner) {
+    return renderImgsInGallery(inner, layout || '1-2');
+  });
+  // remaining single images
   t = t.replace(/\[img((?:\s+\w+=[^\s\]]+)*)\]([\s\S]*?)\[\/img\]/gi, function(_, attrs, u) {
-    u = (u||'').trim().replace(/&amp;/g,'&');
+    u = (u||'').trim();
     attrs = attrs || '';
     var size = 'md', w = null;
     var sm = attrs.match(/\bsize=(sm|md|lg|full)/i); if (sm) size = sm[1].toLowerCase();
@@ -892,10 +930,15 @@ function formatArticleBody(raw) {
     if (w == null) w = { sm:40, md:70, lg:90, full:100 }[size] || 70;
     return '<img src="'+u.replace(/"/g,'&quot;')+'" alt="" style="width:'+w+'%;max-width:100%;border-radius:12px;margin:1rem 0;display:block;height:auto;object-fit:contain;background:rgba(0,0,0,.4)">';
   });
-  t = t.replace(/^### (.+)$/gm, '<h4 class="text-base font-bold text-white mt-4 mb-1">$1</h4>');
-  t = t.replace(/^## (.+)$/gm, '<h3 class="text-lg font-bold text-white mt-4 mb-1">$1</h3>');
-  t = t.replace(/^# (.+)$/gm, '<h2 class="text-xl font-black text-white mt-4 mb-2">$1</h2>');
-  t = t.replace(/\n/g, '<br>');
+  // escape remaining text carefully: split by tags
+  t = t.split(/(<[^>]+>)/).map(function(part) {
+    if (part.charAt(0) === '<') return part;
+    return esc(part)
+      .replace(/^### (.+)$/gm, '<h4 class="text-base font-bold text-white mt-4 mb-1">$1</h4>')
+      .replace(/^## (.+)$/gm, '<h3 class="text-lg font-bold text-white mt-4 mb-1">$1</h3>')
+      .replace(/^# (.+)$/gm, '<h2 class="text-xl font-black text-white mt-4 mb-2">$1</h2>')
+      .replace(/\n/g, '<br>');
+  }).join('');
   return t;
 }
 function openArticle(index) {
