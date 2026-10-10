@@ -1,208 +1,420 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Htoo Htet Explore - Travel Blog</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Htoo Htet Explore - Travel Blog</title>
+<meta name="description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet Explore.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root { color-scheme: light; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Myanmar", sans-serif; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .search-panel { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .28s ease, opacity .22s ease, padding .22s ease; }
+  .search-panel.open { max-height: 80px; opacity: 1; padding-top: 0.5rem; padding-bottom: 0.75rem; }
+  .card-hover { transition: transform .2s ease, box-shadow .2s ease; }
+  .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -8px rgb(0 0 0 / 0.15); }
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+<body class="bg-[#f6f7f9] text-slate-800 min-h-screen">
 
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-40 bg-white shadow-sm border-b border-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center gap-4">
-            <a href="#" class="flex items-center gap-2">
-                <div class="w-10 h-10 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
-                    <i class="fa-solid fa-compass"></i>
-                </div>
-                <div>
-                    <h1 class="font-black text-emerald-900 text-lg sm:text-xl leading-tight tracking-tight">Htoo Htet</h1>
-                    <p class="text-xs sm:text-sm font-bold tracking-wider text-emerald-800">Explore</p>
-                </div>
-            </a>
-            <div class="flex items-center space-x-2 text-slate-600" id="social-links">
-                <a id="link-fb" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition-all"><i class="fa-brands fa-facebook-f text-xs"></i></a>
-                <a id="link-tt" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition-all"><i class="fa-brands fa-tiktok text-xs"></i></a>
-                <a id="link-yt" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition-all"><i class="fa-brands fa-youtube text-xs"></i></a>
-            </div>
-            <button id="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" class="w-10 h-10 rounded-xl text-emerald-900 hover:bg-emerald-50 flex items-center justify-center text-xl" onclick="toggleMenu()">
-                <i class="fa-solid fa-bars"></i>
-            </button>
+<!-- ================= HEADER ================= -->
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-14 sm:h-16 gap-3">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-2.5 shrink-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-700 text-white flex items-center justify-center shadow-sm">
+          <i class="fa-solid fa-compass text-sm sm:text-base"></i>
         </div>
-        <div id="drawer-overlay" class="fixed inset-0 z-40 bg-slate-950/50 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
-        <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,340px)] bg-white shadow-2xl translate-x-full transition-transform duration-300 ease-out p-6 flex flex-col" aria-hidden="true">
-            <div class="flex items-center justify-between mb-8">
-                <div class="font-black text-emerald-900 text-lg">Htoo Htet <span class="text-emerald-700">Explore</span></div>
-                <button type="button" onclick="closeMenu()" aria-label="Close navigation menu" class="w-10 h-10 rounded-xl hover:bg-slate-100 text-xl"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <nav class="flex flex-col gap-2 text-base font-semibold text-slate-700">
-                <a href="#home" onclick="closeMenu()" class="rounded-xl px-4 py-3 hover:bg-emerald-50 hover:text-emerald-800"><i class="fa-solid fa-house w-6"></i> Home</a>
-                <a href="#upcoming" onclick="closeMenu()" class="rounded-xl px-4 py-3 hover:bg-emerald-50 hover:text-emerald-800"><i class="fa-solid fa-map-location-dot w-6"></i> Destinations</a>
-                <a href="#blog-search" onclick="closeMenu()" class="rounded-xl px-4 py-3 hover:bg-emerald-50 hover:text-emerald-800"><i class="fa-solid fa-book-open w-6"></i> Stories</a>
-                <a href="#about" onclick="closeMenu()" class="rounded-xl px-4 py-3 hover:bg-emerald-50 hover:text-emerald-800"><i class="fa-solid fa-circle-info w-6"></i> About</a>
-                <a href="#contact" onclick="closeMenu()" class="rounded-xl px-4 py-3 hover:bg-emerald-50 hover:text-emerald-800"><i class="fa-solid fa-envelope w-6"></i> Contact</a>
-            </nav>
-            <div class="mt-auto pt-6 border-t border-slate-100 text-xs text-slate-400">Discover Myanmar, one journey at a time.</div>
-        </aside>
-    </header>
+        <div class="leading-tight">
+          <div class="font-black text-emerald-900 text-[15px] sm:text-lg tracking-tight">Htoo Htet</div>
+          <div class="text-[10px] sm:text-xs font-bold text-emerald-700 tracking-wider -mt-0.5">Explore</div>
+        </div>
+      </a>
 
-    <main id="home" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
-
-        <!-- Hero Section Banner -->
-        <div class="relative rounded-3xl overflow-hidden shadow-xl min-h-[340px] sm:min-h-[420px] lg:min-h-[500px] bg-slate-900 text-white flex flex-col justify-between p-6 sm:p-10 lg:p-14">
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800" class="absolute inset-0 w-full h-full object-cover opacity-50">
-            <div class="relative z-10">
-                <span class="bg-red-600 text-white font-extrabold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider shadow">Explore Myanmar</span>
-                <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black mt-3 leading-tight uppercase tracking-tight max-w-2xl">Discover<br>The Unseen<br>Beauty</h2>
-                <p class="text-sm sm:text-lg text-slate-100 mt-3 max-w-md">Roads, people, culture and nature — all in one journey.</p>
-            </div>
-            <div class="relative z-10">
-                <a href="#" class="inline-flex items-center gap-2 bg-yellow-400 text-slate-950 font-extrabold text-sm px-6 py-3 rounded-full shadow-lg hover:bg-yellow-300 transition">
-                    Explore More <i class="fa-solid fa-arrow-right text-xs"></i>
-                </a>
-            </div>
+      <!-- Right actions -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- Social (desktop) -->
+        <div class="hidden sm:flex items-center gap-1.5" id="social-links-desktop">
+          <a id="link-fb-d" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-facebook-f"></i></a>
+          <a id="link-tt-d" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-tiktok"></i></a>
+          <a id="link-yt-d" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-youtube"></i></a>
         </div>
 
-        <!-- EXCLUSIVE TITLE PARTNER BANNER -->
-        <div id="sponsor-container" class="relative overflow-hidden bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-900 text-white rounded-2xl p-5 sm:p-7 shadow-xl border border-emerald-700/30">
-            <div class="flex items-center justify-between gap-4">
-                <div class="space-y-1.5 flex-1">
-                    <span class="bg-yellow-400 text-slate-950 text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest shadow-sm">
-                        ⭐ EXCLUSIVE TITLE PARTNER
-                    </span>
-                    <h3 id="sponsor-title" class="text-xl font-black text-white tracking-wide mt-1">VEEZOOM MYANMAR</h3>
-                    <p id="sponsor-desc" class="text-xs text-slate-300 font-medium">Auto Bike — Title Sponsor of Roads of Ayeyarwaddy</p>
-                    <div class="pt-2">
-                        <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition">
-                            Visit Veezoom <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- Logo Box -->
-                <div class="w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 rounded-2xl overflow-hidden border-2 border-emerald-300/50 shadow-lg bg-emerald-800 shrink-0 flex items-center justify-center">
-                    <img id="sponsor-img" src="https://raw.githubusercontent.com/onechannelonlinetv/htoohtetexplore/main/veezoom-logo.jpg" alt="Veezoom Logo" class="w-full h-full object-cover" onError="this.onerror=null; this.src='https://via.placeholder.com/150/ff0000/ffffff?text=VEEZOOM';">
-                </div>
-            </div>
+        <!-- Search toggle -->
+        <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 flex items-center justify-center transition">
+          <i class="fa-solid fa-magnifying-glass text-sm"></i>
+        </button>
+
+        <!-- Menu -->
+        <button id="menu-toggle" type="button" aria-label="Menu" aria-expanded="false" onclick="toggleMenu()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 flex items-center justify-center transition text-lg">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Expandable Search Bar -->
+    <div id="search-panel" class="search-panel">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input id="header-search-input" type="search" placeholder="ခေါင်းစဉ်၊ နေရာ သို့မဟုတ် အမျိုးအစား ရှာရန်..." class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-10 text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 transition">
+        <button type="button" id="search-close" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer overlay + menu -->
+  <div id="drawer-overlay" class="fixed inset-0 z-40 bg-slate-950/50 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
+  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] bg-white shadow-2xl translate-x-full transition-transform duration-300 ease-out p-5 flex flex-col" aria-hidden="true">
+    <div class="flex items-center justify-between mb-6">
+      <div class="font-black text-emerald-900 text-base">Htoo Htet <span class="text-emerald-700">Explore</span></div>
+      <button type="button" onclick="closeMenu()" aria-label="Close" class="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <nav class="flex flex-col gap-1 text-[15px] font-semibold text-slate-700">
+      <a href="#home" onclick="closeMenu()" class="rounded-xl px-3.5 py-3 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-3"><i class="fa-solid fa-house w-5 text-emerald-600"></i> Home</a>
+      <a href="#upcoming" onclick="closeMenu()" class="rounded-xl px-3.5 py-3 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-3"><i class="fa-solid fa-map-location-dot w-5 text-emerald-600"></i> Destinations</a>
+      <a href="#stories" onclick="closeMenu()" class="rounded-xl px-3.5 py-3 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-3"><i class="fa-solid fa-book-open w-5 text-emerald-600"></i> Stories</a>
+      <a href="#about" onclick="closeMenu()" class="rounded-xl px-3.5 py-3 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-3"><i class="fa-solid fa-circle-info w-5 text-emerald-600"></i> About</a>
+    </nav>
+    <div class="mt-auto pt-5 border-t border-slate-100">
+      <div class="flex gap-2 mb-3" id="social-links-mobile">
+        <a id="link-fb-m" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-facebook-f"></i></a>
+        <a id="link-tt-m" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-tiktok"></i></a>
+        <a id="link-yt-m" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-youtube"></i></a>
+      </div>
+      <p class="text-[11px] text-slate-400">Discover Myanmar, one journey at a time.</p>
+    </div>
+  </aside>
+</header>
+
+<!-- ================= MAIN ================= -->
+<main id="home" class="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6 sm:space-y-8">
+
+  <!-- HERO -->
+  <section class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl min-h-[300px] sm:min-h-[400px] lg:min-h-[460px] bg-slate-900 text-white">
+    <img id="hero-img" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200" alt="Explore Myanmar" class="absolute inset-0 w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/20"></div>
+    <div class="relative z-10 h-full min-h-[300px] sm:min-h-[400px] lg:min-h-[460px] flex flex-col justify-between p-5 sm:p-8 lg:p-12">
+      <div>
+        <span class="inline-block bg-emerald-500/90 text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full tracking-wide">Explore Myanmar</span>
+        <h1 class="mt-3 sm:mt-4 text-3xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight max-w-xl">
+          Discover<br>The Unseen<br>Beauty
+        </h1>
+        <p class="mt-3 text-sm sm:text-base text-white/85 max-w-md leading-relaxed">
+          Roads, people, culture and nature — all in one journey.
+        </p>
+      </div>
+      <div class="pt-4">
+        <a href="#stories" class="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-sm px-5 py-2.5 rounded-full shadow-lg transition">
+          Explore More <i class="fa-solid fa-arrow-right text-xs"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPONSOR -->
+  <section id="sponsor-container" class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-900 text-white p-4 sm:p-6 shadow-lg border border-emerald-700/20">
+    <div class="flex items-center gap-4">
+      <div class="flex-1 min-w-0">
+        <span class="inline-block bg-amber-400 text-slate-900 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">Official Sponsor</span>
+        <h2 id="sponsor-title" class="mt-1.5 text-lg sm:text-xl font-black tracking-wide truncate">Veezoom Myanmar</h2>
+        <p id="sponsor-desc" class="text-xs sm:text-sm text-emerald-100/80 mt-0.5 line-clamp-2">Auto Bike — Title Sponsor of Roads of Ayeyarwaddy</p>
+        <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 mt-3 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs px-3.5 py-1.5 rounded-lg transition">
+          Visit Sponsor <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+        </a>
+      </div>
+      <div class="w-16 h-16 sm:w-24 sm:h-24 rounded-xl overflow-hidden border border-emerald-400/30 bg-emerald-800/50 shrink-0 flex items-center justify-center">
+        <img id="sponsor-img" src="" alt="Sponsor" class="w-full h-full object-cover" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </section>
+
+  <!-- UPCOMING / FEATURED ROW (from admin sections or hardcoded fallback) -->
+  <section id="upcoming">
+    <div class="flex items-end justify-between gap-3 mb-3.5">
+      <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+        <span class="w-1 h-5 bg-emerald-600 rounded-full"></span>
+        Upcoming
+      </h2>
+      <a href="#stories" class="text-xs sm:text-sm font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1">See All <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+    </div>
+    <div id="upcoming-banner" class="rounded-2xl overflow-hidden shadow-md relative min-h-[160px] sm:min-h-[200px] bg-slate-800">
+      <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1000" alt="Roads of Ayeyarwaddy" class="absolute inset-0 w-full h-full object-cover opacity-80">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+      <div class="relative z-10 p-4 sm:p-6 flex flex-col justify-end min-h-[160px] sm:min-h-[200px]">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-amber-300">Featured Journey</span>
+        <h3 class="text-white text-xl sm:text-2xl font-black mt-1">Roads of Ayeyarwaddy</h3>
+        <p class="text-white/80 text-xs sm:text-sm mt-1 max-w-md">29 towns · One journey · Exploring local lifestyles & real places</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LATEST / ALL STORIES -->
+  <section id="stories">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
+      <div>
+        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+          <span class="w-1 h-5 bg-emerald-600 rounded-full"></span>
+          Latest Travel Posts
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5">ခေါင်းစဉ်၊ နေရာ၊ အမျိုးအစားအလိုက် ရှာဖွေပါ</p>
+      </div>
+      <select id="story-category-filter" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 w-full sm:w-auto">
+        <option value="">အမျိုးအစားအားလုံး</option>
+      </select>
+    </div>
+
+    <div id="blog-posts-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+      <!-- dynamic cards -->
+    </div>
+  </section>
+
+  <!-- EXTRA HOME SECTIONS (from Admin Rows) -->
+  <div id="extra-home-sections" class="space-y-8"></div>
+
+  <!-- ABOUT (simple) -->
+  <section id="about" class="rounded-2xl bg-white border border-slate-100 p-5 sm:p-7 shadow-sm">
+    <h2 class="text-lg font-extrabold text-slate-900 mb-2">About Htoo Htet Explore</h2>
+    <p class="text-sm text-slate-600 leading-relaxed">
+      မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
+      Discover Myanmar through roads, people, culture and nature.
+    </p>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="mt-8 border-t border-slate-200 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 text-center text-xs text-slate-500">
+    © <span id="footer-year"></span> Htoo Htet Explore · Explore Myanmar
+  </div>
+</footer>
+
+<!-- ARTICLE MODAL -->
+<div id="article-modal" class="fixed inset-0 z-[60] hidden">
+  <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeArticle()"></div>
+  <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
+      <div class="relative">
+        <img id="article-image" src="" alt="" class="w-full h-52 sm:h-64 object-cover rounded-t-2xl sm:rounded-t-2xl">
+        <button type="button" onclick="closeArticle()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 sm:p-6">
+        <p id="article-location" class="text-xs font-bold text-emerald-700 uppercase tracking-wide"></p>
+        <h2 id="article-title" class="text-xl sm:text-2xl font-black text-slate-900 mt-1 leading-snug"></h2>
+        <div id="article-body" class="mt-4 text-sm text-slate-600 leading-relaxed whitespace-pre-line"></div>
+        <div class="mt-6 pt-4 border-t border-slate-100">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Related</p>
+          <div id="related-stories" class="space-y-2"></div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <!-- UPCOMING: Roads Of Ayeyarwaddy Section -->
-        <section id="upcoming">
-            <div class="flex items-center justify-between mb-4 gap-3">
-                <h2 class="text-lg sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-                    <span class="w-1.5 h-6 bg-emerald-700 rounded-full inline-block shrink-0"></span>
-                    UPCOMING: Roads Of Ayeyarwaddy
-                </h2>
-                <a href="#" class="text-xs sm:text-sm font-bold text-emerald-800 flex items-center gap-1 shrink-0">See All <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
-            </div>
+<script>
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-            <!-- Posts List -->
-            <section id="blog-search" class="space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-                <div><p class="text-xs font-bold uppercase tracking-widest text-emerald-700">Explore Myanmar</p><h2 class="text-xl sm:text-2xl font-black text-slate-900">All Stories</h2><p class="text-sm text-slate-500 mt-1">ခေါင်းစဉ်၊ နေရာ၊ ခရီးစဉ်အမျိုးအစားအလိုက် ရှာဖွေပါ</p></div>
-                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <label class="relative block flex-1 sm:w-72"><i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="story-search-input" type="search" placeholder="ခေါင်းစဉ် သို့မဟုတ် နေရာ ရှာရန်..." class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-3 text-sm outline-none focus:border-emerald-600"></label>
-                    <select id="story-category-filter" aria-label="Filter stories by category" class="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-emerald-600"><option value="">ခရီးစဉ်အမျိုးအစားအားလုံး</option></select>
-                </div>
-            </div>
-        </section>
-        <div id="blog-posts-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
-                <!-- Posts will be loaded dynamically -->
-            </div>
+/* ---------- menu ---------- */
+function toggleMenu() {
+  const menu = $('site-menu'), btn = $('menu-toggle'), overlay = $('drawer-overlay');
+  const open = menu.classList.contains('translate-x-full');
+  menu.classList.toggle('translate-x-full', !open);
+  overlay.classList.toggle('opacity-0', !open);
+  overlay.classList.toggle('pointer-events-none', !open);
+  btn.setAttribute('aria-expanded', String(open));
+  menu.setAttribute('aria-hidden', String(!open));
+  btn.innerHTML = open ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
+  document.body.classList.toggle('overflow-hidden', open);
+}
+function closeMenu() {
+  const menu = $('site-menu'), btn = $('menu-toggle'), overlay = $('drawer-overlay');
+  menu.classList.add('translate-x-full');
+  overlay.classList.add('opacity-0', 'pointer-events-none');
+  btn.setAttribute('aria-expanded', 'false');
+  btn.innerHTML = '<i class="fa-solid fa-bars"></i>';
+  menu.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('overflow-hidden');
+}
+
+/* ---------- search panel ---------- */
+const searchPanel = $('search-panel');
+const searchInput = $('header-search-input');
+$('search-toggle').addEventListener('click', () => {
+  searchPanel.classList.toggle('open');
+  if (searchPanel.classList.contains('open')) setTimeout(() => searchInput.focus(), 50);
+});
+$('search-close').addEventListener('click', () => {
+  searchPanel.classList.remove('open');
+  searchInput.value = '';
+  renderStoryCards();
+});
+searchInput.addEventListener('input', () => renderStoryCards());
+document.addEventListener('click', e => {
+  if (!searchPanel.contains(e.target) && !$('search-toggle').contains(e.target) && searchPanel.classList.contains('open')) {
+    searchPanel.classList.remove('open');
+  }
+});
+
+/* ---------- data ---------- */
+let allStoryPosts = [];
+
+function loadBlogData() {
+  $('footer-year').textContent = new Date().getFullYear();
+
+  // social
+  const social = JSON.parse(localStorage.getItem('hh_social') || '{}');
+  [['link-fb-d','link-fb-m', social.fb], ['link-tt-d','link-tt-m', social.tt], ['link-yt-d','link-yt-m', social.yt]].forEach(([d,m,url]) => {
+    [d,m].forEach(id => {
+      const a = $(id);
+      if (!a) return;
+      if (url) { a.href = url; a.classList.remove('hidden'); }
+      else a.classList.add('hidden');
+    });
+  });
+
+  // sponsor
+  const sponsor = JSON.parse(localStorage.getItem('hh_sponsor') || '{}');
+  const sc = $('sponsor-container');
+  if (sponsor.active === false) {
+    sc.classList.add('hidden');
+  } else {
+    sc.classList.remove('hidden');
+    if (sponsor.title) $('sponsor-title').textContent = sponsor.title;
+    if (sponsor.desc) $('sponsor-desc').textContent = sponsor.desc;
+    if (sponsor.link) $('sponsor-link').href = sponsor.link;
+    if (sponsor.img) { $('sponsor-img').src = sponsor.img; $('sponsor-img').style.display = ''; }
+  }
+
+  // posts
+  try {
+    allStoryPosts = JSON.parse(localStorage.getItem('hh_posts')) || [];
+  } catch { allStoryPosts = []; }
+
+  // categories
+  const cats = [...new Set(allStoryPosts.map(p => p.category || p.type || '').filter(Boolean))];
+  const sel = $('story-category-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">အမျိုးအစားအားလုံး</option>' + cats.map(c => `<option value="${safe(c)}">${safe(c)}</option>`).join('');
+  if (cats.includes(cur)) sel.value = cur;
+
+  renderStoryCards();
+  renderExtraHomeSections();
+}
+
+function renderStoryCards() {
+  const q = (searchInput?.value || '').trim().toLowerCase();
+  const category = $('story-category-filter')?.value || '';
+  const posts = allStoryPosts.filter(p => {
+    const isLatest = !p.sectionId || p.sectionId === 'latest';
+    if (!isLatest) return false;
+    if (category && (p.category || p.type || '') !== category) return false;
+    if (!q) return true;
+    return [p.title, p.desc, p.location, p.category, p.type].some(v => String(v || '').toLowerCase().includes(q));
+  });
+
+  const box = $('blog-posts-container');
+  if (!posts.length) {
+    box.innerHTML = '<div class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">Story မရှိသေးပါ။ Admin မှ Post ထည့်ပါ။</div>';
+    return;
+  }
+
+  box.innerHTML = posts.map((post, i) => {
+    const idx = allStoryPosts.indexOf(post);
+    const tag = post.category || post.type || 'Travel Story';
+    return `
+    <button type="button" onclick="openArticle(${idx})" class="card-hover text-left bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
+      <div class="relative h-44 sm:h-48 overflow-hidden bg-slate-100">
+        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600')}" alt="${safe(post.title)}" class="w-full h-full object-cover">
+        <span class="absolute top-3 left-3 bg-black/55 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+          <i class="fa-solid fa-location-dot text-red-400"></i> ${safe(post.location || 'Myanmar')}
+        </span>
+      </div>
+      <div class="p-3.5 sm:p-4 flex-1 flex flex-col">
+        <span class="inline-block self-start bg-amber-400 text-slate-900 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide">${safe(tag)}</span>
+        <h3 class="font-bold text-slate-900 text-[15px] leading-snug mt-1.5 line-clamp-2">${safe(post.title)}</h3>
+        <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed flex-1">${safe(post.desc || '')}</p>
+        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
+          <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[9px] font-bold">H</span> Htoo Htet</span>
+          <span class="text-emerald-700 font-bold">Read <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
         </div>
+      </div>
+    </button>`;
+  }).join('');
+}
 
-    </section>
-    </main>
+function openArticle(index) {
+  const post = allStoryPosts[index];
+  if (!post) return;
+  $('article-image').src = post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1000';
+  $('article-image').alt = post.title || '';
+  $('article-title').textContent = post.title || 'Travel Story';
+  $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ');
+  $('article-body').textContent = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
+  const related = allStoryPosts.filter((p, i) => i !== index).slice(0, 3);
+  $('related-stories').innerHTML = related.length
+    ? related.map(p => `<button onclick="openArticle(${allStoryPosts.indexOf(p)})" class="w-full text-left flex gap-3 rounded-xl border border-slate-100 p-2 hover:bg-slate-50">
+        <img src="${safe(p.img || '')}" class="w-16 h-12 object-cover rounded-lg shrink-0" alt="">
+        <span class="text-sm font-semibold text-slate-800 self-center line-clamp-2">${safe(p.title)}</span>
+      </button>`).join('')
+    : '<p class="text-sm text-slate-400">ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။</p>';
+  $('article-modal').classList.remove('hidden');
+  document.body.classList.add('overflow-hidden');
+}
+function closeArticle() {
+  $('article-modal').classList.add('hidden');
+  document.body.classList.remove('overflow-hidden');
+}
 
-        <div id="extra-home-sections" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8"></div>
-    <footer class="mt-10 border-t border-slate-200 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-slate-500">© <span id="footer-year"></span> Htoo Htet Explore · Explore Myanmar</div>
-    </footer>
+function renderExtraHomeSections() {
+  const container = $('extra-home-sections');
+  if (!container) return;
+  let sections = [], posts = [];
+  try { sections = JSON.parse(localStorage.getItem('hh_home_sections') || '[]'); } catch {}
+  try { posts = JSON.parse(localStorage.getItem('hh_posts') || '[]'); } catch {}
+  if (!sections.length) { container.innerHTML = ''; return; }
 
-    <script>
-        function toggleMenu() {
-            const menu=document.getElementById('site-menu'), button=document.getElementById('menu-toggle'), overlay=document.getElementById('drawer-overlay');
-            const opening=menu.classList.contains('translate-x-full');
-            menu.classList.toggle('translate-x-full',!opening);
-            overlay.classList.toggle('opacity-0',!opening); overlay.classList.toggle('pointer-events-none',!opening);
-            button.setAttribute('aria-expanded',String(opening)); menu.setAttribute('aria-hidden',String(!opening));
-            button.innerHTML=opening?'<i class="fa-solid fa-xmark"></i>':'<i class="fa-solid fa-bars"></i>';
-            document.body.classList.toggle('overflow-hidden',opening);
-        }
-        function closeMenu() {
-            const menu=document.getElementById('site-menu'), button=document.getElementById('menu-toggle'), overlay=document.getElementById('drawer-overlay');
-            menu.classList.add('translate-x-full'); overlay.classList.add('opacity-0','pointer-events-none');
-            button.setAttribute('aria-expanded','false'); button.innerHTML='<i class="fa-solid fa-bars"></i>';
-            menu.setAttribute('aria-hidden','true'); document.body.classList.remove('overflow-hidden');
-        }
-        let allStoryPosts = [];
-        function loadBlogData() {
-            document.getElementById('footer-year').textContent = new Date().getFullYear();
-            const social = JSON.parse(localStorage.getItem('hh_social')) || { fb: '', tt: '', yt: '' };
-            [['link-fb',social.fb],['link-tt',social.tt],['link-yt',social.yt]].forEach(([id,url])=>{const a=document.getElementById(id); if(url){a.href=url;a.classList.remove('hidden')}else{a.classList.add('hidden')}});
-            const sponsor = JSON.parse(localStorage.getItem('hh_sponsor')) || {active:true,title:'VEEZOOM MYANMAR',desc:'Auto Bike — Title Sponsor of Roads of Ayeyarwaddy',link:'',img:''};
-            if (sponsor.active) {
-                document.getElementById('sponsor-container').classList.remove('hidden');
-                if(sponsor.title) document.getElementById('sponsor-title').innerText=sponsor.title;
-                if(sponsor.desc) document.getElementById('sponsor-desc').innerText=sponsor.desc;
-                if(sponsor.link) document.getElementById('sponsor-link').href=sponsor.link;
-                if(sponsor.img) document.getElementById('sponsor-img').src=sponsor.img;
-            } else document.getElementById('sponsor-container').classList.add('hidden');
-            allStoryPosts=JSON.parse(localStorage.getItem('hh_posts'))||[{title:'Bagan - မြန်မာ့ရှေးဟောင်းအမွေအနှစ်',desc:'မြန်မာနိုင်ငံ၏ သမိုင်းဝင်ပုဂံဒေသသို့ သွားရောက်လေ့လာခဲ့သည့် ခရီးသွားမှတ်တမ်း။',img:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',location:'Bagan',category:'ယဉ်ကျေးမှု'}];
-            const categories=[...new Set(allStoryPosts.map(p=>p.category||p.type||'အထွေထွေ').filter(Boolean))];
-            const select=document.getElementById('story-category-filter'); const current=select.value;
-            select.innerHTML='<option value="">ခရီးစဉ်အမျိုးအစားအားလုံး</option>'+categories.map(c=>`<option value="${safeText(c)}">${safeText(c)}</option>`).join('');
-            if(categories.includes(current))select.value=current;
-            renderStoryCards();
-            renderExtraHomeSections();
-        }
-        function renderStoryCards(){
-            const q=(document.getElementById('story-search-input')?.value||'').trim().toLowerCase();
-            const category=document.getElementById('story-category-filter')?.value||'';
-            const posts=allStoryPosts.filter(p=>(!p.sectionId||p.sectionId==='latest')&&(!q||[p.title,p.desc,p.location,p.category,p.type].some(v=>String(v||'').toLowerCase().includes(q)))&&(!category||(p.category||p.type||'အထွေထွေ')===category));
-            const container=document.getElementById('blog-posts-container');
-            container.innerHTML=posts.length?posts.map((post,i)=>`<button type="button" onclick="openArticle(${allStoryPosts.indexOf(post)})" class="text-left bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col hover:shadow-lg hover:-translate-y-0.5 transition-all"><div class="relative h-48 sm:h-44 lg:h-48 overflow-hidden bg-slate-100"><img loading="lazy" src="${safeText(post.img||'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500')}" alt="${safeText(post.title)}" class="w-full h-full object-cover"><span class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full"><i class="fa-solid fa-location-dot text-red-400"></i> ${safeText(post.location||'Myanmar')}</span></div><div class="p-4"><p class="text-[10px] uppercase tracking-wider font-bold text-emerald-700">${safeText(post.category||post.type||'Travel Story')}</p><h3 class="font-bold text-slate-900 text-base leading-snug mt-1">${safeText(post.title)}</h3><p class="text-xs text-slate-500 mt-1 line-clamp-3 leading-relaxed">${safeText(post.desc)}</p><span class="inline-block mt-3 text-xs font-bold text-emerald-800">Read story <i class="fa-solid fa-arrow-right ml-1"></i></span></div></button>`).join(''):'<div class="col-span-full rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">ရှာဖွေမှုနဲ့ ကိုက်ညီတဲ့ Story မတွေ့ပါ။</div>';
-        }
-        function openArticle(index){
-            const post=allStoryPosts[index]; if(!post)return;
-            document.getElementById('article-image').src=post.img||'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1000';
-            document.getElementById('article-image').alt=post.title||'Travel story';
-            document.getElementById('article-title').textContent=post.title||'Travel Story';
-            document.getElementById('article-location').textContent=[post.location,post.category||post.type].filter(Boolean).join(' · ');
-            document.getElementById('article-body').textContent=post.content||post.body||post.desc||'ဒီဆောင်းပါးအတွက် အကြောင်းအရာ မထည့်ရသေးပါ။';
-            const related=allStoryPosts.filter((p,i)=>i!==index).slice(0,2);
-            document.getElementById('related-stories').innerHTML=related.map(p=>`<button onclick="openArticle(${allStoryPosts.indexOf(p)})" class="text-left flex gap-3 rounded-xl border border-slate-200 p-2 hover:bg-slate-50"><img src="${safeText(p.img||'')}" alt="" class="w-20 h-16 object-cover rounded-lg"><span class="text-sm font-bold text-slate-800 self-center">${safeText(p.title)}</span></button>`).join('')||'<p class="text-sm text-slate-500">ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။</p>';
-            document.getElementById('article-modal').classList.remove('hidden'); document.body.classList.add('overflow-hidden');
-        }
-        function closeArticle(){document.getElementById('article-modal').classList.add('hidden');document.body.classList.remove('overflow-hidden');}
-        function safeText(value) {
-            return String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-        }
-        function renderExtraHomeSections() {
-            const container = document.getElementById('extra-home-sections');
-            if (!container) return;
-            let sections = [], posts = [];
-            try { sections = JSON.parse(localStorage.getItem('hh_home_sections')) || []; } catch (e) {}
-            try { posts = JSON.parse(localStorage.getItem('hh_posts')) || []; } catch (e) {}
-            container.innerHTML = sections.map(section => {
-                const sectionPosts = posts.filter(post => String(post.sectionId) === String(section.id));
-                const cards = sectionPosts.length ? sectionPosts.map(post => `
-                    <article class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col hover:shadow-md transition-shadow">
-                        <div class="relative h-48 overflow-hidden bg-slate-100"><img loading="lazy" src="${safeText(post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500')}" alt="${safeText(post.title)}" class="w-full h-full object-cover"><span class="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">${safeText(post.location || 'Myanmar')}</span></div>
-                        <div class="p-4"><h3 class="font-bold text-slate-900 text-base leading-snug">${safeText(post.title)}</h3><p class="text-xs text-slate-500 mt-1 leading-relaxed">${safeText(post.desc)}</p></div>
-                    </article>`).join('') : '<div class="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-500">ဒီ Row အတွက် Post မထည့်ရသေးပါ။ Admin မှာ Post ထည့်ပြီး ဒီ Row ကိုရွေးပါ။</div>';
-                return `
-                    <section class="rounded-2xl">
-                        <div class="mb-4 flex items-end justify-between gap-3"><div><h2 class="text-lg sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2"><span class="w-1.5 h-6 bg-emerald-700 rounded-full inline-block shrink-0"></span>${safeText(section.title)}</h2>${section.subtitle ? `<p class="text-sm text-slate-500 mt-1">${safeText(section.subtitle)}</p>` : ''}</div></div>
-                        <div class="${section.layout === 'wide' ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6'}">${cards}</div>
-                    </section>`;
-            }).join('');
-        }
-        const firebaseConfig = {
-  apiKey: "AIzaSyAIZE_qJV__lUPaXl9kIfEeMWwMEP5OIY",
+  container.innerHTML = sections.map(section => {
+    const sectionPosts = posts.filter(p => String(p.sectionId) === String(section.id));
+    const cards = sectionPosts.length
+      ? sectionPosts.map(post => {
+          const idx = allStoryPosts.indexOf(post);
+          return `<button type="button" onclick="openArticle(${idx >= 0 ? idx : 0})" class="card-hover text-left bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
+            <div class="relative h-40 overflow-hidden bg-slate-100">
+              <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500')}" alt="" class="w-full h-full object-cover">
+              <span class="absolute top-2.5 left-2.5 bg-black/55 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">${safe(post.location || 'Myanmar')}</span>
+            </div>
+            <div class="p-3"><h3 class="font-bold text-slate-900 text-sm leading-snug line-clamp-2">${safe(post.title)}</h3>
+            <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">${safe(post.desc || '')}</p></div>
+          </button>`;
+        }).join('')
+      : '<div class="col-span-full rounded-xl border border-dashed border-slate-200 bg-white p-5 text-sm text-slate-400">ဒီ Row အတွက် Post မထည့်ရသေးပါ။</div>';
+
+    return `<section>
+      <div class="mb-3.5 flex items-end justify-between gap-3">
+        <div>
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <span class="w-1 h-5 bg-emerald-600 rounded-full"></span>${safe(section.title)}
+          </h2>
+          ${section.subtitle ? `<p class="text-xs text-slate-500 mt-0.5">${safe(section.subtitle)}</p>` : ''}
+        </div>
+      </div>
+      <div class="${section.layout === 'wide' ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 sm:grid-cols-2 gap-4'}">${cards}</div>
+    </section>`;
+  }).join('');
+}
+
+/* ---------- firebase ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyCCYJQXip_GTPTZ6DQg2_RhV_jSr2Tq-4s",
   authDomain: "htoo-htet-explore.firebaseapp.com",
   databaseURL: "https://htoo-htet-explore-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "htoo-htet-explore",
@@ -211,26 +423,34 @@
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-        document.addEventListener('DOMContentLoaded',()=>{document.getElementById('story-search-input')?.addEventListener('input',renderStoryCards);document.getElementById('story-category-filter')?.addEventListener('change',renderStoryCards);});
-        document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeArticle();}});
-        let publicFirebaseReady = false;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            const publicDb = firebase.database();
-            publicDb.ref('siteData').on('value', snapshot => {
-                const data = snapshot.val() || {};
-                ['hh_social','hh_sponsor','hh_posts','hh_home_sections'].forEach(key => {
-                    if (Object.prototype.hasOwnProperty.call(data, key)) localStorage.setItem(key, JSON.stringify(data[key]));
-                    else localStorage.removeItem(key);
-                });
-                publicFirebaseReady = true;
-                loadBlogData();
-                renderExtraHomeSections();
-            }, error => { console.error('Firebase read error:', error); loadBlogData(); renderExtraHomeSections(); });
-        } catch (error) { console.error('Firebase setup error:', error); }
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!publicFirebaseReady) { loadBlogData(); renderExtraHomeSections(); }
-        });
-    </script>
+
+let publicFirebaseReady = false;
+try {
+  firebase.initializeApp(firebaseConfig);
+  const publicDb = firebase.database();
+  publicDb.ref('siteData').on('value', snap => {
+    const data = snap.val() || {};
+    ['hh_social','hh_sponsor','hh_posts','hh_home_sections'].forEach(key => {
+      if (Object.prototype.hasOwnProperty.call(data, key)) localStorage.setItem(key, JSON.stringify(data[key]));
+      else localStorage.removeItem(key);
+    });
+    publicFirebaseReady = true;
+    loadBlogData();
+  }, err => {
+    console.error('Firebase read error:', err);
+    loadBlogData();
+  });
+} catch (e) {
+  console.error('Firebase setup error:', e);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  $('story-category-filter')?.addEventListener('change', renderStoryCards);
+  if (!publicFirebaseReady) loadBlogData();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeMenu(); closeArticle(); searchPanel.classList.remove('open'); }
+});
+</script>
 </body>
 </html>
