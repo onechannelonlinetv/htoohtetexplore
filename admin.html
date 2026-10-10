@@ -92,6 +92,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
     </nav>
     <div class="absolute bottom-5 left-5 right-5">
       <a href="index.html" target="_blank" class="btn btn-muted block text-center"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>View Live Website</a>
+        <button type="button" class="btn btn-muted text-xs" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
     </div>
   </aside>
 
@@ -975,11 +976,47 @@ localStorage.setItem = function(key, value) {
   originalSetItem(key, value);
   if (remoteSyncReady && adminUser && DATA_KEYS.includes(key)) {
     let parsed; try { parsed = JSON.parse(value); } catch { parsed = value; }
-    remoteWriteQueue = remoteWriteQueue.then(() => adminDb.ref('siteData/' + key).set(parsed)).catch(err => {
-      console.error(err); toast('Firebase သိမ်းမရပါ: ' + err.message);
+    remoteWriteQueue = remoteWriteQueue.then(function() {
+      return adminDb.ref('siteData/' + key).set(parsed);
+    }).then(function() {
+      // quiet success for routine saves
+    }).catch(function(err) {
+      console.error(err);
+      var msg = (err && err.message) || String(err);
+      if (/PERMISSION_DENIED|permission/i.test(msg)) {
+        toast('Firebase Rules က ပိတ်ထားသည် — Realtime Database Rules စစ်ပါ');
+      } else if (/too large|size|Payload/i.test(msg)) {
+        toast('ဒေတာ ကြီးလွန်းသည် (ပုံ data URL) — ပုံအရေအတွက် လျှော့ပါ');
+      } else {
+        toast('Firebase သိမ်းမရပါ: ' + msg);
+      }
     });
   }
 };
+
+function forceSyncAllToFirebase() {
+  if (!adminUser || !adminDb) {
+    toast('Admin login ဝင်ထားမှ Sync ရမယ်');
+    return;
+  }
+  if (!remoteSyncReady) {
+    toast('Firebase မရသေး — login ပြန်ဝင်ပါ');
+    return;
+  }
+  toast('ဖုန်း/browser အားလုံးသို့ Sync လုပ်နေသည်…');
+  var payload = {};
+  DATA_KEYS.forEach(function(k) {
+    var raw = localStorage.getItem(k);
+    if (raw === null) return;
+    try { payload[k] = JSON.parse(raw); } catch (e) { payload[k] = raw; }
+  });
+  adminDb.ref('siteData').update(payload).then(function() {
+    toast('✓ Firebase Sync ပြီး — ဖုန်းမှာ refresh လုပ်ပါ');
+  }).catch(function(err) {
+    console.error(err);
+    toast('Sync မရ: ' + ((err && err.message) || err));
+  });
+}
 
 function read(key, fallback = []) {
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
@@ -1045,7 +1082,7 @@ async function insertImageInContent(inputEl) {
       const dataUrl = url;
       withTimeout(
         adminStorage.ref('uploads/content_' + Date.now() + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
-        5000
+        15000
       ).then(function(httpsUrl) {
         if (!httpsUrl || ta.value.indexOf(dataUrl) === -1) return;
         ta.value = ta.value.split(dataUrl).join(httpsUrl);
@@ -1239,7 +1276,7 @@ async function uploadImage(inputEl, targetInputId) {
       const dataUrl = finalUrl;
       withTimeout(
         adminStorage.ref('uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
-        5000
+        15000
       ).then(function(httpsUrl) {
         if (!httpsUrl || !target || target.value !== dataUrl) return;
         target.value = httpsUrl;
