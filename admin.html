@@ -4,6 +4,9 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Htoo Htet Explore | Admin Studio</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{color-scheme:dark} body{background:#070d19;color:#e5edf7} .panel{background:#0d1728;border:1px solid #1c2a40;border-radius:18px}.field{width:100%;background:#101d30;border:1px solid #263750;border-radius:11px;padding:11px 13px;color:#eef5ff;outline:none}.field:focus{border-color:#10b981;box-shadow:0 0 0 3px #10b98120}.label{display:block;font-size:12px;color:#9eb0c9;margin-bottom:6px}.btn{border-radius:11px;padding:10px 14px;font-weight:700;font-size:13px;transition:.15s}.btn-green{background:#059669;color:white}.btn-green:hover{background:#10b981}.btn-muted{background:#1a2940;color:#dce8f7;border:1px solid #2b3c55}.btn-purple{background:#7c3aed;color:white}.btn-red{background:#3a1b2a;color:#fda4af;border:1px solid #572537}.navbtn{width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:11px 13px;border-radius:11px;color:#a7b7ce;font-size:13px;font-weight:650}.navbtn.active,.navbtn:hover{background:#12352f;color:#6ee7b7}.view{display:none}.view.active{display:block}.stat{background:linear-gradient(145deg,#101e32,#0c1626);border:1px solid #1c2d45;border-radius:16px;padding:17px}.tiny{font-size:11px;color:#92a5bf}
@@ -11,7 +14,7 @@
 </head>
 <body class="min-h-screen">
 <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 p-4">
- <div class="panel w-full max-w-sm p-7 text-center shadow-2xl"><div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300 text-2xl"><i class="fa-solid fa-compass"></i></div><h1 class="text-xl font-black">Htoo Htet Explore</h1><p class="mt-1 mb-6 text-sm text-slate-400">Admin Studio · PIN ဖြည့်ပါ</p><input id="passcode" type="password" inputmode="numeric" placeholder="Admin PIN" class="field mb-3 text-center tracking-[.35em]" onkeydown="if(event.key==='Enter')checkPasscode()"><button onclick="checkPasscode()" class="btn btn-green w-full">Dashboard ဖွင့်မယ် <i class="fa-solid fa-arrow-right ml-1"></i></button><p class="tiny mt-4">မှတ်ချက် - ဒီ PIN သည် browser-side lock သာဖြစ်ပြီး လုံခြုံသော server authentication မဟုတ်သေးပါ။</p></div>
+ <div class="panel w-full max-w-sm p-7 text-center shadow-2xl"><div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300 text-2xl"><i class="fa-solid fa-compass"></i></div><h1 class="text-xl font-black">Htoo Htet Explore</h1><p class="mt-1 mb-6 text-sm text-slate-400">Admin Studio · Firebase Login</p><form onsubmit="event.preventDefault();signInAdmin()"><label class="label text-left" for="admin-email">Admin Email</label><input id="admin-email" type="email" autocomplete="username" required placeholder="you@example.com" class="field mb-3"><label class="label text-left" for="admin-password">Password</label><input id="admin-password" type="password" autocomplete="current-password" required placeholder="Firebase account password" class="field mb-3" onkeydown="if(event.key==='Enter')signInAdmin()"><button id="login-button" type="submit" class="btn btn-green w-full">Login ဝင်မယ် <i class="fa-solid fa-arrow-right ml-1"></i></button></form><p id="login-error" class="mt-3 text-xs text-rose-300" role="alert"></p><p class="tiny mt-4">Firebase Authentication နဲ့ Admin အကောင့်ကို စစ်ဆေးပါတယ်။</p></div>
 </div>
 <div id="app" class="hidden min-h-screen">
  <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-800 bg-[#091220] p-5 lg:block">
@@ -25,9 +28,9 @@
   <div id="mobile-nav" class="hidden border-b border-slate-800 bg-[#091220] p-3 lg:hidden"><div class="grid grid-cols-2 gap-2"><button class="navbtn" onclick="showView('overview')">Overview</button><button class="navbtn" onclick="showView('sections')">Homepage Builder</button><button class="navbtn" onclick="showView('posts')">Travel Posts</button><button class="navbtn" onclick="showView('sponsor')">Sponsor</button><button class="navbtn" onclick="showView('social')">Social Links</button></div></div>
   <div class="mx-auto max-w-7xl space-y-6 p-4 sm:p-8">
    <section id="view-overview" class="view active space-y-6"><div class="overflow-hidden rounded-2xl border border-emerald-900/70 bg-gradient-to-r from-emerald-950 via-[#102d30] to-[#101b30] p-6 sm:p-8"><div class="max-w-2xl"><span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">Content control center</span><h2 class="mt-4 text-2xl font-black sm:text-3xl">မင်းရဲ့ Homepage ကို<br class="sm:hidden"> ဒီနေရာက စီမံပါ</h2><p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">Row အသစ်ဖန်တီး၊ Travel Post ထည့်၊ Sponsor နဲ့ Social Link ပြင်ဆင်နိုင်ပါတယ်။</p><button class="btn btn-green mt-5" onclick="showView('sections')"><i class="fa-solid fa-layer-group mr-2"></i>Homepage Builder သို့သွားမယ်</button></div></div>
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3"><div class="stat"><div class="flex items-center justify-between"><span class="text-sm text-slate-400">Homepage Rows</span><i class="fa-solid fa-layer-group text-violet-300"></i></div><div id="stat-sections" class="mt-3 text-3xl font-black">0</div><p class="tiny mt-1">Custom sections</p></div><div class="stat"><div class="flex items-center justify-between"><span class="text-sm text-slate-400">Travel Posts</span><i class="fa-regular fa-newspaper text-sky-300"></i></div><div id="stat-posts" class="mt-3 text-3xl font-black">0</div><p class="tiny mt-1">Saved in this browser</p></div><div class="stat"><div class="flex items-center justify-between"><span class="text-sm text-slate-400">Sponsor Banner</span><i class="fa-solid fa-rectangle-ad text-amber-300"></i></div><div id="stat-sponsor" class="mt-3 text-xl font-black">Enabled</div><p class="tiny mt-1">Homepage display setting</p></div></div>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3"><div class="stat"><div class="flex items-center justify-between"><span class="text-sm text-slate-400">Homepage Rows</span><i class="fa-solid fa-layer-group text-violet-300"></i></div><div id="stat-sections" class="mt-3 text-3xl font-black">0</div><p class="tiny mt-1">Custom sections</p></div><div class="stat"><div class="flex items-center justify-between"><span class="text-sm text-slate-400">Travel Posts</span><i class="fa-regular fa-newspaper text-sky-300"></i></div><div id="stat-posts" class="mt-3 text-3xl font-black">0</div><p class="tiny mt-1">Firebase Database</p></div><div class="stat"><div class="flex items-center justify-between"><span class="text-sm text-slate-400">Sponsor Banner</span><i class="fa-solid fa-rectangle-ad text-amber-300"></i></div><div id="stat-sponsor" class="mt-3 text-xl font-black">Enabled</div><p class="tiny mt-1">Homepage display setting</p></div></div>
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-2"><div class="panel p-5"><div class="mb-4 flex items-center justify-between"><h3 class="font-bold"><i class="fa-solid fa-layer-group mr-2 text-violet-300"></i>Homepage Rows</h3><button onclick="showView('sections')" class="text-xs font-bold text-emerald-300">Manage <i class="fa-solid fa-arrow-right ml-1"></i></button></div><div id="overview-rows" class="space-y-2"></div></div><div class="panel p-5"><div class="mb-4 flex items-center justify-between"><h3 class="font-bold"><i class="fa-regular fa-newspaper mr-2 text-sky-300"></i>Recent Posts</h3><button onclick="showView('posts')" class="text-xs font-bold text-emerald-300">Manage <i class="fa-solid fa-arrow-right ml-1"></i></button></div><div id="overview-posts" class="space-y-3"></div></div></div>
-    <div class="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100"><i class="fa-solid fa-circle-info mr-2 text-amber-300"></i><b>အရေးကြီး:</b> လက်ရှိစနစ်က localStorage သုံးထားတာကြောင့် ဒီ Browser ထဲမှာပဲ ပြောင်းလဲမှုတွေ သိမ်းပါတယ်။ ဖုန်း/ကွန်ပျူတာအားလုံးမှာ တူညီစေဖို့ Firebase ချိတ်ဆက်မှုကို သီးခြားလုပ်ရပါမယ်။</div>
+    <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm leading-6 text-emerald-100"><i class="fa-solid fa-cloud mr-2 text-emerald-300"></i><b>Firebase ချိတ်ဆက်ထားသည်။</b> သိမ်းဆည်းသောအခါ Database ထဲသို့ ပို့ပြီး Website နှင့် အခြားစက်များတွင် ပြသရန် စီစဉ်ထားသည်။</div>
    </section>
    <section id="view-sections" class="view space-y-5"><div class="flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-xl font-black">Homepage Builder</h2><p class="mt-1 text-sm text-slate-400">Home Page မှာပြမယ့် Row တွေ ဖန်တီးပြီး အစီအစဉ်ချပါ။</p></div><span class="rounded-full bg-violet-400/10 px-3 py-1 text-xs font-bold text-violet-200"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Section manager</span></div>
     <div class="panel p-5 sm:p-6"><div class="mb-5 flex items-center gap-3"><div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-400/10 text-violet-300"><i class="fa-solid fa-plus"></i></div><div><h3 class="font-bold">Row အသစ်ဖန်တီးမယ်</h3><p class="tiny">ဥပမာ: Featured Destinations, Travel Guides, Food & Culture</p></div></div><div class="grid grid-cols-1 gap-4 md:grid-cols-2"><div><label class="label" for="section-title">Row ခေါင်းစဉ် *</label><input id="section-title" class="field" placeholder="ဥပမာ - Featured Destinations"></div><div><label class="label" for="section-subtitle">အောက်စာတန်း (ရှိမှထည့်)</label><input id="section-subtitle" class="field" placeholder="ဥပမာ - Explore Myanmar"></div><div><label class="label" for="section-layout">ပြသမယ့်ပုံစံ</label><select id="section-layout" class="field"><option value="grid">Card Grid — ကတ်များစွာ</option><option value="wide">Wide Row — အကျယ်တစ်တန်း</option></select></div></div><button onclick="addHomeSection()" class="btn btn-purple mt-4"><i class="fa-solid fa-plus mr-2"></i>Add Homepage Row</button></div>
@@ -41,9 +44,43 @@
  </main>
 </div>
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAIZE_qJV__lUPaXl9kIfEeMWwMEP5OIY",
+  authDomain: "htoo-htet-explore.firebaseapp.com",
+  databaseURL: "https://htoo-htet-explore-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "htoo-htet-explore",
+  storageBucket: "htoo-htet-explore.firebasestorage.app",
+  messagingSenderId: "526326382849",
+  appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
+  measurementId: "G-2WNFC5MMEJ"
+};
+const FIREBASE_ADMIN_UID = '3YFTX5IZPiUI7yeNjLNTaiUwooC2';
 const $=id=>document.getElementById(id);const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let adminAuth, adminDb, adminUser=null, remoteSyncReady=false, remoteWriteQueue=Promise.resolve();
+try { firebase.initializeApp(firebaseConfig); adminAuth=firebase.auth(); adminDb=firebase.database(); } catch(e) { console.error(e); }
+const originalSetItem=localStorage.setItem.bind(localStorage);
+localStorage.setItem=function(key,value) { originalSetItem(key,value); if(remoteSyncReady && adminUser && ['hh_social','hh_sponsor','hh_posts','hh_home_sections'].includes(key)) { let parsed; try{parsed=JSON.parse(value)}catch{parsed=value}; remoteWriteQueue=remoteWriteQueue.then(()=>adminDb.ref('siteData/'+key).set(parsed)).catch(err=>{console.error(err);toast('Firebase သိမ်းမရပါ: '+err.message)}); } };
 function read(key,fallback=[]){try{const v=JSON.parse(localStorage.getItem(key));return v??fallback}catch(e){return fallback}}
-function checkPasscode(){if($('passcode').value==='1234'){$('login-modal').classList.add('hidden');$('app').classList.remove('hidden');loadAll()}else alert('PIN မှားနေပါတယ်။')}
+async function signInAdmin(){
+ const email=$('admin-email').value.trim(), password=$('admin-password').value;
+ $('login-error').textContent=''; $('login-button').disabled=true; $('login-button').textContent='ဝင်နေသည်…';
+ try {
+  const credential=await adminAuth.signInWithEmailAndPassword(email,password);
+  if(credential.user.uid!==FIREBASE_ADMIN_UID){await adminAuth.signOut();throw new Error('ဒီအကောင့်ကို Admin အဖြစ် ခွင့်မပြုထားပါ။ Firebase Users ထဲက သတ်မှတ်ထားတဲ့ Admin အကောင့်ကို သုံးပါ။')}
+  adminUser=credential.user;
+  const snap=await adminDb.ref('siteData').once('value'); const data=snap.val();
+  remoteSyncReady=false;
+  if(data) { Object.keys(data).forEach(k=>{ if(['hh_social','hh_sponsor','hh_posts','hh_home_sections'].includes(k)) originalSetItem(k,JSON.stringify(data[k])); }); }
+  else {
+   const seed={}; ['hh_social','hh_sponsor','hh_posts','hh_home_sections'].forEach(k=>{const v=localStorage.getItem(k); if(v!==null){try{seed[k]=JSON.parse(v)}catch{seed[k]=v}}});
+   if(!seed.hh_social)seed.hh_social={fb:'',tt:'',yt:''}; if(!seed.hh_sponsor)seed.hh_sponsor={active:true,title:'VEEZOOM MYANMAR',desc:'Auto Bike — Title Sponsor of Roads of Ayeyarwaddy',link:'',img:''}; if(!seed.hh_posts)seed.hh_posts=[]; if(!seed.hh_home_sections)seed.hh_home_sections=[];
+   await adminDb.ref('siteData').set(seed); Object.keys(seed).forEach(k=>originalSetItem(k,JSON.stringify(seed[k])));
+  }
+  remoteSyncReady=true; $('login-modal').classList.add('hidden'); $('app').classList.remove('hidden'); loadAll();
+ } catch(e) { $('login-error').textContent=e.message||'Login မအောင်မြင်ပါ။'; }
+ finally { $('login-button').disabled=false; $('login-button').innerHTML='Login ဝင်မယ် <i class="fa-solid fa-arrow-right ml-1"></i>'; }
+}
+adminAuth?.onAuthStateChanged(user=>{ if(!user){adminUser=null;remoteSyncReady=false} });
 function toggleMobileNav(){$('mobile-nav').classList.toggle('hidden')}
 const titles={overview:'Overview',sections:'Homepage Builder',posts:'Travel Posts',sponsor:'Sponsor Banner',social:'Social Links'};
 function showView(name,button){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('view-'+name).classList.add('active');document.querySelectorAll('.navbtn[data-view]').forEach(v=>v.classList.toggle('active',v.dataset.view===name));$('page-title').textContent=titles[name]||'Overview';$('mobile-nav').classList.add('hidden');if(name==='sections')renderHomeSectionsList();if(name==='posts')renderPostsList()}
