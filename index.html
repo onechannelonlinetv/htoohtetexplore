@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --brand-bg: #061510;
@@ -22,23 +22,25 @@
     --brand-muted: #6ee7b7;
     --brand-font: 'Inter', 'Noto Sans Myanmar', system-ui, sans-serif;
     --brand-heading-font: 'Inter', 'Noto Sans Myanmar', system-ui, sans-serif;
-    --hero-min-h: 560px;
+    --hero-min-h: 480px;
+    --hero-max-w: 100%;
     --card-img-h: 11rem;
+    --sponsor-min-h: 180px;
+    --upcoming-min-h: 200px;
     --radius: 1rem;
+    --header-h: 64px;
   }
   body {
     font-family: var(--brand-font);
     background: var(--brand-bg);
     color: var(--brand-text);
+    transition: background .3s, color .3s;
   }
   h1, h2, h3, .font-heading { font-family: var(--brand-heading-font); }
   .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .card-hover { transition: transform .25s ease, box-shadow .25s ease; }
   .card-hover:hover { transform: translateY(-4px); box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.45); }
-  .nav-link { position: relative; }
-  .nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: var(--brand-accent); transition: width .25s ease; }
-  .nav-link:hover::after, .nav-link.active::after { width: 100%; }
   .search-panel { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .28s ease, opacity .22s ease, padding .22s ease; }
   .search-panel.open { max-height: 72px; opacity: 1; padding-top: .5rem; padding-bottom: .75rem; }
   .accent-bg { background: var(--brand-accent); }
@@ -46,43 +48,82 @@
   .surface-bg { background: var(--brand-surface); }
   .card-bg { background: var(--brand-card); }
 
-  /* Theme: Forest (default) */
-  body.theme-forest { --radius: 1rem; }
-  body.theme-forest .hero-title { letter-spacing: -0.02em; }
-
-  /* Theme: Ocean — more rounded, cyan glow, different spacing */
-  body.theme-ocean {
-    --radius: 1.25rem;
+  /* ========== THEME: FOREST — classic dark green ========== */
+  body.theme-forest {
+    --radius: 1rem;
   }
-  body.theme-ocean header { border-bottom-color: rgba(6, 182, 212, 0.25); }
-  body.theme-ocean .card-hover:hover { box-shadow: 0 20px 50px -15px rgba(6, 182, 212, 0.25); }
-  body.theme-ocean .nav-link::after { height: 3px; border-radius: 2px; }
-  body.theme-ocean #hero-section { clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%); }
-  body.theme-ocean .card-bg { border-radius: 1.25rem; }
+  body.theme-forest #hero-section { border-radius: 0; }
+  body.theme-forest .card-bg { border-radius: 1rem; }
+  body.theme-forest .hero-overlay { background: linear-gradient(to right, rgba(0,0,0,.88), rgba(0,0,0,.45), transparent); }
 
-  /* Theme: Sunset — warmer, sharper, serif headings */
+  /* ========== THEME: OCEAN — cyan, angled hero, glass cards ========== */
+  body.theme-ocean {
+    --radius: 1.5rem;
+    --brand-heading-font: 'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif;
+  }
+  body.theme-ocean header {
+    border-bottom: 1px solid rgba(34, 211, 238, 0.2);
+    backdrop-filter: blur(16px);
+  }
+  body.theme-ocean #hero-section {
+    clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+  }
+  body.theme-ocean .card-bg {
+    border-radius: 1.5rem;
+    border: 1px solid rgba(34, 211, 238, 0.15) !important;
+    background: linear-gradient(145deg, #0e2840, #0a1c30) !important;
+  }
+  body.theme-ocean .card-hover:hover {
+    box-shadow: 0 0 0 1px rgba(34,211,238,.4), 0 20px 50px -12px rgba(6,182,212,.35);
+  }
+  body.theme-ocean .hero-overlay {
+    background: linear-gradient(135deg, rgba(8,47,73,.92) 0%, rgba(8,47,73,.4) 50%, transparent 100%);
+  }
+  body.theme-ocean .accent-bg { border-radius: 999px; }
+  body.theme-ocean section h2 span.w-1 { background: linear-gradient(to bottom, #22d3ee, #0891b2) !important; }
+
+  /* ========== THEME: SUNSET — warm, sharp corners, serif, editorial ========== */
   body.theme-sunset {
-    --radius: 0.5rem;
+    --radius: 0.25rem;
     --brand-heading-font: 'Playfair Display', 'Noto Sans Myanmar', serif;
   }
-  body.theme-sunset .card-hover:hover { transform: scale(1.02); box-shadow: 0 12px 30px -8px rgba(249, 115, 22, 0.3); }
-  body.theme-sunset .nav-link::after { height: 2px; }
-  body.theme-sunset #hero-section .relative.z-10 { text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
-  body.theme-sunset .accent-bg { border-radius: 0.375rem; }
+  body.theme-sunset header { border-bottom: 2px solid rgba(249, 115, 22, 0.25); }
+  body.theme-sunset #hero-section { border-bottom: 4px solid var(--brand-accent); }
+  body.theme-sunset .card-bg {
+    border-radius: 0.25rem;
+    border: 1px solid rgba(249,115,22,.2) !important;
+  }
+  body.theme-sunset .card-hover:hover {
+    transform: none;
+    box-shadow: 6px 6px 0 rgba(249,115,22,.35);
+  }
+  body.theme-sunset .hero-overlay {
+    background: linear-gradient(to top, rgba(26,18,11,.95) 0%, rgba(26,18,11,.3) 50%, transparent 100%);
+  }
+  body.theme-sunset .accent-bg { border-radius: 0.25rem; }
+  body.theme-sunset #hero-title { font-style: italic; }
+  body.theme-sunset section h2 { letter-spacing: 0.02em; }
 
-  /* Theme: Navy — light minimal, clean */
+  /* ========== THEME: NAVY — light minimal ========== */
   body.theme-navy {
     --radius: 0.75rem;
     --brand-text: #0f172a;
+    --brand-heading-font: 'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif;
     color: #0f172a;
   }
   body.theme-navy .surface-bg { background: #ffffff; }
-  body.theme-navy .card-bg { background: #ffffff; border-color: #e2e8f0 !important; }
-  body.theme-navy header { border-bottom-color: #e2e8f0; background: rgba(255,255,255,0.95); }
-  body.theme-navy .nav-link { color: #334155; }
-  body.theme-navy .nav-link:hover { color: #0f172a; }
+  body.theme-navy .card-bg {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  body.theme-navy header {
+    border-bottom: 1px solid #e2e8f0;
+    background: rgba(255,255,255,.97);
+  }
   body.theme-navy footer { border-top-color: #e2e8f0; }
-  body.theme-navy .text-white { color: #0f172a !important; }
+  body.theme-navy .text-white:not(#hero-section *):not(#sponsor-container *):not(#upcoming-banner *):not(#youtube-section *) { color: #0f172a !important; }
   body.theme-navy .text-emerald-100\/90,
   body.theme-navy .text-emerald-100\/70,
   body.theme-navy .text-emerald-100\/75,
@@ -104,21 +145,60 @@
   body.theme-navy .bg-emerald-950,
   body.theme-navy .bg-emerald-900\/50,
   body.theme-navy .bg-emerald-900\/60 { background: #f1f5f9 !important; color: #0f172a !important; }
-  body.theme-navy #hero-section .text-white { color: #ffffff !important; }
+  body.theme-navy #hero-section .text-white,
+  body.theme-navy #sponsor-container .text-white,
+  body.theme-navy #upcoming-banner .text-white,
+  body.theme-navy #youtube-section .text-white { color: #ffffff !important; }
   body.theme-navy #hero-section .text-emerald-300 { color: #93c5fd !important; }
   body.theme-navy #hero-section .text-emerald-100\/80 { color: rgba(255,255,255,0.85) !important; }
-  body.theme-navy #hero-section .text-emerald-400\/60 { color: rgba(255,255,255,0.6) !important; }
+  body.theme-navy #hero-section .text-emerald-400\/60 { color: rgba(255,255,255,0.55) !important; }
   body.theme-navy .accent-text { color: var(--brand-accent) !important; }
-  body.theme-navy .card-hover:hover { box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.12); }
+  body.theme-navy .card-hover:hover { box-shadow: 0 12px 40px -10px rgba(15,23,42,.12); }
+  body.theme-navy .hero-overlay {
+    background: linear-gradient(to right, rgba(15,23,42,.85), rgba(15,23,42,.4), transparent);
+  }
+
+  /* Light mode override (pairs with any theme base colors flipped) */
+  body.mode-light {
+    --brand-bg: #f8fafc;
+    --brand-surface: #ffffff;
+    --brand-card: #ffffff;
+    --brand-text: #0f172a;
+    color: #0f172a;
+  }
+  body.mode-light .surface-bg { background: #ffffff; }
+  body.mode-light .card-bg { background: #ffffff; border-color: #e2e8f0 !important; }
+  body.mode-light header { background: rgba(255,255,255,.96); border-bottom-color: #e2e8f0; }
+  body.mode-light footer { border-top-color: #e2e8f0; }
+  body.mode-light .text-white:not(#hero-section *):not(#sponsor-container *):not(#upcoming-banner *):not(#youtube-section *):not(#article-modal *) { color: #0f172a !important; }
+  body.mode-light .text-emerald-100\/90,
+  body.mode-light .text-emerald-100\/70,
+  body.mode-light .text-emerald-100\/75 { color: #475569 !important; }
+  body.mode-light .text-emerald-400\/70,
+  body.mode-light .text-emerald-400\/60,
+  body.mode-light .text-emerald-500\/60 { color: #64748b !important; }
+  body.mode-light .text-emerald-400,
+  body.mode-light .text-emerald-300 { color: #0f766e !important; }
+  body.mode-light .border-emerald-800\/40,
+  body.mode-light .border-emerald-800\/50,
+  body.mode-light .border-emerald-900\/50 { border-color: #e2e8f0 !important; }
+  body.mode-light .bg-emerald-950\/80,
+  body.mode-light .bg-emerald-950,
+  body.mode-light .bg-emerald-900\/50 { background: #f1f5f9 !important; color: #0f172a !important; }
+  body.mode-light #hero-section .text-white,
+  body.mode-light #sponsor-container .text-white,
+  body.mode-light #upcoming-banner .text-white,
+  body.mode-light #youtube-section .text-white,
+  body.mode-light #article-modal .text-white { color: #ffffff !important; }
 </style>
 </head>
-<body class="min-h-screen antialiased theme-forest">
+<body class="min-h-screen antialiased theme-forest mode-dark">
 
 <!-- ================= HEADER ================= -->
 <header class="sticky top-0 z-50 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16 sm:h-[70px] gap-3">
-      <!-- Logo + Brand (name only — tagline optional via settings) -->
+    <div class="flex items-center justify-between h-16 gap-3">
+      <!-- Logo + Brand name only -->
       <a href="#home" class="flex items-center gap-2.5 shrink-0">
         <div id="brand-logo-wrap" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg overflow-hidden">
           <img id="brand-logo-img" src="" alt="Logo" class="w-full h-full object-cover hidden">
@@ -130,28 +210,25 @@
         </div>
       </a>
 
-      <!-- Desktop Nav -->
-      <nav id="desktop-nav" class="hidden lg:flex items-center gap-6 text-[13px] font-semibold text-emerald-100/90"></nav>
-
-      <!-- Right actions -->
-      <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Right: social + search + hamburger (NO desktop nav links) -->
+      <div class="flex items-center gap-1 sm:gap-1.5">
         <div class="hidden sm:flex items-center gap-1 text-[11px] font-bold text-emerald-300/80 border border-emerald-800/50 rounded-full px-2.5 py-1">
           <button type="button" id="lang-en" class="accent-text">EN</button>
           <span class="text-emerald-700">|</span>
           <button type="button" id="lang-mm" class="hover:text-white transition">မြန်မာ</button>
         </div>
-        <!-- Social icons next to search -->
-        <div class="hidden md:flex items-center gap-1" id="social-links-desktop"></div>
+        <!-- Social icons (on/off controlled by admin) -->
+        <div class="flex items-center gap-0.5 sm:gap-1" id="social-links-header"></div>
         <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
           <i class="fa-solid fa-magnifying-glass text-sm"></i>
         </button>
-        <button id="menu-toggle" type="button" aria-label="Menu" onclick="toggleMenu()" class="lg:hidden w-10 h-10 rounded-xl bg-emerald-900/50 text-white flex items-center justify-center">
+        <!-- Hamburger always visible — menu holds Home, Stories, etc. -->
+        <button id="menu-toggle" type="button" aria-label="Menu" onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-emerald-900/50 text-white flex items-center justify-center">
           <i class="fa-solid fa-bars text-lg"></i>
         </button>
       </div>
     </div>
 
-    <!-- Search Panel -->
     <div id="search-panel" class="search-panel">
       <div class="relative">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500/70 text-sm"></i>
@@ -163,9 +240,9 @@
     </div>
   </div>
 
-  <!-- Mobile Drawer -->
-  <div id="drawer-overlay" class="fixed inset-0 z-40 bg-black/60 opacity-0 pointer-events-none transition-opacity lg:hidden" onclick="closeMenu()"></div>
-  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out p-6 flex flex-col border-l border-emerald-900/50 lg:hidden">
+  <!-- Drawer menu (all nav items live here) -->
+  <div id="drawer-overlay" class="fixed inset-0 z-40 bg-black/60 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
+  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out p-6 flex flex-col border-l border-emerald-900/50">
     <div class="flex items-center justify-between mb-8">
       <div id="mobile-brand-name" class="font-black text-white text-base">HTOO HTET</div>
       <button type="button" onclick="closeMenu()" class="w-9 h-9 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -180,31 +257,31 @@
 
 <main id="home">
 
-  <!-- ========== HERO ========== -->
-  <section id="hero-section" class="relative overflow-hidden" style="min-height: var(--hero-min-h);">
+  <!-- HERO -->
+  <section id="hero-section" class="relative overflow-hidden mx-auto" style="min-height: var(--hero-min-h); max-width: var(--hero-max-w);">
     <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
-    <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20"></div>
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center py-14 sm:py-20" style="min-height: var(--hero-min-h);">
+    <div class="hero-overlay absolute inset-0"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center py-12 sm:py-16" style="min-height: var(--hero-min-h);">
       <div class="max-w-xl">
         <span id="hero-label" class="inline-block accent-text text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-3">Travel Journal</span>
-        <h1 id="hero-title" class="hero-title text-4xl sm:text-5xl lg:text-[3.25rem] font-black leading-[1.12] tracking-tight text-white">
+        <h1 id="hero-title" class="hero-title text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.15] tracking-tight text-white">
           New Places.<br><span class="text-emerald-300">Same Curiosity.</span>
         </h1>
-        <p id="hero-desc" class="mt-4 sm:mt-5 text-sm sm:text-base text-emerald-100/80 leading-relaxed max-w-md">
+        <p id="hero-desc" class="mt-4 text-sm sm:text-base text-emerald-100/80 leading-relaxed max-w-md">
           Traveling is not just about reaching a destination, it's about collecting stories, meeting people, and seeing the world with a different heart.
         </p>
-        <div class="mt-7 sm:mt-8">
+        <div class="mt-6 sm:mt-7">
           <a id="hero-btn" href="#stories" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full shadow-lg transition">
             Explore My Journey <i class="fa-solid fa-arrow-right text-xs"></i>
           </a>
         </div>
-        <p id="hero-sign" class="mt-8 text-emerald-400/60 text-sm italic font-medium">— Htoo Htet</p>
+        <p id="hero-sign" class="mt-6 text-emerald-400/60 text-sm italic font-medium">— Htoo Htet</p>
       </div>
     </div>
   </section>
 
-  <!-- ========== PROUD SPONSORS ========== -->
+  <!-- PROUD SPONSORS -->
   <section id="proud-sponsors-section" class="surface-bg border-y border-emerald-900/40 hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
       <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
@@ -214,22 +291,22 @@
     </div>
   </section>
 
-  <!-- ========== OFFICIAL SPONSOR BANNER ========== -->
-  <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 hidden">
-    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-800/40 shadow-2xl shadow-black/40">
+  <!-- OFFICIAL SPONSOR -->
+  <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+    <div class="relative overflow-hidden rounded-2xl border border-emerald-800/40 shadow-xl" style="min-height: var(--sponsor-min-h);">
       <img id="sponsor-bg" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&q=80" alt="" class="absolute inset-0 w-full h-full object-cover">
-      <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30"></div>
-      <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-5 sm:p-8 lg:p-10">
+      <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/25"></div>
+      <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 p-5 sm:p-7" style="min-height: var(--sponsor-min-h);">
         <div class="flex-1 min-w-0">
-          <span class="inline-block accent-bg text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Official Sponsor</span>
-          <h2 id="sponsor-title" class="mt-3 text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">Veezoom Myanmar</h2>
-          <p id="sponsor-desc" class="mt-2 text-sm sm:text-base text-emerald-100/80 max-w-lg leading-relaxed"></p>
-          <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-2 mt-5 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition">
+          <span id="sponsor-badge" class="inline-block accent-bg text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Official Sponsor</span>
+          <h2 id="sponsor-title" class="mt-2.5 text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">Veezoom Myanmar</h2>
+          <p id="sponsor-desc" class="mt-1.5 text-sm text-emerald-100/80 max-w-lg leading-relaxed"></p>
+          <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-2 mt-4 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition">
             Visit Sponsor <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
           </a>
         </div>
         <div class="shrink-0">
-          <div class="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-2xl overflow-hidden border-2 border-emerald-500/30 bg-black/40 backdrop-blur flex items-center justify-center shadow-xl">
+          <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden border-2 border-emerald-500/30 bg-black/40 backdrop-blur flex items-center justify-center shadow-xl">
             <img id="sponsor-img" src="" alt="Sponsor" class="w-full h-full object-contain p-2" onerror="this.style.display='none'">
           </div>
         </div>
@@ -237,27 +314,29 @@
     </div>
   </section>
 
-  <!-- ========== UPCOMING ========== -->
-  <section id="upcoming-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
-    <div class="flex items-end justify-between gap-3 mb-4">
+  <!-- UPCOMING -->
+  <section id="upcoming-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 hidden">
+    <!-- Section heading ABOVE the banner (separated) -->
+    <div class="mb-3 sm:mb-4">
       <h2 id="upcoming-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-        <span class="w-1 h-6 rounded-full accent-bg"></span>Upcoming
+        <span class="w-1 h-6 rounded-full accent-bg"></span><span id="upcoming-heading-text">Upcoming</span>
       </h2>
+      <p id="upcoming-section-title" class="text-sm text-emerald-400/70 mt-1 ml-3 hidden"></p>
     </div>
-    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40" style="min-height: 200px;">
+    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40" style="min-height: var(--upcoming-min-h);">
       <img id="upcoming-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200" alt="" class="absolute inset-0 w-full h-full object-cover">
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-      <div class="relative z-10 p-5 sm:p-7 flex flex-col justify-end" style="min-height: 200px;">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
+      <div class="relative z-10 p-5 sm:p-6 flex flex-col justify-end" style="min-height: var(--upcoming-min-h);">
         <span id="upcoming-label" class="text-[10px] font-bold uppercase tracking-widest accent-text">Featured Journey</span>
-        <h3 id="upcoming-title" class="text-white text-xl sm:text-2xl font-black mt-1"></h3>
+        <h3 id="upcoming-title" class="text-white text-lg sm:text-xl font-black mt-1"></h3>
         <p id="upcoming-desc" class="text-white/80 text-xs sm:text-sm mt-1 max-w-md"></p>
       </div>
     </div>
   </section>
 
-  <!-- ========== TRAVEL STORIES (Latest) ========== -->
-  <section id="stories" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+  <!-- TRAVEL STORIES -->
+  <section id="stories" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
       <div>
         <div class="flex items-center gap-2 mb-1">
           <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
@@ -269,42 +348,38 @@
         <option value="">အမျိုးအစားအားလုံး</option>
       </select>
     </div>
-    <div id="blog-posts-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-      <!-- dynamic -->
-    </div>
+    <div id="blog-posts-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"></div>
   </section>
 
-  <!-- Extra custom sections -->
-  <div id="extra-home-sections" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10"></div>
+  <div id="extra-home-sections" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8"></div>
 
-  <!-- ========== YOUTUBE ========== -->
-  <section id="youtube-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 hidden">
-    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-800/40">
+  <!-- YOUTUBE -->
+  <section id="youtube-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10 hidden">
+    <div class="relative overflow-hidden rounded-2xl border border-emerald-800/40">
       <img id="youtube-bg" src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1400&q=80" alt="" class="absolute inset-0 w-full h-full object-cover">
       <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/55"></div>
-      <div class="relative z-10 flex flex-col lg:flex-row items-center gap-8 p-6 sm:p-10 lg:p-12">
+      <div class="relative z-10 flex flex-col lg:flex-row items-center gap-8 p-6 sm:p-9">
         <div class="flex-1 text-center lg:text-left">
-          <div class="inline-flex items-center gap-2 mb-4">
+          <div class="inline-flex items-center gap-2 mb-3">
             <span class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
               <i class="fa-brands fa-youtube text-white text-lg"></i>
             </span>
             <span id="youtube-label" class="text-red-400 font-bold text-sm tracking-wide">Watch My YouTube Channel</span>
           </div>
           <h2 id="youtube-title" class="text-2xl sm:text-3xl font-black text-white leading-tight"></h2>
-          <p id="youtube-desc" class="mt-3 text-emerald-200/70 text-sm max-w-md mx-auto lg:mx-0"></p>
-          <a id="youtube-link" href="#" target="_blank" class="inline-flex items-center gap-2 mt-6 bg-red-600 hover:bg-red-500 text-white font-bold text-sm px-6 py-3 rounded-full transition shadow-lg">
+          <p id="youtube-desc" class="mt-2 text-emerald-200/70 text-sm max-w-md mx-auto lg:mx-0"></p>
+          <a id="youtube-link" href="#" target="_blank" class="inline-flex items-center gap-2 mt-5 bg-red-600 hover:bg-red-500 text-white font-bold text-sm px-6 py-3 rounded-full transition shadow-lg">
             Visit Channel <i class="fa-solid fa-arrow-right text-xs"></i>
           </a>
         </div>
         <div class="shrink-0">
-          <div class="w-64 sm:w-72 h-40 sm:h-44 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative">
+          <div class="w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative">
             <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70">
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
-              <div class="w-14 h-14 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl mb-2">
-                <i class="fa-solid fa-play text-white text-lg ml-0.5"></i>
+              <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl mb-2">
+                <i class="fa-solid fa-play text-white text-base ml-0.5"></i>
               </div>
               <span class="text-xs font-bold text-white/90">HTOO HTET</span>
-              <span class="text-[10px] text-emerald-300/80">Travel Vlog</span>
             </div>
           </div>
         </div>
@@ -312,22 +387,21 @@
     </div>
   </section>
 
-  <!-- ========== ABOUT ========== -->
-  <section id="about-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-    <div class="rounded-2xl sm:rounded-3xl surface-bg border border-emerald-800/40 p-6 sm:p-10">
+  <!-- ABOUT -->
+  <section id="about-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+    <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
       <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3">About Htoo Htet</h2>
       <p id="about-desc" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl">
         မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
       </p>
     </div>
   </section>
-
 </main>
 
-<!-- ================= FOOTER ================= -->
+<!-- FOOTER -->
 <footer id="contact" class="border-t border-emerald-900/50 surface-bg mt-4">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
       <div>
         <div class="flex items-center gap-2.5 mb-4">
           <div id="footer-logo-wrap" class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center overflow-hidden">
@@ -356,7 +430,7 @@
         <p id="footer-tagline" class="text-emerald-300/50 text-sm italic font-medium leading-relaxed text-left sm:text-right">Good Vibes<br>Better Journeys</p>
       </div>
     </div>
-    <div class="mt-10 pt-6 border-t border-emerald-900/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-emerald-500/50">
+    <div class="mt-8 pt-5 border-t border-emerald-900/50 text-[11px] text-emerald-500/50">
       <span>© <span id="footer-year"></span> <span id="footer-copy-name">HTOO HTET</span>. All rights reserved.</span>
     </div>
   </div>
@@ -368,13 +442,13 @@
   <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
     <div class="surface-bg rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl border border-emerald-800/40">
       <div class="relative">
-        <img id="article-image" src="" alt="" class="w-full h-52 sm:h-64 object-cover rounded-t-2xl">
+        <img id="article-image" src="" alt="" class="w-full h-48 sm:h-56 object-cover rounded-t-2xl">
         <button type="button" onclick="closeArticle()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 sm:p-6">
         <p id="article-location" class="text-xs font-bold text-emerald-400 uppercase tracking-wide"></p>
         <h2 id="article-title" class="text-xl sm:text-2xl font-black text-white mt-1 leading-snug"></h2>
-        <div id="article-body" class="mt-4 text-sm text-emerald-100/70 leading-relaxed whitespace-pre-line"></div>
+        <div id="article-body" class="mt-4 text-sm text-emerald-100/70 leading-relaxed"></div>
         <div class="mt-6 pt-4 border-t border-emerald-800/40">
           <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-2">Related Stories</p>
           <div id="related-stories" class="space-y-2"></div>
@@ -422,21 +496,25 @@ function read(key, fallback) {
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
 }
 
-function applyThemeClass(theme) {
-  document.body.classList.remove('theme-forest', 'theme-ocean', 'theme-sunset', 'theme-navy');
+function applyThemeClass(theme, mode) {
+  document.body.classList.remove('theme-forest', 'theme-ocean', 'theme-sunset', 'theme-navy', 'mode-light', 'mode-dark');
   document.body.classList.add('theme-' + (theme || 'forest'));
+  document.body.classList.add(mode === 'light' ? 'mode-light' : 'mode-dark');
 }
 
 function applyColors(s) {
   if (s.accentColor) document.documentElement.style.setProperty('--brand-accent', s.accentColor);
-  if (s.bgColor) document.documentElement.style.setProperty('--brand-bg', s.bgColor);
-  if (s.surfaceColor) document.documentElement.style.setProperty('--brand-surface', s.surfaceColor);
-  if (s.cardColor) document.documentElement.style.setProperty('--brand-card', s.cardColor);
+  if (s.bgColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-bg', s.bgColor);
+  if (s.surfaceColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-surface', s.surfaceColor);
+  if (s.cardColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-card', s.cardColor);
   if (s.fontFamily) document.documentElement.style.setProperty('--brand-font', s.fontFamily);
   if (s.headingFont) document.documentElement.style.setProperty('--brand-heading-font', s.headingFont);
   if (s.heroHeight) document.documentElement.style.setProperty('--hero-min-h', s.heroHeight + 'px');
+  if (s.heroMaxWidth) document.documentElement.style.setProperty('--hero-max-w', s.heroMaxWidth === 100 ? '100%' : s.heroMaxWidth + 'px');
   if (s.cardImgHeight) document.documentElement.style.setProperty('--card-img-h', s.cardImgHeight + 'rem');
-  applyThemeClass(s.theme);
+  if (s.sponsorHeight) document.documentElement.style.setProperty('--sponsor-min-h', s.sponsorHeight + 'px');
+  if (s.upcomingHeight) document.documentElement.style.setProperty('--upcoming-min-h', s.upcomingHeight + 'px');
+  applyThemeClass(s.theme, s.mode || 'dark');
 }
 
 function setLogo(url) {
@@ -445,8 +523,7 @@ function setLogo(url) {
     const icon = $(id.replace('-img', '-icon'));
     if (!img) return;
     if (url) {
-      img.src = url;
-      img.classList.remove('hidden');
+      img.src = url; img.classList.remove('hidden');
       if (icon) icon.classList.add('hidden');
     } else {
       img.classList.add('hidden');
@@ -455,19 +532,20 @@ function setLogo(url) {
   });
 }
 
-function renderSocial(containerId, social) {
+function renderSocial(containerId, social, flags) {
   const el = $(containerId);
   if (!el) return;
   const items = [
-    { key: 'fb', icon: 'fa-facebook-f', hover: 'hover:bg-blue-600', label: 'Facebook' },
-    { key: 'yt', icon: 'fa-youtube', hover: 'hover:bg-red-600', label: 'YouTube' },
-    { key: 'tt', icon: 'fa-tiktok', hover: 'hover:bg-black', label: 'TikTok' },
-    { key: 'vb', icon: 'fa-viber', hover: 'hover:bg-purple-600', label: 'Viber' }
+    { key: 'fb', icon: 'fa-facebook-f', hover: 'hover:bg-blue-600', flag: 'showFb' },
+    { key: 'yt', icon: 'fa-youtube', hover: 'hover:bg-red-600', flag: 'showYt' },
+    { key: 'tt', icon: 'fa-tiktok', hover: 'hover:bg-black', flag: 'showTt' },
+    { key: 'vb', icon: 'fa-viber', hover: 'hover:bg-purple-600', flag: 'showVb' }
   ];
   el.innerHTML = items.map(i => {
     const url = social[i.key];
-    if (!url) return '';
-    return `<a href="${safe(url)}" target="_blank" rel="noopener" title="${i.label}" class="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center ${i.hover} hover:text-white transition text-xs"><i class="fa-brands ${i.icon}"></i></a>`;
+    const on = flags[i.flag] !== false && url;
+    if (!on) return '';
+    return `<a href="${safe(url)}" target="_blank" rel="noopener" class="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center ${i.hover} hover:text-white transition text-xs"><i class="fa-brands ${i.icon}"></i></a>`;
   }).join('');
 }
 
@@ -479,29 +557,23 @@ function renderMenu() {
     { label: 'About', href: '#about-section' },
     { label: 'Contact', href: '#contact' }
   ];
-  const desk = $('desktop-nav');
   const mob = $('mobile-nav');
   const foot = $('footer-links');
-  if (desk) desk.innerHTML = menu.map(m => `<a href="${safe(m.href)}" class="nav-link hover:text-white transition">${safe(m.label)}</a>`).join('');
-  if (mob) mob.innerHTML = menu.map(m => `<a href="${safe(m.href)}" onclick="closeMenu()" class="rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3">${safe(m.label)}</a>`).join('');
+  if (mob) mob.innerHTML = menu.map(m => `<a href="${safe(m.href)}" onclick="closeMenu()" class="rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3"><i class="fa-solid fa-chevron-right text-[10px] opacity-40"></i>${safe(m.label)}</a>`).join('');
   if (foot) foot.innerHTML = menu.map(m => `<li><a href="${safe(m.href)}" class="hover:text-yellow-400 transition">${safe(m.label)}</a></li>`).join('');
 }
 
 function loadBlogData() {
   $('footer-year').textContent = new Date().getFullYear();
-
   siteSettings = read('hh_settings', {});
   applyColors(siteSettings);
+
   const brand = siteSettings.brandName || 'HTOO HTET';
   const tagline = siteSettings.brandTagline || 'Travel Journal & Beyond';
   ['brand-name', 'footer-brand-name', 'mobile-brand-name', 'footer-copy-name'].forEach(id => { if ($(id)) $(id).textContent = brand; });
-  // Tagline under logo: only show if explicitly enabled
   const showTagline = siteSettings.showBrandTagline === true;
   const bt = $('brand-tagline');
-  if (bt) {
-    bt.textContent = tagline;
-    bt.classList.toggle('hidden', !showTagline);
-  }
+  if (bt) { bt.textContent = tagline; bt.classList.toggle('hidden', !showTagline); }
   $('footer-brand-tagline').textContent = tagline;
   setLogo(siteSettings.logoUrl || '');
   if (siteSettings.contactEmail) {
@@ -519,20 +591,22 @@ function loadBlogData() {
   if (hero.btnText) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
   if (hero.btnLink) $('hero-btn').href = hero.btnLink;
   if (hero.sign) $('hero-sign').textContent = hero.sign;
-  if (hero.active === false) $('hero-section').classList.add('hidden');
-  else $('hero-section').classList.remove('hidden');
+  $('hero-section').classList.toggle('hidden', hero.active === false);
 
   siteMenu = read('hh_menu', []);
   renderMenu();
 
   const social = read('hh_social', {});
-  renderSocial('social-links-desktop', social);
-  renderSocial('social-links-mobile', social);
-  renderSocial('footer-social', social);
-  if (social.yt) {
-    const yl = $('youtube-link');
-    if (yl) yl.href = social.yt;
-  }
+  const flags = {
+    showFb: social.showFb !== false,
+    showYt: social.showYt !== false,
+    showTt: social.showTt !== false,
+    showVb: social.showVb !== false
+  };
+  renderSocial('social-links-header', social, flags);
+  renderSocial('social-links-mobile', social, flags);
+  renderSocial('footer-social', social, flags);
+  if (social.yt) { const yl = $('youtube-link'); if (yl) yl.href = social.yt; }
 
   const proud = read('hh_proud_sponsors', []);
   const proudSec = $('proud-sponsors-section');
@@ -542,9 +616,7 @@ function loadBlogData() {
       if (p.logo) return `<a href="${safe(p.link || '#')}" target="_blank" class="shrink-0 opacity-80 hover:opacity-100 transition"><img src="${safe(p.logo)}" alt="${safe(p.name)}" class="h-7 sm:h-8 object-contain"></a>`;
       return `<span class="text-white/90 font-bold text-sm shrink-0 opacity-80">${safe(p.name)}</span>`;
     }).join('');
-  } else {
-    proudSec.classList.add('hidden');
-  }
+  } else proudSec.classList.add('hidden');
 
   const sponsor = read('hh_sponsor', {});
   const sc = $('sponsor-container');
@@ -552,6 +624,7 @@ function loadBlogData() {
     sc.classList.add('hidden');
   } else {
     sc.classList.remove('hidden');
+    $('sponsor-badge').textContent = sponsor.badge || 'Official Sponsor';
     if (sponsor.title) $('sponsor-title').textContent = sponsor.title;
     if (sponsor.desc) $('sponsor-desc').textContent = sponsor.desc;
     if (sponsor.link) $('sponsor-link').href = sponsor.link;
@@ -565,7 +638,15 @@ function loadBlogData() {
     upSec.classList.add('hidden');
   } else {
     upSec.classList.remove('hidden');
-    if (up.heading) $('upcoming-heading').innerHTML = `<span class="w-1 h-6 rounded-full accent-bg"></span>${safe(up.heading)}`;
+    $('upcoming-heading-text').textContent = up.heading || 'Upcoming';
+    // Optional section subtitle ABOVE banner (separate from on-image title)
+    const secTitle = $('upcoming-section-title');
+    if (up.sectionTitle) {
+      secTitle.textContent = up.sectionTitle;
+      secTitle.classList.remove('hidden');
+    } else {
+      secTitle.classList.add('hidden');
+    }
     if (up.label) $('upcoming-label').textContent = up.label;
     if (up.title) $('upcoming-title').textContent = up.title;
     if (up.desc) $('upcoming-desc').textContent = up.desc;
@@ -574,9 +655,8 @@ function loadBlogData() {
 
   const yt = read('hh_youtube', {});
   const ytSec = $('youtube-section');
-  if (yt.active === false) {
-    ytSec.classList.add('hidden');
-  } else {
+  if (yt.active === false) ytSec.classList.add('hidden');
+  else {
     ytSec.classList.remove('hidden');
     if (yt.label) $('youtube-label').textContent = yt.label;
     if (yt.title) $('youtube-title').innerHTML = yt.title;
@@ -590,8 +670,7 @@ function loadBlogData() {
   const about = read('hh_about', {});
   if (about.title) $('about-title').textContent = about.title;
   if (about.desc) $('about-desc').textContent = about.desc;
-  if (about.active === false) $('about-section').classList.add('hidden');
-  else $('about-section').classList.remove('hidden');
+  $('about-section').classList.toggle('hidden', about.active === false);
 
   if (siteSettings.storiesHeading) $('stories-heading').textContent = siteSettings.storiesHeading;
   if (siteSettings.storiesSub) $('stories-sub').textContent = siteSettings.storiesSub;
@@ -626,7 +705,6 @@ function renderStoryCards() {
     if (!q) return true;
     return [p.title, p.desc, p.location, p.category, p.type].some(v => String(v || '').toLowerCase().includes(q));
   });
-
   const box = $('blog-posts-container');
   if (!posts.length) {
     box.innerHTML = `<div class="col-span-full rounded-2xl border border-dashed border-emerald-800/50 bg-emerald-950/40 p-10 text-center">
@@ -635,12 +713,11 @@ function renderStoryCards() {
     </div>`;
     return;
   }
-
   const imgH = siteSettings.cardImgHeight ? siteSettings.cardImgHeight + 'rem' : '11rem';
   box.innerHTML = posts.map(post => {
     const idx = allStoryPosts.indexOf(post);
     const tag = (post.location || post.category || post.type || 'MYANMAR').toUpperCase();
-    const dateStr = formatDate(post.publishedDate) || formatDate(post.id) || formatDate(post.date) || '';
+    const dateStr = formatDate(post.publishedDate) || formatDate(post.id) || '';
     return `
     <button type="button" onclick="openArticle(${idx})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
       <div class="relative overflow-hidden bg-emerald-950" style="height: ${imgH}">
@@ -666,7 +743,6 @@ function openArticle(index) {
   $('article-title').textContent = post.title || 'Travel Story';
   $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ');
   let body = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
-  // Simple [img]url[/img] support
   body = body.replace(/\[img\](.*?)\[\/img\]/gi, '<img src="$1" class="my-3 rounded-xl w-full max-h-80 object-cover" alt="">');
   $('article-body').innerHTML = body.replace(/\n/g, '<br>');
   const related = allStoryPosts.filter((_, i) => i !== index).slice(0, 3);
@@ -691,7 +767,6 @@ function renderExtraHomeSections() {
   const posts = read('hh_posts', []);
   if (!sections.length) { container.innerHTML = ''; return; }
   const imgH = siteSettings.cardImgHeight ? siteSettings.cardImgHeight + 'rem' : '11rem';
-
   container.innerHTML = sections.map(section => {
     const sectionPosts = posts.filter(p => String(p.sectionId) === String(section.id));
     const cards = sectionPosts.length
@@ -709,9 +784,8 @@ function renderExtraHomeSections() {
           </button>`;
         }).join('')
       : '<div class="col-span-full rounded-xl border border-dashed border-emerald-800/40 p-6 text-sm text-emerald-500/50 text-center">ဒီ Row အတွက် Post မထည့်ရသေးပါ။</div>';
-
-    return `<section class="py-4">
-      <div class="mb-5">
+    return `<section class="py-3">
+      <div class="mb-4">
         <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
           <span class="w-1 h-6 rounded-full accent-bg"></span>${safe(section.title)}
         </h2>
@@ -732,7 +806,6 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-
 const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections'];
 let publicFirebaseReady = false;
 try {
