@@ -758,7 +758,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               </div>
               <textarea id="admin-post-content" class="field min-h-40" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="# ခေါင်းစဉ် ဒီလို ရေးပါ&#10;&#10;စာသား ဒီမှာ...&#10;&#10;ပုံထည့်ရန် အပေါ်က ခလုတ် သုံးပါ" oninput="updateContentPreview()"></textarea>
               <div class="mt-3 rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-                <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Article Content</span>
+                <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Article Content (ပုံ: ဖျက် / အပေါ်-အောက် / အရွယ် / drag)</span>
                 <div id="content-live-preview" class="mt-2 text-sm text-slate-200" style="min-height:100px;max-height:360px;overflow-y:auto;padding:8px;"></div>
               </div>
             </div>
@@ -2029,51 +2029,170 @@ function saveAbout() {
   updateAboutPreview();
   toast('About သိမ်းပြီးပါပြီ။');
 }
+function parseContentBlocks(raw) {
+  var text = String(raw || '').replace(/\r\n/g, '\n');
+  var blocks = [];
+  var re = /\[img(?:\s+size=(sm|md|lg|full))?\]([\s\S]*?)\[\/img\]/gi;
+  var last = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) {
+      blocks.push({ type: 'text', value: text.slice(last, m.index) });
+    }
+    blocks.push({ type: 'img', size: (m[1] || 'md'), url: (m[2] || '').trim() });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) blocks.push({ type: 'text', value: text.slice(last) });
+  return blocks;
+}
+function blocksToContent(blocks) {
+  return blocks.map(function(b) {
+    if (b.type === 'img') return '[img size=' + (b.size || 'md') + ']' + b.url + '[/img]';
+    return b.value;
+  }).join('');
+}
+function writeContentBlocks(blocks) {
+  var ta = $('admin-post-content');
+  if (!ta) return;
+  ta.value = blocksToContent(blocks);
+  updateContentPreview();
+}
+function deleteContentImage(imgIndex) {
+  var blocks = parseContentBlocks($('admin-post-content')?.value || '');
+  var n = 0;
+  for (var i = 0; i < blocks.length; i++) {
+    if (blocks[i].type === 'img') {
+      if (n === imgIndex) {
+        blocks.splice(i, 1);
+        // also remove empty text neighbors noise
+        writeContentBlocks(blocks);
+        toast('ပုံ ဖျက်ပြီး');
+        return;
+      }
+      n++;
+    }
+  }
+}
+function moveContentImage(imgIndex, dir) {
+  var blocks = parseContentBlocks($('admin-post-content')?.value || '');
+  var idxs = [];
+  for (var i = 0; i < blocks.length; i++) if (blocks[i].type === 'img') idxs.push(i);
+  var a = idxs[imgIndex], b = idxs[imgIndex + dir];
+  if (a == null || b == null) return;
+  var tmp = blocks[a];
+  blocks[a] = blocks[b];
+  blocks[b] = tmp;
+  writeContentBlocks(blocks);
+  toast(dir < 0 ? 'ပုံ အပေါ်ရွှေ့ပြီး' : 'ပုံ အောက်ရွှေ့ပြီး');
+}
+function setContentImageSize(imgIndex, size) {
+  var blocks = parseContentBlocks($('admin-post-content')?.value || '');
+  var n = 0;
+  for (var i = 0; i < blocks.length; i++) {
+    if (blocks[i].type === 'img') {
+      if (n === imgIndex) {
+        blocks[i].size = size;
+        writeContentBlocks(blocks);
+        toast('ပုံအရွယ်: ' + size);
+        return;
+      }
+      n++;
+    }
+  }
+}
+function renderTextLines(text) {
+  var lines = String(text || '').split('\n');
+  var out = [];
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    if (/^###\s+/.test(line)) {
+      out.push('<h4 style="font-size:16px;font-weight:800;color:#fff;margin:14px 0 6px;padding:4px 8px;border-left:3px solid #f5c518;background:#111827;">' + line.replace(/^###\s+/, '').replace(/</g,'&lt;') + '</h4>');
+    } else if (/^##\s+/.test(line)) {
+      out.push('<h3 style="font-size:20px;font-weight:900;color:#fff;margin:16px 0 6px;padding:6px 10px;border-left:4px solid #34d399;background:#052e22;">' + line.replace(/^##\s+/, '').replace(/</g,'&lt;') + '</h3>');
+    } else if (/^#\s+/.test(line)) {
+      out.push('<h2 style="font-size:26px;font-weight:900;color:#6ee7b7;margin:18px 0 8px;padding:8px 10px;border-bottom:2px solid #10b981;background:#022c22;">' + line.replace(/^#\s+/, '').replace(/</g,'&lt;') + '</h2>');
+    } else if (line.trim() === '') {
+      out.push('<div style="height:6px"></div>');
+    } else {
+      out.push('<p style="color:#cbd5e1;line-height:1.7;margin:4px 0;">' + line.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</p>');
+    }
+  }
+  return out.join('');
+}
 function renderContentHtml(raw) {
   if (!raw || !String(raw).trim()) {
     return '<p class="text-slate-500 text-xs">အပေါ်က ခလုတ်များ သုံးပါ — ခေါင်းစဉ် / ပုံ / စာ ရေးပါ</p>';
   }
-  var lines = String(raw).replace(/\r\n/g, '\n').split('\n');
+  var blocks = parseContentBlocks(raw);
   var out = [];
-  var i = 0;
-  while (i < lines.length) {
-    var line = lines[i];
-    // multi-line [img size=xx]...[/img] may span - join until close
-    if (/\[img/i.test(line)) {
-      var chunk = line;
-      while (i < lines.length && !/\[\/img\]/i.test(chunk)) {
-        i++;
-        if (i < lines.length) chunk += '\n' + lines[i];
-      }
-      var m = chunk.match(/\[img(?:\s+size=(sm|md|lg|full))?\]([\s\S]*?)\[\/img\]/i);
-      if (m) {
-        var size = m[1] || 'md';
-        var url = (m[2] || '').trim();
-        var maxH = { sm:'120px', md:'220px', lg:'340px', full:'480px' }[size] || '220px';
-        var maxW = size === 'sm' ? '45%' : (size === 'md' ? '75%' : '100%');
-        if (url) {
-          out.push('<div style="margin:10px 0;"><img src="' + url.replace(/"/g, '&quot;') + '" alt="" style="max-width:' + maxW + ';width:100%;max-height:' + maxH + ';border-radius:10px;display:block;object-fit:contain;background:#0a0a0a;border:1px solid #333;"></div>');
-        }
-      } else {
-        out.push('<p class="text-slate-400 text-xs">' + chunk.replace(/</g,'&lt;') + '</p>');
-      }
-      i++;
+  var imgIndex = 0;
+  for (var i = 0; i < blocks.length; i++) {
+    var b = blocks[i];
+    if (b.type === 'text') {
+      out.push(renderTextLines(b.value));
       continue;
     }
-    if (/^###\s+/.test(line)) {
-      out.push('<h4 style="font-size:16px;font-weight:800;color:#fff;margin:14px 0 6px;padding:4px 8px;border-left:3px solid #f5c518;background:#111827;">' + line.replace(/^###\s+/, '').replace(/</g,'<') + '</h4>');
-    } else if (/^##\s+/.test(line)) {
-      out.push('<h3 style="font-size:20px;font-weight:900;color:#fff;margin:16px 0 6px;padding:6px 10px;border-left:4px solid #34d399;background:#052e22;">' + line.replace(/^##\s+/, '').replace(/</g,'<') + '</h3>');
-    } else if (/^#\s+/.test(line)) {
-      out.push('<h2 style="font-size:26px;font-weight:900;color:#6ee7b7;margin:18px 0 8px;padding:8px 10px;border-bottom:2px solid #10b981;background:#022c22;">' + line.replace(/^#\s+/, '').replace(/</g,'<') + '</h2>');
-    } else if (line.trim() === '') {
-      out.push('<div style="height:8px"></div>');
-    } else {
-      out.push('<p style="color:#cbd5e1;line-height:1.7;margin:4px 0;">' + line.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</p>');
-    }
-    i++;
+    var size = b.size || 'md';
+    var url = b.url || '';
+    var maxH = { sm:'120px', md:'220px', lg:'340px', full:'480px' }[size] || '220px';
+    var maxW = size === 'sm' ? '45%' : (size === 'md' ? '75%' : '100%');
+    var idx = imgIndex;
+    out.push(
+      '<div class="content-img-card" data-img-index="' + idx + '" style="margin:12px 0;padding:8px;border:1px dashed #334155;border-radius:12px;background:#0a1220;position:relative;">' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;">' +
+          '<span style="font-size:10px;color:#94a3b8;font-weight:700;">ပုံ ' + (idx + 1) + '</span>' +
+          '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="moveContentImage(' + idx + ',-1)" title="အပေါ်"><i class="fa-solid fa-arrow-up"></i></button>' +
+          '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="moveContentImage(' + idx + ',1)" title="အောက်"><i class="fa-solid fa-arrow-down"></i></button>' +
+          '<button type="button" class="btn btn-muted text-xs py-1 px-2 ' + (size==='sm'?'btn-green':'') + '" onclick="setContentImageSize(' + idx + ',\'sm\')">သေး</button>' +
+          '<button type="button" class="btn btn-muted text-xs py-1 px-2 ' + (size==='md'?'btn-green':'') + '" onclick="setContentImageSize(' + idx + ',\'md\')">မှန်</button>' +
+          '<button type="button" class="btn btn-muted text-xs py-1 px-2 ' + (size==='lg'?'btn-green':'') + '" onclick="setContentImageSize(' + idx + ',\'lg\')">ကြီး</button>' +
+          '<button type="button" class="btn btn-muted text-xs py-1 px-2 ' + (size==='full'?'btn-green':'') + '" onclick="setContentImageSize(' + idx + ',\'full\')">အပြည့်</button>' +
+          '<button type="button" class="btn text-xs py-1 px-2" style="background:#7f1d1d;color:#fecaca;border:1px solid #991b1b;" onclick="deleteContentImage(' + idx + ')" title="ဖျက်"><i class="fa-solid fa-trash"></i> ဖျက်</button>' +
+        '</div>' +
+        (url ? '<img src="' + url.replace(/"/g, '&quot;') + '" alt="" style="max-width:' + maxW + ';width:100%;max-height:' + maxH + ';border-radius:10px;display:block;object-fit:contain;background:#111;border:1px solid #333;cursor:grab;" draggable="true" ondragstart="contentImgDragStart(event,' + idx + ')" ondragover="contentImgDragOver(event)" ondrop="contentImgDrop(event,' + idx + ')">' : '<span class="text-slate-500 text-xs">ပုံ URL မရှိ</span>') +
+      '</div>'
+    );
+    imgIndex++;
   }
   return out.join('') || '<p class="text-slate-500 text-xs">—</p>';
+}
+var _dragImgFrom = null;
+function contentImgDragStart(e, idx) {
+  _dragImgFrom = idx;
+  try { e.dataTransfer.setData('text/plain', String(idx)); e.dataTransfer.effectAllowed = 'move'; } catch (err) {}
+}
+function contentImgDragOver(e) {
+  e.preventDefault();
+  try { e.dataTransfer.dropEffect = 'move'; } catch (err) {}
+}
+function contentImgDrop(e, toIdx) {
+  e.preventDefault();
+  var from = _dragImgFrom;
+  if (from == null) {
+    try { from = parseInt(e.dataTransfer.getData('text/plain'), 10); } catch (err) {}
+  }
+  _dragImgFrom = null;
+  if (from == null || isNaN(from) || from === toIdx) return;
+  var blocks = parseContentBlocks($('admin-post-content')?.value || '');
+  var idxs = [];
+  for (var i = 0; i < blocks.length; i++) if (blocks[i].type === 'img') idxs.push(i);
+  if (!idxs[from] && idxs[from] !== 0) return;
+  if (!idxs[toIdx] && idxs[toIdx] !== 0) return;
+  var bi = idxs[from], bj = idxs[toIdx];
+  var item = blocks.splice(bi, 1)[0];
+  // recalculate target after splice
+  idxs = [];
+  for (var j = 0; j < blocks.length; j++) if (blocks[j].type === 'img') idxs.push(j);
+  // after remove, toIdx may shift
+  var insertAt;
+  if (from < toIdx) {
+    // removed before target, target index in imgs is toIdx-1, use that block index
+    insertAt = idxs[toIdx - 1] != null ? idxs[toIdx - 1] + 1 : blocks.length;
+  } else {
+    insertAt = idxs[toIdx] != null ? idxs[toIdx] : 0;
+  }
+  blocks.splice(insertAt, 0, item);
+  writeContentBlocks(blocks);
+  toast('ပုံ နေရာရွှေ့ပြီး');
 }
 function updateContentPreview() {
   const box = $('content-live-preview');
