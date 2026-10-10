@@ -1033,16 +1033,25 @@ function setImagePreview(previewBox, url, msg) {
 /** Put image into a live-preview container as real <img> (works with data-URL + http) */
 function applyLiveBg(container, url) {
   if (!container) return;
-  let img = container.querySelector(':scope > .live-bg-img');
+  container.style.position = 'relative';
+  container.style.overflow = 'hidden';
+  let img = container.querySelector('.live-bg-img');
   if (!img) {
     img = document.createElement('img');
     img.className = 'live-bg-img';
     img.alt = '';
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;';
-    container.style.position = 'relative';
+    img.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;display:none;';
     container.insertBefore(img, container.firstChild);
   }
+  // ensure overlays stay above
+  Array.from(container.children).forEach(function(ch) {
+    if (ch !== img && !ch.classList.contains('live-bg-img')) {
+      if (!ch.style.zIndex || ch.style.zIndex === '0') ch.style.zIndex = '1';
+    }
+  });
   if (url) {
+    img.onload = function() { img.style.display = 'block'; };
+    img.onerror = function() { console.warn('live bg load fail'); };
     img.src = url;
     img.style.display = 'block';
     container.style.backgroundImage = 'none';
@@ -1090,16 +1099,24 @@ async function uploadImage(inputEl, targetInputId) {
   const target = $(targetInputId);
   const previewBox = $(targetInputId + '-preview');
   toast('ပုံ ပြင်ဆင်နေသည်…');
+
   try {
-    // Always show local preview first
+    // 1) IMMEDIATE local preview (blob URL) — Live Preview + thumbnail
     const localUrl = URL.createObjectURL(file);
     setImagePreview(previewBox, localUrl, 'Preview…');
+    if (target) {
+      target.value = localUrl;
+      try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+    }
+    refreshLivePreviewFor(targetInputId);
 
+    // 2) Compress for permanent storage
     let blob = file;
-    try { blob = await compressImageFile(file, 1600, 0.82); } catch (e) { console.warn('compress', e); }
+    try { blob = await compressImageFile(file, 1400, 0.8); } catch (e) { console.warn('compress', e); }
 
     let finalUrl = null;
-    // Try Firebase Storage if logged in
+
+    // 3) Try Firebase Storage
     if (adminUser && adminStorage) {
       try {
         const path = 'uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg';
@@ -1109,26 +1126,25 @@ async function uploadImage(inputEl, targetInputId) {
         setImagePreview(previewBox, finalUrl, 'Firebase Storage ✓');
         toast('ပုံ Upload အောင်မြင်ပါပြီ (Firebase Storage)');
       } catch (err) {
-        console.warn('Storage upload failed, using local data URL', err);
-        toast('Storage မရ — ဒေတာအဖြစ် သိမ်းမယ်: ' + (err.code || err.message || ''));
+        console.warn('Storage upload failed', err);
+        toast('Storage မရ — ဒေတာပုံ သိမ်းမယ်');
       }
-    } else {
-      toast('Login မဝင်ရသေး — ပုံကို ယာယီ သိမ်းမယ်။ Login ဝင်ပြီး Save လုပ်ပါ။');
     }
-    // Fallback: data URL so preview + save always work
+
+    // 4) Fallback data URL (permanent, works offline)
     if (!finalUrl) {
       finalUrl = await fileToDataURL(blob);
-      setImagePreview(previewBox, finalUrl, 'Local preview ✓');
+      setImagePreview(previewBox, finalUrl, 'Local ✓ — Save လုပ်ပါ');
+      toast('ပုံ အဆင်သင့် — Save နှိပ်ပါ');
     }
+
     if (target) {
       target.value = finalUrl;
-      try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
-      try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch(e) {}
+      try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+      try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
     }
-    // Force live preview boxes to refresh (images must appear here too)
     refreshLivePreviewFor(targetInputId);
-    setTimeout(function(){ refreshLivePreviewFor(targetInputId); }, 50);
-    setTimeout(function(){ refreshLivePreviewFor(targetInputId); }, 300);
+    setTimeout(function () { refreshLivePreviewFor(targetInputId); }, 100);
   } catch (err) {
     console.error(err);
     toast('Upload မအောင်မြင်ပါ: ' + (err.message || err.code || 'error'));
