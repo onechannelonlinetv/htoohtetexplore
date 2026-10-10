@@ -715,7 +715,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <label class="label">Cover Image *</label>
               <div class="flex gap-2">
                 <input id="admin-post-img" class="field flex-1" oninput="updatePostPreview()" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-post-img'); setTimeout(updatePostPreview, 800)"></label>
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-post-img')"></label>
               </div>
               <div id="admin-post-img-preview" class="mt-2"></div>
             </div>
@@ -957,14 +957,24 @@ async function insertImageInContent(inputEl) {
   const file = inputEl.files && inputEl.files[0];
   if (!file) return;
   if (!file.type.startsWith('image/')) return toast('Image ဖိုင်သာ။');
-  if (!adminUser || !adminStorage) return toast('Login ဝင်ပါ။');
-  toast('စာထဲ ပုံ upload လုပ်နေသည်…');
+  toast('စာထဲ ပုံ ပြင်ဆင်နေသည်…');
   try {
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-    const path = 'uploads/content_' + Date.now() + '.' + ext;
-    const snapshot = await adminStorage.ref(path).put(file, { contentType: file.type });
-    const url = await snapshot.ref.getDownloadURL();
+    let blob = file;
+    try { blob = await compressImageFile(file, 1400, 0.8); } catch(e) {}
+    let url = null;
+    if (adminUser && adminStorage) {
+      try {
+        const ref = adminStorage.ref('uploads/content_' + Date.now() + '.jpg');
+        const snapshot = await ref.put(blob, { contentType: 'image/jpeg' });
+        url = await snapshot.ref.getDownloadURL();
+      } catch (err) {
+        console.warn(err);
+        toast('Storage မရ — ဒေတာပုံ သုံးမယ်');
+      }
+    }
+    if (!url) url = await fileToDataURL(blob);
     const ta = $('admin-post-content');
+    if (!ta) return;
     const tag = '\n[img]' + url + '[/img]\n';
     const start = ta.selectionStart || ta.value.length;
     ta.value = ta.value.slice(0, start) + tag + ta.value.slice(start);
@@ -1480,54 +1490,100 @@ function updateHeroPreview() {
   }
   const img = $('hero-image')?.value.trim();
   if (box) {
-    if (img) { box.style.backgroundImage = 'url(' + JSON.stringify(img).slice(1, -1) + ')'; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
+    if (img) { box.style.backgroundImage = "url('" + img.replace(/'/g, "%27") + "')"; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
     else box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
   }
   initHeroLineDrag();
 }
+let _heroDragState = null;
+
 function initHeroLineDrag() {
   const box = $('hero-live-preview');
-  if (!box) return;
-  const lines = [
-    { el: 'hero-prev-label', xi: 'hero-label-x', yi: 'hero-label-y', vx: 'val-hlx', vy: 'val-hly' },
-    { el: 'hero-prev-title', xi: 'hero-title-x', yi: 'hero-title-y', vx: 'val-htx', vy: 'val-hty' },
-    { el: 'hero-prev-desc', xi: 'hero-desc-x', yi: 'hero-desc-y', vx: 'val-hdx', vy: 'val-hdy' },
-    { el: 'hero-prev-sign', xi: 'hero-sign-x', yi: 'hero-sign-y', vx: 'val-hsx', vy: 'val-hsy' }
-  ];
-  lines.forEach(cfg => {
-    const el = $(cfg.el);
-    if (!el || el._lineDrag) return;
-    el._lineDrag = true;
-    let dragging = false, startX, startY, origL, origT;
-    const down = (e) => {
-      dragging = true;
-      const pt = e.touches ? e.touches[0] : e;
-      startX = pt.clientX; startY = pt.clientY;
-      origL = parseFloat(el.style.left) || 8;
-      origT = parseFloat(el.style.top) || 20;
-      e.preventDefault(); e.stopPropagation();
-    };
-    const move = (e) => {
-      if (!dragging) return;
-      const pt = e.touches ? e.touches[0] : e;
-      const rect = box.getBoundingClientRect();
-      const nx = Math.max(0, Math.min(90, origL + ((pt.clientX - startX) / rect.width) * 100));
-      const ny = Math.max(0, Math.min(90, origT + ((pt.clientY - startY) / rect.height) * 100));
-      el.style.left = nx + '%'; el.style.top = ny + '%';
-      if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
-      if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
-      if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
-      if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
-    };
-    const up = () => { dragging = false; };
-    el.addEventListener('mousedown', down);
-    el.addEventListener('touchstart', down, { passive: false });
-    window.addEventListener('mousemove', move);
-    window.addEventListener('touchmove', move, { passive: false });
-    window.addEventListener('mouseup', up);
-    window.addEventListener('touchend', up);
+  if (!box || box._dragReady) return;
+  box._dragReady = true;
+
+  const map = {
+    'hero-prev-label': { xi: 'hero-label-x', yi: 'hero-label-y', vx: 'val-hlx', vy: 'val-hly' },
+    'hero-prev-title': { xi: 'hero-title-x', yi: 'hero-title-y', vx: 'val-htx', vy: 'val-hty' },
+    'hero-prev-desc':  { xi: 'hero-desc-x',  yi: 'hero-desc-y',  vx: 'val-hdx', vy: 'val-hdy' },
+    'hero-prev-sign':  { xi: 'hero-sign-x',  yi: 'hero-sign-y',  vx: 'val-hsx', vy: 'val-hsy' }
+  };
+
+  Object.keys(map).forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.style.cursor = 'grab';
+    el.style.userSelect = 'none';
+    el.style.touchAction = 'none';
+    el.style.zIndex = '20';
   });
+
+  function getPt(e) {
+    if (e.touches && e.touches[0]) return e.touches[0];
+    if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
+    return e;
+  }
+
+  function onDown(e) {
+    const el = e.currentTarget;
+    const cfg = map[el.id];
+    if (!cfg) return;
+    const pt = getPt(e);
+    const rect = box.getBoundingClientRect();
+    _heroDragState = {
+      el, cfg,
+      startX: pt.clientX, startY: pt.clientY,
+      origL: parseFloat(el.style.left) || 0,
+      origT: parseFloat(el.style.top) || 0,
+      rectW: rect.width, rectH: rect.height
+    };
+    el.style.cursor = 'grabbing';
+    el.style.borderColor = 'rgba(34,211,238,0.9)';
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function onMove(e) {
+    if (!_heroDragState) return;
+    const pt = getPt(e);
+    const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
+    const nx = Math.max(0, Math.min(90, origL + ((pt.clientX - startX) / rectW) * 100));
+    const ny = Math.max(0, Math.min(90, origT + ((pt.clientY - startY) / rectH) * 100));
+    el.style.left = nx + '%';
+    el.style.top = ny + '%';
+    if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
+    if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
+    if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
+    if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
+    e.preventDefault();
+  }
+
+  function onUp(e) {
+    if (!_heroDragState) return;
+    _heroDragState.el.style.cursor = 'grab';
+    _heroDragState.el.style.borderColor = '';
+    _heroDragState = null;
+  }
+
+  Object.keys(map).forEach(id => {
+    const el = $(id);
+    if (!el || el._boundDrag) return;
+    el._boundDrag = true;
+    el.addEventListener('mousedown', onDown);
+    el.addEventListener('touchstart', onDown, { passive: false });
+  });
+
+  // single window listeners
+  if (!window._heroDragWin) {
+    window._heroDragWin = true;
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+    window.addEventListener('touchcancel', onUp);
+  }
 }
+
 function saveHero() {
   write('hh_hero', {
     active: $('hero-active').checked,
