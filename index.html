@@ -219,6 +219,9 @@
         </div>
         <!-- Social icons (on/off controlled by admin) -->
         <div class="flex items-center gap-0.5 sm:gap-1" id="social-links-header"></div>
+        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
+          <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
         <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
           <i class="fa-solid fa-magnifying-glass text-sm"></i>
         </button>
@@ -262,8 +265,8 @@
     <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
     <div class="hero-overlay absolute inset-0"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15"></div>
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center py-12 sm:py-16" style="min-height: var(--hero-min-h);">
-      <div class="max-w-xl">
+    <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col py-12 sm:py-16" style="min-height: var(--hero-min-h); justify-content: var(--hero-v-align, center);">
+      <div id="hero-text-box" class="max-w-xl" style="max-width: var(--hero-text-maxw, 36rem); margin-left: var(--hero-ml, 0); margin-right: var(--hero-mr, auto); text-align: var(--hero-text-align, left);">
         <span id="hero-label" class="inline-block accent-text text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-3">Travel Journal</span>
         <h1 id="hero-title" class="hero-title text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.15] tracking-tight text-white">
           New Places.<br><span class="text-emerald-300">Same Curiosity.</span>
@@ -500,6 +503,39 @@ function applyThemeClass(theme, mode) {
   document.body.classList.remove('theme-forest', 'theme-ocean', 'theme-sunset', 'theme-navy', 'mode-light', 'mode-dark');
   document.body.classList.add('theme-' + (theme || 'forest'));
   document.body.classList.add(mode === 'light' ? 'mode-light' : 'mode-dark');
+  const icon = document.getElementById('mode-toggle-icon');
+  if (icon) icon.className = mode === 'light' ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
+}
+
+function toggleUserMode() {
+  const isLight = document.body.classList.contains('mode-light');
+  const next = isLight ? 'dark' : 'light';
+  localStorage.setItem('hh_user_mode', next);
+  document.body.classList.remove('mode-light', 'mode-dark');
+  document.body.classList.add(next === 'light' ? 'mode-light' : 'mode-dark');
+  const icon = document.getElementById('mode-toggle-icon');
+  if (icon) icon.className = next === 'light' ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
+}
+
+function applyHeroLayout(s) {
+  const root = document.documentElement;
+  // vertical: top | center | bottom
+  const vMap = { top: 'flex-start', center: 'center', bottom: 'flex-end' };
+  root.style.setProperty('--hero-v-align', vMap[s.heroVAlign] || 'center');
+  // horizontal text: left | center | right
+  const align = s.heroTextAlign || 'left';
+  root.style.setProperty('--hero-text-align', align);
+  if (align === 'center') {
+    root.style.setProperty('--hero-ml', 'auto');
+    root.style.setProperty('--hero-mr', 'auto');
+  } else if (align === 'right') {
+    root.style.setProperty('--hero-ml', 'auto');
+    root.style.setProperty('--hero-mr', '0');
+  } else {
+    root.style.setProperty('--hero-ml', '0');
+    root.style.setProperty('--hero-mr', 'auto');
+  }
+  if (s.heroTextMaxW) root.style.setProperty('--hero-text-maxw', s.heroTextMaxW + 'rem');
 }
 
 function applyColors(s) {
@@ -514,7 +550,11 @@ function applyColors(s) {
   if (s.cardImgHeight) document.documentElement.style.setProperty('--card-img-h', s.cardImgHeight + 'rem');
   if (s.sponsorHeight) document.documentElement.style.setProperty('--sponsor-min-h', s.sponsorHeight + 'px');
   if (s.upcomingHeight) document.documentElement.style.setProperty('--upcoming-min-h', s.upcomingHeight + 'px');
-  applyThemeClass(s.theme, s.mode || 'dark');
+  // User preference overrides admin default for light/dark
+  const userMode = localStorage.getItem('hh_user_mode');
+  const mode = userMode || s.mode || 'dark';
+  applyThemeClass(s.theme, mode);
+  applyHeroLayout(s);
 }
 
 function setLogo(url) {
