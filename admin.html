@@ -435,8 +435,12 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- PROUD SPONSORS -->
       <section id="view-proud" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Our Proud Sponsors bar — logo Upload သို့မဟုတ် နာမည်</p></div>
+        <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ကြည့် · logo Upload</p></div>
         <div class="panel p-5 sm:p-6">
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Proud Bar</span>
+            <div id="proud-preview-bar" class="mt-2 flex flex-wrap items-center gap-4 min-h-[40px]"></div>
+          </div>
           <div class="grid grid-cols-1 gap-3 md:grid-cols-4 mb-4">
             <div><label class="label">Name *</label><input id="proud-name" class="field" placeholder="AYA Bank"></div>
             <div>
@@ -617,19 +621,33 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
         <div><h2 class="text-xl font-black">Travel Posts</h2><p class="mt-1 text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload ရနိုင်</p></div>
         <div class="panel p-5 sm:p-6">
           <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Post Card</span>
+            <div id="post-live-preview" class="mt-2 max-w-xs rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
+              <div id="post-prev-img-wrap" class="h-28 bg-slate-800 flex items-center justify-center overflow-hidden">
+                <img id="post-prev-img" src="" class="w-full h-full object-cover hidden" alt="">
+                <i class="fa-solid fa-image text-slate-600 text-2xl" id="post-prev-img-icon"></i>
+              </div>
+              <div class="p-3">
+                <div id="post-prev-title" class="font-bold text-sm text-white line-clamp-2">Post Title</div>
+                <div id="post-prev-desc" class="text-[11px] text-slate-400 mt-1 line-clamp-2">Short description…</div>
+                <div id="post-prev-meta" class="text-[10px] text-emerald-400 mt-2">Location · Category</div>
+              </div>
+            </div>
+          </div>
           <input id="editing-post-id" type="hidden">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Title *</label><input id="admin-post-title" class="field" placeholder="Bagan - Ancient Temples" oninput="autoSlug()"></div>
+            <div><label class="label">Title *</label><input id="admin-post-title" class="field" placeholder="Bagan - Ancient Temples" oninput="autoSlug();updatePostPreview()"></div>
             <div><label class="label">Slug * <span class="tiny">(URL)</span></label><input id="admin-post-slug" class="field" placeholder="bagan-ancient-temples" oninput="this.dataset.manual='1'"><p class="tiny mt-1">Title ကနေ auto ဖန်တီး — ကိုယ်တိုင်ပြင်လို့ရ</p></div>
             <div class="md:col-span-2">
               <label class="label">Cover Image *</label>
               <div class="flex gap-2">
-                <input id="admin-post-img" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-post-img')"></label>
+                <input id="admin-post-img" class="field flex-1" oninput="updatePostPreview()" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-post-img'); setTimeout(updatePostPreview, 800)"></label>
               </div>
               <div id="admin-post-img-preview" class="mt-2"></div>
             </div>
-            <div class="md:col-span-2"><label class="label">Short Description * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" placeholder="အကျဉ်းချုပ်..."></textarea></div>
+            <div class="md:col-span-2"><label class="label">Short Description * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" oninput="updatePostPreview()" placeholder="အကျဉ်းချုပ်..."></textarea></div>
             <div class="md:col-span-2">
               <label class="label">Article Content *</label>
               <div class="flex gap-2 mb-2 flex-wrap">
@@ -638,9 +656,9 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               </div>
               <textarea id="admin-post-content" class="field min-h-32" placeholder="အကြောင်းအရာ...&#10;&#10;[img]https://...[/img]"></textarea>
             </div>
-            <div><label class="label">Location *</label><input id="admin-post-location" class="field" placeholder="Bagan, Inle Lake..."></div>
+            <div><label class="label">Location *</label><input id="admin-post-location" class="field" oninput="updatePostPreview()" placeholder="Bagan, Inle Lake..."></div>
             <div><label class="label">Category *</label>
-              <select id="admin-post-category" class="field">
+              <select id="admin-post-category" class="field" onchange="updatePostPreview()">
                 <option value="Travel Story">Travel Story</option>
                 <option value="Guide">Guide</option>
                 <option value="Food">Food</option>
@@ -752,16 +770,31 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       </section>
 
       <section id="view-about" class="view space-y-5">
-        <div><h2 class="text-xl font-black">About Section</h2></div>
+        <div><h2 class="text-xl font-black">About Section</h2><p class="mt-1 text-sm text-slate-400">Preview · စာအရောင် · Font weight</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="about-active" checked><span class="text-sm font-semibold">About ပြမယ်</span></label>
-          <div><label class="label">Title</label><input id="about-title" class="field" placeholder="About Htoo Htet"></div>
-          <div><label class="label">Description</label><textarea id="about-desc" class="field min-h-28"></textarea></div>
+          <label class="toggle-row"><input type="checkbox" id="about-active" checked onchange="updateAboutPreview()"><span class="text-sm font-semibold">About ပြမယ်</span></label>
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-4">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · About</span>
+            <div class="mt-3 rounded-xl border border-slate-700 p-4 bg-slate-900/50">
+              <h3 id="about-prev-title" class="text-lg font-black text-white">About Htoo Htet</h3>
+              <p id="about-prev-desc" class="mt-2 text-sm text-slate-300 leading-relaxed">Description…</p>
+            </div>
+          </div>
+          <div><label class="label">Title</label><input id="about-title" class="field" placeholder="About Htoo Htet" oninput="updateAboutPreview()"></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="label">Title အရောင်</label><input id="about-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateAboutPreview()"></div>
+            <div><label class="label">Title Weight</label>
+              <select id="about-title-weight" class="field" onchange="updateAboutPreview()">
+                <option value="400">Regular</option><option value="600">Semi Bold</option><option value="700" selected>Bold</option><option value="900">Black</option>
+              </select>
+            </div>
+          </div>
+          <div><label class="label">Description</label><textarea id="about-desc" class="field min-h-28" oninput="updateAboutPreview()"></textarea></div>
+          <div><label class="label">Description အရောင်</label><input id="about-desc-color" type="color" value="#a7f3d0" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateAboutPreview()"></div>
           <button onclick="saveAbout()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save About</button>
         </div>
       </section>
 
-      <!-- SOCIAL -->
       <section id="view-social" class="view space-y-5">
         <div><h2 class="text-xl font-black">Social Links</h2><p class="mt-1 text-sm text-slate-400">Search icon ဘေး + Header / Footer မှာ ပြမယ် (Facebook, YouTube, TikTok, Viber)</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
@@ -966,14 +999,21 @@ const titles = {
 };
 function showView(name, button) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  $('view-' + name).classList.add('active');
+  const view = $('view-' + name);
+  if (view) view.classList.add('active');
   document.querySelectorAll('.navbtn[data-view]').forEach(v => v.classList.toggle('active', v.dataset.view === name));
   $('page-title').textContent = titles[name] || 'Overview';
   $('mobile-nav').classList.add('hidden');
   if (name === 'sections') renderHomeSectionsList();
-  if (name === 'posts') renderPostsList();
+  if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
   if (name === 'menu') renderMenuList();
-  if (name === 'proud') renderProudList();
+  if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
+  if (name === 'hero' && typeof updateHeroPreview === 'function') updateHeroPreview();
+  if (name === 'sponsor' && typeof updateSponsorPreview === 'function') updateSponsorPreview();
+  if (name === 'upcoming' && typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
+  if (name === 'youtube' && typeof updateYoutubePreview === 'function') updateYoutubePreview();
+  if (name === 'about' && typeof updateAboutPreview === 'function') updateAboutPreview();
+  if (name === 'settings' && typeof updateSizePreview === 'function') updateSizePreview();
 }
 
 function loadAll() {
@@ -1077,7 +1117,11 @@ function loadAll() {
   const ab = read('hh_about', {});
   $('about-active').checked = ab.active !== false;
   $('about-title').value = ab.title || '';
+  if ($('about-title-color')) $('about-title-color').value = ab.titleColor || '#ffffff';
+  if ($('about-title-weight')) $('about-title-weight').value = ab.titleWeight || '700';
   $('about-desc').value = ab.desc || '';
+  if ($('about-desc-color')) $('about-desc-color').value = ab.descColor || '#a7f3d0';
+  if (typeof updateAboutPreview === 'function') updateAboutPreview();
 
   const social = read('hh_social', {});
   $('admin-fb').value = social.fb || '';
@@ -1403,13 +1447,57 @@ function saveYoutube() {
   updateYoutubePreview();
   toast('YouTube Section သိမ်းပြီးပါပြီ။');
 }
+function updateAboutPreview() {
+  const t = $('about-prev-title'), d = $('about-prev-desc');
+  if (t) {
+    t.textContent = $('about-title')?.value || 'About Htoo Htet';
+    t.style.color = $('about-title-color')?.value || '#ffffff';
+    t.style.fontWeight = $('about-title-weight')?.value || '700';
+  }
+  if (d) {
+    d.textContent = $('about-desc')?.value || 'Description…';
+    d.style.color = $('about-desc-color')?.value || '#a7f3d0';
+  }
+}
 function saveAbout() {
   write('hh_about', {
     active: $('about-active').checked,
     title: $('about-title').value.trim(),
-    desc: $('about-desc').value.trim()
+    titleColor: $('about-title-color')?.value || '#ffffff',
+    titleWeight: $('about-title-weight')?.value || '700',
+    desc: $('about-desc').value.trim(),
+    descColor: $('about-desc-color')?.value || '#a7f3d0'
   });
+  updateAboutPreview();
   toast('About သိမ်းပြီးပါပြီ။');
+}
+function updatePostPreview() {
+  const title = $('admin-post-title')?.value || 'Post Title';
+  const desc = $('admin-post-desc')?.value || 'Short description…';
+  const loc = $('admin-post-location')?.value || 'Location';
+  const cat = $('admin-post-category')?.value || 'Category';
+  const img = $('admin-post-img')?.value.trim();
+  if ($('post-prev-title')) $('post-prev-title').textContent = title;
+  if ($('post-prev-desc')) $('post-prev-desc').textContent = desc;
+  if ($('post-prev-meta')) $('post-prev-meta').textContent = loc + ' · ' + cat;
+  const pi = $('post-prev-img'), icon = $('post-prev-img-icon');
+  if (pi) {
+    if (img) { pi.src = img; pi.classList.remove('hidden'); if (icon) icon.classList.add('hidden'); }
+    else { pi.classList.add('hidden'); if (icon) icon.classList.remove('hidden'); }
+  }
+}
+function updateProudPreview() {
+  const bar = $('proud-preview-bar');
+  if (!bar) return;
+  const items = getProud().filter(p => p.active !== false);
+  if (!items.length) {
+    bar.innerHTML = '<span class="text-xs text-slate-500">Sponsor မရှိသေး</span>';
+    return;
+  }
+  bar.innerHTML = items.map(p => {
+    if (p.logo) return '<img src="'+safe(p.logo)+'" class="h-8 object-contain opacity-90" alt="'+safe(p.name)+'" onerror="this.style.display=\'none\'">';
+    return '<span class="text-white/90 font-bold text-sm">'+safe(p.name)+'</span>';
+  }).join('');
 }
 function saveSocial() {
   write('hh_social', {
@@ -1473,6 +1561,7 @@ function getProud() { return read('hh_proud_sponsors', []); }
 function renderProudList() {
   const list = $('proud-list');
   const items = getProud();
+  if (typeof updateProudPreview === 'function') updateProudPreview();
   $('stat-proud') && ($('stat-proud').textContent = items.length);
   if (!items.length) {
     list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Proud Sponsor မရှိသေးပါ။</p>';
