@@ -472,7 +472,7 @@
       <button type="button" onclick="closeArticle()" class="w-10 h-10 rounded-full bg-emerald-900/50 text-emerald-100 flex items-center justify-center hover:bg-emerald-800 transition shrink-0" aria-label="Back">
         <i class="fa-solid fa-arrow-left"></i>
       </button>
-      <span class="text-sm font-bold text-emerald-100/90 truncate">ဆောင်းပါး</span>
+      <span id="article-page-label" class="text-sm font-bold text-emerald-100/90 truncate">ဆောင်းပါး</span>
     </div>
   </div>
 
@@ -490,15 +490,15 @@
 
     <!-- Related posts -->
     <div class="mt-12 pt-8 border-t border-emerald-800/50">
-      <h2 class="text-lg font-black text-white flex items-center gap-2 mb-5">
-        <span class="w-1 h-5 rounded-full accent-bg"></span>Related Stories
+      <h2 id="related-heading" class="text-lg font-black text-white flex items-center gap-2 mb-5">
+        <span class="w-1 h-5 rounded-full accent-bg"></span><span id="related-heading-text">Related Stories</span>
       </h2>
       <div id="related-stories" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
     </div>
 
     <div class="mt-10 text-center">
-      <button type="button" onclick="closeArticle()" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full transition">
-        <i class="fa-solid fa-arrow-left text-xs"></i> ပြန်သွားမယ်
+      <button type="button" id="article-back-btn" onclick="closeArticle()" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full transition">
+        <i class="fa-solid fa-arrow-left text-xs"></i> <span id="article-back-text">ပြန်သွားမယ်</span>
       </button>
     </div>
   </article>
@@ -559,6 +559,102 @@ function toggleUserMode() {
   document.body.classList.add(next === 'light' ? 'mode-light' : 'mode-dark');
   const icon = document.getElementById('mode-toggle-icon');
   if (icon) icon.className = next === 'light' ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
+}
+
+/* ---- Language (EN / မြန်မာ) ---- */
+const I18N = {
+  en: {
+    searchPlaceholder: 'Search title, place...',
+    article: 'Article',
+    related: 'Related Stories',
+    backHome: 'Back to stories',
+    quickLinks: 'Quick Links',
+    contact: 'Contact',
+    allCategories: 'All categories',
+    noStories: 'No stories yet. Add posts from Admin.',
+    noRelated: 'No related stories yet.',
+    read: 'Read',
+    proudSponsors: 'Our Proud Sponsors',
+    visitSponsor: 'Visit Sponsor',
+    copyright: 'All rights reserved.'
+  },
+  mm: {
+    searchPlaceholder: 'ခေါင်းစဉ်၊ နေရာ ရှာရန်...',
+    article: 'ဆောင်းပါး',
+    related: 'ဆက်စပ်ဆောင်းပါးများ',
+    backHome: 'ပြန်သွားမယ်',
+    quickLinks: 'အမြန်လင့်ခ်',
+    contact: 'ဆက်သွယ်ရန်',
+    allCategories: 'အမျိုးအစားအားလုံး',
+    noStories: 'Story မရှိသေးပါ။ Admin မှ Post ထည့်ပါ။',
+    noRelated: 'ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။',
+    read: 'ဖတ်မယ်',
+    proudSponsors: 'ကျွန်ုပ်တို့၏ Sponsors',
+    visitSponsor: 'Sponsor သို့သွားမယ်',
+    copyright: 'မူပိုင်ခွင့်အားလုံး လက်ဝယ်ရှိသည်။'
+  }
+};
+let currentLang = localStorage.getItem('hh_lang') || 'mm';
+
+function t(key) {
+  return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en[key]) || key;
+}
+
+function setLanguage(lang) {
+  if (lang !== 'en' && lang !== 'mm') return;
+  currentLang = lang;
+  localStorage.setItem('hh_lang', lang);
+  const enBtn = $('lang-en'), mmBtn = $('lang-mm');
+  if (enBtn) {
+    enBtn.classList.toggle('accent-text', lang === 'en');
+    enBtn.classList.toggle('hover:text-white', lang !== 'en');
+  }
+  if (mmBtn) {
+    mmBtn.classList.toggle('accent-text', lang === 'mm');
+    mmBtn.classList.toggle('hover:text-white', lang !== 'mm');
+  }
+  applyLanguageUI();
+}
+
+function applyLanguageUI() {
+  const search = $('header-search-input');
+  if (search) search.placeholder = t('searchPlaceholder');
+
+  // Footer headings
+  document.querySelectorAll('footer h4').forEach(function(h, i) {
+    if (i === 0) h.textContent = t('quickLinks');
+    if (i === 1) h.textContent = t('contact');
+  });
+
+  // Category filter first option
+  const sel = $('story-category-filter');
+  if (sel && sel.options.length) {
+    sel.options[0].textContent = t('allCategories');
+  }
+
+  // Proud label
+  const proud = $('proud-label');
+  if (proud) proud.textContent = t('proudSponsors');
+
+  // Sponsor link button text (keep icon)
+  const spLink = $('sponsor-link');
+  if (spLink) {
+    const icon = spLink.querySelector('i');
+    spLink.innerHTML = t('visitSponsor') + (icon ? ' ' + icon.outerHTML : '');
+  }
+
+  if ($('article-page-label')) $('article-page-label').textContent = t('article');
+  if ($('related-heading-text')) $('related-heading-text').textContent = t('related');
+  if ($('article-back-text')) $('article-back-text').textContent = t('backHome');
+
+  // Copyright trailing text
+  const copyEl = document.querySelector('footer .mt-8 span');
+  // leave structure; optional
+
+  // Re-render cards so "Read" label updates
+  if (typeof renderStoryCards === 'function' && typeof allStoryPosts !== 'undefined') {
+    try { renderStoryCards(); } catch (e) {}
+  }
 }
 
 function applyHeroLayout(s) {
@@ -874,7 +970,7 @@ function renderStoryCards() {
   if (!posts.length) {
     box.innerHTML = `<div class="col-span-full rounded-2xl border border-dashed border-emerald-800/50 bg-emerald-950/40 p-10 text-center">
       <i class="fa-solid fa-book-open text-3xl text-emerald-700 mb-3 block"></i>
-      <p class="text-sm text-emerald-400/70">Story မရှိသေးပါ။ Admin မှ Post ထည့်ပါ။</p>
+      <p class="text-sm text-emerald-400/70">${t('noStories')}</p>
     </div>`;
     return;
   }
@@ -894,7 +990,7 @@ function renderStoryCards() {
         <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2 leading-relaxed flex-1">${safe(post.desc || '')}</p>
         <div class="mt-3 flex items-center justify-between text-[11px] text-emerald-500/60">
           <span>${dateStr}</span>
-          <span class="accent-text font-bold flex items-center gap-1">Read <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
+          <span class="accent-text font-bold flex items-center gap-1">${t('read')} <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
         </div>
       </div>
     </button>`;
@@ -1066,19 +1162,22 @@ function openArticle(index) {
             </div>
           </button>`;
         }).join('')
-      : '<p class="col-span-full text-sm text-emerald-500/50">ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။</p>';
+      : '<p class="col-span-full text-sm text-emerald-500/50">' + t('noRelated') + '</p>';
   }
 
   bindArticleImageZoom();
 
-  // Full page: hide home, show article
+  // Full page: hide home + footer, show only article
   const home = $('home');
   if (home) home.classList.add('hidden');
+  const foot = document.querySelector('footer');
+  if (foot) foot.classList.add('hidden');
   const page = $('article-page');
   if (page) page.classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.body.classList.add('article-open');
+  window.scrollTo({ top: 0, behavior: 'auto' });
   try {
-    history.pushState({ article: index }, '', '#article/' + (post.slug || index));
+    history.pushState({ article: index }, '', '#article/' + encodeURIComponent(post.slug || String(index)));
   } catch (e) {}
 }
 function closeArticle() {
@@ -1087,10 +1186,12 @@ function closeArticle() {
   if (page) page.classList.add('hidden');
   const home = $('home');
   if (home) home.classList.remove('hidden');
+  const foot = document.querySelector('footer');
+  if (foot) foot.classList.remove('hidden');
+  document.body.classList.remove('article-open');
   try {
     if (location.hash.indexOf('#article') === 0) history.pushState(null, '', location.pathname + location.search);
   } catch (e) {}
-  // stay near stories if possible
   const stories = $('stories');
   if (stories) stories.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -1169,8 +1270,10 @@ function tryOpenArticleFromHash() {
 
 document.addEventListener('DOMContentLoaded', () => {
   $('story-category-filter')?.addEventListener('change', renderStoryCards);
+  if ($('lang-en')) $('lang-en').addEventListener('click', function() { setLanguage('en'); });
+  if ($('lang-mm')) $('lang-mm').addEventListener('click', function() { setLanguage('mm'); });
+  setLanguage(currentLang || 'mm');
   if (!publicFirebaseReady) loadBlogData();
-  // If hash already present after data loads
   setTimeout(tryOpenArticleFromHash, 400);
 });
 window.addEventListener('popstate', function() {
