@@ -2032,13 +2032,17 @@ function saveAbout() {
 function parseContentBlocks(raw) {
   var text = String(raw || '').replace(/\r\n/g, '\n');
   var blocks = [];
-  var re = /\[img(?:\s+size=(sm|md|lg|full))?\]([\s\S]*?)\[\/img\]/gi;
+  var re = /\[img((?:\s+\w+=[^\s\]]+)*)\]([\s\S]*?)\[\/img\]/gi;
   var last = 0, m;
   while ((m = re.exec(text)) !== null) {
-    if (m.index > last) {
-      blocks.push({ type: 'text', value: text.slice(last, m.index) });
-    }
-    blocks.push({ type: 'img', size: (m[1] || 'md'), url: (m[2] || '').trim() });
+    if (m.index > last) blocks.push({ type: 'text', value: text.slice(last, m.index) });
+    var attrs = m[1] || '';
+    var size = 'md', w = null;
+    var sm = attrs.match(/\bsize=(sm|md|lg|full)/i);
+    if (sm) size = sm[1].toLowerCase();
+    var wm = attrs.match(/\bw=(\d{1,3})/i);
+    if (wm) w = Math.max(15, Math.min(100, parseInt(wm[1], 10)));
+    blocks.push({ type: 'img', size: size, w: w, url: (m[2] || '').trim() });
     last = m.index + m[0].length;
   }
   if (last < text.length) blocks.push({ type: 'text', value: text.slice(last) });
@@ -2046,8 +2050,10 @@ function parseContentBlocks(raw) {
 }
 function blocksToContent(blocks) {
   return blocks.map(function(b) {
-    if (b.type === 'img') return '[img size=' + (b.size || 'md') + ']' + b.url + '[/img]';
-    return b.value;
+    if (b.type !== 'img') return b.value;
+    var attrs = ' size=' + (b.size || 'md');
+    if (b.w != null) attrs += ' w=' + Math.round(b.w);
+    return '[img' + attrs + ']' + b.url + '[/img]';
   }).join('');
 }
 function writeContentBlocks(blocks) {
@@ -2056,21 +2062,23 @@ function writeContentBlocks(blocks) {
   ta.value = blocksToContent(blocks);
   updateContentPreview();
 }
-function deleteContentImage(imgIndex) {
+function getImgBlock(imgIndex) {
   var blocks = parseContentBlocks($('admin-post-content')?.value || '');
   var n = 0;
   for (var i = 0; i < blocks.length; i++) {
     if (blocks[i].type === 'img') {
-      if (n === imgIndex) {
-        blocks.splice(i, 1);
-        // also remove empty text neighbors noise
-        writeContentBlocks(blocks);
-        toast('ပုံ ဖျက်ပြီး');
-        return;
-      }
+      if (n === imgIndex) return { blocks: blocks, i: i, block: blocks[i] };
       n++;
     }
   }
+  return null;
+}
+function deleteContentImage(imgIndex) {
+  var hit = getImgBlock(imgIndex);
+  if (!hit) return;
+  hit.blocks.splice(hit.i, 1);
+  writeContentBlocks(hit.blocks);
+  toast('ပုံ ဖျက်ပြီး');
 }
 function moveContentImage(imgIndex, dir) {
   var blocks = parseContentBlocks($('admin-post-content')?.value || '');
@@ -2082,22 +2090,24 @@ function moveContentImage(imgIndex, dir) {
   blocks[a] = blocks[b];
   blocks[b] = tmp;
   writeContentBlocks(blocks);
-  toast(dir < 0 ? 'ပုံ အပေါ်ရွှေ့ပြီး' : 'ပုံ အောက်ရွှေ့ပြီး');
 }
-function setContentImageSize(imgIndex, size) {
-  var blocks = parseContentBlocks($('admin-post-content')?.value || '');
-  var n = 0;
-  for (var i = 0; i < blocks.length; i++) {
-    if (blocks[i].type === 'img') {
-      if (n === imgIndex) {
-        blocks[i].size = size;
-        writeContentBlocks(blocks);
-        toast('ပုံအရွယ်: ' + size);
-        return;
-      }
-      n++;
-    }
+function setContentImageWidth(imgIndex, w) {
+  var hit = getImgBlock(imgIndex);
+  if (!hit) return;
+  hit.block.w = Math.max(15, Math.min(100, Math.round(w)));
+  // map width to size label for site display
+  var ww = hit.block.w;
+  hit.block.size = ww <= 40 ? 'sm' : (ww <= 70 ? 'md' : (ww <= 90 ? 'lg' : 'full'));
+  var ta = $('admin-post-content');
+  if (ta) ta.value = blocksToContent(hit.blocks);
+  // live update without full re-render while dragging
+  var img = document.querySelector('.content-img-card[data-img-index="' + imgIndex + '"] img.content-img-el');
+  if (img) {
+    img.style.maxWidth = hit.block.w + '%';
+    img.style.width = hit.block.w + '%';
   }
+  var lab = document.querySelector('.content-img-card[data-img-index="' + imgIndex + '"] .img-w-label');
+  if (lab) lab.textContent = hit.block.w + '%';
 }
 function renderTextLines(text) {
   var lines = String(text || '').split('\n');
@@ -2118,6 +2128,9 @@ function renderTextLines(text) {
   }
   return out.join('');
 }
+function defaultWidthForSize(size) {
+  return { sm: 40, md: 70, lg: 90, full: 100 }[size] || 70;
+}
 function renderContentHtml(raw) {
   if (!raw || !String(raw).trim()) {
     return '<p class="text-slate-500 text-xs">အပေါ်က ခလုတ်များ သုံးပါ — ခေါင်းစဉ် / ပုံ / စာ ရေးပါ</p>';
@@ -2127,36 +2140,40 @@ function renderContentHtml(raw) {
   var imgIndex = 0;
   for (var i = 0; i < blocks.length; i++) {
     var b = blocks[i];
-    if (b.type === 'text') {
-      out.push(renderTextLines(b.value));
-      continue;
-    }
+    if (b.type === 'text') { out.push(renderTextLines(b.value)); continue; }
     var size = b.size || 'md';
+    var w = b.w != null ? b.w : defaultWidthForSize(size);
     var url = b.url || '';
-    var maxH = { sm:'120px', md:'220px', lg:'340px', full:'480px' }[size] || '220px';
-    var maxW = size === 'sm' ? '45%' : (size === 'md' ? '75%' : '100%');
     var idx = imgIndex;
     out.push(
-      '<div class="content-img-card" data-img-index="' + idx + '" style="margin:12px 0;padding:8px;border:1px dashed #334155;border-radius:12px;background:#0a1220;position:relative;">' +
-        '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;">' +
-          '<span style="font-size:10px;color:#94a3b8;font-weight:700;">ပုံ ' + (idx + 1) + '</span>' +
-          '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="moveContentImage(' + idx + ',-1)" title="အပေါ်"><i class="fa-solid fa-arrow-up"></i></button>' +
-          '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="moveContentImage(' + idx + ',1)" title="အောက်"><i class="fa-solid fa-arrow-down"></i></button>' +
-          '<button type="button" class="btn btn-muted text-xs py-1 px-2 ' + (size==='sm'?'btn-green':'') + '" onclick="setContentImageSize(' + idx + ',\'sm\')">သေး</button>' +
-          '<button type="button" class="btn btn-muted text-xs py-1 px-2 ' + (size==='md'?'btn-green':'') + '" onclick="setContentImageSize(' + idx + ',\'md\')">မှန်</button>' +
-          '<button type="button" class="btn btn-muted text-xs py-1 px-2 ' + (size==='lg'?'btn-green':'') + '" onclick="setContentImageSize(' + idx + ',\'lg\')">ကြီး</button>' +
-          '<button type="button" class="btn btn-muted text-xs py-1 px-2 ' + (size==='full'?'btn-green':'') + '" onclick="setContentImageSize(' + idx + ',\'full\')">အပြည့်</button>' +
-          '<button type="button" class="btn text-xs py-1 px-2" style="background:#7f1d1d;color:#fecaca;border:1px solid #991b1b;" onclick="deleteContentImage(' + idx + ')" title="ဖျက်"><i class="fa-solid fa-trash"></i> ဖျက်</button>' +
+      '<div class="content-img-card" data-img-index="' + idx + '" style="margin:14px 0;position:relative;display:inline-block;max-width:100%;vertical-align:top;">' +
+        '<div style="position:relative;display:inline-block;max-width:100%;">' +
+          (url
+            ? '<img class="content-img-el" src="' + url.replace(/"/g, '&quot;') + '" alt="" draggable="true" ' +
+              'ondragstart="contentImgDragStart(event,' + idx + ')" ondragover="contentImgDragOver(event)" ondrop="contentImgDrop(event,' + idx + ')" ' +
+              'style="width:' + w + '%;max-width:100%;height:auto;border-radius:10px;display:block;object-fit:contain;background:#111;border:1px solid #475569;cursor:grab;">'
+            : '<span class="text-slate-500 text-xs">ပုံ မရှိ</span>') +
+          '<div class="img-resize-handle" title="ဆွဲပြီး အကြီးအသေး" ' +
+            'onmousedown="startImgResize(event,' + idx + ')" ' +
+            'style="position:absolute;right:2px;bottom:2px;width:18px;height:18px;background:#10b981;border:2px solid #fff;border-radius:4px 0 10px 0;cursor:nwse-resize;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.5);"></div>' +
+          '<button type="button" onclick="deleteContentImage(' + idx + ')" title="ပုံဖျက်" ' +
+            'style="position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:8px;background:rgba(127,29,29,.92);color:#fecaca;border:1px solid #991b1b;cursor:pointer;z-index:6;display:flex;align-items:center;justify-content:center;">' +
+            '<i class="fa-solid fa-trash" style="font-size:12px;"></i></button>' +
+          '<span class="img-w-label" style="position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.7);color:#6ee7b7;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;">' + w + '%</span>' +
         '</div>' +
-        (url ? '<img src="' + url.replace(/"/g, '&quot;') + '" alt="" style="max-width:' + maxW + ';width:100%;max-height:' + maxH + ';border-radius:10px;display:block;object-fit:contain;background:#111;border:1px solid #333;cursor:grab;" draggable="true" ondragstart="contentImgDragStart(event,' + idx + ')" ondragover="contentImgDragOver(event)" ondrop="contentImgDrop(event,' + idx + ')">' : '<span class="text-slate-500 text-xs">ပုံ URL မရှိ</span>') +
+        '<div style="margin-top:4px;font-size:10px;color:#64748b;">ပုံ ' + (idx + 1) + ' · ထောင့်စိမ်း ဆွဲ = အရွယ် · ပုံဆွဲ = နေရာရွှေ့ · အနီ = ဖျက်</div>' +
       '</div>'
     );
     imgIndex++;
   }
   return out.join('') || '<p class="text-slate-500 text-xs">—</p>';
 }
+
 var _dragImgFrom = null;
+var _resizeState = null;
+
 function contentImgDragStart(e, idx) {
+  if (_resizeState) { e.preventDefault(); return; }
   _dragImgFrom = idx;
   try { e.dataTransfer.setData('text/plain', String(idx)); e.dataTransfer.effectAllowed = 'move'; } catch (err) {}
 }
@@ -2175,25 +2192,68 @@ function contentImgDrop(e, toIdx) {
   var blocks = parseContentBlocks($('admin-post-content')?.value || '');
   var idxs = [];
   for (var i = 0; i < blocks.length; i++) if (blocks[i].type === 'img') idxs.push(i);
-  if (!idxs[from] && idxs[from] !== 0) return;
-  if (!idxs[toIdx] && idxs[toIdx] !== 0) return;
-  var bi = idxs[from], bj = idxs[toIdx];
+  if (idxs[from] == null || idxs[toIdx] == null) return;
+  var bi = idxs[from];
   var item = blocks.splice(bi, 1)[0];
-  // recalculate target after splice
   idxs = [];
   for (var j = 0; j < blocks.length; j++) if (blocks[j].type === 'img') idxs.push(j);
-  // after remove, toIdx may shift
   var insertAt;
-  if (from < toIdx) {
-    // removed before target, target index in imgs is toIdx-1, use that block index
-    insertAt = idxs[toIdx - 1] != null ? idxs[toIdx - 1] + 1 : blocks.length;
-  } else {
-    insertAt = idxs[toIdx] != null ? idxs[toIdx] : 0;
-  }
+  if (from < toIdx) insertAt = (idxs[toIdx - 1] != null ? idxs[toIdx - 1] + 1 : blocks.length);
+  else insertAt = (idxs[toIdx] != null ? idxs[toIdx] : 0);
   blocks.splice(insertAt, 0, item);
   writeContentBlocks(blocks);
   toast('ပုံ နေရာရွှေ့ပြီး');
 }
+
+function startImgResize(e, idx) {
+  e.preventDefault();
+  e.stopPropagation();
+  var card = document.querySelector('.content-img-card[data-img-index="' + idx + '"]');
+  if (!card) return;
+  var wrap = card.firstElementChild;
+  var rect = wrap.getBoundingClientRect();
+  var hit = getImgBlock(idx);
+  var startW = hit && hit.block.w != null ? hit.block.w : defaultWidthForSize(hit && hit.block.size || 'md');
+  _resizeState = {
+    idx: idx,
+    startX: e.clientX,
+    startW: startW,
+    parentW: rect.width / (startW / 100) // full 100% width in px
+  };
+  document.body.style.cursor = 'nwse-resize';
+  document.body.style.userSelect = 'none';
+}
+function onImgResizeMove(e) {
+  if (!_resizeState) return;
+  e.preventDefault();
+  var dx = e.clientX - _resizeState.startX;
+  var parentW = _resizeState.parentW || 400;
+  var newW = _resizeState.startW + (dx / parentW) * 100;
+  setContentImageWidth(_resizeState.idx, newW);
+}
+function onImgResizeEnd() {
+  if (!_resizeState) return;
+  var idx = _resizeState.idx;
+  _resizeState = null;
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
+  // final write + full preview sync
+  var hit = getImgBlock(idx);
+  if (hit) writeContentBlocks(hit.blocks);
+  toast('ပုံအရွယ် သိမ်းပြီး');
+}
+if (!window._imgResizeBound) {
+  window._imgResizeBound = true;
+  window.addEventListener('mousemove', onImgResizeMove);
+  window.addEventListener('mouseup', onImgResizeEnd);
+  window.addEventListener('touchmove', function(e) {
+    if (!_resizeState || !e.touches || !e.touches[0]) return;
+    onImgResizeMove(e.touches[0]);
+    e.preventDefault();
+  }, { passive: false });
+  window.addEventListener('touchend', onImgResizeEnd);
+}
+
 function updateContentPreview() {
   const box = $('content-live-preview');
   if (!box) return;
