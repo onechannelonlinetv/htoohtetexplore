@@ -345,6 +345,10 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero</span>
+              <label class="tiny flex items-center gap-2 ml-auto">Frame
+                <input type="range" id="hero-frame-h" min="120" max="360" value="200" class="w-28 accent-emerald-500" oninput="var b=document.getElementById('hero-live-preview');if(b)b.style.height=this.value+'px';var v=document.getElementById('val-hero-frame');if(v)v.textContent=this.value+'px'">
+                <span id="val-hero-frame">200px</span>
+              </label>
             <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 select-none" style="height:200px; background:linear-gradient(135deg,#0a1f18,#061510);">
               <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none"></div>
               <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">စာတစ်ကြောင်းချင်း ဖိဆွဲပါ</p>
@@ -634,13 +638,24 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Upcoming</span>
             <div class="mt-2 mb-1 text-xs font-bold text-white" id="up-prev-heading">Upcoming</div>
             <div class="text-[10px] text-emerald-400/70 mb-2" id="up-prev-section-title"></div>
-            <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700" style="min-height:110px; background:linear-gradient(90deg,#1a1a1a,#333);">
-              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-              <div class="relative z-10 p-4 flex flex-col justify-end" style="min-height:110px;">
-                <span id="up-prev-label" class="text-[9px] font-bold uppercase tracking-widest" style="color:#f5c518;">Featured</span>
-                <div id="up-prev-title" class="text-sm font-black text-white mt-0.5">Title</div>
-                <div id="up-prev-desc" class="text-[10px] text-white/70 mt-0.5 line-clamp-2">Desc</div>
-              </div>
+            <label class="tiny flex items-center gap-2 mb-2">Frame အမြင့်
+              <input type="range" id="up-frame-h" min="100" max="320" value="160" class="w-32 accent-emerald-500" oninput="updateUpcomingPreview()">
+              <span id="val-up-frame-h">160px</span>
+            </label>
+            <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="height:160px;background:#1a1a1a;">
+              <div class="absolute inset-0 pointer-events-none" style="z-index:1;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.15));"></div>
+              <span id="up-prev-label" class="absolute z-10 cursor-grab border border-dashed border-yellow-400/40 rounded px-1 font-bold uppercase" style="left:6%;top:40%;color:#f5c518;font-size:10px;touch-action:none;">Featured</span>
+              <div id="up-prev-title" class="absolute z-10 cursor-grab border border-dashed border-white/30 rounded px-1 font-black text-white" style="left:6%;top:55%;font-size:14px;touch-action:none;max-width:85%;">Title</div>
+              <div id="up-prev-desc" class="absolute z-10 cursor-grab border border-dashed border-white/20 rounded px-1 text-white/70" style="left:6%;top:72%;font-size:11px;touch-action:none;max-width:80%;">Desc</div>
+            </div>
+            <p class="tiny mt-1">စာတစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
+            <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
+              <div>Label X <input type="range" id="up-label-x" min="0" max="90" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-ulx">6</span>%</div>
+              <div>Label Y <input type="range" id="up-label-y" min="0" max="90" value="40" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uly">40</span>%</div>
+              <div>Title X <input type="range" id="up-title-x" min="0" max="90" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-utx">6</span>%</div>
+              <div>Title Y <input type="range" id="up-title-y" min="0" max="90" value="55" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uty">55</span>%</div>
+              <div>Desc X <input type="range" id="up-desc-x" min="0" max="90" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udx">6</span>%</div>
+              <div>Desc Y <input type="range" id="up-desc-y" min="0" max="90" value="72" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udy">72</span>%</div>
             </div>
           </div>
 
@@ -964,6 +979,16 @@ function togglePasswordVisibility() {
 }
 
 /* ---- Image Upload to Firebase Storage ---- */
+function insertHeading(prefix) {
+  const ta = $('admin-post-content');
+  if (!ta) return;
+  const start = ta.selectionStart || 0;
+  const before = ta.value.slice(0, start);
+  const needNL = before.length && !before.endsWith('\n') ? '\n' : '';
+  ta.value = before + needNL + prefix + ta.value.slice(start);
+  ta.focus();
+  if (typeof updateContentPreview === 'function') updateContentPreview();
+}
 async function insertImageInContent(inputEl) {
   const file = inputEl.files && inputEl.files[0];
   if (!file) return;
@@ -986,7 +1011,8 @@ async function insertImageInContent(inputEl) {
     if (!url) url = await fileToDataURL(blob);
     const ta = $('admin-post-content');
     if (!ta) return;
-    const tag = '\n[img]' + url + '[/img]\n';
+    const sz = ($('content-img-size')?.value) || 'md';
+    const tag = '\n[img size=' + sz + ']' + url + '[/img]\n';
     const start = ta.selectionStart || ta.value.length;
     ta.value = ta.value.slice(0, start) + tag + ta.value.slice(start);
     ta.focus();
@@ -1338,6 +1364,13 @@ function loadAll() {
   if ($('up-desc-color')) $('up-desc-color').value = up.descColor || '#cccccc';
   $('up-desc').value = up.desc || '';
   $('up-image').value = up.image || '';
+  if ($('up-label-x')) $('up-label-x').value = up.labelX != null ? up.labelX : 6;
+  if ($('up-label-y')) $('up-label-y').value = up.labelY != null ? up.labelY : 40;
+  if ($('up-title-x')) $('up-title-x').value = up.titleX != null ? up.titleX : 6;
+  if ($('up-title-y')) $('up-title-y').value = up.titleY != null ? up.titleY : 55;
+  if ($('up-desc-x')) $('up-desc-x').value = up.descX != null ? up.descX : 6;
+  if ($('up-desc-y')) $('up-desc-y').value = up.descY != null ? up.descY : 72;
+  if ($('up-frame-h')) $('up-frame-h').value = up.frameH || 160;
   showPreviewIfUrl('up-image');
   if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
 
@@ -1772,38 +1805,119 @@ function saveSponsor() {
   toast('Official Sponsor သိမ်းပြီးပါပြီ။');
 }
 function updateUpcomingPreview() {
+  const box = $('up-live-preview');
+  const fh = parseInt($('up-frame-h')?.value || '160', 10);
+  if ($('val-up-frame-h')) $('val-up-frame-h').textContent = fh + 'px';
+  if (box) box.style.height = fh + 'px';
+
   if ($('up-prev-heading')) $('up-prev-heading').textContent = $('up-heading')?.value || 'Upcoming';
   const st = $('up-section-title')?.value || '';
-  if ($('up-prev-section-title')) { $('up-prev-section-title').textContent = st; $('up-prev-section-title').style.display = st ? '' : 'none'; }
-  if ($('up-prev-label')) {
-    $('up-prev-label').textContent = $('up-label')?.value || 'Featured';
-    $('up-prev-label').style.color = $('up-label-color')?.value || '#f5c518';
+  if ($('up-prev-section-title')) {
+    $('up-prev-section-title').textContent = st;
+    $('up-prev-section-title').style.display = st ? '' : 'none';
   }
-  if ($('up-prev-title')) {
-    $('up-prev-title').textContent = $('up-title')?.value || 'Title';
-    $('up-prev-title').style.color = $('up-title-color')?.value || '#ffffff';
-    $('up-prev-title').style.fontWeight = $('up-title-weight')?.value || '900';
-    const tfs = $('up-title-fs')?.value || 22;
-    $('up-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.6)) + 'px';
+
+  const pos = (id, def) => parseInt($(id)?.value || def, 10);
+  const lx = pos('up-label-x', 6), ly = pos('up-label-y', 40);
+  const tx = pos('up-title-x', 6), ty = pos('up-title-y', 55);
+  const dx = pos('up-desc-x', 6), dy = pos('up-desc-y', 72);
+  [['val-ulx',lx],['val-uly',ly],['val-utx',tx],['val-uty',ty],['val-udx',dx],['val-udy',dy]].forEach(function(p){
+    if ($(p[0])) $(p[0]).textContent = p[1];
+  });
+
+  const label = $('up-prev-label');
+  const title = $('up-prev-title');
+  const desc = $('up-prev-desc');
+  if (label) {
+    label.textContent = $('up-label')?.value || 'Featured';
+    label.style.color = $('up-label-color')?.value || '#f5c518';
+    label.style.fontSize = (pos('up-label-fs', 11)) + 'px';
+    label.style.left = lx + '%'; label.style.top = ly + '%';
+  }
+  if (title) {
+    title.textContent = $('up-title')?.value || 'Title';
+    title.style.color = $('up-title-color')?.value || '#ffffff';
+    title.style.fontWeight = $('up-title-weight')?.value || '900';
+    const tfs = pos('up-title-fs', 22);
+    title.style.fontSize = Math.max(12, Math.round(tfs * 0.65)) + 'px';
     if ($('val-up-title-fs')) $('val-up-title-fs').textContent = tfs + 'px';
+    title.style.left = tx + '%'; title.style.top = ty + '%';
   }
-  if ($('up-prev-label')) {
-    const lfs = $('up-label-fs')?.value || 11;
-    $('up-prev-label').style.fontSize = lfs + 'px';
+  if (desc) {
+    desc.textContent = $('up-desc')?.value || 'Desc';
+    desc.style.color = $('up-desc-color')?.value || '#cccccc';
+    const dfs = pos('up-desc-fs', 13);
+    desc.style.fontSize = Math.max(10, Math.round(dfs * 0.85)) + 'px';
+    desc.style.left = dx + '%'; desc.style.top = dy + '%';
   }
-  if ($('up-prev-desc')) {
-    $('up-prev-desc').textContent = $('up-desc')?.value || 'Desc';
-    $('up-prev-desc').style.color = $('up-desc-color')?.value || '#cccccc';
-    const dfs = $('up-desc-fs')?.value || 13;
-    $('up-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
-  }
+
   const img = ($('up-image')?.value || '').trim();
-  const box = $('up-live-preview');
-  if (box) {
+  if (box && typeof applyLiveBg === 'function') {
     applyLiveBg(box, img);
-    if (!img) box.style.backgroundImage = 'linear-gradient(90deg,#1a1a1a,#333)';
+    if (!img) box.style.background = '#1a1a1a';
+  }
+  initUpcomingDrag();
+}
+let _upDrag = null;
+function initUpcomingDrag() {
+  const box = $('up-live-preview');
+  if (!box || box._upDragReady) return;
+  box._upDragReady = true;
+  const map = {
+    'up-prev-label': { xi:'up-label-x', yi:'up-label-y', vx:'val-ulx', vy:'val-uly' },
+    'up-prev-title': { xi:'up-title-x', yi:'up-title-y', vx:'val-utx', vy:'val-uty' },
+    'up-prev-desc':  { xi:'up-desc-x', yi:'up-desc-y', vx:'val-udx', vy:'val-udy' }
+  };
+  function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
+  Object.keys(map).forEach(function(id){
+    const el = $(id);
+    if (!el || el._bound) return;
+    el._bound = true;
+    el.style.cursor = 'grab';
+    el.addEventListener('mousedown', function(e){
+      const c = map[id];
+      const p = pt(e);
+      const r = box.getBoundingClientRect();
+      _upDrag = { el:el, c:c, sx:p.clientX, sy:p.clientY, ol:parseFloat(el.style.left)||0, ot:parseFloat(el.style.top)||0, rw:r.width, rh:r.height };
+      el.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+    el.addEventListener('touchstart', function(e){
+      const c = map[id];
+      const p = pt(e);
+      const r = box.getBoundingClientRect();
+      _upDrag = { el:el, c:c, sx:p.clientX, sy:p.clientY, ol:parseFloat(el.style.left)||0, ot:parseFloat(el.style.top)||0, rw:r.width, rh:r.height };
+      e.preventDefault();
+    }, { passive:false });
+  });
+  if (!window._upDragWin) {
+    window._upDragWin = true;
+    window.addEventListener('mousemove', function(e){
+      if (!_upDrag) return;
+      const p = pt(e);
+      const nx = Math.max(0, Math.min(90, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
+      const ny = Math.max(0, Math.min(90, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
+      _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
+      if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
+      if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
+      if ($(_upDrag.c.vx)) $(_upDrag.c.vx).textContent = Math.round(nx);
+      if ($(_upDrag.c.vy)) $(_upDrag.c.vy).textContent = Math.round(ny);
+    });
+    window.addEventListener('touchmove', function(e){
+      if (!_upDrag) return;
+      const p = pt(e);
+      const nx = Math.max(0, Math.min(90, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
+      const ny = Math.max(0, Math.min(90, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
+      _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
+      if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
+      if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
+      e.preventDefault();
+    }, { passive:false });
+    window.addEventListener('mouseup', function(){ if (_upDrag){ _upDrag.el.style.cursor='grab'; _upDrag=null; } });
+    window.addEventListener('touchend', function(){ _upDrag=null; });
   }
 }
+
 function saveUpcoming() {
   write('hh_upcoming', {
     active: $('up-active').checked,
@@ -1812,13 +1926,20 @@ function saveUpcoming() {
     label: $('up-label').value.trim(),
     labelColor: $('up-label-color')?.value || '#f5c518',
     labelFs: parseInt($('up-label-fs')?.value || '11', 10),
+    labelX: parseInt($('up-label-x')?.value || '6', 10),
+    labelY: parseInt($('up-label-y')?.value || '40', 10),
     title: $('up-title').value.trim(),
     titleColor: $('up-title-color')?.value || '#ffffff',
     titleFs: parseInt($('up-title-fs')?.value || '22', 10),
     titleWeight: $('up-title-weight')?.value || '900',
+    titleX: parseInt($('up-title-x')?.value || '6', 10),
+    titleY: parseInt($('up-title-y')?.value || '55', 10),
     desc: $('up-desc').value.trim(),
     descColor: $('up-desc-color')?.value || '#cccccc',
     descFs: parseInt($('up-desc-fs')?.value || '13', 10),
+    descX: parseInt($('up-desc-x')?.value || '6', 10),
+    descY: parseInt($('up-desc-y')?.value || '72', 10),
+    frameH: parseInt($('up-frame-h')?.value || '160', 10),
     image: $('up-image').value.trim()
   });
   updateUpcomingPreview();
@@ -1884,10 +2005,13 @@ function renderContentHtml(raw) {
   let html = String(raw)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   // [img]url[/img]
-  html = html.replace(/\[img\]([\s\S]*?)\[\/img\]/gi, function(_, url) {
-    url = url.trim().replace(/&amp;/g, '&');
+  html = html.replace(/\[img(?:\s+size=(sm|md|lg|full))?\]([\s\S]*?)\[\/img\]/gi, function(_, size, url) {
+    url = (url||'').trim().replace(/&amp;/g, '&');
     if (!url) return '';
-    return '<div style="margin:10px 0;"><img src="' + url.replace(/"/g, '&quot;') + '" alt="" style="max-width:100%;border-radius:10px;display:block;max-height:280px;object-fit:contain;background:#111;border:1px solid #333;"></div>';
+    size = size || 'md';
+    var maxH = { sm:'140px', md:'240px', lg:'360px', full:'none' }[size] || '240px';
+    var maxW = size === 'sm' ? '50%' : (size === 'md' ? '80%' : '100%');
+    return '<div style="margin:12px 0;"><img src="' + url.replace(/"/g, '&quot;') + '" alt="" style="max-width:' + maxW + ';width:100%;border-radius:10px;display:block;max-height:' + maxH + ';object-fit:contain;background:#111;"></div>';
   });
   // simple headings: lines starting with # 
   html = html.replace(/^###\s+(.+)$/gm, '<h4 class="text-base font-bold text-white mt-3">$1</h4>');
