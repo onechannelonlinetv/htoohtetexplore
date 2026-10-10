@@ -172,7 +172,7 @@
   body.mode-light .card-bg { background: #ffffff; border-color: #e2e8f0 !important; }
   body.mode-light header { background: rgba(255,255,255,.96); border-bottom-color: #e2e8f0; }
   body.mode-light footer { border-top-color: #e2e8f0; }
-  body.mode-light .text-white:not(#hero-section *):not(#sponsor-container *):not(#upcoming-banner *):not(#youtube-section *):not(#article-modal *) { color: #0f172a !important; }
+  body.mode-light .text-white:not(#hero-section *):not(#sponsor-container *):not(#upcoming-banner *):not(#youtube-section *):not(#article-page *) { color: #0f172a !important; }
   body.mode-light .text-emerald-100\/90,
   body.mode-light .text-emerald-100\/70,
   body.mode-light .text-emerald-100\/75 { color: #475569 !important; }
@@ -191,7 +191,9 @@
   body.mode-light #sponsor-container .text-white,
   body.mode-light #upcoming-banner .text-white,
   body.mode-light #youtube-section .text-white,
-  body.mode-light #article-modal .text-white { color: #ffffff !important; }
+  body.mode-light #article-page .text-white { color: #ffffff !important; }
+  #article-body img { cursor: zoom-in; border-radius: 12px; }
+  #article-body img:hover { opacity: 0.95; }
 
   /* Custom typography from admin — win over Tailwind on mobile */
   #hero-label, #hero-title, #hero-desc, #hero-sign,
@@ -463,30 +465,44 @@
 </footer>
 
 <!-- ARTICLE MODAL -->
-<div id="article-modal" class="fixed inset-0 z-[60] hidden">
-  <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeArticle()"></div>
-  <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
-    <div class="surface-bg rounded-t-2xl sm:rounded-2xl w-full sm:max-w-3xl max-h-[96vh] overflow-y-auto shadow-2xl border border-emerald-800/40">
-      <div class="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 border-b border-emerald-800/40" style="background:rgba(6,21,16,.95);backdrop-filter:blur(8px)">
-        <button type="button" onclick="closeArticle()" class="w-9 h-9 rounded-full bg-emerald-900/60 text-emerald-100 flex items-center justify-center hover:bg-emerald-800"><i class="fa-solid fa-arrow-left"></i></button>
-        <span class="text-sm font-bold text-emerald-100 truncate flex-1">ဆောင်းပါး</span>
-        <button type="button" onclick="closeArticle()" class="w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/70"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="relative">
-        <img id="article-image" src="" alt="" class="w-full h-52 sm:h-64 object-cover cursor-zoom-in" onclick="openLightboxFromArticle(this)" title="နှိပ်ပြီး ချဲ့ကြည့်">
-      </div>
-      <div class="p-5 sm:p-7">
-        <p id="article-location" class="text-xs font-bold text-emerald-400 uppercase tracking-wide"></p>
-        <h2 id="article-title" class="text-2xl sm:text-3xl font-black text-white mt-1 leading-snug"></h2>
-        <div id="article-body" class="mt-5 text-[15px] sm:text-base text-emerald-50/85 leading-relaxed article-prose"></div>
-        <div class="mt-6 pt-4 border-t border-emerald-800/40">
-          <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-2">Related Stories</p>
-          <div id="related-stories" class="space-y-2"></div>
-        </div>
-      </div>
+<!-- FULL PAGE ARTICLE (replaces modal popup) -->
+<section id="article-page" class="hidden min-h-screen">
+  <div class="sticky top-0 z-40 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
+      <button type="button" onclick="closeArticle()" class="w-10 h-10 rounded-full bg-emerald-900/50 text-emerald-100 flex items-center justify-center hover:bg-emerald-800 transition shrink-0" aria-label="Back">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <span class="text-sm font-bold text-emerald-100/90 truncate">ဆောင်းပါး</span>
     </div>
   </div>
-</div>
+
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 pb-16">
+    <!-- Cover -->
+    <div class="relative -mx-4 sm:mx-0 sm:rounded-2xl overflow-hidden mt-0 sm:mt-6 mb-6 border-0 sm:border border-emerald-800/40">
+      <img id="article-image" src="" alt="" class="w-full h-56 sm:h-72 object-cover cursor-zoom-in" onclick="openLightboxFromArticle(this)" title="နှိပ်ပြီး ချဲ့ကြည့်">
+    </div>
+
+    <p id="article-location" class="text-xs font-bold text-emerald-400 uppercase tracking-wide"></p>
+    <h1 id="article-title" class="text-2xl sm:text-3xl lg:text-4xl font-black text-white mt-2 leading-snug"></h1>
+    <p id="article-meta" class="mt-2 text-sm text-emerald-400/60"></p>
+
+    <div id="article-body" class="mt-6 text-[15px] sm:text-base text-emerald-50/90 leading-[1.8] article-prose"></div>
+
+    <!-- Related posts -->
+    <div class="mt-12 pt-8 border-t border-emerald-800/50">
+      <h2 class="text-lg font-black text-white flex items-center gap-2 mb-5">
+        <span class="w-1 h-5 rounded-full accent-bg"></span>Related Stories
+      </h2>
+      <div id="related-stories" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+    </div>
+
+    <div class="mt-10 text-center">
+      <button type="button" onclick="closeArticle()" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full transition">
+        <i class="fa-solid fa-arrow-left text-xs"></i> ပြန်သွားမယ်
+      </button>
+    </div>
+  </article>
+</section>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -832,6 +848,7 @@ function loadBlogData() {
 
   renderStoryCards();
   renderExtraHomeSections();
+  tryOpenArticleFromHash();
 }
 
 function formatDate(ts) {
@@ -1013,26 +1030,69 @@ document.addEventListener('keydown', function(e) {
 function openArticle(index) {
   const post = allStoryPosts[index];
   if (!post) return;
+  try { closeLightbox(); } catch (e) {}
+  closeMenu();
+
   $('article-image').src = post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000';
   $('article-title').textContent = post.title || 'Travel Story';
-  $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ');
+  $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ').toUpperCase();
+  const meta = $('article-meta');
+  if (meta) {
+    const parts = [];
+    if (post.author) parts.push(post.author);
+    const d = formatDate(post.publishedDate) || formatDate(post.id);
+    if (d) parts.push(d);
+    meta.textContent = parts.join(' · ');
+  }
   let body = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
   $('article-body').innerHTML = formatArticleBody(body);
-  const related = allStoryPosts.filter((_, i) => i !== index).slice(0, 3);
-  $('related-stories').innerHTML = related.length
-    ? related.map(p => `<button onclick="openArticle(${allStoryPosts.indexOf(p)})" class="w-full text-left flex gap-3 rounded-xl border border-emerald-800/40 p-2 hover:bg-emerald-900/40 transition">
-        <img src="${safe(p.img || '')}" class="w-16 h-12 object-cover rounded-lg shrink-0" alt="" onerror="this.style.display='none'">
-        <span class="text-sm font-semibold text-emerald-100 self-center line-clamp-2">${safe(p.title)}</span>
-      </button>`).join('')
-    : '<p class="text-sm text-emerald-500/50">ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။</p>';
+
+  // Related: same category first, then others — up to 3
+  const sameCat = allStoryPosts.filter((p, i) => i !== index && (p.category || p.type) && (p.category || p.type) === (post.category || post.type));
+  const others = allStoryPosts.filter((p, i) => i !== index && sameCat.indexOf(p) === -1);
+  const related = sameCat.concat(others).slice(0, 3);
+  const relBox = $('related-stories');
+  if (relBox) {
+    relBox.innerHTML = related.length
+      ? related.map(p => {
+          const idx = allStoryPosts.indexOf(p);
+          return `<button type="button" onclick="openArticle(${idx})" class="card-hover text-left card-bg rounded-xl overflow-hidden border border-emerald-800/40 group">
+            <div class="relative h-28 overflow-hidden bg-emerald-950">
+              <img loading="lazy" src="${safe(p.img || '')}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.style.display='none'">
+            </div>
+            <div class="p-3">
+              <p class="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wide">${safe(p.location || p.category || '')}</p>
+              <h3 class="text-sm font-bold text-white leading-snug line-clamp-2 mt-0.5 group-hover:text-emerald-300 transition">${safe(p.title)}</h3>
+            </div>
+          </button>`;
+        }).join('')
+      : '<p class="col-span-full text-sm text-emerald-500/50">ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။</p>';
+  }
+
   bindArticleImageZoom();
-  $('article-modal').classList.remove('hidden');
-  document.body.classList.add('overflow-hidden');
+
+  // Full page: hide home, show article
+  const home = $('home');
+  if (home) home.classList.add('hidden');
+  const page = $('article-page');
+  if (page) page.classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try {
+    history.pushState({ article: index }, '', '#article/' + (post.slug || index));
+  } catch (e) {}
 }
 function closeArticle() {
   try { closeLightbox(); } catch (e) {}
-  $('article-modal').classList.add('hidden');
-  document.body.classList.remove('overflow-hidden');
+  const page = $('article-page');
+  if (page) page.classList.add('hidden');
+  const home = $('home');
+  if (home) home.classList.remove('hidden');
+  try {
+    if (location.hash.indexOf('#article') === 0) history.pushState(null, '', location.pathname + location.search);
+  } catch (e) {}
+  // stay near stories if possible
+  const stories = $('stories');
+  if (stories) stories.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function renderExtraHomeSections() {
@@ -1097,12 +1157,37 @@ try {
   }, err => { console.error(err); loadBlogData(); });
 } catch (e) { console.error(e); }
 
+function tryOpenArticleFromHash() {
+  const h = location.hash || '';
+  if (h.indexOf('#article/') !== 0) return;
+  const key = decodeURIComponent(h.slice('#article/'.length));
+  if (!allStoryPosts.length) return;
+  let idx = allStoryPosts.findIndex(p => String(p.slug) === key || String(p.id) === key);
+  if (idx < 0 && /^\d+$/.test(key)) idx = parseInt(key, 10);
+  if (idx >= 0 && idx < allStoryPosts.length) openArticle(idx);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   $('story-category-filter')?.addEventListener('change', renderStoryCards);
   if (!publicFirebaseReady) loadBlogData();
+  // If hash already present after data loads
+  setTimeout(tryOpenArticleFromHash, 400);
+});
+window.addEventListener('popstate', function() {
+  if (location.hash.indexOf('#article/') === 0) tryOpenArticleFromHash();
+  else closeArticle();
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeMenu(); closeArticle(); searchPanel.classList.remove('open'); }
+  if (e.key === 'Escape') {
+    const lb = $('img-lightbox');
+    if (lb && !lb.classList.contains('hidden') && lb.style.display !== 'none') {
+      closeLightbox();
+      return;
+    }
+    closeMenu();
+    closeArticle();
+    searchPanel.classList.remove('open');
+  }
 });
 </script>
 
