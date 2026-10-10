@@ -987,6 +987,12 @@ function togglePasswordVisibility() {
 }
 
 /* ---- Image Upload to Firebase Storage ---- */
+function withTimeout(promise, ms) {
+  return new Promise(function(resolve, reject) {
+    var t = setTimeout(function() { reject(new Error('timeout')); }, ms);
+    Promise.resolve(promise).then(function(v) { clearTimeout(t); resolve(v); }, function(e) { clearTimeout(t); reject(e); });
+  });
+}
 function insertHeading(prefix) {
   const ta = $('admin-post-content');
   if (!ta) return;
@@ -1007,19 +1013,18 @@ function insertHeading(prefix) {
 async function insertImageInContent(inputEl) {
   const file = inputEl.files && inputEl.files[0];
   if (!file) return;
-  if (!file.type.startsWith('image/')) return toast('Image ဖိုင်သာ။');
-  toast('စာထဲ ပုံ ပြင်ဆင်နေသည်…');
+  if (!file.type.startsWith('image/')) { inputEl.value = ''; return toast('Image ဖိုင်သာ။'); }
+  toast('ပုံ ထည့်နေသည်…');
   try {
     let blob = file;
-    try { blob = await compressImageFile(file, 1000, 0.75); } catch (e) {}
-    let url = null;
-    if (adminUser && adminStorage) {
+    try { blob = await withTimeout(compressImageFile(file, 900, 0.62), 8000); } catch (e) { blob = file; }
+    let url = await fileToDataURL(blob);
+    if (url.length > 650000) {
       try {
-        const snap = await adminStorage.ref('uploads/content_' + Date.now() + '.jpg').put(blob, { contentType: 'image/jpeg' });
-        url = await snap.ref.getDownloadURL();
-      } catch (err) { console.warn(err); }
+        blob = await compressImageFile(file, 640, 0.48);
+        url = await fileToDataURL(blob);
+      } catch (e) {}
     }
-    if (!url) url = await fileToDataURL(blob);
     const ta = $('admin-post-content');
     if (!ta) return;
     const sz = ($('content-img-size') && $('content-img-size').value) || 'md';
@@ -1028,7 +1033,19 @@ async function insertImageInContent(inputEl) {
     ta.value = ta.value.slice(0, pos) + tag + ta.value.slice(pos);
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
-    toast('စာထဲ ပုံ ထည့်ပြီး — Preview ကြည့်ပါ');
+    toast('ပုံ Preview ထဲ ပေါ်ပါပြီ');
+    if (adminUser && adminStorage) {
+      const dataUrl = url;
+      withTimeout(
+        adminStorage.ref('uploads/content_' + Date.now() + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
+        5000
+      ).then(function(httpsUrl) {
+        if (!httpsUrl || ta.value.indexOf(dataUrl) === -1) return;
+        ta.value = ta.value.split(dataUrl).join(httpsUrl);
+        if (typeof updateContentPreview === 'function') updateContentPreview();
+        toast('ပုံ Firebase သိမ်းပြီး');
+      }).catch(function() {});
+    }
   } catch (err) {
     toast('ပုံ မထည့်နိုင်: ' + (err.message || ''));
   }
@@ -1157,32 +1174,32 @@ async function uploadImage(inputEl, targetInputId) {
     let blob = file;
     try { blob = await compressImageFile(file, 1200, 0.78); } catch (e) { console.warn(e); }
 
-    let finalUrl = null;
-    if (adminUser && adminStorage) {
-      try {
-        const ref = adminStorage.ref('uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg');
-        const snap = await ref.put(blob, { contentType: 'image/jpeg' });
-        finalUrl = await snap.ref.getDownloadURL();
-        toast('Firebase Storage သိမ်းပြီး ✓');
-      } catch (err) {
-        console.warn('Storage fail', err);
-      }
-    }
-    if (!finalUrl) {
-      finalUrl = await fileToDataURL(blob);
-      toast('ပုံ အဆင်သင့် — Save နှိပ်ပါ');
-    }
-
-    try { URL.revokeObjectURL(localUrl); } catch (e) {}
-
-    setImagePreview(previewBox, finalUrl, '✓ သိမ်းရန် အဆင်သင့်');
+    let finalUrl = await fileToDataURL(blob);
+    setImagePreview(previewBox, finalUrl, '✓ Preview အဆင်သင့်');
     if (target) {
-      target.value = finalUrl; // never blob:
+      target.value = finalUrl;
       try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
       try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
     }
     refreshLivePreviewFor(targetInputId);
-    setTimeout(function(){ refreshLivePreviewFor(targetInputId); }, 100);
+    toast('ပုံ Preview မှာ ပေါ်ပါပြီ — Save နှိပ်ပါ');
+
+    if (adminUser && adminStorage) {
+      const dataUrl = finalUrl;
+      withTimeout(
+        adminStorage.ref('uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
+        5000
+      ).then(function(httpsUrl) {
+        if (!httpsUrl || !target || target.value !== dataUrl) return;
+        target.value = httpsUrl;
+        setImagePreview(previewBox, httpsUrl, 'Firebase ✓');
+        try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+        refreshLivePreviewFor(targetInputId);
+        toast('Firebase Storage သိမ်းပြီး ✓');
+      }).catch(function() {});
+    }
+
+    try { URL.revokeObjectURL(localUrl); } catch (e) {}
   } catch (err) {
     console.error(err);
     toast('Upload မအောင်မြင်: ' + (err.message || err.code || 'error'));
@@ -2044,11 +2061,11 @@ function renderContentHtml(raw) {
       continue;
     }
     if (/^###\s+/.test(line)) {
-      out.push('<h4 style="font-size:15px;font-weight:700;color:#fff;margin:12px 0 4px;">' + line.replace(/^###\s+/, '').replace(/</g,'&lt;') + '</h4>');
+      out.push('<h4 style="font-size:16px;font-weight:800;color:#fff;margin:14px 0 6px;padding:4px 8px;border-left:3px solid #f5c518;background:#111827;">' + line.replace(/^###\s+/, '').replace(/</g,'<') + '</h4>');
     } else if (/^##\s+/.test(line)) {
-      out.push('<h3 style="font-size:18px;font-weight:800;color:#fff;margin:14px 0 4px;">' + line.replace(/^##\s+/, '').replace(/</g,'&lt;') + '</h3>');
+      out.push('<h3 style="font-size:20px;font-weight:900;color:#fff;margin:16px 0 6px;padding:6px 10px;border-left:4px solid #34d399;background:#052e22;">' + line.replace(/^##\s+/, '').replace(/</g,'<') + '</h3>');
     } else if (/^#\s+/.test(line)) {
-      out.push('<h2 style="font-size:22px;font-weight:900;color:#6ee7b7;margin:16px 0 6px;border-bottom:1px solid #1c3a2e;padding-bottom:4px;">' + line.replace(/^#\s+/, '').replace(/</g,'&lt;') + '</h2>');
+      out.push('<h2 style="font-size:26px;font-weight:900;color:#6ee7b7;margin:18px 0 8px;padding:8px 10px;border-bottom:2px solid #10b981;background:#022c22;">' + line.replace(/^#\s+/, '').replace(/</g,'<') + '</h2>');
     } else if (line.trim() === '') {
       out.push('<div style="height:8px"></div>');
     } else {
