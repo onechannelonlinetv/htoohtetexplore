@@ -37,6 +37,13 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 .upload-zone:hover{border-color:#10b981;background:#0d1a28}
 .upload-zone.dragging{border-color:#10b981;background:#0f2a22}
 .preview-thumb{max-height:80px;max-width:120px;border-radius:8px;object-fit:cover}
+
+.live-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none!important}
+#sponsor-live-preview,#hero-live-preview,#up-live-preview,#yt-live-preview{position:relative!important;overflow:hidden}
+#hero-live-preview [id^="hero-prev-"]{z-index:10}
+#content-live-preview img{max-width:100%;border-radius:10px;display:block;margin:8px 0}
+#sp-prev-logo{width:100%!important;height:100%!important;object-fit:contain!important}
+.preview-thumb{max-height:140px!important;max-width:240px!important;object-fit:contain!important;display:block!important}
 </style>
 </head>
 <body class="min-h-screen">
@@ -726,7 +733,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                 <label class="btn btn-muted cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>စာထဲ ပုံ Upload ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
                 <span class="tiny self-center">Upload ပြီး [img]url[/img] အလိုအလျောက် ထည့်ပေးမယ်</span>
               </div>
-              <textarea id="admin-post-content" class="field min-h-32" placeholder="ခေါင်းစဉ် / စာသား ရေးပါ&#10;&#10;ပုံထည့်ရန် အပေါ်က Upload ခလုတ် သုံးပါ&#10;[img]...[/img]" oninput="updateContentPreview()"></textarea>
+              <textarea id="admin-post-content" class="field min-h-32" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="ခေါင်းစဉ် / စာသား ရေးပါ&#10;&#10;ပုံထည့်ရန် အပေါ်က Upload ခလုတ် သုံးပါ&#10;[img]...[/img]" oninput="updateContentPreview()"></textarea>
               <div class="mt-3 rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3">
                 <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Article Content</span>
                 <div id="content-live-preview" class="mt-2 prose prose-invert max-w-none text-sm text-slate-200 space-y-3 min-h-[60px]"></div>
@@ -1020,8 +1027,52 @@ function fileToDataURL(file) {
 }
 function setImagePreview(previewBox, url, msg) {
   if (!previewBox) return;
-  previewBox.innerHTML = '<img src="' + url.replace(/"/g, '&quot;') + '" class="preview-thumb border border-slate-600" alt="preview" style="max-height:120px;max-width:100%;object-fit:contain;border-radius:8px;">' +
-    (msg ? '<span class="tiny ml-2 text-emerald-300">' + msg + '</span>' : '');
+  previewBox.innerHTML = '<img src="' + String(url).replace(/"/g, '&quot;') + '" class="preview-thumb border border-slate-600" alt="preview" style="max-height:120px;max-width:220px;object-fit:contain;border-radius:8px;display:block;">' +
+    (msg ? '<div class="tiny mt-1 text-emerald-300">' + msg + '</div>' : '');
+}
+/** Put image into a live-preview container as real <img> (works with data-URL + http) */
+function applyLiveBg(container, url) {
+  if (!container) return;
+  let img = container.querySelector(':scope > .live-bg-img');
+  if (!img) {
+    img = document.createElement('img');
+    img.className = 'live-bg-img';
+    img.alt = '';
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;';
+    container.style.position = 'relative';
+    container.insertBefore(img, container.firstChild);
+  }
+  if (url) {
+    img.src = url;
+    img.style.display = 'block';
+    container.style.backgroundImage = 'none';
+  } else {
+    img.removeAttribute('src');
+    img.style.display = 'none';
+  }
+}
+function applyLiveLogo(imgEl, iconEl, url) {
+  if (!imgEl) return;
+  if (url) {
+    imgEl.src = url;
+    imgEl.classList.remove('hidden');
+    imgEl.style.cssText = (imgEl.style.cssText || '') + ';display:block!important;width:100%;height:100%;object-fit:contain;';
+    if (iconEl) { iconEl.classList.add('hidden'); iconEl.style.display = 'none'; }
+  } else {
+    imgEl.removeAttribute('src');
+    imgEl.classList.add('hidden');
+    imgEl.style.display = 'none';
+    if (iconEl) { iconEl.classList.remove('hidden'); iconEl.style.display = ''; }
+  }
+}
+function refreshLivePreviewFor(inputId) {
+  try {
+    if (inputId === 'hero-image' && typeof updateHeroPreview === 'function') updateHeroPreview();
+    if ((inputId === 'admin-sponsor-img' || inputId === 'admin-sponsor-bg') && typeof updateSponsorPreview === 'function') updateSponsorPreview();
+    if (inputId === 'up-image' && typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
+    if ((inputId === 'yt-thumb' || inputId === 'yt-bg') && typeof updateYoutubePreview === 'function') updateYoutubePreview();
+    if (inputId === 'admin-post-img' && typeof updatePostPreview === 'function') updatePostPreview();
+  } catch (e) { console.warn(e); }
 }
 async function uploadImage(inputEl, targetInputId) {
   const file = inputEl.files && inputEl.files[0];
@@ -1071,15 +1122,13 @@ async function uploadImage(inputEl, targetInputId) {
     }
     if (target) {
       target.value = finalUrl;
-      target.dispatchEvent(new Event('input', { bubbles: true }));
-      target.dispatchEvent(new Event('change', { bubbles: true }));
+      try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
+      try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch(e) {}
     }
-    // trigger section previews
-    if (typeof updateHeroPreview === 'function' && targetInputId === 'hero-image') updateHeroPreview();
-    if (typeof updateSponsorPreview === 'function' && (targetInputId === 'admin-sponsor-img' || targetInputId === 'admin-sponsor-bg')) updateSponsorPreview();
-    if (typeof updateUpcomingPreview === 'function' && targetInputId === 'up-image') updateUpcomingPreview();
-    if (typeof updateYoutubePreview === 'function' && (targetInputId === 'yt-thumb' || targetInputId === 'yt-bg')) updateYoutubePreview();
-    if (typeof updatePostPreview === 'function' && targetInputId === 'admin-post-img') updatePostPreview();
+    // Force live preview boxes to refresh (images must appear here too)
+    refreshLivePreviewFor(targetInputId);
+    setTimeout(function(){ refreshLivePreviewFor(targetInputId); }, 50);
+    setTimeout(function(){ refreshLivePreviewFor(targetInputId); }, 300);
   } catch (err) {
     console.error(err);
     toast('Upload မအောင်မြင်ပါ: ' + (err.message || err.code || 'error'));
@@ -1493,10 +1542,10 @@ function updateHeroPreview() {
     sign.style.left = sx + '%'; sign.style.top = sy + '%';
     sign.style.display = (sign.textContent ? '' : 'none');
   }
-  const img = $('hero-image')?.value.trim();
+  const img = ($('hero-image')?.value || '').trim();
   if (box) {
-    if (img) { box.style.backgroundImage = "url('" + img.replace(/'/g, "%27") + "')"; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
-    else box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
+    applyLiveBg(box, img);
+    if (!img) box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
   }
   initHeroLineDrag();
 }
@@ -1662,28 +1711,11 @@ function updateSponsorPreview() {
     if ($('val-sp-desc-fs')) $('val-sp-desc-fs').textContent = dfs + 'px';
   }
   const imgUrl = ($('admin-sponsor-img')?.value || '').trim();
-  if (logo) {
-    if (imgUrl) {
-      logo.src = imgUrl;
-      logo.classList.remove('hidden');
-      logo.style.display = 'block';
-      if (logoIcon) { logoIcon.classList.add('hidden'); logoIcon.style.display = 'none'; }
-    } else {
-      logo.removeAttribute('src');
-      logo.classList.add('hidden');
-      logo.style.display = 'none';
-      if (logoIcon) { logoIcon.classList.remove('hidden'); logoIcon.style.display = ''; }
-    }
-  }
+  applyLiveLogo(logo, logoIcon, imgUrl);
   const bgUrl = ($('admin-sponsor-bg')?.value || '').trim();
   if (box) {
-    if (bgUrl) {
-      box.style.backgroundImage = "url('" + bgUrl.replace(/'/g, "%27") + "')";
-      box.style.backgroundSize = 'cover';
-      box.style.backgroundPosition = 'center';
-    } else {
-      box.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
-    }
+    applyLiveBg(box, bgUrl);
+    if (!bgUrl) box.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
   }
   const h = $('admin-sponsor-height-local')?.value || $('set-sponsor-height')?.value || 180;
   if ($('val-sp-h-local')) $('val-sp-h-local').textContent = h + 'px';
@@ -1749,11 +1781,11 @@ function updateUpcomingPreview() {
     const dfs = $('up-desc-fs')?.value || 13;
     $('up-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
   }
-  const img = $('up-image')?.value.trim();
+  const img = ($('up-image')?.value || '').trim();
   const box = $('up-live-preview');
   if (box) {
-    if (img) { box.style.backgroundImage = 'url(' + img + ')'; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
-    else box.style.backgroundImage = 'linear-gradient(90deg,#1a1a1a,#333)';
+    applyLiveBg(box, img);
+    if (!img) box.style.backgroundImage = 'linear-gradient(90deg,#1a1a1a,#333)';
   }
 }
 function saveUpcoming() {
@@ -1784,9 +1816,11 @@ function updateYoutubePreview() {
     $('yt-prev-title').style.fontWeight = $('yt-title-weight')?.value || '900';
   }
   if ($('yt-prev-desc')) $('yt-prev-desc').textContent = $('yt-desc')?.value || 'Description';
-  const bg = $('yt-bg')?.value.trim();
+  const bg = ($('yt-bg')?.value || '').trim();
   const box = $('yt-live-preview');
-  if (box && bg) { box.style.backgroundImage = 'url(' + bg + ')'; box.style.backgroundSize = 'cover'; }
+  if (box) applyLiveBg(box, bg);
+  const thumb = ($('yt-thumb')?.value || '').trim();
+  // optional small thumb indicator in preview
 }
 function saveYoutube() {
   write('hh_youtube', {
@@ -1834,9 +1868,10 @@ function renderContentHtml(raw) {
   let html = String(raw)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   // [img]url[/img]
-  html = html.replace(/\[img\](.*?)\[\/img\]/gi, function(_, url) {
+  html = html.replace(/\[img\]([\s\S]*?)\[\/img\]/gi, function(_, url) {
     url = url.trim().replace(/&amp;/g, '&');
-    return '<img src="' + url.replace(/"/g, '&quot;') + '" alt="" style="max-width:100%;border-radius:10px;margin:8px 0;display:block;max-height:280px;object-fit:contain;background:#0a0a0a;">';
+    if (!url) return '';
+    return '<div style="margin:10px 0;"><img src="' + url.replace(/"/g, '&quot;') + '" alt="" style="max-width:100%;border-radius:10px;display:block;max-height:280px;object-fit:contain;background:#111;border:1px solid #333;"></div>';
   });
   // simple headings: lines starting with # 
   html = html.replace(/^###\s+(.+)$/gm, '<h4 class="text-base font-bold text-white mt-3">$1</h4>');
@@ -1864,10 +1899,8 @@ function updatePostPreview() {
   if ($('post-prev-desc')) $('post-prev-desc').textContent = desc;
   if ($('post-prev-meta')) $('post-prev-meta').textContent = loc + ' · ' + cat;
   const pi = $('post-prev-img'), icon = $('post-prev-img-icon');
-  if (pi) {
-    if (img) { pi.src = img; pi.classList.remove('hidden'); if (icon) icon.classList.add('hidden'); }
-    else { pi.classList.add('hidden'); if (icon) icon.classList.remove('hidden'); }
-  }
+  applyLiveLogo(pi, icon, img);
+  if (typeof updateContentPreview === 'function') updateContentPreview();
 }
 function updateProudPreview() {
   const bar = $('proud-preview-bar');
