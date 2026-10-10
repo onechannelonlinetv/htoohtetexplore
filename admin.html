@@ -338,14 +338,13 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero</span>
-            <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 select-none" style="height:180px; background:linear-gradient(135deg,#0a1f18,#061510);">
+            <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 select-none" style="height:200px; background:linear-gradient(135deg,#0a1f18,#061510);">
               <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none"></div>
-              <div id="hero-prev-text" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded p-2" style="left:8%; top:35%; max-width:70%; touch-action:none;">
-                <div id="hero-prev-label" class="font-bold uppercase tracking-widest mb-1" style="color:#f5c518; font-size:10px;">Travel Journal</div>
-                <div id="hero-prev-title" class="font-black leading-tight text-white" style="font-size:16px;">New Places.</div>
-                <div id="hero-prev-desc" class="mt-1 line-clamp-2" style="color:rgba(255,255,255,0.7); font-size:11px;">Description…</div>
-                <div id="hero-prev-sign" class="mt-1 text-[10px]" style="color:#6ee7b7;"></div>
-              </div>
+              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">စာတစ်ကြောင်းချင်း ဖိဆွဲပါ</p>
+              <div id="hero-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%; top:18%; color:#f5c518; font-size:10px; touch-action:none; max-width:80%;">Travel Journal</div>
+              <div id="hero-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%; top:32%; font-size:16px; touch-action:none; max-width:85%;">New Places.</div>
+              <div id="hero-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1.5 py-0.5 line-clamp-3" style="left:8%; top:55%; color:rgba(255,255,255,0.75); font-size:11px; touch-action:none; max-width:80%;">Description…</div>
+              <div id="hero-prev-sign" class="absolute z-10 cursor-move border border-dashed border-emerald-400/30 rounded px-1.5 py-0.5 text-[10px]" style="left:8%; top:78%; color:#6ee7b7; touch-action:none;"></div>
             </div>
           </div>
 
@@ -359,16 +358,19 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <div id="hero-image-preview" class="mt-2"></div>
             </div>
             <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
-              <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Preview ထဲက စာကို ဖိပြီး နေရာရွှေ့နိုင်ပါတယ် (Drag)</p>
-              <p class="tiny">စာပုံးကို preview ထဲမှာ ဖိဆွဲ → X/Y ရာခိုင်နှုန်း သိမ်းမယ်</p>
-              <div class="grid grid-cols-2 gap-2 mt-2">
-                <div><label class="label">Text X % <span id="val-hero-x" class="range-val">8</span></label>
-                  <input type="range" id="hero-text-x" min="0" max="80" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()">
-                </div>
-                <div><label class="label">Text Y % <span id="val-hero-y" class="range-val">35</span></label>
-                  <input type="range" id="hero-text-y" min="0" max="80" value="35" class="w-full accent-sky-500" oninput="updateHeroPreview()">
-                </div>
+              <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Label / Title / Desc / Sign — တစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
+              <p class="tiny">နေရာရွှေ့ပြီး Save Hero နှိပ်ပါ။ Slider နဲ့လည်း ချိန်နိုင်ပါတယ်။</p>
+              <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
+                <div>Label X <input type="range" id="hero-label-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hlx">8</span>%</div>
+                <div>Label Y <input type="range" id="hero-label-y" min="0" max="90" value="18" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hly">18</span>%</div>
+                <div>Title X <input type="range" id="hero-title-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-htx">8</span>%</div>
+                <div>Title Y <input type="range" id="hero-title-y" min="0" max="90" value="32" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hty">32</span>%</div>
+                <div>Desc X <input type="range" id="hero-desc-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdx">8</span>%</div>
+                <div>Desc Y <input type="range" id="hero-desc-y" min="0" max="90" value="55" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdy">55</span>%</div>
+                <div>Sign X <input type="range" id="hero-sign-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsx">8</span>%</div>
+                <div>Sign Y <input type="range" id="hero-sign-y" min="0" max="90" value="78" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsy">78</span>%</div>
               </div>
+              <input type="hidden" id="hero-text-x" value="8"><input type="hidden" id="hero-text-y" value="35">
             </div>
             <div>
               <label class="label">Small Label</label>
@@ -971,39 +973,98 @@ async function insertImageInContent(inputEl) {
   } catch (err) { toast('Upload မအောင်မြင်: ' + (err.message || '')); }
   inputEl.value = '';
 }
+function compressImageFile(file, maxW, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let w = img.width, h = img.height;
+      const max = maxW || 1600;
+      if (w > max) { h = Math.round(h * max / w); w = max; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => {
+        if (!blob) return reject(new Error('compress failed'));
+        resolve(blob);
+      }, 'image/jpeg', quality || 0.82);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+    img.src = url;
+  });
+}
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+function setImagePreview(previewBox, url, msg) {
+  if (!previewBox) return;
+  previewBox.innerHTML = '<img src="' + url.replace(/"/g, '&quot;') + '" class="preview-thumb border border-slate-600" alt="preview" style="max-height:120px;max-width:100%;object-fit:contain;border-radius:8px;">' +
+    (msg ? '<span class="tiny ml-2 text-emerald-300">' + msg + '</span>' : '');
+}
 async function uploadImage(inputEl, targetInputId) {
   const file = inputEl.files && inputEl.files[0];
   if (!file) return;
   if (!file.type.startsWith('image/')) {
     toast('Image ဖိုင်သာ ရွေးပါ။');
+    inputEl.value = '';
     return;
   }
-  if (file.size > 8 * 1024 * 1024) {
-    toast('ဖိုင်အရွယ် 8MB အောက် ထားပါ။');
-    return;
-  }
-  if (!adminUser || !adminStorage) {
-    toast('Login ဝင်ပြီးမှ Upload လုပ်ပါ။');
+  if (file.size > 12 * 1024 * 1024) {
+    toast('ဖိုင်အရွယ် 12MB အောက် ထားပါ။');
+    inputEl.value = '';
     return;
   }
   const target = $(targetInputId);
-  const previewId = targetInputId + '-preview';
-  const previewBox = $(previewId);
-  toast('Upload လုပ်နေသည်…');
+  const previewBox = $(targetInputId + '-preview');
+  toast('ပုံ ပြင်ဆင်နေသည်…');
   try {
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-    const path = 'uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-    const ref = adminStorage.ref(path);
-    const snapshot = await ref.put(file, { contentType: file.type });
-    const url = await snapshot.ref.getDownloadURL();
+    // Always show local preview first
+    const localUrl = URL.createObjectURL(file);
+    setImagePreview(previewBox, localUrl, 'Preview…');
+
+    let blob = file;
+    try { blob = await compressImageFile(file, 1600, 0.82); } catch (e) { console.warn('compress', e); }
+
+    let finalUrl = null;
+    // Try Firebase Storage if logged in
+    if (adminUser && adminStorage) {
+      try {
+        const path = 'uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg';
+        const ref = adminStorage.ref(path);
+        const snapshot = await ref.put(blob, { contentType: 'image/jpeg' });
+        finalUrl = await snapshot.ref.getDownloadURL();
+        setImagePreview(previewBox, finalUrl, 'Firebase Storage ✓');
+        toast('ပုံ Upload အောင်မြင်ပါပြီ (Firebase Storage)');
+      } catch (err) {
+        console.warn('Storage upload failed, using local data URL', err);
+        toast('Storage မရ — ဒေတာအဖြစ် သိမ်းမယ်: ' + (err.code || err.message || ''));
+      }
+    } else {
+      toast('Login မဝင်ရသေး — ပုံကို ယာယီ သိမ်းမယ်။ Login ဝင်ပြီး Save လုပ်ပါ။');
+    }
+    // Fallback: data URL so preview + save always work
+    if (!finalUrl) {
+      finalUrl = await fileToDataURL(blob);
+      setImagePreview(previewBox, finalUrl, 'Local preview ✓');
+    }
     if (target) {
-      target.value = url;
+      target.value = finalUrl;
       target.dispatchEvent(new Event('input', { bubbles: true }));
+      target.dispatchEvent(new Event('change', { bubbles: true }));
     }
-    if (previewBox) {
-      previewBox.innerHTML = `<img src="${safe(url)}" class="preview-thumb border border-slate-600" alt="preview"> <span class="tiny ml-2 text-emerald-300">Upload အောင်မြင်ပါပြီ</span>`;
-    }
-    toast('ပုံ Upload အောင်မြင်ပါပြီ။ Firebase Storage မှာ သိမ်းပြီးပါပြီ။');
+    // trigger section previews
+    if (typeof updateHeroPreview === 'function' && targetInputId === 'hero-image') updateHeroPreview();
+    if (typeof updateSponsorPreview === 'function' && (targetInputId === 'admin-sponsor-img' || targetInputId === 'admin-sponsor-bg')) updateSponsorPreview();
+    if (typeof updateUpcomingPreview === 'function' && targetInputId === 'up-image') updateUpcomingPreview();
+    if (typeof updateYoutubePreview === 'function' && (targetInputId === 'yt-thumb' || targetInputId === 'yt-bg')) updateYoutubePreview();
+    if (typeof updatePostPreview === 'function' && targetInputId === 'admin-post-img') updatePostPreview();
   } catch (err) {
     console.error(err);
     toast('Upload မအောင်မြင်ပါ: ' + (err.message || err.code || 'error'));
@@ -1015,9 +1076,9 @@ function showPreviewIfUrl(inputId) {
   const el = $(inputId);
   const box = $(inputId + '-preview');
   if (!el || !box) return;
-  const v = el.value.trim();
-  if (v && /^https?:\/\//i.test(v)) {
-    box.innerHTML = `<img src="${safe(v)}" class="preview-thumb border border-slate-600" alt="preview" onerror="this.parentNode.innerHTML=''">`;
+  const v = (el.value || '').trim();
+  if (v && (v.startsWith('http') || v.startsWith('data:image'))) {
+    setImagePreview(box, v, '');
   }
 }
 
@@ -1145,6 +1206,14 @@ function loadAll() {
   $('hero-desc').value = h.desc || '';
   if ($('hero-desc-color')) $('hero-desc-color').value = h.descColor || '#a7f3d0';
   if ($('hero-desc-fs')) $('hero-desc-fs').value = h.descFs || 14;
+  if ($('hero-label-x')) $('hero-label-x').value = h.labelX != null ? h.labelX : (h.textX != null ? h.textX : 8);
+  if ($('hero-label-y')) $('hero-label-y').value = h.labelY != null ? h.labelY : 18;
+  if ($('hero-title-x')) $('hero-title-x').value = h.titleX != null ? h.titleX : (h.textX != null ? h.textX : 8);
+  if ($('hero-title-y')) $('hero-title-y').value = h.titleY != null ? h.titleY : (h.textY != null ? h.textY : 32);
+  if ($('hero-desc-x')) $('hero-desc-x').value = h.descX != null ? h.descX : 8;
+  if ($('hero-desc-y')) $('hero-desc-y').value = h.descY != null ? h.descY : 55;
+  if ($('hero-sign-x')) $('hero-sign-x').value = h.signX != null ? h.signX : 8;
+  if ($('hero-sign-y')) $('hero-sign-y').value = h.signY != null ? h.signY : 78;
   if ($('hero-text-x')) $('hero-text-x').value = h.textX != null ? h.textX : 8;
   if ($('hero-text-y')) $('hero-text-y').value = h.textY != null ? h.textY : 35;
   $('hero-btn-text').value = h.btnText || '';
@@ -1362,31 +1431,31 @@ function saveSettings() {
 }
 function updateHeroPreview() {
   const box = $('hero-live-preview');
-  const textBox = $('hero-prev-text');
   const label = $('hero-prev-label');
   const title = $('hero-prev-title');
   const desc = $('hero-prev-desc');
   const sign = $('hero-prev-sign');
-  const lx = $('hero-text-x')?.value || 8;
-  const ly = $('hero-text-y')?.value || 35;
-  if ($('val-hero-x')) $('val-hero-x').textContent = lx;
-  if ($('val-hero-y')) $('val-hero-y').textContent = ly;
-  if (textBox) {
-    textBox.style.left = lx + '%';
-    textBox.style.top = ly + '%';
-    textBox.style.right = 'auto';
-    textBox.style.bottom = 'auto';
-  }
-  const lfs = $('hero-label-fs')?.value || 12;
-  const tfs = $('hero-title-fs')?.value || 28;
-  const dfs = $('hero-desc-fs')?.value || 14;
+  const pos = (id, def) => parseInt($(id)?.value || def, 10);
+  const lx = pos('hero-label-x', 8), ly = pos('hero-label-y', 18);
+  const tx = pos('hero-title-x', 8), ty = pos('hero-title-y', 32);
+  const dx = pos('hero-desc-x', 8), dy = pos('hero-desc-y', 55);
+  const sx = pos('hero-sign-x', 8), sy = pos('hero-sign-y', 78);
+  const setVal = (id, v) => { if ($(id)) $(id).textContent = v; };
+  setVal('val-hlx', lx); setVal('val-hly', ly);
+  setVal('val-htx', tx); setVal('val-hty', ty);
+  setVal('val-hdx', dx); setVal('val-hdy', dy);
+  setVal('val-hsx', sx); setVal('val-hsy', sy);
+
+  const lfs = pos('hero-label-fs', 12), tfs = pos('hero-title-fs', 28), dfs = pos('hero-desc-fs', 14);
   if ($('val-hero-label-fs')) $('val-hero-label-fs').textContent = lfs + 'px';
   if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
   if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
+
   if (label) {
     label.textContent = $('hero-label')?.value || 'Travel Journal';
     label.style.color = $('hero-label-color')?.value || '#f5c518';
-    label.style.fontSize = Math.max(8, Math.round(lfs * 0.7)) + 'px';
+    label.style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
+    label.style.left = lx + '%'; label.style.top = ly + '%';
   }
   if (title) {
     const raw = $('hero-title')?.value || 'New Places.';
@@ -1395,59 +1464,69 @@ function updateHeroPreview() {
     title.style.fontWeight = $('hero-title-weight')?.value || '900';
     title.style.fontStyle = $('hero-title-style')?.value || 'normal';
     title.style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
+    title.style.left = tx + '%'; title.style.top = ty + '%';
   }
   if (desc) {
     desc.textContent = $('hero-desc')?.value || 'Description…';
     desc.style.color = $('hero-desc-color')?.value || 'rgba(255,255,255,0.7)';
     desc.style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
+    desc.style.left = dx + '%'; desc.style.top = dy + '%';
   }
   if (sign) {
     sign.textContent = $('hero-sign')?.value || '';
     sign.style.color = $('hero-sign-color')?.value || '#6ee7b7';
+    sign.style.left = sx + '%'; sign.style.top = sy + '%';
+    sign.style.display = (sign.textContent ? '' : 'none');
   }
   const img = $('hero-image')?.value.trim();
   if (box) {
-    if (img) { box.style.backgroundImage = 'url(' + img + ')'; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
+    if (img) { box.style.backgroundImage = 'url(' + JSON.stringify(img).slice(1, -1) + ')'; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
     else box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
   }
-  initHeroDrag();
+  initHeroLineDrag();
 }
-function initHeroDrag() {
-  const el = $('hero-prev-text');
+function initHeroLineDrag() {
   const box = $('hero-live-preview');
-  if (!el || !box || el._dragBound) return;
-  el._dragBound = true;
-  let dragging = false, startX, startY, origL, origT;
-  const onDown = (e) => {
-    dragging = true;
-    const pt = e.touches ? e.touches[0] : e;
-    startX = pt.clientX; startY = pt.clientY;
-    origL = parseFloat(el.style.left) || 8;
-    origT = parseFloat(el.style.top) || 35;
-    e.preventDefault();
-  };
-  const onMove = (e) => {
-    if (!dragging) return;
-    const pt = e.touches ? e.touches[0] : e;
-    const rect = box.getBoundingClientRect();
-    const dx = ((pt.clientX - startX) / rect.width) * 100;
-    const dy = ((pt.clientY - startY) / rect.height) * 100;
-    let nx = Math.max(0, Math.min(80, origL + dx));
-    let ny = Math.max(0, Math.min(80, origT + dy));
-    el.style.left = nx + '%';
-    el.style.top = ny + '%';
-    if ($('hero-text-x')) $('hero-text-x').value = Math.round(nx);
-    if ($('hero-text-y')) $('hero-text-y').value = Math.round(ny);
-    if ($('val-hero-x')) $('val-hero-x').textContent = Math.round(nx);
-    if ($('val-hero-y')) $('val-hero-y').textContent = Math.round(ny);
-  };
-  const onUp = () => { dragging = false; };
-  el.addEventListener('mousedown', onDown);
-  el.addEventListener('touchstart', onDown, { passive: false });
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('touchmove', onMove, { passive: false });
-  window.addEventListener('mouseup', onUp);
-  window.addEventListener('touchend', onUp);
+  if (!box) return;
+  const lines = [
+    { el: 'hero-prev-label', xi: 'hero-label-x', yi: 'hero-label-y', vx: 'val-hlx', vy: 'val-hly' },
+    { el: 'hero-prev-title', xi: 'hero-title-x', yi: 'hero-title-y', vx: 'val-htx', vy: 'val-hty' },
+    { el: 'hero-prev-desc', xi: 'hero-desc-x', yi: 'hero-desc-y', vx: 'val-hdx', vy: 'val-hdy' },
+    { el: 'hero-prev-sign', xi: 'hero-sign-x', yi: 'hero-sign-y', vx: 'val-hsx', vy: 'val-hsy' }
+  ];
+  lines.forEach(cfg => {
+    const el = $(cfg.el);
+    if (!el || el._lineDrag) return;
+    el._lineDrag = true;
+    let dragging = false, startX, startY, origL, origT;
+    const down = (e) => {
+      dragging = true;
+      const pt = e.touches ? e.touches[0] : e;
+      startX = pt.clientX; startY = pt.clientY;
+      origL = parseFloat(el.style.left) || 8;
+      origT = parseFloat(el.style.top) || 20;
+      e.preventDefault(); e.stopPropagation();
+    };
+    const move = (e) => {
+      if (!dragging) return;
+      const pt = e.touches ? e.touches[0] : e;
+      const rect = box.getBoundingClientRect();
+      const nx = Math.max(0, Math.min(90, origL + ((pt.clientX - startX) / rect.width) * 100));
+      const ny = Math.max(0, Math.min(90, origT + ((pt.clientY - startY) / rect.height) * 100));
+      el.style.left = nx + '%'; el.style.top = ny + '%';
+      if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
+      if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
+      if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
+      if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
+    };
+    const up = () => { dragging = false; };
+    el.addEventListener('mousedown', down);
+    el.addEventListener('touchstart', down, { passive: false });
+    window.addEventListener('mousemove', move);
+    window.addEventListener('touchmove', move, { passive: false });
+    window.addEventListener('mouseup', up);
+    window.addEventListener('touchend', up);
+  });
 }
 function saveHero() {
   write('hh_hero', {
@@ -1456,23 +1535,31 @@ function saveHero() {
     label: $('hero-label').value.trim(),
     labelColor: $('hero-label-color')?.value || '#f5c518',
     labelFs: parseInt($('hero-label-fs')?.value || '12', 10),
+    labelX: parseInt($('hero-label-x')?.value || '8', 10),
+    labelY: parseInt($('hero-label-y')?.value || '18', 10),
     sign: $('hero-sign').value.trim(),
     signColor: $('hero-sign-color')?.value || '#6ee7b7',
+    signX: parseInt($('hero-sign-x')?.value || '8', 10),
+    signY: parseInt($('hero-sign-y')?.value || '78', 10),
     title: $('hero-title').value.trim(),
     titleColor: $('hero-title-color')?.value || '#ffffff',
     titleFs: parseInt($('hero-title-fs')?.value || '28', 10),
     titleWeight: $('hero-title-weight')?.value || '900',
     titleStyle: $('hero-title-style')?.value || 'normal',
+    titleX: parseInt($('hero-title-x')?.value || '8', 10),
+    titleY: parseInt($('hero-title-y')?.value || '32', 10),
     desc: $('hero-desc').value.trim(),
     descColor: $('hero-desc-color')?.value || '#a7f3d0',
     descFs: parseInt($('hero-desc-fs')?.value || '14', 10),
-    textX: parseInt($('hero-text-x')?.value || '8', 10),
-    textY: parseInt($('hero-text-y')?.value || '35', 10),
+    descX: parseInt($('hero-desc-x')?.value || '8', 10),
+    descY: parseInt($('hero-desc-y')?.value || '55', 10),
+    textX: parseInt($('hero-label-x')?.value || '8', 10),
+    textY: parseInt($('hero-title-y')?.value || '32', 10),
     btnText: $('hero-btn-text').value.trim(),
     btnLink: $('hero-btn-link').value.trim()
   });
   updateHeroPreview();
-  toast('Hero သိမ်းပြီးပါပြီ။');
+  toast('Hero သိမ်းပြီးပါပြီ။ Live site / ဖုန်းမှာ refresh လုပ်ပါ။');
 }
 function updateSponsorPreview() {
   const badge = $('sp-prev-badge');
