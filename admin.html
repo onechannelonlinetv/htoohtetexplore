@@ -1116,26 +1116,38 @@ async function insertGalleryInContent(inputEl) {
     inputEl.value = '';
     return;
   }
-  toast('Gallery ပုံ ' + files.length + ' ခု ပြင်ဆင်နေသည်…');
+  if (!adminUser || !adminStorage) {
+    toast('Gallery ပုံတင်ရန် Admin Login ဝင်ပြီး Firebase Storage ကို ဖွင့်ထားပါ');
+    inputEl.value = '';
+    return;
+  }
+  toast('Gallery ပုံများ Upload လုပ်နေသည်…');
   try {
     var urls = [];
     for (var i = 0; i < files.length; i++) {
-      if (!files[i].type.startsWith('image/')) continue;
-      urls.push(await fileToCompressedDataURL(files[i]));
+      var file = files[i];
+      if (!file.type.startsWith('image/')) continue;
+      var blob = file;
+      try { blob = await withTimeout(compressImageFile(file, 1200, 0.78), 10000); } catch (e) { blob = file; }
+      var ref = adminStorage.ref('uploads/gallery_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 8) + '.jpg');
+      var snapshot = await withTimeout(ref.put(blob, { contentType: 'image/jpeg' }), 30000);
+      var httpsUrl = await snapshot.ref.getDownloadURL();
+      if (httpsUrl) urls.push(httpsUrl);
     }
-    if (urls.length < 2) { toast('ပုံ 2 ခုအထက် လိုအပ်သည်'); inputEl.value = ''; return; }
+    if (urls.length < 2) { toast('ပုံ အနည်းဆုံး 2 ပုံ Upload အောင်မြင်ဖို့ လိုပါတယ်'); inputEl.value = ''; return; }
     var layout = ($('content-gallery-layout') && $('content-gallery-layout').value) || '1-2';
-    var inner = urls.map(function(u) { return '[img]' + u + '[/img]'; }).join('\\n');
-    var block = '\\n[gallery layout=' + layout + ']\\n' + inner + '\\n[/gallery]\\n';
+    var inner = urls.map(function(u) { return '[img]' + u + '[/img]'; }).join('\n');
+    var block = '\n[gallery layout=' + layout + ']\n' + inner + '\n[/gallery]\n';
     var ta = $('admin-post-content');
     if (!ta) return;
     var pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
     ta.value = ta.value.slice(0, pos) + block + ta.value.slice(pos);
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
-    toast('Gallery ထည့်ပြီး — Preview ကြည့်ပါ');
+    toast('Gallery ထည့်ပြီး — ပုံ URL များကို Firebase မှာ သိမ်းပြီးပါပြီ');
   } catch (err) {
-    toast('Gallery မထည့်နိုင်: ' + (err.message || ''));
+    console.error(err);
+    toast('Gallery Upload မအောင်မြင်ပါ။ Firebase Storage rules/billing ကို စစ်ပါ။ ' + (err.message || ''));
   }
   inputEl.value = '';
 }
