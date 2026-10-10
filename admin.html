@@ -292,6 +292,17 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           </div>
 
           <button onclick="saveSettings()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Brand & Layout</button>
+
+          <!-- CUSTOM THEME PRESETS -->
+          <div class="border-t border-slate-700 pt-5 mt-2 space-y-3">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">💾 My Theme Presets — ပြင်ထားသမျှ Save / ပြန်သုံး</p>
+            <p class="tiny">လက်ရှိ Layout + Hero/Sponsor/Upcoming/YouTube/About on-off + အရောင်/အရွယ် အားလုံးကို နာမည်ပေးပြီး သိမ်းနိုင်ပါတယ်။ နောက်မှ Load ပြန်လုပ်ရင် အတိုင်းအတာ ပြန်ရမယ်။</p>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input id="preset-name" class="field flex-1" placeholder="Theme နာမည် ဥပမာ: My Travel Look">
+              <button type="button" onclick="saveThemePreset()" class="btn btn-purple shrink-0"><i class="fa-solid fa-floppy-disk mr-1"></i>Save as Theme</button>
+            </div>
+            <div id="preset-list" class="space-y-2"></div>
+          </div>
         </div>
       </section>
 
@@ -355,33 +366,80 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- OFFICIAL SPONSOR -->
       <section id="view-sponsor" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Official Sponsor Banner</h2><p class="mt-1 text-sm text-slate-400">Homepage ရဲ့ Official Sponsor — ပုံ Upload ရနိုင်</p></div>
+        <div><h2 class="text-xl font-black">Official Sponsor Banner</h2><p class="mt-1 text-sm text-slate-400">Badge အရောင် · Preview နဲ့ ချိန် · ပုံ Upload</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="admin-sponsor-active" checked><span class="text-sm font-semibold">Sponsor Banner ပြမယ်</span></label>
+          <label class="toggle-row"><input type="checkbox" id="admin-sponsor-active" checked onchange="updateSponsorPreview()"><span class="text-sm font-semibold">Sponsor Banner ပြမယ်</span></label>
+
+          <!-- Live Sponsor Preview -->
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Sponsor</span>
+              <span class="tiny" id="sponsor-preview-dims">180px</span>
+            </div>
+            <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700" style="min-height:120px; background:linear-gradient(90deg,#111,#333);">
+              <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent"></div>
+              <div class="relative z-10 flex items-center justify-between gap-3 p-4" style="min-height:120px;">
+                <div class="min-w-0 flex-1">
+                  <span id="sp-prev-badge" class="inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black">Official Sponsor</span>
+                  <div id="sp-prev-title" class="mt-1.5 text-base font-black text-white truncate">Sponsor Title</div>
+                  <div id="sp-prev-desc" class="text-[11px] text-white/60 mt-0.5 line-clamp-2">Description…</div>
+                </div>
+                <div id="sp-prev-logo-wrap" class="w-16 h-16 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+                  <img id="sp-prev-logo" src="" class="w-full h-full object-contain hidden" alt="">
+                  <i class="fa-solid fa-image text-white/30 text-lg" id="sp-prev-logo-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label class="label">Badge Text (ပြင်နိုင်)</label>
-              <input id="admin-sponsor-badge" class="field" placeholder="Official Sponsor">
-              <p class="tiny mt-1">ဥပမာ: Official Sponsor · Exclusive Partner · Main Sponsor · Co Sponsor</p>
+              <label class="label">Badge Text</label>
+              <input id="admin-sponsor-badge" class="field" placeholder="Exclusive Partner" oninput="updateSponsorPreview()">
+              <p class="tiny mt-1">Official · Exclusive Partner · Main · Co Sponsor</p>
             </div>
-            <div><label class="label">Sponsor Title</label><input id="admin-sponsor-title" class="field" placeholder="Veezoom Myanmar"></div>
-            <div><label class="label">Sponsor Link</label><input id="admin-sponsor-link" class="field" placeholder="https://..."></div>
-            <div class="md:col-span-2"><label class="label">Description</label><textarea id="admin-sponsor-desc" class="field min-h-20"></textarea></div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label">Badge နောက်ခံအရောင်</label>
+                <input id="admin-sponsor-badge-bg" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
+              </div>
+              <div>
+                <label class="label">Badge စာအရောင်</label>
+                <input id="admin-sponsor-badge-color" type="color" value="#000000" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
+              </div>
+            </div>
+            <div>
+              <label class="label">Sponsor Title</label>
+              <input id="admin-sponsor-title" class="field" placeholder="Veezoom Myanmar" oninput="updateSponsorPreview()">
+            </div>
+            <div>
+              <label class="label">Sponsor Link</label>
+              <input id="admin-sponsor-link" class="field" placeholder="https://...">
+            </div>
+            <div class="md:col-span-2">
+              <label class="label">Description</label>
+              <textarea id="admin-sponsor-desc" class="field min-h-16" oninput="updateSponsorPreview()"></textarea>
+            </div>
             <div>
               <label class="label">Logo / Image</label>
               <div class="flex gap-2">
-                <input id="admin-sponsor-img" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-img')"></label>
+                <input id="admin-sponsor-img" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-img'); setTimeout(updateSponsorPreview, 800)"></label>
               </div>
               <div id="admin-sponsor-img-preview" class="mt-2"></div>
             </div>
             <div>
               <label class="label">Background Image</label>
               <div class="flex gap-2">
-                <input id="admin-sponsor-bg" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-bg')"></label>
+                <input id="admin-sponsor-bg" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-bg'); setTimeout(updateSponsorPreview, 800)"></label>
               </div>
               <div id="admin-sponsor-bg-preview" class="mt-2"></div>
+            </div>
+            <div class="md:col-span-2">
+              <label class="label flex justify-between">Banner Height <span class="range-val" id="val-sp-h-local">180px</span></label>
+              <input type="range" id="admin-sponsor-height-local" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="document.getElementById('set-sponsor-height') &amp;&amp; (document.getElementById('set-sponsor-height').value=this.value); updateSponsorPreview(); if(typeof updateSizePreview==='function') updateSizePreview();">
+              <p class="tiny mt-1">Brand &amp; Layout မှာလည်း ရှိ — ဒီမှာ တိုက်ရိုက် ချိန်လို့ရ</p>
             </div>
           </div>
           <button onclick="saveSponsor()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Official Sponsor</button>
@@ -583,7 +641,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -801,6 +859,8 @@ function loadAll() {
   const sp = read('hh_sponsor', {});
   $('admin-sponsor-active').checked = sp.active !== false;
   if ($('admin-sponsor-badge')) $('admin-sponsor-badge').value = sp.badge || 'Official Sponsor';
+  if ($('admin-sponsor-badge-bg')) $('admin-sponsor-badge-bg').value = sp.badgeBg || '#f5c518';
+  if ($('admin-sponsor-badge-color')) $('admin-sponsor-badge-color').value = sp.badgeColor || '#000000';
   $('admin-sponsor-title').value = sp.title || '';
   $('admin-sponsor-desc').value = sp.desc || '';
   $('admin-sponsor-link').value = sp.link || '';
@@ -850,6 +910,10 @@ function loadAll() {
   renderHomeSectionsList();
   renderPostsList();
   renderOverview();
+  if (typeof updateSponsorPreview === 'function') updateSponsorPreview();
+  if (typeof renderPresetList === 'function') renderPresetList();
+  const _sh = read('hh_settings', {}).sponsorHeight;
+  if (_sh && $('admin-sponsor-height-local')) $('admin-sponsor-height-local').value = _sh;
 }
 
 const THEME_PRESETS = {
@@ -984,10 +1048,52 @@ function saveHero() {
   });
   toast('Hero သိမ်းပြီးပါပြီ။');
 }
+function updateSponsorPreview() {
+  const badge = $('sp-prev-badge');
+  const title = $('sp-prev-title');
+  const desc = $('sp-prev-desc');
+  const logo = $('sp-prev-logo');
+  const logoIcon = $('sp-prev-logo-icon');
+  const box = $('sponsor-live-preview');
+  if (!badge) return;
+  badge.textContent = $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor';
+  const bg = $('admin-sponsor-badge-bg')?.value || '#f5c518';
+  const fg = $('admin-sponsor-badge-color')?.value || '#000000';
+  badge.style.background = bg;
+  badge.style.color = fg;
+  if (title) title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
+  if (desc) desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
+  const imgUrl = $('admin-sponsor-img')?.value.trim();
+  if (logo) {
+    if (imgUrl) { logo.src = imgUrl; logo.classList.remove('hidden'); if (logoIcon) logoIcon.classList.add('hidden'); }
+    else { logo.classList.add('hidden'); if (logoIcon) logoIcon.classList.remove('hidden'); }
+  }
+  const bgUrl = $('admin-sponsor-bg')?.value.trim();
+  if (box) {
+    if (bgUrl) box.style.backgroundImage = 'url(' + bgUrl + ')';
+    else box.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
+    box.style.backgroundSize = 'cover';
+    box.style.backgroundPosition = 'center';
+  }
+  const h = $('admin-sponsor-height-local')?.value || $('set-sponsor-height')?.value || 180;
+  if ($('val-sp-h-local')) $('val-sp-h-local').textContent = h + 'px';
+  if (box) box.style.minHeight = Math.max(80, Math.round(parseInt(h,10) / 1.5)) + 'px';
+  if ($('sponsor-preview-dims')) $('sponsor-preview-dims').textContent = h + 'px';
+}
 function saveSponsor() {
+  const hLocal = $('admin-sponsor-height-local')?.value;
+  if (hLocal && $('set-sponsor-height')) {
+    $('set-sponsor-height').value = hLocal;
+    // also persist height into settings
+    const s = read('hh_settings', {});
+    s.sponsorHeight = parseInt(hLocal, 10);
+    write('hh_settings', s);
+  }
   write('hh_sponsor', {
     active: $('admin-sponsor-active').checked,
     badge: $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor',
+    badgeBg: $('admin-sponsor-badge-bg')?.value || '#f5c518',
+    badgeColor: $('admin-sponsor-badge-color')?.value || '#000000',
     title: $('admin-sponsor-title').value.trim(),
     desc: $('admin-sponsor-desc').value.trim(),
     link: $('admin-sponsor-link').value.trim(),
@@ -995,6 +1101,7 @@ function saveSponsor() {
     bgImage: $('admin-sponsor-bg').value.trim()
   });
   renderOverview();
+  updateSponsorPreview();
   toast('Official Sponsor သိမ်းပြီးပါပြီ။');
 }
 function saveUpcoming() {
@@ -1308,6 +1415,72 @@ function renderOverview() {
   $('stat-sections').textContent = sections.length;
   $('stat-proud').textContent = proud.length;
   $('stat-sponsor').textContent = sp.active === false ? 'Off' : (sp.title || 'On');
+}
+
+/* ---- Theme Presets (full layout snapshot) ---- */
+function getPresets() { return read('hh_theme_presets', []); }
+function saveThemePreset() {
+  const name = ($('preset-name')?.value || '').trim();
+  if (!name) return alert('Theme နာမည် ထည့်ပါ။');
+  // Ensure current form values are written first
+  try { saveSettings(); } catch(e) {}
+  const snapshot = {
+    id: Date.now(),
+    name,
+    savedAt: new Date().toISOString(),
+    hh_settings: read('hh_settings', {}),
+    hh_hero: read('hh_hero', {}),
+    hh_sponsor: read('hh_sponsor', {}),
+    hh_upcoming: read('hh_upcoming', {}),
+    hh_youtube: read('hh_youtube', {}),
+    hh_about: read('hh_about', {}),
+    hh_social: read('hh_social', {})
+  };
+  const list = getPresets();
+  list.unshift(snapshot);
+  write('hh_theme_presets', list);
+  if ($('preset-name')) $('preset-name').value = '';
+  renderPresetList();
+  toast('Theme "' + name + '" သိမ်းပြီးပါပြီ။');
+}
+function loadThemePreset(id) {
+  const p = getPresets().find(x => String(x.id) === String(id));
+  if (!p) return alert('Theme မတွေ့ပါ။');
+  if (!confirm('"' + p.name + '" ကို Load မယ် — လက်ရှိ layout အချို့ ပြောင်းသွားမယ်။')) return;
+  const keys = ['hh_settings','hh_hero','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social'];
+  keys.forEach(k => { if (p[k] != null) write(k, p[k]); });
+  loadAll();
+  toast('Theme "' + p.name + '" Load ပြီးပါပြီ။');
+}
+function deleteThemePreset(id) {
+  if (!confirm('ဒီ Theme ကို ဖျက်မလား?')) return;
+  write('hh_theme_presets', getPresets().filter(x => String(x.id) !== String(id)));
+  renderPresetList();
+  toast('Theme ဖျက်ပြီးပါပြီ။');
+}
+function renderPresetList() {
+  const box = $('preset-list');
+  if (!box) return;
+  const list = getPresets();
+  if (!list.length) {
+    box.innerHTML = '<p class="text-sm text-slate-500 border border-dashed border-slate-700 rounded-xl p-4 text-center">သိမ်းထားသော Theme မရှိသေးပါ။ Layout ပြင်ပြီး "Save as Theme" နှိပ်ပါ။</p>';
+    return;
+  }
+  box.innerHTML = list.map(p => {
+    const d = p.savedAt ? new Date(p.savedAt).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) : '';
+    const theme = (p.hh_settings && p.hh_settings.theme) || '—';
+    const mode = (p.hh_settings && p.hh_settings.mode) || 'dark';
+    return `<div class="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
+      <div class="flex-1 min-w-0">
+        <p class="font-bold truncate">${safe(p.name)}</p>
+        <p class="tiny">${safe(theme)} · ${safe(mode)} · ${d}</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn btn-green" onclick="loadThemePreset('${p.id}')"><i class="fa-solid fa-download mr-1"></i>Load</button>
+        <button class="btn btn-red" onclick="deleteThemePreset('${p.id}')"><i class="fa-regular fa-trash-can"></i></button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function toast(message) {
