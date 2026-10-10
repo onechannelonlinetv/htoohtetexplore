@@ -649,6 +649,10 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <input id="up-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
             </div>
             <div>
+              <label class="label flex justify-between">Title Size <span class="range-val" id="val-up-title-fs">22px</span></label>
+              <input type="range" id="up-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
+            </div>
+            <div>
               <label class="label">Title Weight</label>
               <select id="up-title-weight" class="field" onchange="updateUpcomingPreview()">
                 <option value="400">Regular</option>
@@ -656,6 +660,18 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                 <option value="700">Bold</option>
                 <option value="900" selected>Black</option>
               </select>
+            </div>
+            <div>
+              <label class="label">Label Size</label>
+              <input type="range" id="up-label-fs" min="8" max="20" value="11" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
+            </div>
+            <div>
+              <label class="label">Desc Size</label>
+              <input type="range" id="up-desc-fs" min="10" max="22" value="13" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
+            </div>
+            <div>
+              <label class="label">Desc အရောင်</label>
+              <input id="up-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
             </div>
             <div>
               <label class="label">Image</label>
@@ -793,6 +809,10 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <input id="yt-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateYoutubePreview()">
             </div>
             <div>
+              <label class="label flex justify-between">Title Size <span class="range-val" id="val-yt-title-fs">22px</span></label>
+              <input type="range" id="yt-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateYoutubePreview()">
+            </div>
+            <div>
               <label class="label">Title Weight</label>
               <select id="yt-title-weight" class="field" onchange="updateYoutubePreview()">
                 <option value="400">Regular</option>
@@ -837,6 +857,9 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           <div><label class="label">Title</label><input id="about-title" class="field" placeholder="About Htoo Htet" oninput="updateAboutPreview()"></div>
           <div class="grid grid-cols-2 gap-3">
             <div><label class="label">Title အရောင်</label><input id="about-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateAboutPreview()"></div>
+            <div><label class="label flex justify-between">Title Size <span class="range-val" id="val-about-fs">24px</span></label>
+              <input type="range" id="about-title-fs" min="14" max="40" value="24" class="w-full accent-emerald-500" oninput="updateAboutPreview()">
+            </div>
             <div><label class="label">Title Weight</label>
               <select id="about-title-weight" class="field" onchange="updateAboutPreview()">
                 <option value="400">Regular</option><option value="600">Semi Bold</option><option value="700" selected>Bold</option><option value="900">Black</option>
@@ -1160,6 +1183,10 @@ function loadAll() {
   $('up-title').value = up.title || '';
   if ($('up-title-color')) $('up-title-color').value = up.titleColor || '#ffffff';
   if ($('up-title-weight')) $('up-title-weight').value = up.titleWeight || '900';
+  if ($('up-title-fs')) $('up-title-fs').value = up.titleFs || 22;
+  if ($('up-label-fs')) $('up-label-fs').value = up.labelFs || 11;
+  if ($('up-desc-fs')) $('up-desc-fs').value = up.descFs || 13;
+  if ($('up-desc-color')) $('up-desc-color').value = up.descColor || '#cccccc';
   $('up-desc').value = up.desc || '';
   $('up-image').value = up.image || '';
   showPreviewIfUrl('up-image');
@@ -1171,6 +1198,7 @@ function loadAll() {
   $('yt-title').value = yt.title || '';
   if ($('yt-title-color')) $('yt-title-color').value = yt.titleColor || '#ffffff';
   if ($('yt-title-weight')) $('yt-title-weight').value = yt.titleWeight || '900';
+  if ($('yt-title-fs')) $('yt-title-fs').value = yt.titleFs || 22;
   $('yt-desc').value = yt.desc || '';
   $('yt-link').value = yt.link || '';
   $('yt-thumb').value = yt.thumb || '';
@@ -1547,8 +1575,20 @@ function updateUpcomingPreview() {
     $('up-prev-title').textContent = $('up-title')?.value || 'Title';
     $('up-prev-title').style.color = $('up-title-color')?.value || '#ffffff';
     $('up-prev-title').style.fontWeight = $('up-title-weight')?.value || '900';
+    const tfs = $('up-title-fs')?.value || 22;
+    $('up-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.6)) + 'px';
+    if ($('val-up-title-fs')) $('val-up-title-fs').textContent = tfs + 'px';
   }
-  if ($('up-prev-desc')) $('up-prev-desc').textContent = $('up-desc')?.value || 'Desc';
+  if ($('up-prev-label')) {
+    const lfs = $('up-label-fs')?.value || 11;
+    $('up-prev-label').style.fontSize = lfs + 'px';
+  }
+  if ($('up-prev-desc')) {
+    $('up-prev-desc').textContent = $('up-desc')?.value || 'Desc';
+    $('up-prev-desc').style.color = $('up-desc-color')?.value || '#cccccc';
+    const dfs = $('up-desc-fs')?.value || 13;
+    $('up-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
+  }
   const img = $('up-image')?.value.trim();
   const box = $('up-live-preview');
   if (box) {
@@ -1563,10 +1603,14 @@ function saveUpcoming() {
     sectionTitle: $('up-section-title')?.value.trim() || '',
     label: $('up-label').value.trim(),
     labelColor: $('up-label-color')?.value || '#f5c518',
+    labelFs: parseInt($('up-label-fs')?.value || '11', 10),
     title: $('up-title').value.trim(),
     titleColor: $('up-title-color')?.value || '#ffffff',
+    titleFs: parseInt($('up-title-fs')?.value || '22', 10),
     titleWeight: $('up-title-weight')?.value || '900',
     desc: $('up-desc').value.trim(),
+    descColor: $('up-desc-color')?.value || '#cccccc',
+    descFs: parseInt($('up-desc-fs')?.value || '13', 10),
     image: $('up-image').value.trim()
   });
   updateUpcomingPreview();
@@ -1590,6 +1634,7 @@ function saveYoutube() {
     label: $('yt-label').value.trim(),
     title: $('yt-title').value.trim(),
     titleColor: $('yt-title-color')?.value || '#ffffff',
+    titleFs: parseInt($('yt-title-fs')?.value || '22', 10),
     titleWeight: $('yt-title-weight')?.value || '900',
     desc: $('yt-desc').value.trim(),
     link: $('yt-link').value.trim(),
@@ -1616,6 +1661,7 @@ function saveAbout() {
     active: $('about-active').checked,
     title: $('about-title').value.trim(),
     titleColor: $('about-title-color')?.value || '#ffffff',
+    titleFs: parseInt($('about-title-fs')?.value || '24', 10),
     titleWeight: $('about-title-weight')?.value || '700',
     desc: $('about-desc').value.trim(),
     descColor: $('about-desc-color')?.value || '#a7f3d0'
