@@ -868,6 +868,19 @@ function renderStoryCards() {
   }).join('');
 }
 
+function formatArticleBody(raw) {
+  if (!raw) return '';
+  let t = String(raw).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  t = t.replace(/\[img\]([\s\S]*?)\[\/img\]/gi, function(_, u) {
+    u = u.trim().replace(/&amp;/g,'&');
+    return '<img src="'+u.replace(/"/g,'&quot;')+'" alt="" class="w-full rounded-xl my-4 max-h-96 object-contain bg-black/40">';
+  });
+  t = t.replace(/^### (.+)$/gm, '<h4 class="text-base font-bold text-white mt-4 mb-1">$1</h4>');
+  t = t.replace(/^## (.+)$/gm, '<h3 class="text-lg font-bold text-white mt-4 mb-1">$1</h3>');
+  t = t.replace(/^# (.+)$/gm, '<h2 class="text-xl font-black text-white mt-4 mb-2">$1</h2>');
+  t = t.replace(/\n/g, '<br>');
+  return t;
+}
 function openArticle(index) {
   const post = allStoryPosts[index];
   if (!post) return;
@@ -875,8 +888,7 @@ function openArticle(index) {
   $('article-title').textContent = post.title || 'Travel Story';
   $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ');
   let body = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
-  body = body.replace(/\[img\](.*?)\[\/img\]/gi, '<img src="$1" class="my-3 rounded-xl w-full max-h-80 object-cover" alt="">');
-  $('article-body').innerHTML = body.replace(/\n/g, '<br>');
+  $('article-body').innerHTML = formatArticleBody(body);
   const related = allStoryPosts.filter((_, i) => i !== index).slice(0, 3);
   $('related-stories').innerHTML = related.length
     ? related.map(p => `<button onclick="openArticle(${allStoryPosts.indexOf(p)})" class="w-full text-left flex gap-3 rounded-xl border border-emerald-800/40 p-2 hover:bg-emerald-900/40 transition">
