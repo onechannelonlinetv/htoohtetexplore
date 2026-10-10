@@ -3,214 +3,301 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Htoo Htet Explore - Travel Blog</title>
-<meta name="description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet Explore.">
+<title>HTOO HTET | Travel Journal & Beyond</title>
+<meta name="description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet.">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  :root { color-scheme: light; }
-  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Myanmar", sans-serif; }
+  :root {
+    --brand-bg: #061510;
+    --brand-surface: #0a1f18;
+    --brand-card: #0f2e24;
+    --brand-accent: #f5c518;
+    --brand-text: #ffffff;
+    --brand-muted: #6ee7b7;
+  }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Myanmar", sans-serif; background: var(--brand-bg); color: var(--brand-text); }
   .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-hover { transition: transform .25s ease, box-shadow .25s ease; }
+  .card-hover:hover { transform: translateY(-4px); box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.45); }
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: var(--brand-accent); transition: width .25s ease; }
+  .nav-link:hover::after, .nav-link.active::after { width: 100%; }
   .search-panel { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .28s ease, opacity .22s ease, padding .22s ease; }
-  .search-panel.open { max-height: 80px; opacity: 1; padding-top: 0.5rem; padding-bottom: 0.75rem; }
-  .card-hover { transition: transform .2s ease, box-shadow .2s ease; }
-  .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -8px rgb(0 0 0 / 0.15); }
+  .search-panel.open { max-height: 72px; opacity: 1; padding-top: .5rem; padding-bottom: .75rem; }
+  .accent-bg { background: var(--brand-accent); }
+  .accent-text { color: var(--brand-accent); }
+  .surface-bg { background: var(--brand-surface); }
+  .card-bg { background: var(--brand-card); }
 </style>
 </head>
-<body class="bg-[#f6f7f9] text-slate-800 min-h-screen">
+<body class="min-h-screen antialiased">
 
 <!-- ================= HEADER ================= -->
-<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6">
-    <div class="flex items-center justify-between h-14 sm:h-16 gap-3">
-      <!-- Logo -->
-      <a href="#" class="flex items-center gap-2.5 shrink-0">
-        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-700 text-white flex items-center justify-center shadow-sm">
-          <i class="fa-solid fa-compass text-sm sm:text-base"></i>
+<header class="sticky top-0 z-50 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 sm:h-[70px] gap-3">
+      <!-- Logo + Brand -->
+      <a href="#home" class="flex items-center gap-2.5 shrink-0">
+        <div id="brand-logo-wrap" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg overflow-hidden">
+          <img id="brand-logo-img" src="" alt="Logo" class="w-full h-full object-cover hidden">
+          <i id="brand-logo-icon" class="fa-solid fa-mountain-sun text-white text-sm sm:text-base"></i>
         </div>
-        <div class="leading-tight">
-          <div class="font-black text-emerald-900 text-[15px] sm:text-lg tracking-tight">Htoo Htet</div>
-          <div class="text-[10px] sm:text-xs font-bold text-emerald-700 tracking-wider -mt-0.5">Explore</div>
+        <div class="leading-none">
+          <div id="brand-name" class="font-black text-white text-[15px] sm:text-lg tracking-tight">HTOO HTET</div>
+          <div id="brand-tagline" class="text-[9px] sm:text-[10px] font-semibold text-emerald-400 tracking-[0.12em] uppercase">Travel Journal & Beyond</div>
         </div>
       </a>
 
+      <!-- Desktop Nav -->
+      <nav id="desktop-nav" class="hidden lg:flex items-center gap-6 text-[13px] font-semibold text-emerald-100/90"></nav>
+
       <!-- Right actions -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <!-- Social (desktop) -->
-        <div class="hidden sm:flex items-center gap-1.5" id="social-links-desktop">
-          <a id="link-fb-d" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-facebook-f"></i></a>
-          <a id="link-tt-d" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-tiktok"></i></a>
-          <a id="link-yt-d" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-youtube"></i></a>
+        <div class="hidden sm:flex items-center gap-1 text-[11px] font-bold text-emerald-300/80 border border-emerald-800/50 rounded-full px-2.5 py-1">
+          <button type="button" id="lang-en" class="accent-text">EN</button>
+          <span class="text-emerald-700">|</span>
+          <button type="button" id="lang-mm" class="hover:text-white transition">မြန်မာ</button>
         </div>
-
-        <!-- Search toggle -->
-        <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 flex items-center justify-center transition">
+        <div class="hidden md:flex items-center gap-1.5" id="social-links-desktop"></div>
+        <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
           <i class="fa-solid fa-magnifying-glass text-sm"></i>
         </button>
-
-        <!-- Menu -->
-        <button id="menu-toggle" type="button" aria-label="Menu" aria-expanded="false" onclick="toggleMenu()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 flex items-center justify-center transition text-lg">
-          <i class="fa-solid fa-bars"></i>
+        <button id="menu-toggle" type="button" aria-label="Menu" onclick="toggleMenu()" class="lg:hidden w-10 h-10 rounded-xl bg-emerald-900/50 text-white flex items-center justify-center">
+          <i class="fa-solid fa-bars text-lg"></i>
         </button>
       </div>
     </div>
 
-    <!-- Expandable Search Bar -->
+    <!-- Search Panel -->
     <div id="search-panel" class="search-panel">
       <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-        <input id="header-search-input" type="search" placeholder="ခေါင်းစဉ်၊ နေရာ သို့မဟုတ် အမျိုးအစား ရှာရန်..." class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-10 text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 transition">
-        <button type="button" id="search-close" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600 flex items-center justify-center">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500/70 text-sm"></i>
+        <input id="header-search-input" type="search" placeholder="ခေါင်းစဉ်၊ နေရာ ရှာရန်..." class="w-full rounded-xl border border-emerald-800/50 bg-emerald-950/80 py-2.5 pl-10 pr-10 text-sm text-white placeholder-emerald-500/50 outline-none focus:border-emerald-500 transition">
+        <button type="button" id="search-close" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full text-emerald-400 hover:bg-emerald-800 flex items-center justify-center">
           <i class="fa-solid fa-xmark text-xs"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Drawer overlay + menu -->
-  <div id="drawer-overlay" class="fixed inset-0 z-40 bg-slate-950/50 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
-  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] bg-white shadow-2xl translate-x-full transition-transform duration-300 ease-out p-5 flex flex-col" aria-hidden="true">
-    <div class="flex items-center justify-between mb-6">
-      <div class="font-black text-emerald-900 text-base">Htoo Htet <span class="text-emerald-700">Explore</span></div>
-      <button type="button" onclick="closeMenu()" aria-label="Close" class="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+  <!-- Mobile Drawer -->
+  <div id="drawer-overlay" class="fixed inset-0 z-40 bg-black/60 opacity-0 pointer-events-none transition-opacity lg:hidden" onclick="closeMenu()"></div>
+  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out p-6 flex flex-col border-l border-emerald-900/50 lg:hidden">
+    <div class="flex items-center justify-between mb-8">
+      <div id="mobile-brand-name" class="font-black text-white text-base">HTOO HTET</div>
+      <button type="button" onclick="closeMenu()" class="w-9 h-9 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <nav class="flex flex-col gap-1 text-[15px] font-semibold text-slate-700">
-      <a href="#home" onclick="closeMenu()" class="rounded-xl px-3.5 py-3 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-3"><i class="fa-solid fa-house w-5 text-emerald-600"></i> Home</a>
-      <a href="#upcoming" onclick="closeMenu()" class="rounded-xl px-3.5 py-3 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-3"><i class="fa-solid fa-map-location-dot w-5 text-emerald-600"></i> Destinations</a>
-      <a href="#stories" onclick="closeMenu()" class="rounded-xl px-3.5 py-3 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-3"><i class="fa-solid fa-book-open w-5 text-emerald-600"></i> Stories</a>
-      <a href="#about" onclick="closeMenu()" class="rounded-xl px-3.5 py-3 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-3"><i class="fa-solid fa-circle-info w-5 text-emerald-600"></i> About</a>
-    </nav>
-    <div class="mt-auto pt-5 border-t border-slate-100">
-      <div class="flex gap-2 mb-3" id="social-links-mobile">
-        <a id="link-fb-m" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-facebook-f"></i></a>
-        <a id="link-tt-m" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-tiktok"></i></a>
-        <a id="link-yt-m" href="#" target="_blank" class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition text-xs"><i class="fa-brands fa-youtube"></i></a>
-      </div>
-      <p class="text-[11px] text-slate-400">Discover Myanmar, one journey at a time.</p>
+    <nav id="mobile-nav" class="flex flex-col gap-1 text-[15px] font-semibold text-emerald-100"></nav>
+    <div class="mt-auto pt-6 border-t border-emerald-900/50">
+      <div class="flex gap-2 mb-4" id="social-links-mobile"></div>
+      <p id="mobile-tagline" class="text-[11px] text-emerald-500/70">Discover Myanmar, one journey at a time.</p>
     </div>
   </aside>
 </header>
 
-<!-- ================= MAIN ================= -->
-<main id="home" class="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6 sm:space-y-8">
+<main id="home">
 
-  <!-- HERO -->
-  <section class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl min-h-[300px] sm:min-h-[400px] lg:min-h-[460px] bg-slate-900 text-white">
-    <img id="hero-img" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200" alt="Explore Myanmar" class="absolute inset-0 w-full h-full object-cover">
-    <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/20"></div>
-    <div class="relative z-10 h-full min-h-[300px] sm:min-h-[400px] lg:min-h-[460px] flex flex-col justify-between p-5 sm:p-8 lg:p-12">
-      <div>
-        <span class="inline-block bg-emerald-500/90 text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full tracking-wide">Explore Myanmar</span>
-        <h1 class="mt-3 sm:mt-4 text-3xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight max-w-xl">
-          Discover<br>The Unseen<br>Beauty
+  <!-- ========== HERO ========== -->
+  <section id="hero-section" class="relative min-h-[480px] sm:min-h-[560px] lg:min-h-[640px] overflow-hidden">
+    <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[480px] sm:min-h-[560px] lg:min-h-[640px] flex flex-col justify-center py-14 sm:py-20">
+      <div class="max-w-xl">
+        <span id="hero-label" class="inline-block accent-text text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-3">Travel Journal</span>
+        <h1 id="hero-title" class="text-4xl sm:text-5xl lg:text-[3.25rem] font-black leading-[1.12] tracking-tight text-white">
+          New Places.<br><span class="text-emerald-300">Same Curiosity.</span>
         </h1>
-        <p class="mt-3 text-sm sm:text-base text-white/85 max-w-md leading-relaxed">
-          Roads, people, culture and nature — all in one journey.
+        <p id="hero-desc" class="mt-4 sm:mt-5 text-sm sm:text-base text-emerald-100/80 leading-relaxed max-w-md">
+          Traveling is not just about reaching a destination, it's about collecting stories, meeting people, and seeing the world with a different heart.
         </p>
-      </div>
-      <div class="pt-4">
-        <a href="#stories" class="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-sm px-5 py-2.5 rounded-full shadow-lg transition">
-          Explore More <i class="fa-solid fa-arrow-right text-xs"></i>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- SPONSOR -->
-  <section id="sponsor-container" class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-900 text-white p-4 sm:p-6 shadow-lg border border-emerald-700/20">
-    <div class="flex items-center gap-4">
-      <div class="flex-1 min-w-0">
-        <span class="inline-block bg-amber-400 text-slate-900 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">Official Sponsor</span>
-        <h2 id="sponsor-title" class="mt-1.5 text-lg sm:text-xl font-black tracking-wide truncate">Veezoom Myanmar</h2>
-        <p id="sponsor-desc" class="text-xs sm:text-sm text-emerald-100/80 mt-0.5 line-clamp-2">Auto Bike — Title Sponsor of Roads of Ayeyarwaddy</p>
-        <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 mt-3 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs px-3.5 py-1.5 rounded-lg transition">
-          Visit Sponsor <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-        </a>
-      </div>
-      <div class="w-16 h-16 sm:w-24 sm:h-24 rounded-xl overflow-hidden border border-emerald-400/30 bg-emerald-800/50 shrink-0 flex items-center justify-center">
-        <img id="sponsor-img" src="" alt="Sponsor" class="w-full h-full object-cover" onerror="this.style.display='none'">
+        <div class="mt-7 sm:mt-8">
+          <a id="hero-btn" href="#stories" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full shadow-lg transition">
+            Explore My Journey <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
+        </div>
+        <p id="hero-sign" class="mt-8 text-emerald-400/60 text-sm italic font-medium">— Htoo Htet</p>
       </div>
     </div>
   </section>
 
-  <!-- UPCOMING / FEATURED ROW (from admin sections or hardcoded fallback) -->
-  <section id="upcoming">
-    <div class="flex items-end justify-between gap-3 mb-3.5">
-      <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
-        <span class="w-1 h-5 bg-emerald-600 rounded-full"></span>
-        Upcoming
+  <!-- ========== PROUD SPONSORS ========== -->
+  <section id="proud-sponsors-section" class="surface-bg border-y border-emerald-900/40 hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
+        <span id="proud-label" class="text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/80 shrink-0">Our Proud Sponsors</span>
+        <div id="proud-sponsors-list" class="flex items-center gap-6 sm:gap-8 overflow-x-auto w-full justify-start sm:justify-center"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== OFFICIAL SPONSOR BANNER ========== -->
+  <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 hidden">
+    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-800/40 shadow-2xl shadow-black/40">
+      <img id="sponsor-bg" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&q=80" alt="" class="absolute inset-0 w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30"></div>
+      <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-5 sm:p-8 lg:p-10">
+        <div class="flex-1 min-w-0">
+          <span class="inline-block accent-bg text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Official Sponsor</span>
+          <h2 id="sponsor-title" class="mt-3 text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">Veezoom Myanmar</h2>
+          <p id="sponsor-desc" class="mt-2 text-sm sm:text-base text-emerald-100/80 max-w-lg leading-relaxed"></p>
+          <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-2 mt-5 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition">
+            Visit Sponsor <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+          </a>
+        </div>
+        <div class="shrink-0">
+          <div class="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-2xl overflow-hidden border-2 border-emerald-500/30 bg-black/40 backdrop-blur flex items-center justify-center shadow-xl">
+            <img id="sponsor-img" src="" alt="Sponsor" class="w-full h-full object-contain p-2" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== UPCOMING ========== -->
+  <section id="upcoming-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+    <div class="flex items-end justify-between gap-3 mb-4">
+      <h2 id="upcoming-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+        <span class="w-1 h-6 rounded-full accent-bg"></span>Upcoming
       </h2>
-      <a href="#stories" class="text-xs sm:text-sm font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1">See All <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
     </div>
-    <div id="upcoming-banner" class="rounded-2xl overflow-hidden shadow-md relative min-h-[160px] sm:min-h-[200px] bg-slate-800">
-      <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1000" alt="Roads of Ayeyarwaddy" class="absolute inset-0 w-full h-full object-cover opacity-80">
-      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-      <div class="relative z-10 p-4 sm:p-6 flex flex-col justify-end min-h-[160px] sm:min-h-[200px]">
-        <span class="text-[10px] font-bold uppercase tracking-widest text-amber-300">Featured Journey</span>
-        <h3 class="text-white text-xl sm:text-2xl font-black mt-1">Roads of Ayeyarwaddy</h3>
-        <p class="text-white/80 text-xs sm:text-sm mt-1 max-w-md">29 towns · One journey · Exploring local lifestyles & real places</p>
+    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden min-h-[180px] sm:min-h-[220px] border border-emerald-800/40">
+      <img id="upcoming-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200" alt="" class="absolute inset-0 w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+      <div class="relative z-10 p-5 sm:p-7 flex flex-col justify-end min-h-[180px] sm:min-h-[220px]">
+        <span id="upcoming-label" class="text-[10px] font-bold uppercase tracking-widest accent-text">Featured Journey</span>
+        <h3 id="upcoming-title" class="text-white text-xl sm:text-2xl font-black mt-1"></h3>
+        <p id="upcoming-desc" class="text-white/80 text-xs sm:text-sm mt-1 max-w-md"></p>
       </div>
     </div>
   </section>
 
-  <!-- LATEST / ALL STORIES -->
-  <section id="stories">
-    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
+  <!-- ========== TRAVEL STORIES (Latest) ========== -->
+  <section id="stories" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
       <div>
-        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
-          <span class="w-1 h-5 bg-emerald-600 rounded-full"></span>
-          Latest Travel Posts
-        </h2>
-        <p class="text-xs text-slate-500 mt-0.5">ခေါင်းစဉ်၊ နေရာ၊ အမျိုးအစားအလိုက် ရှာဖွေပါ</p>
+        <div class="flex items-center gap-2 mb-1">
+          <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
+          <h2 id="stories-heading" class="text-xl sm:text-2xl font-black text-white">Travel Stories</h2>
+        </div>
+        <p id="stories-sub" class="text-xs sm:text-sm text-emerald-400/70">မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ</p>
       </div>
-      <select id="story-category-filter" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 w-full sm:w-auto">
+      <select id="story-category-filter" class="rounded-xl border border-emerald-800/50 bg-emerald-950 text-emerald-100 text-sm px-3 py-2 outline-none focus:border-emerald-500 w-full sm:w-auto">
         <option value="">အမျိုးအစားအားလုံး</option>
       </select>
     </div>
-
-    <div id="blog-posts-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-      <!-- dynamic cards -->
+    <div id="blog-posts-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <!-- dynamic -->
     </div>
   </section>
 
-  <!-- EXTRA HOME SECTIONS (from Admin Rows) -->
-  <div id="extra-home-sections" class="space-y-8"></div>
+  <!-- Extra custom sections -->
+  <div id="extra-home-sections" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10"></div>
 
-  <!-- ABOUT (simple) -->
-  <section id="about" class="rounded-2xl bg-white border border-slate-100 p-5 sm:p-7 shadow-sm">
-    <h2 class="text-lg font-extrabold text-slate-900 mb-2">About Htoo Htet Explore</h2>
-    <p class="text-sm text-slate-600 leading-relaxed">
-      မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
-      Discover Myanmar through roads, people, culture and nature.
-    </p>
+  <!-- ========== YOUTUBE ========== -->
+  <section id="youtube-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 hidden">
+    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-800/40">
+      <img id="youtube-bg" src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1400&q=80" alt="" class="absolute inset-0 w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/55"></div>
+      <div class="relative z-10 flex flex-col lg:flex-row items-center gap-8 p-6 sm:p-10 lg:p-12">
+        <div class="flex-1 text-center lg:text-left">
+          <div class="inline-flex items-center gap-2 mb-4">
+            <span class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+              <i class="fa-brands fa-youtube text-white text-lg"></i>
+            </span>
+            <span id="youtube-label" class="text-red-400 font-bold text-sm tracking-wide">Watch My YouTube Channel</span>
+          </div>
+          <h2 id="youtube-title" class="text-2xl sm:text-3xl font-black text-white leading-tight"></h2>
+          <p id="youtube-desc" class="mt-3 text-emerald-200/70 text-sm max-w-md mx-auto lg:mx-0"></p>
+          <a id="youtube-link" href="#" target="_blank" class="inline-flex items-center gap-2 mt-6 bg-red-600 hover:bg-red-500 text-white font-bold text-sm px-6 py-3 rounded-full transition shadow-lg">
+            Visit Channel <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
+        </div>
+        <div class="shrink-0">
+          <div class="w-64 sm:w-72 h-40 sm:h-44 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative">
+            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70">
+            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+              <div class="w-14 h-14 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl mb-2">
+                <i class="fa-solid fa-play text-white text-lg ml-0.5"></i>
+              </div>
+              <span class="text-xs font-bold text-white/90">HTOO HTET</span>
+              <span class="text-[10px] text-emerald-300/80">Travel Vlog</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
+
+  <!-- ========== ABOUT ========== -->
+  <section id="about-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div class="rounded-2xl sm:rounded-3xl surface-bg border border-emerald-800/40 p-6 sm:p-10">
+      <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3">About Htoo Htet</h2>
+      <p id="about-desc" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl">
+        မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
+      </p>
+    </div>
+  </section>
+
 </main>
 
-<!-- FOOTER -->
-<footer class="mt-8 border-t border-slate-200 bg-white">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 text-center text-xs text-slate-500">
-    © <span id="footer-year"></span> Htoo Htet Explore · Explore Myanmar
+<!-- ================= FOOTER ================= -->
+<footer id="contact" class="border-t border-emerald-900/50 surface-bg mt-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
+      <div>
+        <div class="flex items-center gap-2.5 mb-4">
+          <div id="footer-logo-wrap" class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center overflow-hidden">
+            <img id="footer-logo-img" src="" alt="" class="w-full h-full object-cover hidden">
+            <i id="footer-logo-icon" class="fa-solid fa-mountain-sun text-white text-sm"></i>
+          </div>
+          <div>
+            <div id="footer-brand-name" class="font-black text-white text-sm">HTOO HTET</div>
+            <div id="footer-brand-tagline" class="text-[9px] text-emerald-400 tracking-wider uppercase">Travel Journal & Beyond</div>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-4" id="footer-social"></div>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-4">Quick Links</h4>
+        <ul id="footer-links" class="space-y-2 text-sm text-emerald-100/70"></ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-4">Contact</h4>
+        <ul class="space-y-2.5 text-sm text-emerald-100/70">
+          <li class="flex items-center gap-2"><i class="fa-regular fa-envelope text-emerald-500 text-xs"></i><a id="contact-email" href="mailto:htoohtet@gmail.com" class="hover:text-yellow-400 transition">htoohtet@gmail.com</a></li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-emerald-500 text-xs"></i><span id="contact-location">Yangon, Myanmar</span></li>
+        </ul>
+      </div>
+      <div class="flex flex-col items-start sm:items-end">
+        <p id="footer-tagline" class="text-emerald-300/50 text-sm italic font-medium leading-relaxed text-left sm:text-right">Good Vibes<br>Better Journeys</p>
+      </div>
+    </div>
+    <div class="mt-10 pt-6 border-t border-emerald-900/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-emerald-500/50">
+      <span>© <span id="footer-year"></span> <span id="footer-copy-name">HTOO HTET</span>. All rights reserved.</span>
+    </div>
   </div>
 </footer>
 
 <!-- ARTICLE MODAL -->
 <div id="article-modal" class="fixed inset-0 z-[60] hidden">
-  <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeArticle()"></div>
+  <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeArticle()"></div>
   <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
-    <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
+    <div class="surface-bg rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl border border-emerald-800/40">
       <div class="relative">
-        <img id="article-image" src="" alt="" class="w-full h-52 sm:h-64 object-cover rounded-t-2xl sm:rounded-t-2xl">
-        <button type="button" onclick="closeArticle()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70"><i class="fa-solid fa-xmark"></i></button>
+        <img id="article-image" src="" alt="" class="w-full h-52 sm:h-64 object-cover rounded-t-2xl">
+        <button type="button" onclick="closeArticle()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 sm:p-6">
-        <p id="article-location" class="text-xs font-bold text-emerald-700 uppercase tracking-wide"></p>
-        <h2 id="article-title" class="text-xl sm:text-2xl font-black text-slate-900 mt-1 leading-snug"></h2>
-        <div id="article-body" class="mt-4 text-sm text-slate-600 leading-relaxed whitespace-pre-line"></div>
-        <div class="mt-6 pt-4 border-t border-slate-100">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Related</p>
+        <p id="article-location" class="text-xs font-bold text-emerald-400 uppercase tracking-wide"></p>
+        <h2 id="article-title" class="text-xl sm:text-2xl font-black text-white mt-1 leading-snug"></h2>
+        <div id="article-body" class="mt-4 text-sm text-emerald-100/70 leading-relaxed whitespace-pre-line"></div>
+        <div class="mt-6 pt-4 border-t border-emerald-800/40">
+          <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-2">Related Stories</p>
           <div id="related-stories" class="space-y-2"></div>
         </div>
       </div>
@@ -219,33 +306,28 @@
 </div>
 
 <script>
-/* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let allStoryPosts = [];
+let siteSettings = {};
+let siteMenu = [];
 
-/* ---------- menu ---------- */
+/* ---------- menu drawer ---------- */
 function toggleMenu() {
-  const menu = $('site-menu'), btn = $('menu-toggle'), overlay = $('drawer-overlay');
+  const menu = $('site-menu'), overlay = $('drawer-overlay');
   const open = menu.classList.contains('translate-x-full');
   menu.classList.toggle('translate-x-full', !open);
   overlay.classList.toggle('opacity-0', !open);
   overlay.classList.toggle('pointer-events-none', !open);
-  btn.setAttribute('aria-expanded', String(open));
-  menu.setAttribute('aria-hidden', String(!open));
-  btn.innerHTML = open ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
   document.body.classList.toggle('overflow-hidden', open);
 }
 function closeMenu() {
-  const menu = $('site-menu'), btn = $('menu-toggle'), overlay = $('drawer-overlay');
-  menu.classList.add('translate-x-full');
-  overlay.classList.add('opacity-0', 'pointer-events-none');
-  btn.setAttribute('aria-expanded', 'false');
-  btn.innerHTML = '<i class="fa-solid fa-bars"></i>';
-  menu.setAttribute('aria-hidden', 'true');
+  $('site-menu').classList.add('translate-x-full');
+  $('drawer-overlay').classList.add('opacity-0', 'pointer-events-none');
   document.body.classList.remove('overflow-hidden');
 }
 
-/* ---------- search panel ---------- */
+/* ---------- search ---------- */
 const searchPanel = $('search-panel');
 const searchInput = $('header-search-input');
 $('search-toggle').addEventListener('click', () => {
@@ -258,33 +340,128 @@ $('search-close').addEventListener('click', () => {
   renderStoryCards();
 });
 searchInput.addEventListener('input', () => renderStoryCards());
-document.addEventListener('click', e => {
-  if (!searchPanel.contains(e.target) && !$('search-toggle').contains(e.target) && searchPanel.classList.contains('open')) {
-    searchPanel.classList.remove('open');
-  }
-});
 
-/* ---------- data ---------- */
-let allStoryPosts = [];
+/* ---------- helpers ---------- */
+function read(key, fallback) {
+  try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
+}
+function applyColors(s) {
+  if (s.accentColor) document.documentElement.style.setProperty('--brand-accent', s.accentColor);
+  if (s.bgColor) document.documentElement.style.setProperty('--brand-bg', s.bgColor);
+  if (s.surfaceColor) document.documentElement.style.setProperty('--brand-surface', s.surfaceColor);
+  if (s.cardColor) document.documentElement.style.setProperty('--brand-card', s.cardColor);
+  if (s.theme === 'navy') {
+    document.body.style.color = '#0f172a';
+  } else {
+    document.body.style.color = '#ffffff';
+  }
+}
+function setLogo(url) {
+  ['brand-logo-img', 'footer-logo-img'].forEach(id => {
+    const img = $(id);
+    const icon = $(id.replace('-img', '-icon'));
+    if (!img) return;
+    if (url) {
+      img.src = url;
+      img.classList.remove('hidden');
+      if (icon) icon.classList.add('hidden');
+    } else {
+      img.classList.add('hidden');
+      if (icon) icon.classList.remove('hidden');
+    }
+  });
+}
+function renderSocial(containerId, social, white = true) {
+  const el = $(containerId);
+  if (!el) return;
+  const items = [
+    { key: 'fb', icon: 'fa-facebook-f', hover: 'hover:bg-blue-600' },
+    { key: 'yt', icon: 'fa-youtube', hover: 'hover:bg-red-600' },
+    { key: 'tt', icon: 'fa-tiktok', hover: 'hover:bg-black' }
+  ];
+  el.innerHTML = items.map(i => {
+    const url = social[i.key];
+    if (!url) return '';
+    return `<a href="${safe(url)}" target="_blank" class="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center ${i.hover} hover:text-white transition text-xs"><i class="fa-brands ${i.icon}"></i></a>`;
+  }).join('');
+}
+function renderMenu() {
+  const menu = siteMenu.length ? siteMenu : [
+    { label: 'Home', href: '#home' },
+    { label: 'Travel Stories', href: '#stories' },
+    { label: 'YouTube', href: '#youtube-section' },
+    { label: 'About', href: '#about-section' },
+    { label: 'Contact', href: '#contact' }
+  ];
+  const desk = $('desktop-nav');
+  const mob = $('mobile-nav');
+  const foot = $('footer-links');
+  if (desk) desk.innerHTML = menu.map(m => `<a href="${safe(m.href)}" class="nav-link hover:text-white transition">${safe(m.label)}</a>`).join('');
+  if (mob) mob.innerHTML = menu.map(m => `<a href="${safe(m.href)}" onclick="closeMenu()" class="rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3">${safe(m.label)}</a>`).join('');
+  if (foot) foot.innerHTML = menu.map(m => `<li><a href="${safe(m.href)}" class="hover:text-yellow-400 transition">${safe(m.label)}</a></li>`).join('');
+}
 
 function loadBlogData() {
   $('footer-year').textContent = new Date().getFullYear();
 
-  // social
-  const social = JSON.parse(localStorage.getItem('hh_social') || '{}');
-  [['link-fb-d','link-fb-m', social.fb], ['link-tt-d','link-tt-m', social.tt], ['link-yt-d','link-yt-m', social.yt]].forEach(([d,m,url]) => {
-    [d,m].forEach(id => {
-      const a = $(id);
-      if (!a) return;
-      if (url) { a.href = url; a.classList.remove('hidden'); }
-      else a.classList.add('hidden');
-    });
-  });
+  // Settings
+  siteSettings = read('hh_settings', {});
+  applyColors(siteSettings);
+  const brand = siteSettings.brandName || 'HTOO HTET';
+  const tagline = siteSettings.brandTagline || 'Travel Journal & Beyond';
+  ['brand-name', 'footer-brand-name', 'mobile-brand-name', 'footer-copy-name'].forEach(id => { if ($(id)) $(id).textContent = brand; });
+  ['brand-tagline', 'footer-brand-tagline'].forEach(id => { if ($(id)) $(id).textContent = tagline; });
+  setLogo(siteSettings.logoUrl || '');
+  if (siteSettings.contactEmail) {
+    const a = $('contact-email');
+    if (a) { a.textContent = siteSettings.contactEmail; a.href = 'mailto:' + siteSettings.contactEmail; }
+  }
+  if (siteSettings.contactLocation) $('contact-location').textContent = siteSettings.contactLocation;
+  if (siteSettings.footerTagline) $('footer-tagline').innerHTML = siteSettings.footerTagline.replace(/\n/g, '<br>');
 
-  // sponsor
-  const sponsor = JSON.parse(localStorage.getItem('hh_sponsor') || '{}');
+  // Hero
+  const hero = read('hh_hero', {});
+  if (hero.image) $('hero-img').src = hero.image;
+  if (hero.label) $('hero-label').textContent = hero.label;
+  if (hero.title) $('hero-title').innerHTML = hero.title;
+  if (hero.desc) $('hero-desc').textContent = hero.desc;
+  if (hero.btnText) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
+  if (hero.btnLink) $('hero-btn').href = hero.btnLink;
+  if (hero.sign) $('hero-sign').textContent = hero.sign;
+  if (hero.active === false) $('hero-section').classList.add('hidden');
+  else $('hero-section').classList.remove('hidden');
+
+  // Menu
+  siteMenu = read('hh_menu', []);
+  renderMenu();
+
+  // Social (white icons)
+  const social = read('hh_social', {});
+  renderSocial('social-links-desktop', social);
+  renderSocial('social-links-mobile', social);
+  renderSocial('footer-social', social);
+  if (social.yt) {
+    const yl = $('youtube-link');
+    if (yl) yl.href = social.yt;
+  }
+
+  // Proud Sponsors
+  const proud = read('hh_proud_sponsors', []);
+  const proudSec = $('proud-sponsors-section');
+  if (proud.length && proud.some(p => p.active !== false)) {
+    proudSec.classList.remove('hidden');
+    $('proud-sponsors-list').innerHTML = proud.filter(p => p.active !== false).map(p => {
+      if (p.logo) return `<a href="${safe(p.link || '#')}" target="_blank" class="shrink-0 opacity-80 hover:opacity-100 transition"><img src="${safe(p.logo)}" alt="${safe(p.name)}" class="h-7 sm:h-8 object-contain"></a>`;
+      return `<span class="text-white/90 font-bold text-sm shrink-0 opacity-80">${safe(p.name)}</span>`;
+    }).join('');
+  } else {
+    proudSec.classList.add('hidden');
+  }
+
+  // Official Sponsor
+  const sponsor = read('hh_sponsor', {});
   const sc = $('sponsor-container');
-  if (sponsor.active === false) {
+  if (sponsor.active === false || (!sponsor.title && !sponsor.img)) {
     sc.classList.add('hidden');
   } else {
     sc.classList.remove('hidden');
@@ -292,15 +469,53 @@ function loadBlogData() {
     if (sponsor.desc) $('sponsor-desc').textContent = sponsor.desc;
     if (sponsor.link) $('sponsor-link').href = sponsor.link;
     if (sponsor.img) { $('sponsor-img').src = sponsor.img; $('sponsor-img').style.display = ''; }
+    if (sponsor.bgImage) $('sponsor-bg').src = sponsor.bgImage;
   }
 
-  // posts
-  try {
-    allStoryPosts = JSON.parse(localStorage.getItem('hh_posts')) || [];
-  } catch { allStoryPosts = []; }
+  // Upcoming
+  const up = read('hh_upcoming', {});
+  const upSec = $('upcoming-section');
+  if (up.active === false || !up.title) {
+    upSec.classList.add('hidden');
+  } else {
+    upSec.classList.remove('hidden');
+    if (up.heading) $('upcoming-heading').innerHTML = `<span class="w-1 h-6 rounded-full accent-bg"></span>${safe(up.heading)}`;
+    if (up.label) $('upcoming-label').textContent = up.label;
+    if (up.title) $('upcoming-title').textContent = up.title;
+    if (up.desc) $('upcoming-desc').textContent = up.desc;
+    if (up.image) $('upcoming-img').src = up.image;
+  }
 
-  // categories
-  const cats = [...new Set(allStoryPosts.map(p => p.category || p.type || '').filter(Boolean))];
+  // YouTube
+  const yt = read('hh_youtube', {});
+  const ytSec = $('youtube-section');
+  if (yt.active === false) {
+    ytSec.classList.add('hidden');
+  } else {
+    ytSec.classList.remove('hidden');
+    if (yt.label) $('youtube-label').textContent = yt.label;
+    if (yt.title) $('youtube-title').innerHTML = yt.title;
+    if (yt.desc) $('youtube-desc').textContent = yt.desc;
+    if (yt.link) $('youtube-link').href = yt.link;
+    else if (social.yt) $('youtube-link').href = social.yt;
+    if (yt.thumb) $('youtube-thumb').src = yt.thumb;
+    if (yt.bgImage) $('youtube-bg').src = yt.bgImage;
+  }
+
+  // About
+  const about = read('hh_about', {});
+  if (about.title) $('about-title').textContent = about.title;
+  if (about.desc) $('about-desc').textContent = about.desc;
+  if (about.active === false) $('about-section').classList.add('hidden');
+  else $('about-section').classList.remove('hidden');
+
+  // Stories heading
+  if (siteSettings.storiesHeading) $('stories-heading').textContent = siteSettings.storiesHeading;
+  if (siteSettings.storiesSub) $('stories-sub').textContent = siteSettings.storiesSub;
+
+  // Posts
+  allStoryPosts = read('hh_posts', []);
+  const cats = [...new Set(allStoryPosts.map(p => p.category || p.type || p.location || '').filter(Boolean))];
   const sel = $('story-category-filter');
   const cur = sel.value;
   sel.innerHTML = '<option value="">အမျိုးအစားအားလုံး</option>' + cats.map(c => `<option value="${safe(c)}">${safe(c)}</option>`).join('');
@@ -310,41 +525,51 @@ function loadBlogData() {
   renderExtraHomeSections();
 }
 
+function formatDate(ts) {
+  if (!ts) return '';
+  try {
+    const d = new Date(typeof ts === 'number' ? ts : ts);
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch { return ''; }
+}
+
 function renderStoryCards() {
   const q = (searchInput?.value || '').trim().toLowerCase();
   const category = $('story-category-filter')?.value || '';
   const posts = allStoryPosts.filter(p => {
     const isLatest = !p.sectionId || p.sectionId === 'latest';
     if (!isLatest) return false;
-    if (category && (p.category || p.type || '') !== category) return false;
+    if (category && (p.category || p.type || p.location || '') !== category) return false;
     if (!q) return true;
     return [p.title, p.desc, p.location, p.category, p.type].some(v => String(v || '').toLowerCase().includes(q));
   });
 
   const box = $('blog-posts-container');
   if (!posts.length) {
-    box.innerHTML = '<div class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">Story မရှိသေးပါ။ Admin မှ Post ထည့်ပါ။</div>';
+    box.innerHTML = `<div class="col-span-full rounded-2xl border border-dashed border-emerald-800/50 bg-emerald-950/40 p-10 text-center">
+      <i class="fa-solid fa-book-open text-3xl text-emerald-700 mb-3 block"></i>
+      <p class="text-sm text-emerald-400/70">Story မရှိသေးပါ။ Admin မှ Post ထည့်ပါ။</p>
+    </div>`;
     return;
   }
 
-  box.innerHTML = posts.map((post, i) => {
+  box.innerHTML = posts.map(post => {
     const idx = allStoryPosts.indexOf(post);
-    const tag = post.category || post.type || 'Travel Story';
+    const tag = (post.location || post.category || post.type || 'MYANMAR').toUpperCase();
+    const dateStr = formatDate(post.publishedDate) || formatDate(post.id) || formatDate(post.date) || '';
     return `
-    <button type="button" onclick="openArticle(${idx})" class="card-hover text-left bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
-      <div class="relative h-44 sm:h-48 overflow-hidden bg-slate-100">
-        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600')}" alt="${safe(post.title)}" class="w-full h-full object-cover">
-        <span class="absolute top-3 left-3 bg-black/55 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-          <i class="fa-solid fa-location-dot text-red-400"></i> ${safe(post.location || 'Myanmar')}
-        </span>
+    <button type="button" onclick="openArticle(${idx})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
+      <div class="relative h-44 sm:h-48 overflow-hidden bg-emerald-950">
+        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600')}" alt="${safe(post.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        <span class="absolute top-3 left-3 bg-black/75 backdrop-blur-sm accent-text text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase">${safe(tag)}</span>
       </div>
-      <div class="p-3.5 sm:p-4 flex-1 flex flex-col">
-        <span class="inline-block self-start bg-amber-400 text-slate-900 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide">${safe(tag)}</span>
-        <h3 class="font-bold text-slate-900 text-[15px] leading-snug mt-1.5 line-clamp-2">${safe(post.title)}</h3>
-        <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed flex-1">${safe(post.desc || '')}</p>
-        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
-          <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[9px] font-bold">H</span> Htoo Htet</span>
-          <span class="text-emerald-700 font-bold">Read <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
+      <div class="p-4 flex-1 flex flex-col">
+        <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2 group-hover:text-emerald-300 transition">${safe(post.title)}</h3>
+        <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2 leading-relaxed flex-1">${safe(post.desc || '')}</p>
+        <div class="mt-3 flex items-center justify-between text-[11px] text-emerald-500/60">
+          <span>${dateStr}</span>
+          <span class="accent-text font-bold flex items-center gap-1">Read <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
         </div>
       </div>
     </button>`;
@@ -354,18 +579,17 @@ function renderStoryCards() {
 function openArticle(index) {
   const post = allStoryPosts[index];
   if (!post) return;
-  $('article-image').src = post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1000';
-  $('article-image').alt = post.title || '';
+  $('article-image').src = post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000';
   $('article-title').textContent = post.title || 'Travel Story';
   $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ');
   $('article-body').textContent = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
-  const related = allStoryPosts.filter((p, i) => i !== index).slice(0, 3);
+  const related = allStoryPosts.filter((_, i) => i !== index).slice(0, 3);
   $('related-stories').innerHTML = related.length
-    ? related.map(p => `<button onclick="openArticle(${allStoryPosts.indexOf(p)})" class="w-full text-left flex gap-3 rounded-xl border border-slate-100 p-2 hover:bg-slate-50">
-        <img src="${safe(p.img || '')}" class="w-16 h-12 object-cover rounded-lg shrink-0" alt="">
-        <span class="text-sm font-semibold text-slate-800 self-center line-clamp-2">${safe(p.title)}</span>
+    ? related.map(p => `<button onclick="openArticle(${allStoryPosts.indexOf(p)})" class="w-full text-left flex gap-3 rounded-xl border border-emerald-800/40 p-2 hover:bg-emerald-900/40 transition">
+        <img src="${safe(p.img || '')}" class="w-16 h-12 object-cover rounded-lg shrink-0" alt="" onerror="this.style.display='none'">
+        <span class="text-sm font-semibold text-emerald-100 self-center line-clamp-2">${safe(p.title)}</span>
       </button>`).join('')
-    : '<p class="text-sm text-slate-400">ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။</p>';
+    : '<p class="text-sm text-emerald-500/50">ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။</p>';
   $('article-modal').classList.remove('hidden');
   document.body.classList.add('overflow-hidden');
 }
@@ -377,9 +601,8 @@ function closeArticle() {
 function renderExtraHomeSections() {
   const container = $('extra-home-sections');
   if (!container) return;
-  let sections = [], posts = [];
-  try { sections = JSON.parse(localStorage.getItem('hh_home_sections') || '[]'); } catch {}
-  try { posts = JSON.parse(localStorage.getItem('hh_posts') || '[]'); } catch {}
+  const sections = read('hh_home_sections', []);
+  const posts = read('hh_posts', []);
   if (!sections.length) { container.innerHTML = ''; return; }
 
   container.innerHTML = sections.map(section => {
@@ -387,32 +610,32 @@ function renderExtraHomeSections() {
     const cards = sectionPosts.length
       ? sectionPosts.map(post => {
           const idx = allStoryPosts.indexOf(post);
-          return `<button type="button" onclick="openArticle(${idx >= 0 ? idx : 0})" class="card-hover text-left bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
-            <div class="relative h-40 overflow-hidden bg-slate-100">
-              <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500')}" alt="" class="w-full h-full object-cover">
-              <span class="absolute top-2.5 left-2.5 bg-black/55 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">${safe(post.location || 'Myanmar')}</span>
+          return `<button type="button" onclick="openArticle(${idx >= 0 ? idx : 0})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
+            <div class="relative h-44 sm:h-48 overflow-hidden">
+              <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500')}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              <span class="absolute top-2.5 left-2.5 bg-black/75 accent-text text-[10px] font-black px-2 py-0.5 rounded-md uppercase">${safe(post.location || 'Myanmar')}</span>
             </div>
-            <div class="p-3"><h3 class="font-bold text-slate-900 text-sm leading-snug line-clamp-2">${safe(post.title)}</h3>
-            <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">${safe(post.desc || '')}</p></div>
+            <div class="p-4">
+              <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2">${safe(post.title)}</h3>
+              <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2">${safe(post.desc || '')}</p>
+            </div>
           </button>`;
         }).join('')
-      : '<div class="col-span-full rounded-xl border border-dashed border-slate-200 bg-white p-5 text-sm text-slate-400">ဒီ Row အတွက် Post မထည့်ရသေးပါ။</div>';
+      : '<div class="col-span-full rounded-xl border border-dashed border-emerald-800/40 p-6 text-sm text-emerald-500/50 text-center">ဒီ Row အတွက် Post မထည့်ရသေးပါ။</div>';
 
-    return `<section>
-      <div class="mb-3.5 flex items-end justify-between gap-3">
-        <div>
-          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
-            <span class="w-1 h-5 bg-emerald-600 rounded-full"></span>${safe(section.title)}
-          </h2>
-          ${section.subtitle ? `<p class="text-xs text-slate-500 mt-0.5">${safe(section.subtitle)}</p>` : ''}
-        </div>
+    return `<section class="py-4">
+      <div class="mb-5">
+        <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+          <span class="w-1 h-6 rounded-full accent-bg"></span>${safe(section.title)}
+        </h2>
+        ${section.subtitle ? `<p class="text-xs text-emerald-400/60 mt-1 ml-3">${safe(section.subtitle)}</p>` : ''}
       </div>
-      <div class="${section.layout === 'wide' ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 sm:grid-cols-2 gap-4'}">${cards}</div>
+      <div class="${section.layout === 'wide' ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5'}">${cards}</div>
     </section>`;
   }).join('');
 }
 
-/* ---------- firebase ---------- */
+/* ---------- Firebase ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCCYJQXip_GTPTZ6DQg2_RhV_jSr2Tq-4s",
   authDomain: "htoo-htet-explore.firebaseapp.com",
@@ -424,25 +647,21 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections'];
 let publicFirebaseReady = false;
 try {
   firebase.initializeApp(firebaseConfig);
   const publicDb = firebase.database();
   publicDb.ref('siteData').on('value', snap => {
     const data = snap.val() || {};
-    ['hh_social','hh_sponsor','hh_posts','hh_home_sections'].forEach(key => {
+    DATA_KEYS.forEach(key => {
       if (Object.prototype.hasOwnProperty.call(data, key)) localStorage.setItem(key, JSON.stringify(data[key]));
       else localStorage.removeItem(key);
     });
     publicFirebaseReady = true;
     loadBlogData();
-  }, err => {
-    console.error('Firebase read error:', err);
-    loadBlogData();
-  });
-} catch (e) {
-  console.error('Firebase setup error:', e);
-}
+  }, err => { console.error(err); loadBlogData(); });
+} catch (e) { console.error(e); }
 
 document.addEventListener('DOMContentLoaded', () => {
   $('story-category-filter')?.addEventListener('change', renderStoryCards);
