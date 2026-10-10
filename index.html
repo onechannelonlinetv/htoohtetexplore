@@ -466,15 +466,19 @@
 <div id="article-modal" class="fixed inset-0 z-[60] hidden">
   <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeArticle()"></div>
   <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
-    <div class="surface-bg rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl border border-emerald-800/40">
-      <div class="relative">
-        <img id="article-image" src="" alt="" class="w-full h-48 sm:h-56 object-cover rounded-t-2xl">
-        <button type="button" onclick="closeArticle()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"><i class="fa-solid fa-xmark"></i></button>
+    <div class="surface-bg rounded-t-2xl sm:rounded-2xl w-full sm:max-w-3xl max-h-[96vh] overflow-y-auto shadow-2xl border border-emerald-800/40">
+      <div class="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 border-b border-emerald-800/40" style="background:rgba(6,21,16,.95);backdrop-filter:blur(8px)">
+        <button type="button" onclick="closeArticle()" class="w-9 h-9 rounded-full bg-emerald-900/60 text-emerald-100 flex items-center justify-center hover:bg-emerald-800"><i class="fa-solid fa-arrow-left"></i></button>
+        <span class="text-sm font-bold text-emerald-100 truncate flex-1">ဆောင်းပါး</span>
+        <button type="button" onclick="closeArticle()" class="w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/70"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-5 sm:p-6">
+      <div class="relative">
+        <img id="article-image" src="" alt="" class="w-full h-52 sm:h-64 object-cover cursor-zoom-in" onclick="openLightboxFromArticle(this)" title="နှိပ်ပြီး ချဲ့ကြည့်">
+      </div>
+      <div class="p-5 sm:p-7">
         <p id="article-location" class="text-xs font-bold text-emerald-400 uppercase tracking-wide"></p>
-        <h2 id="article-title" class="text-xl sm:text-2xl font-black text-white mt-1 leading-snug"></h2>
-        <div id="article-body" class="mt-4 text-sm text-emerald-100/70 leading-relaxed"></div>
+        <h2 id="article-title" class="text-2xl sm:text-3xl font-black text-white mt-1 leading-snug"></h2>
+        <div id="article-body" class="mt-5 text-[15px] sm:text-base text-emerald-50/85 leading-relaxed article-prose"></div>
         <div class="mt-6 pt-4 border-t border-emerald-800/40">
           <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-2">Related Stories</p>
           <div id="related-stories" class="space-y-2"></div>
@@ -941,6 +945,71 @@ function formatArticleBody(raw) {
   }).join('');
   return t;
 }
+
+let lightboxList = [];
+let lightboxIndex = 0;
+function openLightbox(src, list) {
+  lightboxList = list && list.length ? list : [src];
+  lightboxIndex = Math.max(0, lightboxList.indexOf(src));
+  if (lightboxIndex < 0) lightboxIndex = 0;
+  const box = $('img-lightbox');
+  const img = $('lightbox-img');
+  if (!box || !img) return;
+  img.src = lightboxList[lightboxIndex];
+  box.style.display = 'flex';
+  box.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  updateLightboxCounter();
+}
+function updateLightboxCounter() {
+  const c = $('lightbox-counter');
+  if (c) c.textContent = lightboxList.length > 1 ? (lightboxIndex + 1) + ' / ' + lightboxList.length : '';
+}
+function lightboxNav(dir) {
+  if (!lightboxList.length) return;
+  lightboxIndex = (lightboxIndex + dir + lightboxList.length) % lightboxList.length;
+  $('lightbox-img').src = lightboxList[lightboxIndex];
+  updateLightboxCounter();
+}
+function closeLightbox() {
+  const box = $('img-lightbox');
+  if (!box) return;
+  box.style.display = 'none';
+  box.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+function openLightboxFromArticle(el) {
+  const src = el && el.src;
+  if (!src) return;
+  const body = $('article-body');
+  const imgs = body ? Array.from(body.querySelectorAll('img')).map(i => i.src) : [];
+  const cover = $('article-image')?.src;
+  const list = [];
+  if (cover) list.push(cover);
+  imgs.forEach(s => { if (s && list.indexOf(s) === -1) list.push(s); });
+  openLightbox(src, list.length ? list : [src]);
+}
+function bindArticleImageZoom() {
+  const body = $('article-body');
+  if (!body) return;
+  body.querySelectorAll('img').forEach(function(img) {
+    img.style.cursor = 'zoom-in';
+    img.title = 'နှိပ်ပြီး ချဲ့ကြည့်';
+    img.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openLightboxFromArticle(img);
+    };
+  });
+}
+document.addEventListener('keydown', function(e) {
+  const box = $('img-lightbox');
+  if (!box || box.classList.contains('hidden') || box.style.display === 'none') return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') lightboxNav(-1);
+  if (e.key === 'ArrowRight') lightboxNav(1);
+});
+
 function openArticle(index) {
   const post = allStoryPosts[index];
   if (!post) return;
@@ -956,10 +1025,12 @@ function openArticle(index) {
         <span class="text-sm font-semibold text-emerald-100 self-center line-clamp-2">${safe(p.title)}</span>
       </button>`).join('')
     : '<p class="text-sm text-emerald-500/50">ဆက်စပ်ဆောင်းပါး မရှိသေးပါ။</p>';
+  bindArticleImageZoom();
   $('article-modal').classList.remove('hidden');
   document.body.classList.add('overflow-hidden');
 }
 function closeArticle() {
+  try { closeLightbox(); } catch (e) {}
   $('article-modal').classList.add('hidden');
   document.body.classList.remove('overflow-hidden');
 }
@@ -1034,5 +1105,14 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeMenu(); closeArticle(); searchPanel.classList.remove('open'); }
 });
 </script>
+
+<div id="img-lightbox" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/95" style="display:none">
+  <button type="button" onclick="closeLightbox()" class="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/10 text-white text-xl flex items-center justify-center hover:bg-white/20 z-10"><i class="fa-solid fa-xmark"></i></button>
+  <button type="button" onclick="lightboxNav(-1)" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 z-10"><i class="fa-solid fa-chevron-left"></i></button>
+  <button type="button" onclick="lightboxNav(1)" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 z-10"><i class="fa-solid fa-chevron-right"></i></button>
+  <img id="lightbox-img" src="" alt="" class="max-w-[96vw] max-h-[88vh] object-contain rounded-lg shadow-2xl" onclick="event.stopPropagation()">
+  <p id="lightbox-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm"></p>
+</div>
+
 </body>
 </html>
