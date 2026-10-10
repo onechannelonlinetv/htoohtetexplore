@@ -30,6 +30,9 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 .tiny{font-size:11px;color:#92a5bf}
 .toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .toggle-row input[type=checkbox]{width:18px;height:18px;accent-color:#10b981}
+.preview-thumb{max-height:72px;max-width:110px;border-radius:8px;object-fit:cover}
+.preview-box{background:#0a1220;border:1px solid #1c2a40;border-radius:12px;overflow:hidden;position:relative}
+.range-val{font-size:12px;color:#6ee7b7;font-weight:700;min-width:48px}
 .upload-zone{border:2px dashed #2b3c55;border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:.15s;background:#0a1220}
 .upload-zone:hover{border-color:#10b981;background:#0d1a28}
 .upload-zone.dragging{border-color:#10b981;background:#0f2a22}
@@ -68,7 +71,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
     <nav class="space-y-0.5 pb-20">
       <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
-      <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Settings</button>
+      <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Layout</button>
       <button class="navbtn" data-view="hero" onclick="showView('hero',this)"><i class="fa-solid fa-image w-4"></i> Hero Banner</button>
       <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
       <button class="navbtn" data-view="proud" onclick="showView('proud',this)"><i class="fa-solid fa-handshake w-4"></i> Proud Sponsors</button>
@@ -133,7 +136,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- BRAND & SETTINGS -->
       <section id="view-settings" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Brand & Settings</h2><p class="mt-1 text-sm text-slate-400">Theme (၄ မျိုး ဒီဇိုင်းကွဲ), Logo, Font, အရောင်, အရွယ်အစား, Contact</p></div>
+        <div><h2 class="text-xl font-black">Brand & Layout</h2><p class="mt-1 text-sm text-slate-400">Theme (၄ မျိုး ဒီဇိုင်းကွဲ), Logo, Font, အရောင်, အရွယ်အစား, Contact</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <div>
             <label class="label mb-3">Website Theme — ဒီဇိုင်း ၄ မျိုး ကွဲပြား</label>
@@ -162,6 +165,15 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <input type="hidden" id="set-theme" value="forest">
           </div>
 
+          <div>
+            <label class="label mb-2">Light / Dark Mode</label>
+            <div class="flex gap-2">
+              <button type="button" id="mode-dark-btn" onclick="selectMode('dark')" class="btn btn-green flex-1"><i class="fa-solid fa-moon mr-2"></i>Dark</button>
+              <button type="button" id="mode-light-btn" onclick="selectMode('light')" class="btn btn-muted flex-1"><i class="fa-solid fa-sun mr-2"></i>Light</button>
+            </div>
+            <input type="hidden" id="set-mode" value="dark">
+          </div>
+
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Brand Name *</label><input id="set-brand-name" class="field" placeholder="HTOO HTET"></div>
             <div><label class="label">Tagline (Footer / optional under logo)</label><input id="set-brand-tagline" class="field" placeholder="Travel Journal & Beyond"></div>
@@ -184,35 +196,49 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           </div>
 
           <div class="border-t border-slate-700 pt-4 mt-2">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Font & Size Controls</p>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Font, Color & Banner Sizes (slider နဲ့ ချိန် + preview)</p>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label class="label">Body Font</label>
                 <select id="set-font" class="field">
-                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter (default)</option>
+                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
                   <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
+                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
                   <option value="'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif">Space Grotesk</option>
-                  <option value="system-ui, -apple-system, 'Noto Sans Myanmar', sans-serif">System UI</option>
                 </select>
               </div>
               <div>
                 <label class="label">Heading Font</label>
                 <select id="set-heading-font" class="field">
-                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter (default)</option>
-                  <option value="'Playfair Display', 'Noto Sans Myanmar', serif">Playfair Display (serif)</option>
+                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
+                  <option value="'Playfair Display', 'Noto Sans Myanmar', serif">Playfair (serif)</option>
                   <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
-                  <option value="'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif">Space Grotesk</option>
+                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
                 </select>
               </div>
               <div>
-                <label class="label">Hero Min Height (px)</label>
-                <input id="set-hero-height" type="number" min="320" max="900" class="field" placeholder="560">
-                <p class="tiny mt-1">ဥပမာ 480 / 560 / 640 / 720</p>
+                <label class="label flex justify-between">Hero Height <span class="range-val" id="val-hero-h">480px</span></label>
+                <input type="range" id="set-hero-height" min="280" max="800" step="20" value="480" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+                <div class="preview-box mt-2 relative" id="preview-hero" style="height:80px">
+                  <div class="absolute inset-0 bg-gradient-to-r from-emerald-950 to-transparent flex items-end p-2"><span class="text-[10px] font-bold text-white">Hero Preview</span></div>
+                </div>
               </div>
               <div>
-                <label class="label">Card Image Height (rem)</label>
-                <input id="set-card-img-h" type="number" min="6" max="20" step="0.5" class="field" placeholder="11">
-                <p class="tiny mt-1">ဥပမာ 9 / 11 / 13 / 15</p>
+                <label class="label flex justify-between">Hero Max Width <span class="range-val" id="val-hero-w">100%</span></label>
+                <input type="range" id="set-hero-maxw" min="600" max="1400" step="50" value="1400" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+                <p class="tiny mt-1">1400≈full · လျှော့ရင် ကျဉ်း</p>
+              </div>
+              <div>
+                <label class="label flex justify-between">Sponsor Banner Height <span class="range-val" id="val-sp-h">180px</span></label>
+                <input type="range" id="set-sponsor-height" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Upcoming Banner Height <span class="range-val" id="val-up-h">200px</span></label>
+                <input type="range" id="set-upcoming-height" min="120" max="400" step="10" value="200" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Card Image Height <span class="range-val" id="val-card-h">11rem</span></label>
+                <input type="range" id="set-card-img-h" min="6" max="18" step="0.5" value="11" class="w-full accent-emerald-500" oninput="updateSizePreview()">
               </div>
               <div>
                 <label class="label">Custom Accent Color</label>
@@ -224,7 +250,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             </div>
           </div>
 
-          <button onclick="saveSettings()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Brand & Settings</button>
+          <button onclick="saveSettings()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Brand & Layout</button>
         </div>
       </section>
 
@@ -290,8 +316,13 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       <section id="view-sponsor" class="view space-y-5">
         <div><h2 class="text-xl font-black">Official Sponsor Banner</h2><p class="mt-1 text-sm text-slate-400">Homepage ရဲ့ Official Sponsor — ပုံ Upload ရနိုင်</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="admin-sponsor-active" checked><span class="text-sm font-semibold">Official Sponsor Banner ပြမယ်</span></label>
+          <label class="toggle-row"><input type="checkbox" id="admin-sponsor-active" checked><span class="text-sm font-semibold">Sponsor Banner ပြမယ်</span></label>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label class="label">Badge Text (ပြင်နိုင်)</label>
+              <input id="admin-sponsor-badge" class="field" placeholder="Official Sponsor">
+              <p class="tiny mt-1">ဥပမာ: Official Sponsor · Exclusive Partner · Main Sponsor · Co Sponsor</p>
+            </div>
             <div><label class="label">Sponsor Title</label><input id="admin-sponsor-title" class="field" placeholder="Veezoom Myanmar"></div>
             <div><label class="label">Sponsor Link</label><input id="admin-sponsor-link" class="field" placeholder="https://..."></div>
             <div class="md:col-span-2"><label class="label">Description</label><textarea id="admin-sponsor-desc" class="field min-h-20"></textarea></div>
@@ -322,9 +353,14 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
         <div class="panel p-5 sm:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="up-active" checked><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Section Heading</label><input id="up-heading" class="field" placeholder="Upcoming"></div>
-            <div><label class="label">Label</label><input id="up-label" class="field" placeholder="Featured Journey"></div>
-            <div><label class="label">Title *</label><input id="up-title" class="field" placeholder="Roads of Ayeyarwaddy"></div>
+            <div><label class="label">Section Heading (အပေါ် — ဥပမာ Upcoming)</label><input id="up-heading" class="field" placeholder="Upcoming"></div>
+            <div>
+              <label class="label">Section Subtitle (ခေါင်းစဉ်အောက်၊ ပုံမတိုင်ခင်)</label>
+              <input id="up-section-title" class="field" placeholder="Next adventure…">
+              <p class="tiny mt-1">ဗလာ = မပြ · ပုံပေါ် title နဲ့ ခြားချင်ရင် ဒီမှာရေး</p>
+            </div>
+            <div><label class="label">On-image Label</label><input id="up-label" class="field" placeholder="Featured Journey"></div>
+            <div><label class="label">On-image Title *</label><input id="up-title" class="field" placeholder="Roads of Ayeyarwaddy"></div>
             <div>
               <label class="label">Image</label>
               <div class="flex gap-2">
@@ -357,7 +393,14 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <div id="admin-post-img-preview" class="mt-2"></div>
             </div>
             <div class="md:col-span-2"><label class="label">Short Description * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" placeholder="အကျဉ်းချုပ်..."></textarea></div>
-            <div class="md:col-span-2"><label class="label">Article Content * <span class="tiny">(စာ + ပုံ: [img]url[/img])</span></label><textarea id="admin-post-content" class="field min-h-32" placeholder="အကြောင်းအရာ အပြည့်အစုံ...&#10;&#10;ပုံထည့်ချင်ရင်: [img]https://image-url.jpg[/img]"></textarea></div>
+            <div class="md:col-span-2">
+              <label class="label">Article Content *</label>
+              <div class="flex gap-2 mb-2 flex-wrap">
+                <label class="btn btn-muted cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>စာထဲ ပုံ Upload ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
+                <span class="tiny self-center">Upload ပြီး [img]url[/img] အလိုအလျောက် ထည့်ပေးမယ်</span>
+              </div>
+              <textarea id="admin-post-content" class="field min-h-32" placeholder="အကြောင်းအရာ...&#10;&#10;[img]https://...[/img]"></textarea>
+            </div>
             <div><label class="label">Location *</label><input id="admin-post-location" class="field" placeholder="Bagan, Inle Lake..."></div>
             <div><label class="label">Category *</label>
               <select id="admin-post-category" class="field">
@@ -459,14 +502,26 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       <!-- SOCIAL -->
       <section id="view-social" class="view space-y-5">
         <div><h2 class="text-xl font-black">Social Links</h2><p class="mt-1 text-sm text-slate-400">Search icon ဘေး + Header / Footer မှာ ပြမယ် (Facebook, YouTube, TikTok, Viber)</p></div>
-        <div class="panel p-5 sm:p-6">
+        <div class="panel p-5 sm:p-6 space-y-4">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Facebook URL</label><input id="admin-fb" class="field" placeholder="https://facebook.com/..."></div>
-            <div><label class="label">YouTube URL</label><input id="admin-yt" class="field" placeholder="https://youtube.com/..."></div>
-            <div><label class="label">TikTok URL</label><input id="admin-tt" class="field" placeholder="https://tiktok.com/@..."></div>
-            <div><label class="label">Viber Link / Number</label><input id="admin-vb" class="field" placeholder="viber://chat?number=95xxxxxxxxx သို့မဟုတ် https://..."></div>
+            <div>
+              <label class="toggle-row mb-1"><input type="checkbox" id="social-show-fb" checked><span class="text-sm font-semibold">Facebook ပြမယ်</span></label>
+              <input id="admin-fb" class="field" placeholder="https://facebook.com/...">
+            </div>
+            <div>
+              <label class="toggle-row mb-1"><input type="checkbox" id="social-show-yt" checked><span class="text-sm font-semibold">YouTube ပြမယ်</span></label>
+              <input id="admin-yt" class="field" placeholder="https://youtube.com/...">
+            </div>
+            <div>
+              <label class="toggle-row mb-1"><input type="checkbox" id="social-show-tt" checked><span class="text-sm font-semibold">TikTok ပြမယ်</span></label>
+              <input id="admin-tt" class="field" placeholder="https://tiktok.com/@...">
+            </div>
+            <div>
+              <label class="toggle-row mb-1"><input type="checkbox" id="social-show-vb" checked><span class="text-sm font-semibold">Viber ပြမယ်</span></label>
+              <input id="admin-vb" class="field" placeholder="viber://chat?number=95... သို့မဟုတ် https://...">
+            </div>
           </div>
-          <button onclick="saveSocial()" class="btn btn-green mt-4"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Social Links</button>
+          <button onclick="saveSocial()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Social Links</button>
         </div>
       </section>
 
@@ -524,6 +579,26 @@ function togglePasswordVisibility() {
 }
 
 /* ---- Image Upload to Firebase Storage ---- */
+async function insertImageInContent(inputEl) {
+  const file = inputEl.files && inputEl.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) return toast('Image ဖိုင်သာ။');
+  if (!adminUser || !adminStorage) return toast('Login ဝင်ပါ။');
+  toast('စာထဲ ပုံ upload လုပ်နေသည်…');
+  try {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = 'uploads/content_' + Date.now() + '.' + ext;
+    const snapshot = await adminStorage.ref(path).put(file, { contentType: file.type });
+    const url = await snapshot.ref.getDownloadURL();
+    const ta = $('admin-post-content');
+    const tag = '\n[img]' + url + '[/img]\n';
+    const start = ta.selectionStart || ta.value.length;
+    ta.value = ta.value.slice(0, start) + tag + ta.value.slice(start);
+    ta.focus();
+    toast('စာထဲ ပုံ ထည့်ပြီးပါပြီ။');
+  } catch (err) { toast('Upload မအောင်မြင်: ' + (err.message || '')); }
+  inputEl.value = '';
+}
 async function uploadImage(inputEl, targetInputId) {
   const file = inputEl.files && inputEl.files[0];
   if (!file) return;
@@ -623,7 +698,7 @@ adminAuth?.onAuthStateChanged(user => { if (!user) { adminUser = null; remoteSyn
 function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 
 const titles = {
-  overview: 'Overview', settings: 'Brand & Settings', hero: 'Hero Banner', menu: 'Menu Items',
+  overview: 'Overview', settings: 'Brand & Layout', hero: 'Hero Banner', menu: 'Menu Items',
   proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Travel Posts',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
@@ -654,13 +729,18 @@ function loadAll() {
   $('set-stories-sub').value = s.storiesSub || '';
   $('set-font').value = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
   $('set-heading-font').value = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
-  $('set-hero-height').value = s.heroHeight || 560;
+  $('set-hero-height').value = s.heroHeight || 480;
+  if ($('set-hero-maxw')) $('set-hero-maxw').value = (s.heroMaxWidth === 100 || !s.heroMaxWidth) ? 1400 : s.heroMaxWidth;
+  if ($('set-sponsor-height')) $('set-sponsor-height').value = s.sponsorHeight || 180;
+  if ($('set-upcoming-height')) $('set-upcoming-height').value = s.upcomingHeight || 200;
   $('set-card-img-h').value = s.cardImgHeight || 11;
   if (s.accentColor) {
     $('set-accent-color').value = s.accentColor;
     $('set-accent-hex').value = s.accentColor;
   }
   selectTheme(s.theme || 'forest');
+  if (typeof selectMode === 'function') selectMode(s.mode || 'dark');
+  if (typeof updateSizePreview === 'function') updateSizePreview();
   showPreviewIfUrl('set-logo-url');
 
   const h = read('hh_hero', {});
@@ -676,6 +756,7 @@ function loadAll() {
 
   const sp = read('hh_sponsor', {});
   $('admin-sponsor-active').checked = sp.active !== false;
+  if ($('admin-sponsor-badge')) $('admin-sponsor-badge').value = sp.badge || 'Official Sponsor';
   $('admin-sponsor-title').value = sp.title || '';
   $('admin-sponsor-desc').value = sp.desc || '';
   $('admin-sponsor-link').value = sp.link || '';
@@ -687,6 +768,7 @@ function loadAll() {
   const up = read('hh_upcoming', {});
   $('up-active').checked = up.active !== false;
   $('up-heading').value = up.heading || '';
+  if ($('up-section-title')) $('up-section-title').value = up.sectionTitle || '';
   $('up-label').value = up.label || '';
   $('up-title').value = up.title || '';
   $('up-desc').value = up.desc || '';
@@ -714,6 +796,10 @@ function loadAll() {
   $('admin-tt').value = social.tt || '';
   $('admin-yt').value = social.yt || '';
   $('admin-vb').value = social.vb || '';
+  if ($('social-show-fb')) $('social-show-fb').checked = social.showFb !== false;
+  if ($('social-show-yt')) $('social-show-yt').checked = social.showYt !== false;
+  if ($('social-show-tt')) $('social-show-tt').checked = social.showTt !== false;
+  if ($('social-show-vb')) $('social-show-vb').checked = social.showVb !== false;
 
   renderMenuList();
   renderProudList();
@@ -735,10 +821,30 @@ function selectTheme(name) {
     c.classList.toggle('border-transparent', c.dataset.theme !== name);
   });
   const preset = THEME_PRESETS[name];
-  if (preset && !$('set-accent-hex').value) {
+  if (preset) {
     $('set-accent-color').value = preset.accentColor;
     $('set-accent-hex').value = preset.accentColor;
   }
+}
+function selectMode(mode) {
+  $('set-mode').value = mode;
+  const darkBtn = $('mode-dark-btn'), lightBtn = $('mode-light-btn');
+  if (darkBtn) darkBtn.className = 'btn flex-1 ' + (mode === 'dark' ? 'btn-green' : 'btn-muted');
+  if (lightBtn) lightBtn.className = 'btn flex-1 ' + (mode === 'light' ? 'btn-green' : 'btn-muted');
+}
+function updateSizePreview() {
+  const hh = $('set-hero-height')?.value || 480;
+  const hw = $('set-hero-maxw')?.value || 1400;
+  const sh = $('set-sponsor-height')?.value || 180;
+  const uh = $('set-upcoming-height')?.value || 200;
+  const ch = $('set-card-img-h')?.value || 11;
+  if ($('val-hero-h')) $('val-hero-h').textContent = hh + 'px';
+  if ($('val-hero-w')) $('val-hero-w').textContent = (parseInt(hw,10) >= 1350) ? '100%' : hw + 'px';
+  if ($('val-sp-h')) $('val-sp-h').textContent = sh + 'px';
+  if ($('val-up-h')) $('val-up-h').textContent = uh + 'px';
+  if ($('val-card-h')) $('val-card-h').textContent = ch + 'rem';
+  const prev = $('preview-hero');
+  if (prev) prev.style.height = Math.max(50, Math.round(parseInt(hh,10) / 6)) + 'px';
 }
 function syncColorFromHex() {
   const hex = $('set-accent-hex').value.trim();
@@ -752,8 +858,10 @@ function saveSettings() {
   const theme = $('set-theme').value || 'forest';
   const preset = THEME_PRESETS[theme] || THEME_PRESETS.forest;
   const customAccent = $('set-accent-hex').value.trim() || $('set-accent-color').value;
+  const heroMaxW = parseInt($('set-hero-maxw')?.value || '1400', 10);
   write('hh_settings', {
     theme,
+    mode: $('set-mode')?.value || 'dark',
     brandName: $('set-brand-name').value.trim() || 'HTOO HTET',
     brandTagline: $('set-brand-tagline').value.trim(),
     showBrandTagline: $('set-show-tagline').checked,
@@ -764,7 +872,10 @@ function saveSettings() {
     cardColor: preset.cardColor,
     fontFamily: $('set-font').value,
     headingFont: $('set-heading-font').value,
-    heroHeight: parseInt($('set-hero-height').value, 10) || 560,
+    heroHeight: parseInt($('set-hero-height').value, 10) || 480,
+    heroMaxWidth: heroMaxW >= 1350 ? 100 : heroMaxW,
+    sponsorHeight: parseInt($('set-sponsor-height')?.value || '180', 10),
+    upcomingHeight: parseInt($('set-upcoming-height')?.value || '200', 10),
     cardImgHeight: parseFloat($('set-card-img-h').value) || 11,
     contactEmail: $('set-email').value.trim(),
     contactLocation: $('set-location').value.trim(),
@@ -772,7 +883,7 @@ function saveSettings() {
     storiesHeading: $('set-stories-heading').value.trim(),
     storiesSub: $('set-stories-sub').value.trim()
   });
-  toast('Brand & Settings သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
+  toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
 }
 function saveHero() {
   write('hh_hero', {
@@ -790,6 +901,7 @@ function saveHero() {
 function saveSponsor() {
   write('hh_sponsor', {
     active: $('admin-sponsor-active').checked,
+    badge: $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor',
     title: $('admin-sponsor-title').value.trim(),
     desc: $('admin-sponsor-desc').value.trim(),
     link: $('admin-sponsor-link').value.trim(),
@@ -803,6 +915,7 @@ function saveUpcoming() {
   write('hh_upcoming', {
     active: $('up-active').checked,
     heading: $('up-heading').value.trim(),
+    sectionTitle: $('up-section-title')?.value.trim() || '',
     label: $('up-label').value.trim(),
     title: $('up-title').value.trim(),
     desc: $('up-desc').value.trim(),
@@ -835,9 +948,13 @@ function saveSocial() {
     fb: $('admin-fb').value.trim(),
     tt: $('admin-tt').value.trim(),
     yt: $('admin-yt').value.trim(),
-    vb: $('admin-vb').value.trim()
+    vb: $('admin-vb').value.trim(),
+    showFb: $('social-show-fb')?.checked !== false,
+    showYt: $('social-show-yt')?.checked !== false,
+    showTt: $('social-show-tt')?.checked !== false,
+    showVb: $('social-show-vb')?.checked !== false
   });
-  toast('Social Links သိမ်းပြီးပါပြီ။ (FB, YT, TikTok, Viber)');
+  toast('Social Links သိမ်းပြီးပါပြီ။');
 }
 
 /* ---- Menu ---- */
