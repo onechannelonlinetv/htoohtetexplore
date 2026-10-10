@@ -743,12 +743,20 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             </div>
             <div class="md:col-span-2"><label class="label">Short Description * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" oninput="updatePostPreview()" placeholder="အကျဉ်းချုပ်..."></textarea></div>
             <div class="md:col-span-2">
-              <label class="label">Article Content *</label>
-              <div class="flex gap-2 mb-2 flex-wrap">
-                <label class="btn btn-muted cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>စာထဲ ပုံ Upload ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
-                <span class="tiny self-center">Upload ပြီး [img]url[/img] အလိုအလျောက် ထည့်ပေးမယ်</span>
+              <label class="label">Article Content * — ခေါင်းစဉ် / စာ / ပုံ ရောရေးနိုင်</label>
+              <div class="flex gap-2 mb-2 flex-wrap items-center">
+                <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('# ')"># ခေါင်းစဉ်ကြီး</button>
+                <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('## ')">## ခေါင်းစဉ်</button>
+                <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('### ')">### ခေါင်းစဉ်သေး</button>
+                <label class="btn btn-green cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>ပုံ ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
+                <select id="content-img-size" class="field text-xs py-1" style="width:auto;min-width:100px">
+                  <option value="sm">ပုံ သေး</option>
+                  <option value="md" selected>ပုံ မှန်</option>
+                  <option value="lg">ပုံ ကြီး</option>
+                  <option value="full">ပုံ အပြည့်</option>
+                </select>
               </div>
-              <textarea id="admin-post-content" class="field min-h-32" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="ခေါင်းစဉ် / စာသား ရေးပါ&#10;&#10;ပုံထည့်ရန် အပေါ်က Upload ခလုတ် သုံးပါ&#10;[img]...[/img]" oninput="updateContentPreview()"></textarea>
+              <textarea id="admin-post-content" class="field min-h-40" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="# ခေါင်းစဉ် ဒီလို ရေးပါ&#10;&#10;စာသား ဒီမှာ...&#10;&#10;ပုံထည့်ရန် အပေါ်က ခလုတ် သုံးပါ" oninput="updateContentPreview()"></textarea>
               <div class="mt-3 rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3">
                 <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Article Content</span>
                 <div id="content-live-preview" class="mt-2 prose prose-invert max-w-none text-sm text-slate-200 space-y-3 min-h-[60px]"></div>
@@ -996,31 +1004,30 @@ async function insertImageInContent(inputEl) {
   toast('စာထဲ ပုံ ပြင်ဆင်နေသည်…');
   try {
     let blob = file;
-    try { blob = await compressImageFile(file, 1400, 0.8); } catch(e) {}
+    try { blob = await compressImageFile(file, 1000, 0.75); } catch (e) {}
     let url = null;
     if (adminUser && adminStorage) {
       try {
-        const ref = adminStorage.ref('uploads/content_' + Date.now() + '.jpg');
-        const snapshot = await ref.put(blob, { contentType: 'image/jpeg' });
-        url = await snapshot.ref.getDownloadURL();
-      } catch (err) {
-        console.warn(err);
-        toast('Storage မရ — ဒေတာပုံ သုံးမယ်');
-      }
+        const snap = await adminStorage.ref('uploads/content_' + Date.now() + '.jpg').put(blob, { contentType: 'image/jpeg' });
+        url = await snap.ref.getDownloadURL();
+      } catch (err) { console.warn(err); }
     }
     if (!url) url = await fileToDataURL(blob);
     const ta = $('admin-post-content');
     if (!ta) return;
-    const sz = ($('content-img-size')?.value) || 'md';
+    const sz = ($('content-img-size') && $('content-img-size').value) || 'md';
     const tag = '\n[img size=' + sz + ']' + url + '[/img]\n';
-    const start = ta.selectionStart || ta.value.length;
-    ta.value = ta.value.slice(0, start) + tag + ta.value.slice(start);
+    const pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+    ta.value = ta.value.slice(0, pos) + tag + ta.value.slice(pos);
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
-    toast('စာထဲ ပုံ ထည့်ပြီးပါပြီ။');
-  } catch (err) { toast('Upload မအောင်မြင်: ' + (err.message || '')); }
+    toast('စာထဲ ပုံ ထည့်ပြီး — Preview ကြည့်ပါ');
+  } catch (err) {
+    toast('ပုံ မထည့်နိုင်: ' + (err.message || ''));
+  }
   inputEl.value = '';
 }
+
 function compressImageFile(file, maxW, quality) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -1127,53 +1134,51 @@ async function uploadImage(inputEl, targetInputId) {
   toast('ပုံ ပြင်ဆင်နေသည်…');
 
   try {
-    // 1) IMMEDIATE local preview (blob URL) — Live Preview + thumbnail
+    // Quick visual only (do NOT save blob: into input — it breaks after refresh)
     const localUrl = URL.createObjectURL(file);
-    setImagePreview(previewBox, localUrl, 'Preview…');
-    if (target) {
-      target.value = localUrl;
-      try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+    setImagePreview(previewBox, localUrl, 'ပြင်ဆင်နေသည်…');
+    // Show in live preview boxes immediately without writing blob to input
+    if (targetInputId === 'hero-image' && typeof applyLiveBg === 'function') applyLiveBg($('hero-live-preview'), localUrl);
+    if (targetInputId === 'admin-sponsor-bg' && typeof applyLiveBg === 'function') applyLiveBg($('sponsor-live-preview'), localUrl);
+    if (targetInputId === 'admin-sponsor-img' && typeof applyLiveLogo === 'function') applyLiveLogo($('sp-prev-logo'), $('sp-prev-logo-icon'), localUrl);
+    if (targetInputId === 'up-image' && typeof applyLiveBg === 'function') applyLiveBg($('up-live-preview'), localUrl);
+    if (targetInputId === 'admin-post-img') {
+      applyLiveLogo($('post-prev-img'), $('post-prev-img-icon'), localUrl);
     }
-    refreshLivePreviewFor(targetInputId);
 
-    // 2) Compress for permanent storage
+    // Compress then make permanent data URL (or Firebase)
     let blob = file;
-    try { blob = await compressImageFile(file, 1400, 0.8); } catch (e) { console.warn('compress', e); }
+    try { blob = await compressImageFile(file, 1200, 0.78); } catch (e) { console.warn(e); }
 
     let finalUrl = null;
-
-    // 3) Try Firebase Storage
     if (adminUser && adminStorage) {
       try {
-        const path = 'uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg';
-        const ref = adminStorage.ref(path);
-        const snapshot = await ref.put(blob, { contentType: 'image/jpeg' });
-        finalUrl = await snapshot.ref.getDownloadURL();
-        setImagePreview(previewBox, finalUrl, 'Firebase Storage ✓');
-        toast('ပုံ Upload အောင်မြင်ပါပြီ (Firebase Storage)');
+        const ref = adminStorage.ref('uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg');
+        const snap = await ref.put(blob, { contentType: 'image/jpeg' });
+        finalUrl = await snap.ref.getDownloadURL();
+        toast('Firebase Storage သိမ်းပြီး ✓');
       } catch (err) {
-        console.warn('Storage upload failed', err);
-        toast('Storage မရ — ဒေတာပုံ သိမ်းမယ်');
+        console.warn('Storage fail', err);
       }
     }
-
-    // 4) Fallback data URL (permanent, works offline)
     if (!finalUrl) {
       finalUrl = await fileToDataURL(blob);
-      setImagePreview(previewBox, finalUrl, 'Local ✓ — Save လုပ်ပါ');
       toast('ပုံ အဆင်သင့် — Save နှိပ်ပါ');
     }
 
+    try { URL.revokeObjectURL(localUrl); } catch (e) {}
+
+    setImagePreview(previewBox, finalUrl, '✓ သိမ်းရန် အဆင်သင့်');
     if (target) {
-      target.value = finalUrl;
+      target.value = finalUrl; // never blob:
       try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
       try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
     }
     refreshLivePreviewFor(targetInputId);
-    setTimeout(function () { refreshLivePreviewFor(targetInputId); }, 100);
+    setTimeout(function(){ refreshLivePreviewFor(targetInputId); }, 100);
   } catch (err) {
     console.error(err);
-    toast('Upload မအောင်မြင်ပါ: ' + (err.message || err.code || 'error'));
+    toast('Upload မအောင်မြင်: ' + (err.message || err.code || 'error'));
   }
   inputEl.value = '';
 }
@@ -2034,12 +2039,18 @@ function updatePostPreview() {
   const desc = $('admin-post-desc')?.value || 'Short description…';
   const loc = $('admin-post-location')?.value || 'Location';
   const cat = $('admin-post-category')?.value || 'Category';
-  const img = $('admin-post-img')?.value.trim();
+  let img = ($('admin-post-img')?.value || '').trim();
+  // ignore broken blob leftovers
+  if (img.indexOf('blob:') === 0) img = '';
   if ($('post-prev-title')) $('post-prev-title').textContent = title;
   if ($('post-prev-desc')) $('post-prev-desc').textContent = desc;
   if ($('post-prev-meta')) $('post-prev-meta').textContent = loc + ' · ' + cat;
   const pi = $('post-prev-img'), icon = $('post-prev-img-icon');
-  applyLiveLogo(pi, icon, img);
+  if (typeof applyLiveLogo === 'function') applyLiveLogo(pi, icon, img);
+  else if (pi) {
+    if (img) { pi.src = img; pi.classList.remove('hidden'); pi.style.display = 'block'; if (icon) icon.style.display = 'none'; }
+    else { pi.removeAttribute('src'); pi.style.display = 'none'; if (icon) icon.style.display = ''; }
+  }
   if (typeof updateContentPreview === 'function') updateContentPreview();
 }
 function updateProudPreview() {
@@ -2188,7 +2199,7 @@ function savePost() {
   const category = $('admin-post-category').value;
   if (!title) return alert('Title ထည့်ပေးပါ။');
   if (!slug) return alert('Slug ထည့်ပေးပါ။');
-  if (!img) return alert('Cover Image URL / Upload ထည့်ပေးပါ။');
+  if (!img || img.indexOf('blob:') === 0) return alert('Cover Image ကို Upload ခလုတ်နဲ့ ထည့်ပါ။ (ပြီးသည်အထိ စောင့်ပါ — blob မသုံးရ)');
   if (!desc) return alert('Short Description ထည့်ပေးပါ။');
   if (!content) return alert('Article Content ထည့်ပေးပါ။');
   if (!location) return alert('Location ထည့်ပေးပါ။');
