@@ -54,7 +54,7 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-const FIREBASE_ADMIN_UID = 'hFAaKJddggZQR5kN7eL5yTRKKw02';
+const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
 const $=id=>document.getElementById(id);const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let adminAuth, adminDb, adminUser=null, remoteSyncReady=false, remoteWriteQueue=Promise.resolve();
 try { firebase.initializeApp(firebaseConfig); adminAuth=firebase.auth(); adminDb=firebase.database(); } catch(e) { console.error(e); }
