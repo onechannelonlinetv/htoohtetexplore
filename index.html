@@ -36,7 +36,7 @@
     color: var(--brand-text);
     transition: background .3s, color .3s;
   }
-  h1, h2, h3, .font-heading { font-family: var(--brand-heading-font); }
+  h1, h2, h3, .font-heading { font-family: var(--brand-heading-font); font-weight: var(--heading-weight, 700); font-style: var(--heading-style, normal); color: var(--heading-color, inherit); }
   .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .card-hover { transition: transform .25s ease, box-shadow .25s ease; }
@@ -545,6 +545,10 @@ function applyColors(s) {
   if (s.cardColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-card', s.cardColor);
   if (s.fontFamily) document.documentElement.style.setProperty('--brand-font', s.fontFamily);
   if (s.headingFont) document.documentElement.style.setProperty('--brand-heading-font', s.headingFont);
+  if (s.headingWeight) document.documentElement.style.setProperty('--heading-weight', s.headingWeight);
+  if (s.headingStyle) document.documentElement.style.setProperty('--heading-style', s.headingStyle);
+  if (s.bodyColor) document.documentElement.style.setProperty('--brand-text', s.bodyColor);
+  if (s.headingColor) document.documentElement.style.setProperty('--heading-color', s.headingColor);
   if (s.heroHeight) document.documentElement.style.setProperty('--hero-min-h', s.heroHeight + 'px');
   if (s.heroMaxWidth) document.documentElement.style.setProperty('--hero-max-w', s.heroMaxWidth === 100 ? '100%' : s.heroMaxWidth + 'px');
   if (s.cardImgHeight) document.documentElement.style.setProperty('--card-img-h', s.cardImgHeight + 'rem');
@@ -626,8 +630,13 @@ function loadBlogData() {
   const hero = read('hh_hero', {});
   if (hero.image) $('hero-img').src = hero.image;
   if (hero.label) $('hero-label').textContent = hero.label;
+  if (hero.labelColor) { $('hero-label').style.color = hero.labelColor; $('hero-label').classList.remove('accent-text'); }
   if (hero.title) $('hero-title').innerHTML = hero.title;
+  if (hero.titleColor) $('hero-title').style.color = hero.titleColor;
+  if (hero.titleWeight) $('hero-title').style.fontWeight = hero.titleWeight;
+  if (hero.titleStyle) $('hero-title').style.fontStyle = hero.titleStyle;
   if (hero.desc) $('hero-desc').textContent = hero.desc;
+  if (hero.descColor) $('hero-desc').style.color = hero.descColor;
   if (hero.btnText) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
   if (hero.btnLink) $('hero-btn').href = hero.btnLink;
   if (hero.sign) $('hero-sign').textContent = hero.sign;
@@ -675,6 +684,10 @@ function loadBlogData() {
     }
     if (sponsor.badgeColor) badge.style.color = sponsor.badgeColor;
     else badge.style.color = '';
+    if (sponsor.badgePad) badge.style.padding = Math.round(sponsor.badgePad/2) + 'px ' + sponsor.badgePad + 'px';
+    if (sponsor.badgeFs) badge.style.fontSize = sponsor.badgeFs + 'px';
+    if (sponsor.badgeRadius != null) badge.style.borderRadius = (sponsor.badgeRadius >= 24 ? '9999px' : sponsor.badgeRadius + 'px');
+    if (sponsor.badgeWeight) badge.style.fontWeight = sponsor.badgeWeight;
     if (sponsor.title) $('sponsor-title').textContent = sponsor.title;
     if (sponsor.desc) $('sponsor-desc').textContent = sponsor.desc;
     if (sponsor.link) $('sponsor-link').href = sponsor.link;
@@ -698,7 +711,10 @@ function loadBlogData() {
       secTitle.classList.add('hidden');
     }
     if (up.label) $('upcoming-label').textContent = up.label;
+    if (up.labelColor) { $('upcoming-label').style.color = up.labelColor; $('upcoming-label').classList.remove('accent-text'); }
     if (up.title) $('upcoming-title').textContent = up.title;
+    if (up.titleColor) $('upcoming-title').style.color = up.titleColor;
+    if (up.titleWeight) $('upcoming-title').style.fontWeight = up.titleWeight;
     if (up.desc) $('upcoming-desc').textContent = up.desc;
     if (up.image) $('upcoming-img').src = up.image;
   }
@@ -710,6 +726,8 @@ function loadBlogData() {
     ytSec.classList.remove('hidden');
     if (yt.label) $('youtube-label').textContent = yt.label;
     if (yt.title) $('youtube-title').innerHTML = yt.title;
+    if (yt.titleColor) $('youtube-title').style.color = yt.titleColor;
+    if (yt.titleWeight) $('youtube-title').style.fontWeight = yt.titleWeight;
     if (yt.desc) $('youtube-desc').textContent = yt.desc;
     if (yt.link) $('youtube-link').href = yt.link;
     else if (social.yt) $('youtube-link').href = social.yt;
