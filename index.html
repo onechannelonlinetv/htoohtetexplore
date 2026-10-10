@@ -190,7 +190,31 @@
   body.mode-light #upcoming-banner .text-white,
   body.mode-light #youtube-section .text-white,
   body.mode-light #article-modal .text-white { color: #ffffff !important; }
-</style>
+
+  /* Custom typography from admin — win over Tailwind on mobile */
+  #hero-label, #hero-title, #hero-desc, #hero-sign,
+  #sponsor-badge, #sponsor-title, #sponsor-desc,
+  #upcoming-label, #upcoming-title, #upcoming-desc,
+  #youtube-title, #youtube-desc, #about-title, #about-desc {
+    line-height: 1.25;
+  }
+  #hero-text-box {
+    z-index: 5;
+    width: min(92%, var(--hero-text-maxw, 36rem));
+  }
+  @media (max-width: 640px) {
+    #hero-section, #hero-content-wrap {
+      min-height: var(--hero-min-h, 420px) !important;
+    }
+    #hero-text-box {
+      left: var(--hero-text-x, 5%) !important;
+      top: var(--hero-text-y, 28%) !important;
+      max-width: 92% !important;
+      padding-right: 0.5rem;
+    }
+  }
+
+  </style>
 </head>
 <body class="min-h-screen antialiased theme-forest mode-dark">
 
@@ -267,11 +291,11 @@
     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15"></div>
     <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
       <div id="hero-text-box" class="max-w-xl" style="position:absolute; left:var(--hero-text-x, 8%); top:var(--hero-text-y, 35%); max-width: var(--hero-text-maxw, 36rem); text-align: var(--hero-text-align, left);">
-        <span id="hero-label" class="inline-block accent-text text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-3">Travel Journal</span>
-        <h1 id="hero-title" class="hero-title text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.15] tracking-tight text-white">
+        <span id="hero-label" class="inline-block accent-text font-bold tracking-[0.2em] uppercase mb-2" style="font-size:12px;">Travel Journal</span>
+        <h1 id="hero-title" class="hero-title font-black leading-[1.15] tracking-tight text-white" style="font-size:clamp(1.5rem,5vw,2.5rem);">
           New Places.<br><span class="text-emerald-300">Same Curiosity.</span>
         </h1>
-        <p id="hero-desc" class="mt-4 text-sm sm:text-base text-emerald-100/80 leading-relaxed max-w-md">
+        <p id="hero-desc" class="mt-3 text-emerald-100/80 leading-relaxed max-w-md" style="font-size:14px;">
           Traveling is not just about reaching a destination, it's about collecting stories, meeting people, and seeing the world with a different heart.
         </p>
         <div class="mt-6 sm:mt-7">
@@ -463,6 +487,7 @@
 
 <script>
 const $ = id => document.getElementById(id);
+function setStyle(el, prop, val) { if (!el || val == null || val === '') return; el.style.setProperty(prop, String(val), 'important'); }
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let allStoryPosts = [];
 let siteSettings = {};
@@ -630,19 +655,36 @@ function loadBlogData() {
   const hero = read('hh_hero', {});
   if (hero.image) $('hero-img').src = hero.image;
   if (hero.label) $('hero-label').textContent = hero.label;
-  if (hero.labelColor) { $('hero-label').style.color = hero.labelColor; $('hero-label').classList.remove('accent-text'); }
-  if (hero.labelFs) $('hero-label').style.fontSize = hero.labelFs + 'px';
+  if (hero.labelColor) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
+  if (hero.labelFs) setStyle($('hero-label'), 'font-size', hero.labelFs + 'px');
   if (hero.title) $('hero-title').innerHTML = hero.title;
-  if (hero.titleColor) $('hero-title').style.color = hero.titleColor;
-  if (hero.titleFs) $('hero-title').style.fontSize = 'clamp(1.25rem, 2vw + 0.5rem, ' + hero.titleFs + 'px)';
-  if (hero.titleWeight) $('hero-title').style.fontWeight = hero.titleWeight;
-  if (hero.titleStyle) $('hero-title').style.fontStyle = hero.titleStyle;
+  if (hero.titleColor) setStyle($('hero-title'), 'color', hero.titleColor);
+  if (hero.titleFs) setStyle($('hero-title'), 'font-size', 'clamp(1.2rem, 4vw, ' + hero.titleFs + 'px)');
+  if (hero.titleWeight) setStyle($('hero-title'), 'font-weight', hero.titleWeight);
+  if (hero.titleStyle) setStyle($('hero-title'), 'font-style', hero.titleStyle);
   if (hero.desc) $('hero-desc').textContent = hero.desc;
-  if (hero.descColor) $('hero-desc').style.color = hero.descColor;
-  if (hero.descFs) $('hero-desc').style.fontSize = hero.descFs + 'px';
-  if (hero.sign) { const s = $('hero-sign'); if (s) { s.textContent = hero.sign; if (hero.signColor) s.style.color = hero.signColor; } }
-  if (hero.textX != null) document.documentElement.style.setProperty('--hero-text-x', hero.textX + '%');
-  if (hero.textY != null) document.documentElement.style.setProperty('--hero-text-y', hero.textY + '%');
+  if (hero.descColor) setStyle($('hero-desc'), 'color', hero.descColor);
+  if (hero.descFs) setStyle($('hero-desc'), 'font-size', hero.descFs + 'px');
+  if (hero.sign) {
+    let s = $('hero-sign');
+    if (!s) {
+      s = document.createElement('p');
+      s.id = 'hero-sign';
+      s.className = 'mt-3 text-sm font-medium';
+      $('hero-text-box').appendChild(s);
+    }
+    s.textContent = hero.sign;
+    if (hero.signColor) setStyle(s, 'color', hero.signColor);
+  }
+  const tx = hero.textX != null ? hero.textX : 8;
+  const ty = hero.textY != null ? hero.textY : 35;
+  document.documentElement.style.setProperty('--hero-text-x', tx + '%');
+  document.documentElement.style.setProperty('--hero-text-y', ty + '%');
+  const htb = $('hero-text-box');
+  if (htb) {
+    setStyle(htb, 'left', tx + '%');
+    setStyle(htb, 'top', ty + '%');
+  }
   if (hero.btnText) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
   if (hero.btnLink) $('hero-btn').href = hero.btnLink;
   if (hero.sign) $('hero-sign').textContent = hero.sign;
@@ -695,10 +737,17 @@ function loadBlogData() {
     if (sponsor.badgeRadius != null) badge.style.borderRadius = (sponsor.badgeRadius >= 24 ? '9999px' : sponsor.badgeRadius + 'px');
     if (sponsor.badgeWeight) badge.style.fontWeight = sponsor.badgeWeight;
     if (sponsor.title) $('sponsor-title').textContent = sponsor.title;
-    if (sponsor.titleColor) $('sponsor-title').style.color = sponsor.titleColor;
-    if (sponsor.titleFs) $('sponsor-title').style.fontSize = 'clamp(1rem, 1.5vw + 0.5rem, ' + sponsor.titleFs + 'px)';
-    if (sponsor.titleWeight) $('sponsor-title').style.fontWeight = sponsor.titleWeight;
-    if (sponsor.desc) { const d = $('sponsor-desc'); if (d) { d.textContent = sponsor.desc; if (sponsor.descColor) d.style.color = sponsor.descColor; if (sponsor.descFs) d.style.fontSize = sponsor.descFs + 'px'; } }
+    if (sponsor.titleColor) setStyle($('sponsor-title'), 'color', sponsor.titleColor);
+    if (sponsor.titleFs) setStyle($('sponsor-title'), 'font-size', 'clamp(1rem, 3.5vw, ' + sponsor.titleFs + 'px)');
+    if (sponsor.titleWeight) setStyle($('sponsor-title'), 'font-weight', sponsor.titleWeight);
+    if (sponsor.desc) {
+      const d = $('sponsor-desc');
+      if (d) {
+        d.textContent = sponsor.desc;
+        if (sponsor.descColor) setStyle(d, 'color', sponsor.descColor);
+        if (sponsor.descFs) setStyle(d, 'font-size', sponsor.descFs + 'px');
+      }
+    }
     if (sponsor.desc) $('sponsor-desc').textContent = sponsor.desc;
     if (sponsor.link) $('sponsor-link').href = sponsor.link;
     if (sponsor.img) { $('sponsor-img').src = sponsor.img; $('sponsor-img').style.display = ''; }
@@ -721,11 +770,15 @@ function loadBlogData() {
       secTitle.classList.add('hidden');
     }
     if (up.label) $('upcoming-label').textContent = up.label;
-    if (up.labelColor) { $('upcoming-label').style.color = up.labelColor; $('upcoming-label').classList.remove('accent-text'); }
+    if (up.labelColor) { setStyle($('upcoming-label'), 'color', up.labelColor); $('upcoming-label').classList.remove('accent-text'); }
+    if (up.labelFs) setStyle($('upcoming-label'), 'font-size', up.labelFs + 'px');
     if (up.title) $('upcoming-title').textContent = up.title;
-    if (up.titleColor) $('upcoming-title').style.color = up.titleColor;
-    if (up.titleWeight) $('upcoming-title').style.fontWeight = up.titleWeight;
+    if (up.titleColor) setStyle($('upcoming-title'), 'color', up.titleColor);
+    if (up.titleFs) setStyle($('upcoming-title'), 'font-size', 'clamp(1rem, 3.5vw, ' + up.titleFs + 'px)');
+    if (up.titleWeight) setStyle($('upcoming-title'), 'font-weight', up.titleWeight);
     if (up.desc) $('upcoming-desc').textContent = up.desc;
+    if (up.descColor) setStyle($('upcoming-desc'), 'color', up.descColor);
+    if (up.descFs) setStyle($('upcoming-desc'), 'font-size', up.descFs + 'px');
     if (up.image) $('upcoming-img').src = up.image;
   }
 
@@ -736,8 +789,9 @@ function loadBlogData() {
     ytSec.classList.remove('hidden');
     if (yt.label) $('youtube-label').textContent = yt.label;
     if (yt.title) $('youtube-title').innerHTML = yt.title;
-    if (yt.titleColor) $('youtube-title').style.color = yt.titleColor;
-    if (yt.titleWeight) $('youtube-title').style.fontWeight = yt.titleWeight;
+    if (yt.titleColor) setStyle($('youtube-title'), 'color', yt.titleColor);
+    if (yt.titleFs) setStyle($('youtube-title'), 'font-size', 'clamp(1rem, 3.5vw, ' + yt.titleFs + 'px)');
+    if (yt.titleWeight) setStyle($('youtube-title'), 'font-weight', yt.titleWeight);
     if (yt.desc) $('youtube-desc').textContent = yt.desc;
     if (yt.link) $('youtube-link').href = yt.link;
     else if (social.yt) $('youtube-link').href = social.yt;
@@ -747,8 +801,9 @@ function loadBlogData() {
 
   const about = read('hh_about', {});
   if (about.title) $('about-title').textContent = about.title;
-  if (about.titleColor) $('about-title').style.color = about.titleColor;
-  if (about.titleWeight) $('about-title').style.fontWeight = about.titleWeight;
+  if (about.titleColor) setStyle($('about-title'), 'color', about.titleColor);
+  if (about.titleFs) setStyle($('about-title'), 'font-size', 'clamp(1.1rem, 3vw, ' + about.titleFs + 'px)');
+  if (about.titleWeight) setStyle($('about-title'), 'font-weight', about.titleWeight);
   if (about.desc) $('about-desc').textContent = about.desc;
   if (about.descColor) $('about-desc').style.color = about.descColor;
   $('about-section').classList.toggle('hidden', about.active === false);
