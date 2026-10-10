@@ -166,11 +166,12 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           </div>
 
           <div>
-            <label class="label mb-2">Light / Dark Mode</label>
+            <label class="label mb-2">Default Light / Dark (Website မှာ User ကိုယ်တိုင်လည်း ပြောင်းနိုင်)</label>
             <div class="flex gap-2">
               <button type="button" id="mode-dark-btn" onclick="selectMode('dark')" class="btn btn-green flex-1"><i class="fa-solid fa-moon mr-2"></i>Dark</button>
               <button type="button" id="mode-light-btn" onclick="selectMode('light')" class="btn btn-muted flex-1"><i class="fa-solid fa-sun mr-2"></i>Light</button>
             </div>
+            <p class="tiny mt-1">Website header မှာ 🌙/☀️ ခလုတ် ရှိပါတယ် — visitor ကိုယ်တိုင် ပြောင်းနိုင်</p>
             <input type="hidden" id="set-mode" value="dark">
           </div>
 
@@ -195,9 +196,73 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <div><label class="label">Stories Subtitle</label><input id="set-stories-sub" class="field" placeholder="မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ"></div>
           </div>
 
-          <div class="border-t border-slate-700 pt-4 mt-2">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Font, Color & Banner Sizes (slider နဲ့ ချိန် + preview)</p>
+          <div class="border-t border-slate-700 pt-4 mt-2 space-y-5">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">🎨 Visual Layout Studio — ကိုယ်တိုင် ချိန်ပါ</p>
+            <p class="tiny">အောက်က preview box မှာ အရွယ် / စာနေရာ ကို တိုက်ရိုက် မြင်ရပါတယ်။ Save လုပ်မှ website မှာ သက်ရောက်မယ်။</p>
+
+            <!-- LIVE PREVIEW BOX -->
+            <div class="rounded-xl border-2 border-dashed border-emerald-700/50 bg-[#050a12] p-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero Banner</span>
+                <span class="tiny" id="preview-dims">480 × full</span>
+              </div>
+              <div id="layout-preview" class="relative mx-auto overflow-hidden rounded-lg border border-slate-700 bg-cover bg-center transition-all"
+                   style="height:160px; max-width:100%; background-image:linear-gradient(135deg,#0a1f18,#061510);">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent"></div>
+                <div id="layout-preview-inner" class="relative z-10 h-full flex flex-col p-4" style="justify-content:center;">
+                  <div id="layout-preview-text" style="text-align:left; max-width:60%;">
+                    <div class="text-[9px] font-bold uppercase tracking-widest text-yellow-400 mb-1">Travel Journal</div>
+                    <div class="text-sm font-black text-white leading-tight">New Places.<br>Same Curiosity.</div>
+                    <div class="text-[10px] text-white/60 mt-1 line-clamp-2">Stories, people, and the road ahead.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label class="label flex justify-between">Hero Height <span class="range-val" id="val-hero-h">480px</span></label>
+                <input type="range" id="set-hero-height" min="280" max="800" step="20" value="480" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Hero Max Width <span class="range-val" id="val-hero-w">100%</span></label>
+                <input type="range" id="set-hero-maxw" min="600" max="1400" step="50" value="1400" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+              </div>
+              <div>
+                <label class="label">စာသား အလျားလိုက် နေရာ (Text Align)</label>
+                <div class="flex gap-2">
+                  <button type="button" class="btn btn-muted flex-1 align-btn" data-align="left" onclick="setHeroAlign('left')">◀ Left</button>
+                  <button type="button" class="btn btn-muted flex-1 align-btn" data-align="center" onclick="setHeroAlign('center')">● Center</button>
+                  <button type="button" class="btn btn-muted flex-1 align-btn" data-align="right" onclick="setHeroAlign('right')">Right ▶</button>
+                </div>
+                <input type="hidden" id="set-hero-text-align" value="left">
+              </div>
+              <div>
+                <label class="label">စာသား ဒေါင်လိုက် နေရာ (Vertical)</label>
+                <div class="flex gap-2">
+                  <button type="button" class="btn btn-muted flex-1 valign-btn" data-valign="top" onclick="setHeroVAlign('top')">⬆ Top</button>
+                  <button type="button" class="btn btn-muted flex-1 valign-btn" data-valign="center" onclick="setHeroVAlign('center')">● Middle</button>
+                  <button type="button" class="btn btn-muted flex-1 valign-btn" data-valign="bottom" onclick="setHeroVAlign('bottom')">⬇ Bottom</button>
+                </div>
+                <input type="hidden" id="set-hero-v-align" value="center">
+              </div>
+              <div>
+                <label class="label flex justify-between">Text Box Max Width <span class="range-val" id="val-text-mw">36rem</span></label>
+                <input type="range" id="set-hero-text-maxw" min="16" max="48" step="1" value="36" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+                <p class="tiny mt-1">စာကော်လံ အကျဉ်း/အကျယ်</p>
+              </div>
+              <div>
+                <label class="label flex justify-between">Sponsor Banner Height <span class="range-val" id="val-sp-h">180px</span></label>
+                <input type="range" id="set-sponsor-height" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Upcoming Banner Height <span class="range-val" id="val-up-h">200px</span></label>
+                <input type="range" id="set-upcoming-height" min="120" max="400" step="10" value="200" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Card Image Height <span class="range-val" id="val-card-h">11rem</span></label>
+                <input type="range" id="set-card-img-h" min="6" max="18" step="0.5" value="11" class="w-full accent-emerald-500" oninput="updateSizePreview()">
+              </div>
               <div>
                 <label class="label">Body Font</label>
                 <select id="set-font" class="field">
@@ -215,30 +280,6 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                   <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
                   <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
                 </select>
-              </div>
-              <div>
-                <label class="label flex justify-between">Hero Height <span class="range-val" id="val-hero-h">480px</span></label>
-                <input type="range" id="set-hero-height" min="280" max="800" step="20" value="480" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-                <div class="preview-box mt-2 relative" id="preview-hero" style="height:80px">
-                  <div class="absolute inset-0 bg-gradient-to-r from-emerald-950 to-transparent flex items-end p-2"><span class="text-[10px] font-bold text-white">Hero Preview</span></div>
-                </div>
-              </div>
-              <div>
-                <label class="label flex justify-between">Hero Max Width <span class="range-val" id="val-hero-w">100%</span></label>
-                <input type="range" id="set-hero-maxw" min="600" max="1400" step="50" value="1400" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-                <p class="tiny mt-1">1400≈full · လျှော့ရင် ကျဉ်း</p>
-              </div>
-              <div>
-                <label class="label flex justify-between">Sponsor Banner Height <span class="range-val" id="val-sp-h">180px</span></label>
-                <input type="range" id="set-sponsor-height" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Upcoming Banner Height <span class="range-val" id="val-up-h">200px</span></label>
-                <input type="range" id="set-upcoming-height" min="120" max="400" step="10" value="200" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Card Image Height <span class="range-val" id="val-card-h">11rem</span></label>
-                <input type="range" id="set-card-img-h" min="6" max="18" step="0.5" value="11" class="w-full accent-emerald-500" oninput="updateSizePreview()">
               </div>
               <div>
                 <label class="label">Custom Accent Color</label>
@@ -734,12 +775,15 @@ function loadAll() {
   if ($('set-sponsor-height')) $('set-sponsor-height').value = s.sponsorHeight || 180;
   if ($('set-upcoming-height')) $('set-upcoming-height').value = s.upcomingHeight || 200;
   $('set-card-img-h').value = s.cardImgHeight || 11;
+  if ($('set-hero-text-maxw')) $('set-hero-text-maxw').value = s.heroTextMaxW || 36;
   if (s.accentColor) {
     $('set-accent-color').value = s.accentColor;
     $('set-accent-hex').value = s.accentColor;
   }
   selectTheme(s.theme || 'forest');
   if (typeof selectMode === 'function') selectMode(s.mode || 'dark');
+  if (typeof setHeroAlign === 'function') setHeroAlign(s.heroTextAlign || 'left');
+  if (typeof setHeroVAlign === 'function') setHeroVAlign(s.heroVAlign || 'center');
   if (typeof updateSizePreview === 'function') updateSizePreview();
   showPreviewIfUrl('set-logo-url');
 
@@ -833,18 +877,57 @@ function selectMode(mode) {
   if (lightBtn) lightBtn.className = 'btn flex-1 ' + (mode === 'light' ? 'btn-green' : 'btn-muted');
 }
 function updateSizePreview() {
-  const hh = $('set-hero-height')?.value || 480;
-  const hw = $('set-hero-maxw')?.value || 1400;
+  const hh = parseInt($('set-hero-height')?.value || 480, 10);
+  const hw = parseInt($('set-hero-maxw')?.value || 1400, 10);
   const sh = $('set-sponsor-height')?.value || 180;
   const uh = $('set-upcoming-height')?.value || 200;
   const ch = $('set-card-img-h')?.value || 11;
+  const tmw = $('set-hero-text-maxw')?.value || 36;
   if ($('val-hero-h')) $('val-hero-h').textContent = hh + 'px';
-  if ($('val-hero-w')) $('val-hero-w').textContent = (parseInt(hw,10) >= 1350) ? '100%' : hw + 'px';
+  if ($('val-hero-w')) $('val-hero-w').textContent = (hw >= 1350) ? '100%' : hw + 'px';
   if ($('val-sp-h')) $('val-sp-h').textContent = sh + 'px';
   if ($('val-up-h')) $('val-up-h').textContent = uh + 'px';
   if ($('val-card-h')) $('val-card-h').textContent = ch + 'rem';
-  const prev = $('preview-hero');
-  if (prev) prev.style.height = Math.max(50, Math.round(parseInt(hh,10) / 6)) + 'px';
+  if ($('val-text-mw')) $('val-text-mw').textContent = tmw + 'rem';
+  if ($('preview-dims')) $('preview-dims').textContent = hh + 'px × ' + ((hw >= 1350) ? 'full' : hw + 'px');
+
+  // Live visual box
+  const box = $('layout-preview');
+  const inner = $('layout-preview-inner');
+  const text = $('layout-preview-text');
+  if (box) {
+    // scale height for preview (max ~220px in admin)
+    const prevH = Math.max(80, Math.min(220, Math.round(hh / 3.2)));
+    box.style.height = prevH + 'px';
+    box.style.maxWidth = (hw >= 1350) ? '100%' : Math.min(100, Math.round(hw / 14)) + '%';
+  }
+  if (inner) {
+    const v = $('set-hero-v-align')?.value || 'center';
+    const vMap = { top: 'flex-start', center: 'center', bottom: 'flex-end' };
+    inner.style.justifyContent = vMap[v] || 'center';
+  }
+  if (text) {
+    const a = $('set-hero-text-align')?.value || 'left';
+    text.style.textAlign = a;
+    text.style.maxWidth = Math.min(90, Math.round((parseInt(tmw,10) / 48) * 90)) + '%';
+    if (a === 'center') { text.style.marginLeft = 'auto'; text.style.marginRight = 'auto'; }
+    else if (a === 'right') { text.style.marginLeft = 'auto'; text.style.marginRight = '0'; }
+    else { text.style.marginLeft = '0'; text.style.marginRight = 'auto'; }
+  }
+}
+function setHeroAlign(align) {
+  if ($('set-hero-text-align')) $('set-hero-text-align').value = align;
+  document.querySelectorAll('.align-btn').forEach(b => {
+    b.className = 'btn flex-1 align-btn ' + (b.dataset.align === align ? 'btn-green' : 'btn-muted');
+  });
+  updateSizePreview();
+}
+function setHeroVAlign(v) {
+  if ($('set-hero-v-align')) $('set-hero-v-align').value = v;
+  document.querySelectorAll('.valign-btn').forEach(b => {
+    b.className = 'btn flex-1 valign-btn ' + (b.dataset.valign === v ? 'btn-green' : 'btn-muted');
+  });
+  updateSizePreview();
 }
 function syncColorFromHex() {
   const hex = $('set-accent-hex').value.trim();
@@ -874,6 +957,9 @@ function saveSettings() {
     headingFont: $('set-heading-font').value,
     heroHeight: parseInt($('set-hero-height').value, 10) || 480,
     heroMaxWidth: heroMaxW >= 1350 ? 100 : heroMaxW,
+    heroTextAlign: $('set-hero-text-align')?.value || 'left',
+    heroVAlign: $('set-hero-v-align')?.value || 'center',
+    heroTextMaxW: parseInt($('set-hero-text-maxw')?.value || '36', 10),
     sponsorHeight: parseInt($('set-sponsor-height')?.value || '180', 10),
     upcomingHeight: parseInt($('set-upcoming-height')?.value || '200', 10),
     cardImgHeight: parseFloat($('set-card-img-h').value) || 11,
