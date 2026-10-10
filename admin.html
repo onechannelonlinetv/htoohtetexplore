@@ -749,6 +749,13 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                 <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('## ')">## ခေါင်းစဉ်</button>
                 <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('### ')">### ခေါင်းစဉ်သေး</button>
                 <label class="btn btn-green cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>ပုံ ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
+                <label class="btn btn-muted cursor-pointer text-xs py-2" title="2-3 ပုံ collage"><i class="fa-solid fa-table-cells mr-1"></i>Gallery 2-3 ပုံ<input type="file" accept="image/*" multiple class="hidden" onchange="insertGalleryInContent(this)"></label>
+                <select id="content-gallery-layout" class="field text-xs py-1" style="width:auto;min-width:110px" title="Gallery ပုံစံ">
+                  <option value="1-2" selected>1 ကြီး + 2 သေး</option>
+                  <option value="2-1">2 သေး + 1 ကြီး</option>
+                  <option value="2">2 ဘေးချင်း</option>
+                  <option value="3">3 ဘေးချင်း</option>
+                </select>
                 <select id="content-img-size" class="field text-xs py-1" style="width:auto;min-width:100px">
                   <option value="sm">ပုံ သေး</option>
                   <option value="md" selected>ပုံ မှန်</option>
@@ -1048,6 +1055,50 @@ async function insertImageInContent(inputEl) {
     }
   } catch (err) {
     toast('ပုံ မထည့်နိုင်: ' + (err.message || ''));
+  }
+  inputEl.value = '';
+}
+
+async function fileToCompressedDataURL(file) {
+  let blob = file;
+  try { blob = await withTimeout(compressImageFile(file, 900, 0.62), 8000); } catch (e) { blob = file; }
+  var url = await fileToDataURL(blob);
+  if (url.length > 650000) {
+    try {
+      blob = await compressImageFile(file, 640, 0.48);
+      url = await fileToDataURL(blob);
+    } catch (e) {}
+  }
+  return url;
+}
+async function insertGalleryInContent(inputEl) {
+  var files = inputEl.files ? Array.prototype.slice.call(inputEl.files, 0, 3) : [];
+  if (!files.length) return;
+  if (files.length < 2) {
+    toast('Gallery အတွက် ပုံ အနည်းဆုံး 2 ပုံ ရွေးပါ');
+    inputEl.value = '';
+    return;
+  }
+  toast('Gallery ပုံ ' + files.length + ' ခု ပြင်ဆင်နေသည်…');
+  try {
+    var urls = [];
+    for (var i = 0; i < files.length; i++) {
+      if (!files[i].type.startsWith('image/')) continue;
+      urls.push(await fileToCompressedDataURL(files[i]));
+    }
+    if (urls.length < 2) { toast('ပုံ 2 ခုအထက် လိုအပ်သည်'); inputEl.value = ''; return; }
+    var layout = ($('content-gallery-layout') && $('content-gallery-layout').value) || '1-2';
+    var inner = urls.map(function(u) { return '[img]' + u + '[/img]'; }).join('\\n');
+    var block = '\\n[gallery layout=' + layout + ']\\n' + inner + '\\n[/gallery]\\n';
+    var ta = $('admin-post-content');
+    if (!ta) return;
+    var pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+    ta.value = ta.value.slice(0, pos) + block + ta.value.slice(pos);
+    ta.focus();
+    if (typeof updateContentPreview === 'function') updateContentPreview();
+    toast('Gallery ထည့်ပြီး — Preview ကြည့်ပါ');
+  } catch (err) {
+    toast('Gallery မထည့်နိုင်: ' + (err.message || ''));
   }
   inputEl.value = '';
 }
@@ -2032,28 +2083,77 @@ function saveAbout() {
 function parseContentBlocks(raw) {
   var text = String(raw || '').replace(/\r\n/g, '\n');
   var blocks = [];
-  var re = /\[img((?:\s+\w+=[^\s\]]+)*)\]([\s\S]*?)\[\/img\]/gi;
-  var last = 0, m;
-  while ((m = re.exec(text)) !== null) {
-    if (m.index > last) blocks.push({ type: 'text', value: text.slice(last, m.index) });
-    var attrs = m[1] || '';
-    var size = 'md', w = null;
-    var sm = attrs.match(/\bsize=(sm|md|lg|full)/i);
-    if (sm) size = sm[1].toLowerCase();
-    var wm = attrs.match(/\bw=(\d{1,3})/i);
-    if (wm) w = Math.max(15, Math.min(100, parseInt(wm[1], 10)));
-    blocks.push({ type: 'img', size: size, w: w, url: (m[2] || '').trim() });
-    last = m.index + m[0].length;
+  // First extract galleries
+  var galRe = /\[gallery((?:\s+\w+=[^\s\]]+)*)\]([\s\S]*?)\[\/gallery\]/gi;
+  var parts = [];
+  var last = 0, gm;
+  while ((gm = galRe.exec(text)) !== null) {
+    if (gm.index > last) parts.push({ kind: 'raw', value: text.slice(last, gm.index) });
+    var attrs = gm[1] || '';
+    var layout = '1-2';
+    var lm = attrs.match(/\blayout=([^\s\]]+)/i);
+    if (lm) layout = lm[1];
+    var inner = gm[2] || '';
+    var imgs = [];
+    var ire = /\[img((?:\s+\w+=[^\s\]]+)*)\]([\s\S]*?)\[\/img\]/gi;
+    var im;
+    while ((im = ire.exec(inner)) !== null) {
+      var iattrs = im[1] || '';
+      var size = 'md', w = null;
+      var sm = iattrs.match(/\bsize=(sm|md|lg|full)/i);
+      if (sm) size = sm[1].toLowerCase();
+      var wm = iattrs.match(/\bw=(\d{1,3})/i);
+      if (wm) w = Math.max(15, Math.min(100, parseInt(wm[1], 10)));
+      imgs.push({ url: (im[2] || '').trim(), size: size, w: w });
+    }
+    parts.push({ kind: 'gallery', layout: layout, imgs: imgs });
+    last = gm.index + gm[0].length;
   }
-  if (last < text.length) blocks.push({ type: 'text', value: text.slice(last) });
+  if (last < text.length) parts.push({ kind: 'raw', value: text.slice(last) });
+  if (!parts.length) parts.push({ kind: 'raw', value: text });
+
+  function parseRaw(rawText) {
+    var out = [];
+    var re = /\[img((?:\s+\w+=[^\s\]]+)*)\]([\s\S]*?)\[\/img\]/gi;
+    var l2 = 0, m;
+    while ((m = re.exec(rawText)) !== null) {
+      if (m.index > l2) out.push({ type: 'text', value: rawText.slice(l2, m.index) });
+      var attrs = m[1] || '';
+      var size = 'md', w = null;
+      var sm = attrs.match(/\bsize=(sm|md|lg|full)/i);
+      if (sm) size = sm[1].toLowerCase();
+      var wm = attrs.match(/\bw=(\d{1,3})/i);
+      if (wm) w = Math.max(15, Math.min(100, parseInt(wm[1], 10)));
+      out.push({ type: 'img', size: size, w: w, url: (m[2] || '').trim() });
+      l2 = m.index + m[0].length;
+    }
+    if (l2 < rawText.length) out.push({ type: 'text', value: rawText.slice(l2) });
+    return out;
+  }
+
+  parts.forEach(function(p) {
+    if (p.kind === 'gallery') {
+      blocks.push({ type: 'gallery', layout: p.layout || '1-2', imgs: p.imgs || [] });
+    } else {
+      parseRaw(p.value).forEach(function(b) { blocks.push(b); });
+    }
+  });
   return blocks;
 }
 function blocksToContent(blocks) {
   return blocks.map(function(b) {
-    if (b.type !== 'img') return b.value;
-    var attrs = ' size=' + (b.size || 'md');
-    if (b.w != null) attrs += ' w=' + Math.round(b.w);
-    return '[img' + attrs + ']' + b.url + '[/img]';
+    if (b.type === 'gallery') {
+      var inner = (b.imgs || []).map(function(im) {
+        return '[img]' + im.url + '[/img]';
+      }).join('\n');
+      return '[gallery layout=' + (b.layout || '1-2') + ']\n' + inner + '\n[/gallery]';
+    }
+    if (b.type === 'img') {
+      var attrs = ' size=' + (b.size || 'md');
+      if (b.w != null) attrs += ' w=' + Math.round(b.w);
+      return '[img' + attrs + ']' + b.url + '[/img]';
+    }
+    return b.value;
   }).join('');
 }
 function writeContentBlocks(blocks) {
@@ -2080,6 +2180,36 @@ function deleteContentImage(imgIndex) {
   writeContentBlocks(hit.blocks);
   toast('ပုံ ဖျက်ပြီး');
 }
+function deleteGallery(gIndex) {
+  var blocks = parseContentBlocks($('admin-post-content')?.value || '');
+  var n = 0;
+  for (var i = 0; i < blocks.length; i++) {
+    if (blocks[i].type === 'gallery') {
+      if (n === gIndex) {
+        blocks.splice(i, 1);
+        writeContentBlocks(blocks);
+        toast('Gallery ဖျက်ပြီး');
+        return;
+      }
+      n++;
+    }
+  }
+}
+function setGalleryLayout(gIndex, layout) {
+  var blocks = parseContentBlocks($('admin-post-content')?.value || '');
+  var n = 0;
+  for (var i = 0; i < blocks.length; i++) {
+    if (blocks[i].type === 'gallery') {
+      if (n === gIndex) {
+        blocks[i].layout = layout;
+        writeContentBlocks(blocks);
+        toast('Gallery ပုံစံ: ' + layout);
+        return;
+      }
+      n++;
+    }
+  }
+}
 function moveContentImage(imgIndex, dir) {
   var blocks = parseContentBlocks($('admin-post-content')?.value || '');
   var idxs = [];
@@ -2095,12 +2225,10 @@ function setContentImageWidth(imgIndex, w) {
   var hit = getImgBlock(imgIndex);
   if (!hit) return;
   hit.block.w = Math.max(15, Math.min(100, Math.round(w)));
-  // map width to size label for site display
   var ww = hit.block.w;
   hit.block.size = ww <= 40 ? 'sm' : (ww <= 70 ? 'md' : (ww <= 90 ? 'lg' : 'full'));
   var ta = $('admin-post-content');
   if (ta) ta.value = blocksToContent(hit.blocks);
-  // live update without full re-render while dragging
   var img = document.querySelector('.content-img-card[data-img-index="' + imgIndex + '"] img.content-img-el');
   if (img) {
     img.style.maxWidth = hit.block.w + '%';
@@ -2131,16 +2259,66 @@ function renderTextLines(text) {
 function defaultWidthForSize(size) {
   return { sm: 40, md: 70, lg: 90, full: 100 }[size] || 70;
 }
+function renderGalleryHtml(g, gIndex) {
+  var layout = g.layout || '1-2';
+  var imgs = (g.imgs || []).filter(function(x) { return x && x.url; }).slice(0, 3);
+  if (!imgs.length) return '';
+  var gridCss = '';
+  var cellHtml = '';
+  if (layout === '1-2' && imgs.length >= 3) {
+    gridCss = 'display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:min(420px,52vw);';
+    cellHtml =
+      '<div style="grid-row:1/3;border-radius:14px;overflow:hidden;"><img src="' + imgs[0].url.replace(/"/g,'&quot;') + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>' +
+      '<div style="border-radius:14px;overflow:hidden;"><img src="' + imgs[1].url.replace(/"/g,'&quot;') + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>' +
+      '<div style="border-radius:14px;overflow:hidden;"><img src="' + imgs[2].url.replace(/"/g,'&quot;') + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
+  } else if (layout === '2-1' && imgs.length >= 3) {
+    gridCss = 'display:grid;grid-template-columns:1fr 1.2fr;grid-template-rows:1fr 1fr;gap:8px;height:min(420px,52vw);';
+    cellHtml =
+      '<div style="border-radius:14px;overflow:hidden;"><img src="' + imgs[0].url.replace(/"/g,'&quot;') + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>' +
+      '<div style="grid-row:1/3;grid-column:2;border-radius:14px;overflow:hidden;"><img src="' + imgs[1].url.replace(/"/g,'&quot;') + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>' +
+      '<div style="border-radius:14px;overflow:hidden;"><img src="' + imgs[2].url.replace(/"/g,'&quot;') + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
+  } else if (layout === '3' || imgs.length >= 3) {
+    gridCss = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:min(280px,40vw);';
+    cellHtml = imgs.slice(0,3).map(function(im) {
+      return '<div style="border-radius:14px;overflow:hidden;"><img src="' + im.url.replace(/"/g,'&quot;') + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
+    }).join('');
+  } else {
+    // 2 side by side
+    gridCss = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;height:min(300px,42vw);';
+    cellHtml = imgs.slice(0,2).map(function(im) {
+      return '<div style="border-radius:14px;overflow:hidden;"><img src="' + im.url.replace(/"/g,'&quot;') + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
+    }).join('');
+  }
+  return (
+    '<div class="content-gallery-card" data-g-index="' + gIndex + '" style="margin:16px 0;padding:10px;border:1px dashed #334155;border-radius:16px;background:#0a1220;">' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;">' +
+        '<span style="font-size:10px;color:#94a3b8;font-weight:700;">Gallery</span>' +
+        '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="setGalleryLayout(' + gIndex + ',\'1-2\')">1+2</button>' +
+        '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="setGalleryLayout(' + gIndex + ',\'2-1\')">2+1</button>' +
+        '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="setGalleryLayout(' + gIndex + ',\'2\')">2</button>' +
+        '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="setGalleryLayout(' + gIndex + ',\'3\')">3</button>' +
+        '<button type="button" onclick="deleteGallery(' + gIndex + ')" style="margin-left:auto;width:28px;height:28px;border-radius:8px;background:rgba(127,29,29,.92);color:#fecaca;border:1px solid #991b1b;cursor:pointer;"><i class="fa-solid fa-trash" style="font-size:12px;"></i></button>' +
+      '</div>' +
+      '<div style="' + gridCss + '">' + cellHtml + '</div>' +
+    '</div>'
+  );
+}
 function renderContentHtml(raw) {
   if (!raw || !String(raw).trim()) {
-    return '<p class="text-slate-500 text-xs">အပေါ်က ခလုတ်များ သုံးပါ — ခေါင်းစဉ် / ပုံ / စာ ရေးပါ</p>';
+    return '<p class="text-slate-500 text-xs">အပေါ်က ခလုတ်များ သုံးပါ — ခေါင်းစဉ် / ပုံ / Gallery / စာ ရေးပါ</p>';
   }
   var blocks = parseContentBlocks(raw);
   var out = [];
   var imgIndex = 0;
+  var gIndex = 0;
   for (var i = 0; i < blocks.length; i++) {
     var b = blocks[i];
     if (b.type === 'text') { out.push(renderTextLines(b.value)); continue; }
+    if (b.type === 'gallery') {
+      out.push(renderGalleryHtml(b, gIndex));
+      gIndex++;
+      continue;
+    }
     var size = b.size || 'md';
     var w = b.w != null ? b.w : defaultWidthForSize(size);
     var url = b.url || '';
@@ -2161,7 +2339,6 @@ function renderContentHtml(raw) {
             '<i class="fa-solid fa-trash" style="font-size:12px;"></i></button>' +
           '<span class="img-w-label" style="position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.7);color:#6ee7b7;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;">' + w + '%</span>' +
         '</div>' +
-        '<div style="margin-top:4px;font-size:10px;color:#64748b;">ပုံ ' + (idx + 1) + ' · ထောင့်စိမ်း ဆွဲ = အရွယ် · ပုံဆွဲ = နေရာရွှေ့ · အနီ = ဖျက်</div>' +
       '</div>'
     );
     imgIndex++;
@@ -2218,7 +2395,7 @@ function startImgResize(e, idx) {
     idx: idx,
     startX: e.clientX,
     startW: startW,
-    parentW: rect.width / (startW / 100) // full 100% width in px
+    parentW: rect.width / (startW / 100)
   };
   document.body.style.cursor = 'nwse-resize';
   document.body.style.userSelect = 'none';
@@ -2237,7 +2414,6 @@ function onImgResizeEnd() {
   _resizeState = null;
   document.body.style.cursor = '';
   document.body.style.userSelect = '';
-  // final write + full preview sync
   var hit = getImgBlock(idx);
   if (hit) writeContentBlocks(hit.blocks);
   toast('ပုံအရွယ် သိမ်းပြီး');
