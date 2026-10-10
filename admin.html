@@ -78,7 +78,7 @@ async function signInAdmin(){
    await adminDb.ref('siteData').set(seed); Object.keys(seed).forEach(k=>originalSetItem(k,JSON.stringify(seed[k])));
   }
   remoteSyncReady=true; $('login-modal').classList.add('hidden'); $('app').classList.remove('hidden'); loadAll();
- } catch(e) { $('login-error').textContent=e.message||'Login မအောင်မြင်ပါ။'; }
+ } catch(e) { $('login-error').textContent=(e.code==='auth/api-key-not-valid' || /api-key-not-valid/i.test(e.message||''))?'Firebase API Key မမှန်ပါ။ Firebase Console > Project settings > General > Your apps မှ Web App config ကို ပြန်ကူးထည့်ပါ။':(e.message||'Login မအောင်မြင်ပါ။'); }
  finally { $('login-button').disabled=false; $('login-button').innerHTML='Login ဝင်မယ် <i class="fa-solid fa-arrow-right ml-1"></i>'; }
 }
 adminAuth?.onAuthStateChanged(user=>{ if(!user){adminUser=null;remoteSyncReady=false} });
