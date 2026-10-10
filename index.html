@@ -9,6 +9,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --brand-bg: #061510;
@@ -17,8 +20,18 @@
     --brand-accent: #f5c518;
     --brand-text: #ffffff;
     --brand-muted: #6ee7b7;
+    --brand-font: 'Inter', 'Noto Sans Myanmar', system-ui, sans-serif;
+    --brand-heading-font: 'Inter', 'Noto Sans Myanmar', system-ui, sans-serif;
+    --hero-min-h: 560px;
+    --card-img-h: 11rem;
+    --radius: 1rem;
   }
-  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Myanmar", sans-serif; background: var(--brand-bg); color: var(--brand-text); }
+  body {
+    font-family: var(--brand-font);
+    background: var(--brand-bg);
+    color: var(--brand-text);
+  }
+  h1, h2, h3, .font-heading { font-family: var(--brand-heading-font); }
   .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .card-hover { transition: transform .25s ease, box-shadow .25s ease; }
@@ -32,15 +45,80 @@
   .accent-text { color: var(--brand-accent); }
   .surface-bg { background: var(--brand-surface); }
   .card-bg { background: var(--brand-card); }
+
+  /* Theme: Forest (default) */
+  body.theme-forest { --radius: 1rem; }
+  body.theme-forest .hero-title { letter-spacing: -0.02em; }
+
+  /* Theme: Ocean — more rounded, cyan glow, different spacing */
+  body.theme-ocean {
+    --radius: 1.25rem;
+  }
+  body.theme-ocean header { border-bottom-color: rgba(6, 182, 212, 0.25); }
+  body.theme-ocean .card-hover:hover { box-shadow: 0 20px 50px -15px rgba(6, 182, 212, 0.25); }
+  body.theme-ocean .nav-link::after { height: 3px; border-radius: 2px; }
+  body.theme-ocean #hero-section { clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%); }
+  body.theme-ocean .card-bg { border-radius: 1.25rem; }
+
+  /* Theme: Sunset — warmer, sharper, serif headings */
+  body.theme-sunset {
+    --radius: 0.5rem;
+    --brand-heading-font: 'Playfair Display', 'Noto Sans Myanmar', serif;
+  }
+  body.theme-sunset .card-hover:hover { transform: scale(1.02); box-shadow: 0 12px 30px -8px rgba(249, 115, 22, 0.3); }
+  body.theme-sunset .nav-link::after { height: 2px; }
+  body.theme-sunset #hero-section .relative.z-10 { text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
+  body.theme-sunset .accent-bg { border-radius: 0.375rem; }
+
+  /* Theme: Navy — light minimal, clean */
+  body.theme-navy {
+    --radius: 0.75rem;
+    --brand-text: #0f172a;
+    color: #0f172a;
+  }
+  body.theme-navy .surface-bg { background: #ffffff; }
+  body.theme-navy .card-bg { background: #ffffff; border-color: #e2e8f0 !important; }
+  body.theme-navy header { border-bottom-color: #e2e8f0; background: rgba(255,255,255,0.95); }
+  body.theme-navy .nav-link { color: #334155; }
+  body.theme-navy .nav-link:hover { color: #0f172a; }
+  body.theme-navy footer { border-top-color: #e2e8f0; }
+  body.theme-navy .text-white { color: #0f172a !important; }
+  body.theme-navy .text-emerald-100\/90,
+  body.theme-navy .text-emerald-100\/70,
+  body.theme-navy .text-emerald-100\/75,
+  body.theme-navy .text-emerald-100 { color: #475569 !important; }
+  body.theme-navy .text-emerald-400\/70,
+  body.theme-navy .text-emerald-400\/60,
+  body.theme-navy .text-emerald-400\/80,
+  body.theme-navy .text-emerald-300\/80,
+  body.theme-navy .text-emerald-500\/60,
+  body.theme-navy .text-emerald-500\/50,
+  body.theme-navy .text-emerald-500\/70 { color: #64748b !important; }
+  body.theme-navy .text-emerald-400,
+  body.theme-navy .text-emerald-300 { color: #1e3a5f !important; }
+  body.theme-navy .border-emerald-800\/40,
+  body.theme-navy .border-emerald-800\/50,
+  body.theme-navy .border-emerald-900\/50,
+  body.theme-navy .border-emerald-900\/40 { border-color: #e2e8f0 !important; }
+  body.theme-navy .bg-emerald-950\/80,
+  body.theme-navy .bg-emerald-950,
+  body.theme-navy .bg-emerald-900\/50,
+  body.theme-navy .bg-emerald-900\/60 { background: #f1f5f9 !important; color: #0f172a !important; }
+  body.theme-navy #hero-section .text-white { color: #ffffff !important; }
+  body.theme-navy #hero-section .text-emerald-300 { color: #93c5fd !important; }
+  body.theme-navy #hero-section .text-emerald-100\/80 { color: rgba(255,255,255,0.85) !important; }
+  body.theme-navy #hero-section .text-emerald-400\/60 { color: rgba(255,255,255,0.6) !important; }
+  body.theme-navy .accent-text { color: var(--brand-accent) !important; }
+  body.theme-navy .card-hover:hover { box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.12); }
 </style>
 </head>
-<body class="min-h-screen antialiased">
+<body class="min-h-screen antialiased theme-forest">
 
 <!-- ================= HEADER ================= -->
 <header class="sticky top-0 z-50 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16 sm:h-[70px] gap-3">
-      <!-- Logo + Brand -->
+      <!-- Logo + Brand (name only — tagline optional via settings) -->
       <a href="#home" class="flex items-center gap-2.5 shrink-0">
         <div id="brand-logo-wrap" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg overflow-hidden">
           <img id="brand-logo-img" src="" alt="Logo" class="w-full h-full object-cover hidden">
@@ -48,7 +126,7 @@
         </div>
         <div class="leading-none">
           <div id="brand-name" class="font-black text-white text-[15px] sm:text-lg tracking-tight">HTOO HTET</div>
-          <div id="brand-tagline" class="text-[9px] sm:text-[10px] font-semibold text-emerald-400 tracking-[0.12em] uppercase">Travel Journal & Beyond</div>
+          <div id="brand-tagline" class="text-[9px] sm:text-[10px] font-semibold text-emerald-400 tracking-[0.12em] uppercase hidden"></div>
         </div>
       </a>
 
@@ -62,7 +140,8 @@
           <span class="text-emerald-700">|</span>
           <button type="button" id="lang-mm" class="hover:text-white transition">မြန်မာ</button>
         </div>
-        <div class="hidden md:flex items-center gap-1.5" id="social-links-desktop"></div>
+        <!-- Social icons next to search -->
+        <div class="hidden md:flex items-center gap-1" id="social-links-desktop"></div>
         <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
           <i class="fa-solid fa-magnifying-glass text-sm"></i>
         </button>
@@ -93,7 +172,7 @@
     </div>
     <nav id="mobile-nav" class="flex flex-col gap-1 text-[15px] font-semibold text-emerald-100"></nav>
     <div class="mt-auto pt-6 border-t border-emerald-900/50">
-      <div class="flex gap-2 mb-4" id="social-links-mobile"></div>
+      <div class="flex gap-2 mb-4 flex-wrap" id="social-links-mobile"></div>
       <p id="mobile-tagline" class="text-[11px] text-emerald-500/70">Discover Myanmar, one journey at a time.</p>
     </div>
   </aside>
@@ -102,14 +181,14 @@
 <main id="home">
 
   <!-- ========== HERO ========== -->
-  <section id="hero-section" class="relative min-h-[480px] sm:min-h-[560px] lg:min-h-[640px] overflow-hidden">
+  <section id="hero-section" class="relative overflow-hidden" style="min-height: var(--hero-min-h);">
     <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
     <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20"></div>
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[480px] sm:min-h-[560px] lg:min-h-[640px] flex flex-col justify-center py-14 sm:py-20">
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center py-14 sm:py-20" style="min-height: var(--hero-min-h);">
       <div class="max-w-xl">
         <span id="hero-label" class="inline-block accent-text text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-3">Travel Journal</span>
-        <h1 id="hero-title" class="text-4xl sm:text-5xl lg:text-[3.25rem] font-black leading-[1.12] tracking-tight text-white">
+        <h1 id="hero-title" class="hero-title text-4xl sm:text-5xl lg:text-[3.25rem] font-black leading-[1.12] tracking-tight text-white">
           New Places.<br><span class="text-emerald-300">Same Curiosity.</span>
         </h1>
         <p id="hero-desc" class="mt-4 sm:mt-5 text-sm sm:text-base text-emerald-100/80 leading-relaxed max-w-md">
@@ -165,10 +244,10 @@
         <span class="w-1 h-6 rounded-full accent-bg"></span>Upcoming
       </h2>
     </div>
-    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden min-h-[180px] sm:min-h-[220px] border border-emerald-800/40">
+    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40" style="min-height: 200px;">
       <img id="upcoming-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200" alt="" class="absolute inset-0 w-full h-full object-cover">
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-      <div class="relative z-10 p-5 sm:p-7 flex flex-col justify-end min-h-[180px] sm:min-h-[220px]">
+      <div class="relative z-10 p-5 sm:p-7 flex flex-col justify-end" style="min-height: 200px;">
         <span id="upcoming-label" class="text-[10px] font-bold uppercase tracking-widest accent-text">Featured Journey</span>
         <h3 id="upcoming-title" class="text-white text-xl sm:text-2xl font-black mt-1"></h3>
         <p id="upcoming-desc" class="text-white/80 text-xs sm:text-sm mt-1 max-w-md"></p>
@@ -260,7 +339,7 @@
             <div id="footer-brand-tagline" class="text-[9px] text-emerald-400 tracking-wider uppercase">Travel Journal & Beyond</div>
           </div>
         </div>
-        <div class="flex gap-2 mt-4" id="footer-social"></div>
+        <div class="flex gap-2 mt-4 flex-wrap" id="footer-social"></div>
       </div>
       <div>
         <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-4">Quick Links</h4>
@@ -312,7 +391,6 @@ let allStoryPosts = [];
 let siteSettings = {};
 let siteMenu = [];
 
-/* ---------- menu drawer ---------- */
 function toggleMenu() {
   const menu = $('site-menu'), overlay = $('drawer-overlay');
   const open = menu.classList.contains('translate-x-full');
@@ -327,7 +405,6 @@ function closeMenu() {
   document.body.classList.remove('overflow-hidden');
 }
 
-/* ---------- search ---------- */
 const searchPanel = $('search-panel');
 const searchInput = $('header-search-input');
 $('search-toggle').addEventListener('click', () => {
@@ -341,21 +418,27 @@ $('search-close').addEventListener('click', () => {
 });
 searchInput.addEventListener('input', () => renderStoryCards());
 
-/* ---------- helpers ---------- */
 function read(key, fallback) {
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
 }
+
+function applyThemeClass(theme) {
+  document.body.classList.remove('theme-forest', 'theme-ocean', 'theme-sunset', 'theme-navy');
+  document.body.classList.add('theme-' + (theme || 'forest'));
+}
+
 function applyColors(s) {
   if (s.accentColor) document.documentElement.style.setProperty('--brand-accent', s.accentColor);
   if (s.bgColor) document.documentElement.style.setProperty('--brand-bg', s.bgColor);
   if (s.surfaceColor) document.documentElement.style.setProperty('--brand-surface', s.surfaceColor);
   if (s.cardColor) document.documentElement.style.setProperty('--brand-card', s.cardColor);
-  if (s.theme === 'navy') {
-    document.body.style.color = '#0f172a';
-  } else {
-    document.body.style.color = '#ffffff';
-  }
+  if (s.fontFamily) document.documentElement.style.setProperty('--brand-font', s.fontFamily);
+  if (s.headingFont) document.documentElement.style.setProperty('--brand-heading-font', s.headingFont);
+  if (s.heroHeight) document.documentElement.style.setProperty('--hero-min-h', s.heroHeight + 'px');
+  if (s.cardImgHeight) document.documentElement.style.setProperty('--card-img-h', s.cardImgHeight + 'rem');
+  applyThemeClass(s.theme);
 }
+
 function setLogo(url) {
   ['brand-logo-img', 'footer-logo-img'].forEach(id => {
     const img = $(id);
@@ -371,20 +454,23 @@ function setLogo(url) {
     }
   });
 }
-function renderSocial(containerId, social, white = true) {
+
+function renderSocial(containerId, social) {
   const el = $(containerId);
   if (!el) return;
   const items = [
-    { key: 'fb', icon: 'fa-facebook-f', hover: 'hover:bg-blue-600' },
-    { key: 'yt', icon: 'fa-youtube', hover: 'hover:bg-red-600' },
-    { key: 'tt', icon: 'fa-tiktok', hover: 'hover:bg-black' }
+    { key: 'fb', icon: 'fa-facebook-f', hover: 'hover:bg-blue-600', label: 'Facebook' },
+    { key: 'yt', icon: 'fa-youtube', hover: 'hover:bg-red-600', label: 'YouTube' },
+    { key: 'tt', icon: 'fa-tiktok', hover: 'hover:bg-black', label: 'TikTok' },
+    { key: 'vb', icon: 'fa-viber', hover: 'hover:bg-purple-600', label: 'Viber' }
   ];
   el.innerHTML = items.map(i => {
     const url = social[i.key];
     if (!url) return '';
-    return `<a href="${safe(url)}" target="_blank" class="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center ${i.hover} hover:text-white transition text-xs"><i class="fa-brands ${i.icon}"></i></a>`;
+    return `<a href="${safe(url)}" target="_blank" rel="noopener" title="${i.label}" class="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center ${i.hover} hover:text-white transition text-xs"><i class="fa-brands ${i.icon}"></i></a>`;
   }).join('');
 }
+
 function renderMenu() {
   const menu = siteMenu.length ? siteMenu : [
     { label: 'Home', href: '#home' },
@@ -404,13 +490,19 @@ function renderMenu() {
 function loadBlogData() {
   $('footer-year').textContent = new Date().getFullYear();
 
-  // Settings
   siteSettings = read('hh_settings', {});
   applyColors(siteSettings);
   const brand = siteSettings.brandName || 'HTOO HTET';
   const tagline = siteSettings.brandTagline || 'Travel Journal & Beyond';
   ['brand-name', 'footer-brand-name', 'mobile-brand-name', 'footer-copy-name'].forEach(id => { if ($(id)) $(id).textContent = brand; });
-  ['brand-tagline', 'footer-brand-tagline'].forEach(id => { if ($(id)) $(id).textContent = tagline; });
+  // Tagline under logo: only show if explicitly enabled
+  const showTagline = siteSettings.showBrandTagline === true;
+  const bt = $('brand-tagline');
+  if (bt) {
+    bt.textContent = tagline;
+    bt.classList.toggle('hidden', !showTagline);
+  }
+  $('footer-brand-tagline').textContent = tagline;
   setLogo(siteSettings.logoUrl || '');
   if (siteSettings.contactEmail) {
     const a = $('contact-email');
@@ -419,7 +511,6 @@ function loadBlogData() {
   if (siteSettings.contactLocation) $('contact-location').textContent = siteSettings.contactLocation;
   if (siteSettings.footerTagline) $('footer-tagline').innerHTML = siteSettings.footerTagline.replace(/\n/g, '<br>');
 
-  // Hero
   const hero = read('hh_hero', {});
   if (hero.image) $('hero-img').src = hero.image;
   if (hero.label) $('hero-label').textContent = hero.label;
@@ -431,11 +522,9 @@ function loadBlogData() {
   if (hero.active === false) $('hero-section').classList.add('hidden');
   else $('hero-section').classList.remove('hidden');
 
-  // Menu
   siteMenu = read('hh_menu', []);
   renderMenu();
 
-  // Social (white icons)
   const social = read('hh_social', {});
   renderSocial('social-links-desktop', social);
   renderSocial('social-links-mobile', social);
@@ -445,7 +534,6 @@ function loadBlogData() {
     if (yl) yl.href = social.yt;
   }
 
-  // Proud Sponsors
   const proud = read('hh_proud_sponsors', []);
   const proudSec = $('proud-sponsors-section');
   if (proud.length && proud.some(p => p.active !== false)) {
@@ -458,7 +546,6 @@ function loadBlogData() {
     proudSec.classList.add('hidden');
   }
 
-  // Official Sponsor
   const sponsor = read('hh_sponsor', {});
   const sc = $('sponsor-container');
   if (sponsor.active === false || (!sponsor.title && !sponsor.img)) {
@@ -472,7 +559,6 @@ function loadBlogData() {
     if (sponsor.bgImage) $('sponsor-bg').src = sponsor.bgImage;
   }
 
-  // Upcoming
   const up = read('hh_upcoming', {});
   const upSec = $('upcoming-section');
   if (up.active === false || !up.title) {
@@ -486,7 +572,6 @@ function loadBlogData() {
     if (up.image) $('upcoming-img').src = up.image;
   }
 
-  // YouTube
   const yt = read('hh_youtube', {});
   const ytSec = $('youtube-section');
   if (yt.active === false) {
@@ -502,18 +587,15 @@ function loadBlogData() {
     if (yt.bgImage) $('youtube-bg').src = yt.bgImage;
   }
 
-  // About
   const about = read('hh_about', {});
   if (about.title) $('about-title').textContent = about.title;
   if (about.desc) $('about-desc').textContent = about.desc;
   if (about.active === false) $('about-section').classList.add('hidden');
   else $('about-section').classList.remove('hidden');
 
-  // Stories heading
   if (siteSettings.storiesHeading) $('stories-heading').textContent = siteSettings.storiesHeading;
   if (siteSettings.storiesSub) $('stories-sub').textContent = siteSettings.storiesSub;
 
-  // Posts
   allStoryPosts = read('hh_posts', []);
   const cats = [...new Set(allStoryPosts.map(p => p.category || p.type || p.location || '').filter(Boolean))];
   const sel = $('story-category-filter');
@@ -554,13 +636,14 @@ function renderStoryCards() {
     return;
   }
 
+  const imgH = siteSettings.cardImgHeight ? siteSettings.cardImgHeight + 'rem' : '11rem';
   box.innerHTML = posts.map(post => {
     const idx = allStoryPosts.indexOf(post);
     const tag = (post.location || post.category || post.type || 'MYANMAR').toUpperCase();
     const dateStr = formatDate(post.publishedDate) || formatDate(post.id) || formatDate(post.date) || '';
     return `
     <button type="button" onclick="openArticle(${idx})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
-      <div class="relative h-44 sm:h-48 overflow-hidden bg-emerald-950">
+      <div class="relative overflow-hidden bg-emerald-950" style="height: ${imgH}">
         <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600')}" alt="${safe(post.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
         <span class="absolute top-3 left-3 bg-black/75 backdrop-blur-sm accent-text text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase">${safe(tag)}</span>
       </div>
@@ -582,7 +665,10 @@ function openArticle(index) {
   $('article-image').src = post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000';
   $('article-title').textContent = post.title || 'Travel Story';
   $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ');
-  $('article-body').textContent = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
+  let body = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
+  // Simple [img]url[/img] support
+  body = body.replace(/\[img\](.*?)\[\/img\]/gi, '<img src="$1" class="my-3 rounded-xl w-full max-h-80 object-cover" alt="">');
+  $('article-body').innerHTML = body.replace(/\n/g, '<br>');
   const related = allStoryPosts.filter((_, i) => i !== index).slice(0, 3);
   $('related-stories').innerHTML = related.length
     ? related.map(p => `<button onclick="openArticle(${allStoryPosts.indexOf(p)})" class="w-full text-left flex gap-3 rounded-xl border border-emerald-800/40 p-2 hover:bg-emerald-900/40 transition">
@@ -604,6 +690,7 @@ function renderExtraHomeSections() {
   const sections = read('hh_home_sections', []);
   const posts = read('hh_posts', []);
   if (!sections.length) { container.innerHTML = ''; return; }
+  const imgH = siteSettings.cardImgHeight ? siteSettings.cardImgHeight + 'rem' : '11rem';
 
   container.innerHTML = sections.map(section => {
     const sectionPosts = posts.filter(p => String(p.sectionId) === String(section.id));
@@ -611,7 +698,7 @@ function renderExtraHomeSections() {
       ? sectionPosts.map(post => {
           const idx = allStoryPosts.indexOf(post);
           return `<button type="button" onclick="openArticle(${idx >= 0 ? idx : 0})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
-            <div class="relative h-44 sm:h-48 overflow-hidden">
+            <div class="relative overflow-hidden" style="height: ${imgH}">
               <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500')}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
               <span class="absolute top-2.5 left-2.5 bg-black/75 accent-text text-[10px] font-black px-2 py-0.5 rounded-md uppercase">${safe(post.location || 'Myanmar')}</span>
             </div>
@@ -635,7 +722,6 @@ function renderExtraHomeSections() {
   }).join('');
 }
 
-/* ---------- Firebase ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCCYJQXip_GTPTZ6DQg2_RhV_jSr2Tq-4s",
   authDomain: "htoo-htet-explore.firebaseapp.com",
