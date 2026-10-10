@@ -488,6 +488,46 @@
 
     <div id="article-body" class="mt-6 text-[15px] sm:text-base text-emerald-50/90 leading-[1.8] article-prose"></div>
 
+    <!-- Like · Share · Comment -->
+    <div id="article-engage" class="mt-8 pt-6 border-t border-emerald-800/50 space-y-5">
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <button type="button" id="btn-like" onclick="toggleLike()" class="inline-flex items-center gap-2 rounded-full border border-emerald-800/50 bg-emerald-950/50 px-4 py-2 text-sm font-bold text-emerald-100 hover:border-emerald-500/50 transition">
+          <i id="like-icon" class="fa-regular fa-heart text-base"></i>
+          <span id="like-label">Like</span>
+          <span id="like-count" class="text-emerald-400/80">0</span>
+        </button>
+        <button type="button" id="btn-share" onclick="shareArticle()" class="inline-flex items-center gap-2 rounded-full border border-emerald-800/50 bg-emerald-950/50 px-4 py-2 text-sm font-bold text-emerald-100 hover:border-emerald-500/50 transition">
+          <i class="fa-solid fa-share-nodes"></i>
+          <span id="share-label">Share</span>
+        </button>
+        <button type="button" onclick="document.getElementById('comment-form-wrap').scrollIntoView({behavior:'smooth',block:'center'})" class="inline-flex items-center gap-2 rounded-full border border-emerald-800/50 bg-emerald-950/50 px-4 py-2 text-sm font-bold text-emerald-100 hover:border-emerald-500/50 transition">
+          <i class="fa-regular fa-comment"></i>
+          <span id="comment-label">Comment</span>
+          <span id="comment-count" class="text-emerald-400/80">0</span>
+        </button>
+      </div>
+      <p id="engage-status" class="text-xs text-emerald-500/70 min-h-[1rem]"></p>
+
+      <div id="comment-form-wrap" class="rounded-2xl border border-emerald-800/40 bg-emerald-950/30 p-4 space-y-3">
+        <p id="comment-form-title" class="text-sm font-bold text-white">Leave a comment</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input id="comment-name" type="text" maxlength="40" class="field w-full rounded-xl border border-emerald-800/50 bg-emerald-950/80 px-3 py-2.5 text-sm text-white placeholder-emerald-500/50 outline-none focus:border-emerald-500" placeholder="Your name">
+        </div>
+        <textarea id="comment-text" maxlength="500" rows="3" class="w-full rounded-xl border border-emerald-800/50 bg-emerald-950/80 px-3 py-2.5 text-sm text-white placeholder-emerald-500/50 outline-none focus:border-emerald-500 resize-y" placeholder="Write a comment..."></textarea>
+        <div class="flex items-center justify-between gap-2">
+          <p class="text-[11px] text-emerald-500/50"><span id="comment-hint">Max 500 characters</span></p>
+          <button type="button" id="btn-post-comment" onclick="submitComment()" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition">
+            <i class="fa-solid fa-paper-plane text-xs"></i> <span id="comment-submit-label">Post</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <p id="comments-heading" class="text-sm font-bold text-emerald-300 mb-3">Comments</p>
+        <div id="comments-list" class="space-y-3"></div>
+      </div>
+    </div>
+
     <!-- Related posts -->
     <div class="mt-12 pt-8 border-t border-emerald-800/50">
       <h2 id="related-heading" class="text-lg font-black text-white flex items-center gap-2 mb-5">
@@ -576,7 +616,25 @@ const I18N = {
     read: 'Read',
     proudSponsors: 'Our Proud Sponsors',
     visitSponsor: 'Visit Sponsor',
-    copyright: 'All rights reserved.'
+    copyright: 'All rights reserved.',
+    like: 'Like',
+    liked: 'Liked',
+    share: 'Share',
+    comment: 'Comment',
+    comments: 'Comments',
+    leaveComment: 'Leave a comment',
+    yourName: 'Your name',
+    writeComment: 'Write a comment...',
+    postComment: 'Post',
+    commentHint: 'Max 500 characters',
+    noComments: 'No comments yet. Be the first!',
+    shareCopied: 'Link copied!',
+    shareFailed: 'Could not share',
+    commentNeedName: 'Please enter your name',
+    commentNeedText: 'Please write a comment',
+    commentPosted: 'Comment posted!',
+    commentFailed: 'Could not post (check Firebase rules)',
+    likeFailed: 'Could not update like'
   },
   mm: {
     searchPlaceholder: 'ခေါင်းစဉ်၊ နေရာ ရှာရန်...',
@@ -591,7 +649,25 @@ const I18N = {
     read: 'ဖတ်မယ်',
     proudSponsors: 'ကျွန်ုပ်တို့၏ Sponsors',
     visitSponsor: 'Sponsor သို့သွားမယ်',
-    copyright: 'မူပိုင်ခွင့်အားလုံး လက်ဝယ်ရှိသည်။'
+    copyright: 'မူပိုင်ခွင့်အားလုံး လက်ဝယ်ရှိသည်။',
+    like: 'Like',
+    liked: 'Liked',
+    share: 'Share',
+    comment: 'Comment',
+    comments: 'မှတ်ချက်များ',
+    leaveComment: 'မှတ်ချက် ရေးမယ်',
+    yourName: 'နာမည်',
+    writeComment: 'မှတ်ချက် ရေးပါ...',
+    postComment: 'ပို့မယ်',
+    commentHint: 'အများဆုံး ၅၀၀ လုံး',
+    noComments: 'မှတ်ချက် မရှိသေးပါ — ပထမဦးဆုံး ရေးပါ!',
+    shareCopied: 'Link ကူးပြီးပါပြီ!',
+    shareFailed: 'Share မရပါ',
+    commentNeedName: 'နာမည် ထည့်ပါ',
+    commentNeedText: 'မှတ်ချက် ရေးပါ',
+    commentPosted: 'မှတ်ချက် တင်ပြီးပါပြီ!',
+    commentFailed: 'မတင်နိုင်ပါ (Firebase Rules စစ်ပါ)',
+    likeFailed: 'Like မရပါ'
   }
 };
 let currentLang = localStorage.getItem('hh_lang') || 'mm';
@@ -646,6 +722,15 @@ function applyLanguageUI() {
   if ($('article-page-label')) $('article-page-label').textContent = t('article');
   if ($('related-heading-text')) $('related-heading-text').textContent = t('related');
   if ($('article-back-text')) $('article-back-text').textContent = t('backHome');
+  if ($('like-label')) $('like-label').textContent = (window._likedCurrent ? t('liked') : t('like'));
+  if ($('share-label')) $('share-label').textContent = t('share');
+  if ($('comment-label')) $('comment-label').textContent = t('comment');
+  if ($('comment-form-title')) $('comment-form-title').textContent = t('leaveComment');
+  if ($('comment-name')) $('comment-name').placeholder = t('yourName');
+  if ($('comment-text')) $('comment-text').placeholder = t('writeComment');
+  if ($('comment-submit-label')) $('comment-submit-label').textContent = t('postComment');
+  if ($('comment-hint')) $('comment-hint').textContent = t('commentHint');
+  if ($('comments-heading')) $('comments-heading').textContent = t('comments');
 
   // Copyright trailing text
   const copyEl = document.querySelector('footer .mt-8 span');
@@ -1166,6 +1251,8 @@ function openArticle(index) {
   }
 
   bindArticleImageZoom();
+  currentPostTitle = post.title || '';
+  bindEngagement(post.id != null ? post.id : index);
 
   // Full page: hide home + footer, show only article
   const home = $('home');
@@ -1182,6 +1269,8 @@ function openArticle(index) {
 }
 function closeArticle() {
   try { closeLightbox(); } catch (e) {}
+  if (_engageUnsub) { try { _engageUnsub(); } catch (e) {} _engageUnsub = null; }
+  currentPostId = null;
   const page = $('article-page');
   if (page) page.classList.add('hidden');
   const home = $('home');
@@ -1244,9 +1333,10 @@ const firebaseConfig = {
 };
 const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 let publicFirebaseReady = false;
+let publicDb = null;
 try {
   firebase.initializeApp(firebaseConfig);
-  const publicDb = firebase.database();
+  publicDb = firebase.database();
   publicDb.ref('siteData').on('value', snap => {
     const data = snap.val() || {};
     DATA_KEYS.forEach(key => {
@@ -1257,6 +1347,176 @@ try {
     loadBlogData();
   }, err => { console.error(err); loadBlogData(); });
 } catch (e) { console.error(e); }
+
+/* ---- Engagement: Like / Share / Comment ---- */
+let currentPostId = null;
+let currentPostTitle = '';
+let _engageUnsub = null;
+window._likedCurrent = false;
+
+function getDeviceId() {
+  let id = localStorage.getItem('hh_device_id');
+  if (!id) {
+    id = 'd_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('hh_device_id', id);
+  }
+  return id;
+}
+
+function engageRef(postId) {
+  if (!publicDb || !postId) return null;
+  return publicDb.ref('engagement/' + postId);
+}
+
+function setEngageStatus(msg, isError) {
+  const el = $('engage-status');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.className = 'text-xs min-h-[1rem] ' + (isError ? 'text-rose-300' : 'text-emerald-400/80');
+  if (msg) setTimeout(function() { if (el.textContent === msg) el.textContent = ''; }, 3200);
+}
+
+function renderLikeUI(count, liked) {
+  window._likedCurrent = !!liked;
+  const icon = $('like-icon');
+  const label = $('like-label');
+  const cnt = $('like-count');
+  const btn = $('btn-like');
+  if (cnt) cnt.textContent = String(count || 0);
+  if (label) label.textContent = liked ? t('liked') : t('like');
+  if (icon) {
+    icon.className = liked ? 'fa-solid fa-heart text-base text-rose-400' : 'fa-regular fa-heart text-base';
+  }
+  if (btn) {
+    btn.classList.toggle('border-rose-500/40', !!liked);
+    btn.classList.toggle('bg-rose-950/30', !!liked);
+  }
+}
+
+function renderComments(commentsObj) {
+  const box = $('comments-list');
+  const countEl = $('comment-count');
+  if (!box) return;
+  const list = [];
+  if (commentsObj && typeof commentsObj === 'object') {
+    Object.keys(commentsObj).forEach(function(k) {
+      const c = commentsObj[k];
+      if (c && c.text) list.push({ id: k, name: c.name || 'Guest', text: c.text, at: c.at || 0 });
+    });
+  }
+  list.sort(function(a, b) { return (b.at || 0) - (a.at || 0); });
+  if (countEl) countEl.textContent = String(list.length);
+  if (!list.length) {
+    box.innerHTML = '<p class="text-sm text-emerald-500/50 py-2">' + t('noComments') + '</p>';
+    return;
+  }
+  box.innerHTML = list.map(function(c) {
+    const when = c.at ? formatDate(c.at) : '';
+    return '<div class="rounded-xl border border-emerald-800/40 bg-emerald-950/40 p-3 sm:p-4">' +
+      '<div class="flex items-center justify-between gap-2 mb-1">' +
+        '<span class="text-sm font-bold text-white">' + safe(c.name) + '</span>' +
+        (when ? '<span class="text-[11px] text-emerald-500/50">' + safe(when) + '</span>' : '') +
+      '</div>' +
+      '<p class="text-sm text-emerald-100/85 leading-relaxed whitespace-pre-wrap">' + safe(c.text) + '</p>' +
+    '</div>';
+  }).join('');
+}
+
+function bindEngagement(postId) {
+  currentPostId = postId != null ? String(postId) : null;
+  if (_engageUnsub) { try { _engageUnsub(); } catch (e) {} _engageUnsub = null; }
+  renderLikeUI(0, false);
+  renderComments(null);
+  if (!currentPostId || !publicDb) return;
+  const ref = engageRef(currentPostId);
+  if (!ref) return;
+  const handler = function(snap) {
+    const data = snap.val() || {};
+    const likes = typeof data.likes === 'number' ? data.likes : 0;
+    const likedBy = data.likedBy || {};
+    const liked = !!likedBy[getDeviceId()];
+    renderLikeUI(likes, liked);
+    renderComments(data.comments || null);
+  };
+  ref.on('value', handler);
+  _engageUnsub = function() { ref.off('value', handler); };
+}
+
+function toggleLike() {
+  if (!currentPostId || !publicDb) {
+    setEngageStatus(t('likeFailed'), true);
+    return;
+  }
+  const deviceId = getDeviceId();
+  const ref = engageRef(currentPostId);
+  ref.transaction(function(cur) {
+    cur = cur || {};
+    cur.likes = typeof cur.likes === 'number' ? cur.likes : 0;
+    cur.likedBy = cur.likedBy || {};
+    if (cur.likedBy[deviceId]) {
+      delete cur.likedBy[deviceId];
+      cur.likes = Math.max(0, cur.likes - 1);
+    } else {
+      cur.likedBy[deviceId] = true;
+      cur.likes = cur.likes + 1;
+    }
+    return cur;
+  }).catch(function() {
+    setEngageStatus(t('likeFailed'), true);
+  });
+}
+
+async function shareArticle() {
+  const url = location.href;
+  const title = currentPostTitle || document.title;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: title, url: url, text: title });
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    setEngageStatus(t('shareCopied'), false);
+  } catch (e2) {
+    // fallback prompt
+    try {
+      window.prompt('Copy link:', url);
+      setEngageStatus(t('shareCopied'), false);
+    } catch (e3) {
+      setEngageStatus(t('shareFailed'), true);
+    }
+  }
+}
+
+function submitComment() {
+  if (!currentPostId || !publicDb) {
+    setEngageStatus(t('commentFailed'), true);
+    return;
+  }
+  const name = ($('comment-name') && $('comment-name').value || '').trim();
+  const text = ($('comment-text') && $('comment-text').value || '').trim();
+  if (!name) { setEngageStatus(t('commentNeedName'), true); return; }
+  if (!text) { setEngageStatus(t('commentNeedText'), true); return; }
+  if (name.length > 40 || text.length > 500) { setEngageStatus(t('commentFailed'), true); return; }
+  const btn = $('btn-post-comment');
+  if (btn) btn.disabled = true;
+  engageRef(currentPostId).child('comments').push({
+    name: name,
+    text: text,
+    at: Date.now(),
+    deviceId: getDeviceId()
+  }).then(function() {
+    if ($('comment-text')) $('comment-text').value = '';
+    setEngageStatus(t('commentPosted'), false);
+  }).catch(function() {
+    setEngageStatus(t('commentFailed'), true);
+  }).finally(function() {
+    if (btn) btn.disabled = false;
+  });
+}
 
 function tryOpenArticleFromHash() {
   const h = location.hash || '';
