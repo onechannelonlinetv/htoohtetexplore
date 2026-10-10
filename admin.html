@@ -1054,58 +1054,88 @@ function insertHeading(prefix) {
   if (typeof updateContentPreview === 'function') updateContentPreview();
   toast('ခေါင်းစဉ် ထည့်ပြီး — စာဆက်ရေးပါ');
 }
-async function uploadContentImageToStorage(file, index) {
-  if (!adminUser || !adminStorage) {
-    throw new Error('ပုံကို URL အဖြစ်သိမ်းရန် Firebase Storage login/permission လိုအပ်သည်။ Base64 အဖြစ် မထည့်ထားပါ။');
-  }
-  var blob = file;
-  try { blob = await withTimeout(compressImageFile(file, 1400, 0.78), 10000); } catch (e) {}
-  var path = 'uploads/article_' + Date.now() + '_' + (index || 0) + '.jpg';
-  var snap = await withTimeout(adminStorage.ref(path).put(blob, {contentType: blob.type || 'image/jpeg'}), 20000);
-  return await withTimeout(snap.ref.getDownloadURL(), 15000);
-}
 async function insertImageInContent(inputEl) {
-  var file = inputEl.files && inputEl.files[0];
+  const file = inputEl.files && inputEl.files[0];
   if (!file) return;
   if (!file.type.startsWith('image/')) { inputEl.value = ''; return toast('Image ဖိုင်သာ။'); }
-  var ta = $('admin-post-content');
-  if (!ta) return;
-  var pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
-  toast('ပုံကို သိမ်းဆည်းနေသည်…');
+  toast('ပုံ ထည့်နေသည်…');
   try {
-    var url = await uploadContentImageToStorage(file, 0);
-    var sz = ($('content-img-size') && $('content-img-size').value) || 'md';
-    var tag = '\n[img size=' + sz + ']' + url + '[/img]\n';
+    let blob = file;
+    try { blob = await withTimeout(compressImageFile(file, 900, 0.62), 8000); } catch (e) { blob = file; }
+    let url = await fileToDataURL(blob);
+    if (url.length > 650000) {
+      try {
+        blob = await compressImageFile(file, 640, 0.48);
+        url = await fileToDataURL(blob);
+      } catch (e) {}
+    }
+    const ta = $('admin-post-content');
+    if (!ta) return;
+    const sz = ($('content-img-size') && $('content-img-size').value) || 'md';
+    const tag = '\n[img size=' + sz + ']' + url + '[/img]\n';
+    const pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
     ta.value = ta.value.slice(0, pos) + tag + ta.value.slice(pos);
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
-    toast('ပုံထည့်ပြီး — Preview ကြည့်ပါ');
+    toast('ပုံ Preview ထဲ ပေါ်ပါပြီ');
+    if (adminUser && adminStorage) {
+      const dataUrl = url;
+      withTimeout(
+        adminStorage.ref('uploads/content_' + Date.now() + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
+        15000
+      ).then(function(httpsUrl) {
+        if (!httpsUrl || ta.value.indexOf(dataUrl) === -1) return;
+        ta.value = ta.value.split(dataUrl).join(httpsUrl);
+        if (typeof updateContentPreview === 'function') updateContentPreview();
+        toast('ပုံ Firebase သိမ်းပြီး');
+      }).catch(function() {});
+    }
   } catch (err) {
-    toast('ပုံမထည့်နိုင်: ' + (err.message || 'Firebase Storage စစ်ပါ'));
+    toast('ပုံ မထည့်နိုင်: ' + (err.message || ''));
   }
   inputEl.value = '';
+}
+
+async function fileToCompressedDataURL(file) {
+  let blob = file;
+  try { blob = await withTimeout(compressImageFile(file, 900, 0.62), 8000); } catch (e) { blob = file; }
+  var url = await fileToDataURL(blob);
+  if (url.length > 650000) {
+    try {
+      blob = await compressImageFile(file, 640, 0.48);
+      url = await fileToDataURL(blob);
+    } catch (e) {}
+  }
+  return url;
 }
 async function insertGalleryInContent(inputEl) {
   var files = inputEl.files ? Array.prototype.slice.call(inputEl.files, 0, 3) : [];
   if (!files.length) return;
-  if (files.length < 2) { toast('Gallery အတွက် အနည်းဆုံး ပုံ 2 ပုံ ရွေးပါ'); inputEl.value = ''; return; }
-  if (files.some(function(f){ return !f.type.startsWith('image/'); })) { toast('Image ဖိုင်များကိုသာ ရွေးပါ'); inputEl.value = ''; return; }
-  var ta = $('admin-post-content');
-  if (!ta) return;
-  var pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
-  toast('Gallery ပုံများကို သိမ်းဆည်းနေသည်…');
+  if (files.length < 2) {
+    toast('Gallery အတွက် ပုံ အနည်းဆုံး 2 ပုံ ရွေးပါ');
+    inputEl.value = '';
+    return;
+  }
+  toast('Gallery ပုံ ' + files.length + ' ခု ပြင်ဆင်နေသည်…');
   try {
     var urls = [];
-    for (var i = 0; i < files.length; i++) urls.push(await uploadContentImageToStorage(files[i], i));
+    for (var i = 0; i < files.length; i++) {
+      if (!files[i].type.startsWith('image/')) continue;
+      urls.push(await fileToCompressedDataURL(files[i]));
+    }
+    if (urls.length < 2) { toast('ပုံ 2 ခုအထက် လိုအပ်သည်'); inputEl.value = ''; return; }
     var layout = ($('content-gallery-layout') && $('content-gallery-layout').value) || '1-2';
-    var inner = urls.map(function(u) { return '[img]' + u + '[/img]'; }).join('\n');
-    var block = '\n[gallery layout=' + layout + ']\n' + inner + '\n[/gallery]\n';
+    var inner = urls.map(function(u) { return '[img]' + u + '[/img]'; }).join('\\n');
+    var block = '\\n[gallery layout=' + layout + ']\\n' + inner + '\\n[/gallery]\\n';
+    var ta = $('admin-post-content');
+    if (!ta) return;
+    var pos = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
     ta.value = ta.value.slice(0, pos) + block + ta.value.slice(pos);
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
     toast('Gallery ထည့်ပြီး — Preview ကြည့်ပါ');
   } catch (err) {
-    toast('Gallery မထည့်နိုင်: ' + (err.message || 'Firebase Storage permission စစ်ပါ'));
+    toast('Gallery မထည့်နိုင်: ' + (err.message || ''));
   }
   inputEl.value = '';
 }
