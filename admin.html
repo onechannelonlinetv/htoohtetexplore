@@ -338,14 +338,13 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero</span>
-            <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700" style="height:160px; background:linear-gradient(135deg,#0a1f18,#061510);">
-              <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
-              <div id="hero-prev-inner" class="relative z-10 h-full flex flex-col p-4" style="justify-content:center;">
-                <div id="hero-prev-text" style="max-width:70%;">
-                  <div id="hero-prev-label" class="text-[9px] font-bold uppercase tracking-widest mb-1" style="color:#f5c518;">Travel Journal</div>
-                  <div id="hero-prev-title" class="text-sm font-black leading-tight text-white">New Places.</div>
-                  <div id="hero-prev-desc" class="text-[10px] mt-1 line-clamp-2" style="color:rgba(255,255,255,0.7);">Description…</div>
-                </div>
+            <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 select-none" style="height:180px; background:linear-gradient(135deg,#0a1f18,#061510);">
+              <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none"></div>
+              <div id="hero-prev-text" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded p-2" style="left:8%; top:35%; max-width:70%; touch-action:none;">
+                <div id="hero-prev-label" class="font-bold uppercase tracking-widest mb-1" style="color:#f5c518; font-size:10px;">Travel Journal</div>
+                <div id="hero-prev-title" class="font-black leading-tight text-white" style="font-size:16px;">New Places.</div>
+                <div id="hero-prev-desc" class="mt-1 line-clamp-2" style="color:rgba(255,255,255,0.7); font-size:11px;">Description…</div>
+                <div id="hero-prev-sign" class="mt-1 text-[10px]" style="color:#6ee7b7;"></div>
               </div>
             </div>
           </div>
@@ -359,13 +358,31 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               </div>
               <div id="hero-image-preview" class="mt-2"></div>
             </div>
+            <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
+              <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Preview ထဲက စာကို ဖိပြီး နေရာရွှေ့နိုင်ပါတယ် (Drag)</p>
+              <p class="tiny">စာပုံးကို preview ထဲမှာ ဖိဆွဲ → X/Y ရာခိုင်နှုန်း သိမ်းမယ်</p>
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                <div><label class="label">Text X % <span id="val-hero-x" class="range-val">8</span></label>
+                  <input type="range" id="hero-text-x" min="0" max="80" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()">
+                </div>
+                <div><label class="label">Text Y % <span id="val-hero-y" class="range-val">35</span></label>
+                  <input type="range" id="hero-text-y" min="0" max="80" value="35" class="w-full accent-sky-500" oninput="updateHeroPreview()">
+                </div>
+              </div>
+            </div>
             <div>
               <label class="label">Small Label</label>
               <input id="hero-label" class="field" placeholder="Travel Journal" oninput="updateHeroPreview()">
             </div>
-            <div>
-              <label class="label">Label အရောင်</label>
-              <input id="hero-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label">Label အရောင်</label>
+                <input id="hero-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Label Size <span class="range-val" id="val-hero-label-fs">12px</span></label>
+                <input type="range" id="hero-label-fs" min="8" max="24" value="12" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
+              </div>
             </div>
             <div class="md:col-span-2">
               <label class="label">Title (HTML ok)</label>
@@ -374,6 +391,10 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <div>
               <label class="label">Title အရောင်</label>
               <input id="hero-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
+            </div>
+            <div>
+              <label class="label flex justify-between">Title Size <span class="range-val" id="val-hero-title-fs">28px</span></label>
+              <input type="range" id="hero-title-fs" min="14" max="56" value="28" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
             </div>
             <div>
               <label class="label">Title Font Weight</label>
@@ -400,8 +421,16 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <input id="hero-desc-color" type="color" value="#a7f3d0" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
             </div>
             <div>
+              <label class="label flex justify-between">Desc Size <span class="range-val" id="val-hero-desc-fs">14px</span></label>
+              <input type="range" id="hero-desc-fs" min="10" max="28" value="14" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
+            </div>
+            <div>
               <label class="label">Signature</label>
               <input id="hero-sign" class="field" placeholder="— Htoo Htet" oninput="updateHeroPreview()">
+            </div>
+            <div>
+              <label class="label">Sign အရောင်</label>
+              <input id="hero-sign-color" type="color" value="#6ee7b7" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
             </div>
             <div>
               <label class="label">Button Text</label>
@@ -531,9 +560,34 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <label class="label">Sponsor Link</label>
               <input id="admin-sponsor-link" class="field" placeholder="https://...">
             </div>
+            <div>
+              <label class="label">Title အရောင်</label>
+              <input id="admin-sponsor-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
+            </div>
+            <div>
+              <label class="label flex justify-between">Title Size <span class="range-val" id="val-sp-title-fs">22px</span></label>
+              <input type="range" id="admin-sponsor-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+            </div>
+            <div>
+              <label class="label">Title Weight</label>
+              <select id="admin-sponsor-title-weight" class="field" onchange="updateSponsorPreview()">
+                <option value="400">Regular</option>
+                <option value="600">Semi Bold</option>
+                <option value="700">Bold</option>
+                <option value="900" selected>Black</option>
+              </select>
+            </div>
             <div class="md:col-span-2">
               <label class="label">Description</label>
               <textarea id="admin-sponsor-desc" class="field min-h-16" oninput="updateSponsorPreview()"></textarea>
+            </div>
+            <div>
+              <label class="label">Desc အရောင်</label>
+              <input id="admin-sponsor-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
+            </div>
+            <div>
+              <label class="label flex justify-between">Desc Size <span class="range-val" id="val-sp-desc-fs">12px</span></label>
+              <input type="range" id="admin-sponsor-desc-fs" min="10" max="22" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
             </div>
             <div>
               <label class="label">Logo / Image</label>
@@ -1057,13 +1111,19 @@ function loadAll() {
   $('hero-image').value = h.image || '';
   $('hero-label').value = h.label || '';
   if ($('hero-label-color')) $('hero-label-color').value = h.labelColor || '#f5c518';
+  if ($('hero-label-fs')) $('hero-label-fs').value = h.labelFs || 12;
   $('hero-sign').value = h.sign || '';
+  if ($('hero-sign-color')) $('hero-sign-color').value = h.signColor || '#6ee7b7';
   $('hero-title').value = h.title || '';
   if ($('hero-title-color')) $('hero-title-color').value = h.titleColor || '#ffffff';
+  if ($('hero-title-fs')) $('hero-title-fs').value = h.titleFs || 28;
   if ($('hero-title-weight')) $('hero-title-weight').value = h.titleWeight || '900';
   if ($('hero-title-style')) $('hero-title-style').value = h.titleStyle || 'normal';
   $('hero-desc').value = h.desc || '';
   if ($('hero-desc-color')) $('hero-desc-color').value = h.descColor || '#a7f3d0';
+  if ($('hero-desc-fs')) $('hero-desc-fs').value = h.descFs || 14;
+  if ($('hero-text-x')) $('hero-text-x').value = h.textX != null ? h.textX : 8;
+  if ($('hero-text-y')) $('hero-text-y').value = h.textY != null ? h.textY : 35;
   $('hero-btn-text').value = h.btnText || '';
   $('hero-btn-link').value = h.btnLink || '';
   showPreviewIfUrl('hero-image');
@@ -1079,6 +1139,11 @@ function loadAll() {
   if ($('admin-sponsor-badge-radius')) $('admin-sponsor-badge-radius').value = sp.badgeRadius != null ? sp.badgeRadius : 24;
   if ($('admin-sponsor-badge-weight')) $('admin-sponsor-badge-weight').value = sp.badgeWeight || '900';
   $('admin-sponsor-title').value = sp.title || '';
+  if ($('admin-sponsor-title-color')) $('admin-sponsor-title-color').value = sp.titleColor || '#ffffff';
+  if ($('admin-sponsor-title-fs')) $('admin-sponsor-title-fs').value = sp.titleFs || 22;
+  if ($('admin-sponsor-title-weight')) $('admin-sponsor-title-weight').value = sp.titleWeight || '900';
+  if ($('admin-sponsor-desc-color')) $('admin-sponsor-desc-color').value = sp.descColor || '#cccccc';
+  if ($('admin-sponsor-desc-fs')) $('admin-sponsor-desc-fs').value = sp.descFs || 12;
   $('admin-sponsor-desc').value = sp.desc || '';
   $('admin-sponsor-link').value = sp.link || '';
   $('admin-sponsor-img').value = sp.img || '';
@@ -1269,12 +1334,31 @@ function saveSettings() {
 }
 function updateHeroPreview() {
   const box = $('hero-live-preview');
+  const textBox = $('hero-prev-text');
   const label = $('hero-prev-label');
   const title = $('hero-prev-title');
   const desc = $('hero-prev-desc');
+  const sign = $('hero-prev-sign');
+  const lx = $('hero-text-x')?.value || 8;
+  const ly = $('hero-text-y')?.value || 35;
+  if ($('val-hero-x')) $('val-hero-x').textContent = lx;
+  if ($('val-hero-y')) $('val-hero-y').textContent = ly;
+  if (textBox) {
+    textBox.style.left = lx + '%';
+    textBox.style.top = ly + '%';
+    textBox.style.right = 'auto';
+    textBox.style.bottom = 'auto';
+  }
+  const lfs = $('hero-label-fs')?.value || 12;
+  const tfs = $('hero-title-fs')?.value || 28;
+  const dfs = $('hero-desc-fs')?.value || 14;
+  if ($('val-hero-label-fs')) $('val-hero-label-fs').textContent = lfs + 'px';
+  if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
+  if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
   if (label) {
     label.textContent = $('hero-label')?.value || 'Travel Journal';
     label.style.color = $('hero-label-color')?.value || '#f5c518';
+    label.style.fontSize = Math.max(8, Math.round(lfs * 0.7)) + 'px';
   }
   if (title) {
     const raw = $('hero-title')?.value || 'New Places.';
@@ -1282,16 +1366,60 @@ function updateHeroPreview() {
     title.style.color = $('hero-title-color')?.value || '#ffffff';
     title.style.fontWeight = $('hero-title-weight')?.value || '900';
     title.style.fontStyle = $('hero-title-style')?.value || 'normal';
+    title.style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
   }
   if (desc) {
     desc.textContent = $('hero-desc')?.value || 'Description…';
     desc.style.color = $('hero-desc-color')?.value || 'rgba(255,255,255,0.7)';
+    desc.style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
+  }
+  if (sign) {
+    sign.textContent = $('hero-sign')?.value || '';
+    sign.style.color = $('hero-sign-color')?.value || '#6ee7b7';
   }
   const img = $('hero-image')?.value.trim();
   if (box) {
     if (img) { box.style.backgroundImage = 'url(' + img + ')'; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
     else box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
   }
+  initHeroDrag();
+}
+function initHeroDrag() {
+  const el = $('hero-prev-text');
+  const box = $('hero-live-preview');
+  if (!el || !box || el._dragBound) return;
+  el._dragBound = true;
+  let dragging = false, startX, startY, origL, origT;
+  const onDown = (e) => {
+    dragging = true;
+    const pt = e.touches ? e.touches[0] : e;
+    startX = pt.clientX; startY = pt.clientY;
+    origL = parseFloat(el.style.left) || 8;
+    origT = parseFloat(el.style.top) || 35;
+    e.preventDefault();
+  };
+  const onMove = (e) => {
+    if (!dragging) return;
+    const pt = e.touches ? e.touches[0] : e;
+    const rect = box.getBoundingClientRect();
+    const dx = ((pt.clientX - startX) / rect.width) * 100;
+    const dy = ((pt.clientY - startY) / rect.height) * 100;
+    let nx = Math.max(0, Math.min(80, origL + dx));
+    let ny = Math.max(0, Math.min(80, origT + dy));
+    el.style.left = nx + '%';
+    el.style.top = ny + '%';
+    if ($('hero-text-x')) $('hero-text-x').value = Math.round(nx);
+    if ($('hero-text-y')) $('hero-text-y').value = Math.round(ny);
+    if ($('val-hero-x')) $('val-hero-x').textContent = Math.round(nx);
+    if ($('val-hero-y')) $('val-hero-y').textContent = Math.round(ny);
+  };
+  const onUp = () => { dragging = false; };
+  el.addEventListener('mousedown', onDown);
+  el.addEventListener('touchstart', onDown, { passive: false });
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
 }
 function saveHero() {
   write('hh_hero', {
@@ -1299,13 +1427,19 @@ function saveHero() {
     image: $('hero-image').value.trim(),
     label: $('hero-label').value.trim(),
     labelColor: $('hero-label-color')?.value || '#f5c518',
+    labelFs: parseInt($('hero-label-fs')?.value || '12', 10),
     sign: $('hero-sign').value.trim(),
+    signColor: $('hero-sign-color')?.value || '#6ee7b7',
     title: $('hero-title').value.trim(),
     titleColor: $('hero-title-color')?.value || '#ffffff',
+    titleFs: parseInt($('hero-title-fs')?.value || '28', 10),
     titleWeight: $('hero-title-weight')?.value || '900',
     titleStyle: $('hero-title-style')?.value || 'normal',
     desc: $('hero-desc').value.trim(),
     descColor: $('hero-desc-color')?.value || '#a7f3d0',
+    descFs: parseInt($('hero-desc-fs')?.value || '14', 10),
+    textX: parseInt($('hero-text-x')?.value || '8', 10),
+    textY: parseInt($('hero-text-y')?.value || '35', 10),
     btnText: $('hero-btn-text').value.trim(),
     btnLink: $('hero-btn-link').value.trim()
   });
@@ -1336,8 +1470,21 @@ function updateSponsorPreview() {
   if ($('val-badge-pad')) $('val-badge-pad').textContent = pad + 'px';
   if ($('val-badge-fs')) $('val-badge-fs').textContent = fs + 'px';
   if ($('val-badge-radius')) $('val-badge-radius').textContent = (parseInt(rad,10) >= 24 ? 'pill' : rad + 'px');
-  if (title) title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
-  if (desc) desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
+  if (title) {
+    title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
+    title.style.color = $('admin-sponsor-title-color')?.value || '#ffffff';
+    const tfs = $('admin-sponsor-title-fs')?.value || 22;
+    title.style.fontSize = Math.max(11, Math.round(tfs * 0.65)) + 'px';
+    title.style.fontWeight = $('admin-sponsor-title-weight')?.value || '900';
+    if ($('val-sp-title-fs')) $('val-sp-title-fs').textContent = tfs + 'px';
+  }
+  if (desc) {
+    desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
+    desc.style.color = $('admin-sponsor-desc-color')?.value || '#cccccc';
+    const dfs = $('admin-sponsor-desc-fs')?.value || 12;
+    desc.style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
+    if ($('val-sp-desc-fs')) $('val-sp-desc-fs').textContent = dfs + 'px';
+  }
   const imgUrl = $('admin-sponsor-img')?.value.trim();
   if (logo) {
     if (imgUrl) { logo.src = imgUrl; logo.classList.remove('hidden'); if (logoIcon) logoIcon.classList.add('hidden'); }
@@ -1374,7 +1521,12 @@ function saveSponsor() {
     badgeRadius: parseInt($('admin-sponsor-badge-radius')?.value || '24', 10),
     badgeWeight: $('admin-sponsor-badge-weight')?.value || '900',
     title: $('admin-sponsor-title').value.trim(),
+    titleColor: $('admin-sponsor-title-color')?.value || '#ffffff',
+    titleFs: parseInt($('admin-sponsor-title-fs')?.value || '22', 10),
+    titleWeight: $('admin-sponsor-title-weight')?.value || '900',
     desc: $('admin-sponsor-desc').value.trim(),
+    descColor: $('admin-sponsor-desc-color')?.value || '#cccccc',
+    descFs: parseInt($('admin-sponsor-desc-fs')?.value || '12', 10),
     link: $('admin-sponsor-link').value.trim(),
     img: $('admin-sponsor-img').value.trim(),
     bgImage: $('admin-sponsor-bg').value.trim()
