@@ -282,6 +282,30 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                 </select>
               </div>
               <div>
+                <label class="label">Default Heading Weight</label>
+                <select id="set-heading-weight" class="field">
+                  <option value="400">Regular</option>
+                  <option value="600">Semi Bold</option>
+                  <option value="700" selected>Bold</option>
+                  <option value="900">Black</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Default Heading Style</label>
+                <select id="set-heading-style" class="field">
+                  <option value="normal">Normal</option>
+                  <option value="italic">Italic</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Body Text အရောင် (optional)</label>
+                <input id="set-body-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent">
+              </div>
+              <div>
+                <label class="label">Heading Text အရောင် (optional)</label>
+                <input id="set-heading-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent">
+              </div>
+              <div>
                 <label class="label">Custom Accent Color</label>
                 <div class="flex gap-2">
                   <input id="set-accent-color" type="color" class="h-11 w-14 rounded-lg border border-slate-600 cursor-pointer bg-transparent">
@@ -308,24 +332,85 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- HERO -->
       <section id="view-hero" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Hero Banner</h2><p class="mt-1 text-sm text-slate-400">Homepage အပေါ်ဆုံး banner — ပုံ Upload သို့မဟုတ် URL</p></div>
+        <div><h2 class="text-xl font-black">Hero Banner</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန် · စာအရောင် · Font weight</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="hero-active" checked><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
+          <label class="toggle-row"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
+
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero</span>
+            <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700" style="height:160px; background:linear-gradient(135deg,#0a1f18,#061510);">
+              <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+              <div id="hero-prev-inner" class="relative z-10 h-full flex flex-col p-4" style="justify-content:center;">
+                <div id="hero-prev-text" style="max-width:70%;">
+                  <div id="hero-prev-label" class="text-[9px] font-bold uppercase tracking-widest mb-1" style="color:#f5c518;">Travel Journal</div>
+                  <div id="hero-prev-title" class="text-sm font-black leading-tight text-white">New Places.</div>
+                  <div id="hero-prev-desc" class="text-[10px] mt-1 line-clamp-2" style="color:rgba(255,255,255,0.7);">Description…</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="md:col-span-2">
               <label class="label">Background Image</label>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <input id="hero-image" class="field flex-1" placeholder="https://... သို့မဟုတ် Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'hero-image')"></label>
+              <div class="flex gap-2">
+                <input id="hero-image" class="field flex-1" placeholder="URL / Upload" oninput="updateHeroPreview()">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'hero-image'); setTimeout(updateHeroPreview,800)"></label>
               </div>
               <div id="hero-image-preview" class="mt-2"></div>
             </div>
-            <div><label class="label">Small Label</label><input id="hero-label" class="field" placeholder="Travel Journal"></div>
-            <div><label class="label">Signature</label><input id="hero-sign" class="field" placeholder="— Htoo Htet"></div>
-            <div class="md:col-span-2"><label class="label">Title (HTML ok: &lt;br&gt;, &lt;span&gt;)</label><textarea id="hero-title" class="field min-h-20" placeholder="New Places.<br><span class='text-emerald-300'>Same Curiosity.</span>"></textarea></div>
-            <div class="md:col-span-2"><label class="label">Description</label><textarea id="hero-desc" class="field min-h-20"></textarea></div>
-            <div><label class="label">Button Text</label><input id="hero-btn-text" class="field" placeholder="Explore My Journey"></div>
-            <div><label class="label">Button Link</label><input id="hero-btn-link" class="field" placeholder="#stories"></div>
+            <div>
+              <label class="label">Small Label</label>
+              <input id="hero-label" class="field" placeholder="Travel Journal" oninput="updateHeroPreview()">
+            </div>
+            <div>
+              <label class="label">Label အရောင်</label>
+              <input id="hero-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
+            </div>
+            <div class="md:col-span-2">
+              <label class="label">Title (HTML ok)</label>
+              <textarea id="hero-title" class="field min-h-16" oninput="updateHeroPreview()" placeholder="New Places.<br><span>Same Curiosity.</span>"></textarea>
+            </div>
+            <div>
+              <label class="label">Title အရောင်</label>
+              <input id="hero-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
+            </div>
+            <div>
+              <label class="label">Title Font Weight</label>
+              <select id="hero-title-weight" class="field" onchange="updateHeroPreview()">
+                <option value="400">Regular</option>
+                <option value="600">Semi Bold</option>
+                <option value="700">Bold</option>
+                <option value="900" selected>Black</option>
+              </select>
+            </div>
+            <div>
+              <label class="label">Title Style</label>
+              <select id="hero-title-style" class="field" onchange="updateHeroPreview()">
+                <option value="normal">Normal</option>
+                <option value="italic">Italic</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="label">Description</label>
+              <textarea id="hero-desc" class="field min-h-16" oninput="updateHeroPreview()"></textarea>
+            </div>
+            <div>
+              <label class="label">Description အရောင်</label>
+              <input id="hero-desc-color" type="color" value="#a7f3d0" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateHeroPreview()">
+            </div>
+            <div>
+              <label class="label">Signature</label>
+              <input id="hero-sign" class="field" placeholder="— Htoo Htet" oninput="updateHeroPreview()">
+            </div>
+            <div>
+              <label class="label">Button Text</label>
+              <input id="hero-btn-text" class="field" placeholder="Explore My Journey">
+            </div>
+            <div>
+              <label class="label">Button Link</label>
+              <input id="hero-btn-link" class="field" placeholder="#stories">
+            </div>
           </div>
           <button onclick="saveHero()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Hero</button>
         </div>
@@ -333,8 +418,12 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- MENU -->
       <section id="view-menu" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Menu Items</h2><p class="mt-1 text-sm text-slate-400">Header နဲ့ Footer မှာ ပြမယ့် menu (Brand tagline က Menu ထဲသာ — logo အောက်မပြ)</p></div>
+        <div><h2 class="text-xl font-black">Menu Items</h2><p class="mt-1 text-sm text-slate-400">Hamburger menu ထဲမှာ ပြမယ်</p></div>
         <div class="panel p-5 sm:p-6">
+          <div class="rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Preview · Menu Drawer</span>
+            <div id="menu-preview-box" class="mt-2 space-y-1 text-sm text-emerald-100"></div>
+          </div>
           <div class="grid grid-cols-1 gap-3 md:grid-cols-3 mb-4">
             <div><label class="label">Label</label><input id="menu-label" class="field" placeholder="Travel Stories"></div>
             <div><label class="label">Link (href)</label><input id="menu-href" class="field" placeholder="#stories"></div>
@@ -407,6 +496,28 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                 <label class="label">Badge စာအရောင်</label>
                 <input id="admin-sponsor-badge-color" type="color" value="#000000" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
               </div>
+              <div>
+                <label class="label flex justify-between">Badge Padding <span class="range-val" id="val-badge-pad">8px</span></label>
+                <input type="range" id="admin-sponsor-badge-pad" min="4" max="20" step="1" value="8" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Badge Font Size <span class="range-val" id="val-badge-fs">10px</span></label>
+                <input type="range" id="admin-sponsor-badge-fs" min="8" max="16" step="1" value="10" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Badge Radius <span class="range-val" id="val-badge-radius">999px</span></label>
+                <input type="range" id="admin-sponsor-badge-radius" min="0" max="24" step="1" value="24" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+                <p class="tiny mt-1">0 = စတုရန်း · 24 = အဝိုင်း</p>
+              </div>
+              <div>
+                <label class="label">Badge Font Weight</label>
+                <select id="admin-sponsor-badge-weight" class="field" onchange="updateSponsorPreview()">
+                  <option value="400">Regular</option>
+                  <option value="600">Semi Bold</option>
+                  <option value="700">Bold</option>
+                  <option value="900" selected>Black</option>
+                </select>
+              </div>
             </div>
             <div>
               <label class="label">Sponsor Title</label>
@@ -448,33 +559,60 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- UPCOMING -->
       <section id="view-upcoming" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Upcoming Section</h2><p class="mt-1 text-sm text-slate-400">Featured Journey — ပုံ Upload ရနိုင်</p></div>
+        <div><h2 class="text-xl font-black">Upcoming Section</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန် · စာအရောင်</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="up-active" checked><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Section Heading (အပေါ် — ဥပမာ Upcoming)</label><input id="up-heading" class="field" placeholder="Upcoming"></div>
-            <div>
-              <label class="label">Section Subtitle (ခေါင်းစဉ်အောက်၊ ပုံမတိုင်ခင်)</label>
-              <input id="up-section-title" class="field" placeholder="Next adventure…">
-              <p class="tiny mt-1">ဗလာ = မပြ · ပုံပေါ် title နဲ့ ခြားချင်ရင် ဒီမှာရေး</p>
+          <label class="toggle-row"><input type="checkbox" id="up-active" checked onchange="updateUpcomingPreview()"><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
+
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Upcoming</span>
+            <div class="mt-2 mb-1 text-xs font-bold text-white" id="up-prev-heading">Upcoming</div>
+            <div class="text-[10px] text-emerald-400/70 mb-2" id="up-prev-section-title"></div>
+            <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700" style="min-height:110px; background:linear-gradient(90deg,#1a1a1a,#333);">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+              <div class="relative z-10 p-4 flex flex-col justify-end" style="min-height:110px;">
+                <span id="up-prev-label" class="text-[9px] font-bold uppercase tracking-widest" style="color:#f5c518;">Featured</span>
+                <div id="up-prev-title" class="text-sm font-black text-white mt-0.5">Title</div>
+                <div id="up-prev-desc" class="text-[10px] text-white/70 mt-0.5 line-clamp-2">Desc</div>
+              </div>
             </div>
-            <div><label class="label">On-image Label</label><input id="up-label" class="field" placeholder="Featured Journey"></div>
-            <div><label class="label">On-image Title *</label><input id="up-title" class="field" placeholder="Roads of Ayeyarwaddy"></div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div><label class="label">Section Heading</label><input id="up-heading" class="field" placeholder="Upcoming" oninput="updateUpcomingPreview()"></div>
+            <div><label class="label">Section Subtitle</label><input id="up-section-title" class="field" placeholder="Next adventure…" oninput="updateUpcomingPreview()"></div>
+            <div><label class="label">On-image Label</label><input id="up-label" class="field" placeholder="Featured Journey" oninput="updateUpcomingPreview()"></div>
+            <div>
+              <label class="label">Label အရောင်</label>
+              <input id="up-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
+            </div>
+            <div><label class="label">On-image Title *</label><input id="up-title" class="field" placeholder="Roads of Ayeyarwaddy" oninput="updateUpcomingPreview()"></div>
+            <div>
+              <label class="label">Title အရောင်</label>
+              <input id="up-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
+            </div>
+            <div>
+              <label class="label">Title Weight</label>
+              <select id="up-title-weight" class="field" onchange="updateUpcomingPreview()">
+                <option value="400">Regular</option>
+                <option value="600">Semi Bold</option>
+                <option value="700">Bold</option>
+                <option value="900" selected>Black</option>
+              </select>
+            </div>
             <div>
               <label class="label">Image</label>
               <div class="flex gap-2">
-                <input id="up-image" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'up-image')"></label>
+                <input id="up-image" class="field flex-1" oninput="updateUpcomingPreview()">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'up-image'); setTimeout(updateUpcomingPreview,800)"></label>
               </div>
               <div id="up-image-preview" class="mt-2"></div>
             </div>
-            <div class="md:col-span-2"><label class="label">Description</label><textarea id="up-desc" class="field min-h-16"></textarea></div>
+            <div class="md:col-span-2"><label class="label">Description</label><textarea id="up-desc" class="field min-h-14" oninput="updateUpcomingPreview()"></textarea></div>
           </div>
           <button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
         </div>
       </section>
 
-      <!-- POSTS -->
       <section id="view-posts" class="view space-y-5">
         <div><h2 class="text-xl font-black">Travel Posts</h2><p class="mt-1 text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload ရနိုင်</p></div>
         <div class="panel p-5 sm:p-6">
@@ -558,27 +696,53 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- YOUTUBE -->
       <section id="view-youtube" class="view space-y-5">
-        <div><h2 class="text-xl font-black">YouTube Section</h2><p class="mt-1 text-sm text-slate-400">YouTube block — Thumbnail / BG Upload ရနိုင်</p></div>
+        <div><h2 class="text-xl font-black">YouTube Section</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန်</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="yt-active" checked><span class="text-sm font-semibold">YouTube Section ပြမယ်</span></label>
+          <label class="toggle-row"><input type="checkbox" id="yt-active" checked onchange="updateYoutubePreview()"><span class="text-sm font-semibold">YouTube Section ပြမယ်</span></label>
+
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · YouTube</span>
+            <div id="yt-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 p-4" style="min-height:100px; background:linear-gradient(90deg,#1a0505,#000);">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center"><i class="fa-brands fa-youtube text-white text-xs"></i></span>
+                <span id="yt-prev-label" class="text-red-400 text-xs font-bold">Watch My YouTube</span>
+              </div>
+              <div id="yt-prev-title" class="text-sm font-black text-white">Channel Title</div>
+              <div id="yt-prev-desc" class="text-[10px] text-white/60 mt-1 line-clamp-2">Description</div>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Label</label><input id="yt-label" class="field" placeholder="Watch My YouTube Channel"></div>
-            <div><label class="label">Channel Link</label><input id="yt-link" class="field" placeholder="https://youtube.com/..."></div>
-            <div class="md:col-span-2"><label class="label">Title</label><textarea id="yt-title" class="field min-h-16" placeholder="ခရီးသွားမှတ်တမ်းများကို YouTube မှာ ကြည့်ရှုပါ"></textarea></div>
-            <div class="md:col-span-2"><label class="label">Description</label><textarea id="yt-desc" class="field min-h-16"></textarea></div>
+            <div><label class="label">Label</label><input id="yt-label" class="field" oninput="updateYoutubePreview()"></div>
+            <div><label class="label">Channel Link</label><input id="yt-link" class="field"></div>
+            <div class="md:col-span-2"><label class="label">Title</label><textarea id="yt-title" class="field min-h-14" oninput="updateYoutubePreview()"></textarea></div>
             <div>
-              <label class="label">Thumbnail Image</label>
+              <label class="label">Title အရောင်</label>
+              <input id="yt-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateYoutubePreview()">
+            </div>
+            <div>
+              <label class="label">Title Weight</label>
+              <select id="yt-title-weight" class="field" onchange="updateYoutubePreview()">
+                <option value="400">Regular</option>
+                <option value="600">Semi Bold</option>
+                <option value="700">Bold</option>
+                <option value="900" selected>Black</option>
+              </select>
+            </div>
+            <div class="md:col-span-2"><label class="label">Description</label><textarea id="yt-desc" class="field min-h-14" oninput="updateYoutubePreview()"></textarea></div>
+            <div>
+              <label class="label">Thumbnail</label>
               <div class="flex gap-2">
-                <input id="yt-thumb" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'yt-thumb')"></label>
+                <input id="yt-thumb" class="field flex-1" oninput="updateYoutubePreview()">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'yt-thumb'); setTimeout(updateYoutubePreview,800)"></label>
               </div>
               <div id="yt-thumb-preview" class="mt-2"></div>
             </div>
             <div>
-              <label class="label">Background Image</label>
+              <label class="label">Background</label>
               <div class="flex gap-2">
-                <input id="yt-bg" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'yt-bg')"></label>
+                <input id="yt-bg" class="field flex-1" oninput="updateYoutubePreview()">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'yt-bg'); setTimeout(updateYoutubePreview,800)"></label>
               </div>
               <div id="yt-bg-preview" class="mt-2"></div>
             </div>
@@ -587,7 +751,6 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
         </div>
       </section>
 
-      <!-- ABOUT -->
       <section id="view-about" class="view space-y-5">
         <div><h2 class="text-xl font-black">About Section</h2></div>
         <div class="panel p-5 sm:p-6 space-y-4">
@@ -828,6 +991,10 @@ function loadAll() {
   $('set-stories-sub').value = s.storiesSub || '';
   $('set-font').value = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
   $('set-heading-font').value = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
+  if ($('set-heading-weight')) $('set-heading-weight').value = s.headingWeight || '700';
+  if ($('set-heading-style')) $('set-heading-style').value = s.headingStyle || 'normal';
+  if ($('set-body-color')) $('set-body-color').value = s.bodyColor || '#ffffff';
+  if ($('set-heading-color')) $('set-heading-color').value = s.headingColor || '#ffffff';
   $('set-hero-height').value = s.heroHeight || 480;
   if ($('set-hero-maxw')) $('set-hero-maxw').value = (s.heroMaxWidth === 100 || !s.heroMaxWidth) ? 1400 : s.heroMaxWidth;
   if ($('set-sponsor-height')) $('set-sponsor-height').value = s.sponsorHeight || 180;
@@ -849,18 +1016,28 @@ function loadAll() {
   $('hero-active').checked = h.active !== false;
   $('hero-image').value = h.image || '';
   $('hero-label').value = h.label || '';
+  if ($('hero-label-color')) $('hero-label-color').value = h.labelColor || '#f5c518';
   $('hero-sign').value = h.sign || '';
   $('hero-title').value = h.title || '';
+  if ($('hero-title-color')) $('hero-title-color').value = h.titleColor || '#ffffff';
+  if ($('hero-title-weight')) $('hero-title-weight').value = h.titleWeight || '900';
+  if ($('hero-title-style')) $('hero-title-style').value = h.titleStyle || 'normal';
   $('hero-desc').value = h.desc || '';
+  if ($('hero-desc-color')) $('hero-desc-color').value = h.descColor || '#a7f3d0';
   $('hero-btn-text').value = h.btnText || '';
   $('hero-btn-link').value = h.btnLink || '';
   showPreviewIfUrl('hero-image');
+  if (typeof updateHeroPreview === 'function') updateHeroPreview();
 
   const sp = read('hh_sponsor', {});
   $('admin-sponsor-active').checked = sp.active !== false;
   if ($('admin-sponsor-badge')) $('admin-sponsor-badge').value = sp.badge || 'Official Sponsor';
   if ($('admin-sponsor-badge-bg')) $('admin-sponsor-badge-bg').value = sp.badgeBg || '#f5c518';
   if ($('admin-sponsor-badge-color')) $('admin-sponsor-badge-color').value = sp.badgeColor || '#000000';
+  if ($('admin-sponsor-badge-pad')) $('admin-sponsor-badge-pad').value = sp.badgePad || 8;
+  if ($('admin-sponsor-badge-fs')) $('admin-sponsor-badge-fs').value = sp.badgeFs || 10;
+  if ($('admin-sponsor-badge-radius')) $('admin-sponsor-badge-radius').value = sp.badgeRadius != null ? sp.badgeRadius : 24;
+  if ($('admin-sponsor-badge-weight')) $('admin-sponsor-badge-weight').value = sp.badgeWeight || '900';
   $('admin-sponsor-title').value = sp.title || '';
   $('admin-sponsor-desc').value = sp.desc || '';
   $('admin-sponsor-link').value = sp.link || '';
@@ -874,21 +1051,28 @@ function loadAll() {
   $('up-heading').value = up.heading || '';
   if ($('up-section-title')) $('up-section-title').value = up.sectionTitle || '';
   $('up-label').value = up.label || '';
+  if ($('up-label-color')) $('up-label-color').value = up.labelColor || '#f5c518';
   $('up-title').value = up.title || '';
+  if ($('up-title-color')) $('up-title-color').value = up.titleColor || '#ffffff';
+  if ($('up-title-weight')) $('up-title-weight').value = up.titleWeight || '900';
   $('up-desc').value = up.desc || '';
   $('up-image').value = up.image || '';
   showPreviewIfUrl('up-image');
+  if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
 
   const yt = read('hh_youtube', {});
   $('yt-active').checked = yt.active !== false;
   $('yt-label').value = yt.label || '';
   $('yt-title').value = yt.title || '';
+  if ($('yt-title-color')) $('yt-title-color').value = yt.titleColor || '#ffffff';
+  if ($('yt-title-weight')) $('yt-title-weight').value = yt.titleWeight || '900';
   $('yt-desc').value = yt.desc || '';
   $('yt-link').value = yt.link || '';
   $('yt-thumb').value = yt.thumb || '';
   $('yt-bg').value = yt.bgImage || '';
   showPreviewIfUrl('yt-thumb');
   showPreviewIfUrl('yt-bg');
+  if (typeof updateYoutubePreview === 'function') updateYoutubePreview();
 
   const ab = read('hh_about', {});
   $('about-active').checked = ab.active !== false;
@@ -1019,6 +1203,10 @@ function saveSettings() {
     cardColor: preset.cardColor,
     fontFamily: $('set-font').value,
     headingFont: $('set-heading-font').value,
+    headingWeight: $('set-heading-weight')?.value || '700',
+    headingStyle: $('set-heading-style')?.value || 'normal',
+    bodyColor: $('set-body-color')?.value || '',
+    headingColor: $('set-heading-color')?.value || '',
     heroHeight: parseInt($('set-hero-height').value, 10) || 480,
     heroMaxWidth: heroMaxW >= 1350 ? 100 : heroMaxW,
     heroTextAlign: $('set-hero-text-align')?.value || 'left',
@@ -1035,17 +1223,49 @@ function saveSettings() {
   });
   toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
 }
+function updateHeroPreview() {
+  const box = $('hero-live-preview');
+  const label = $('hero-prev-label');
+  const title = $('hero-prev-title');
+  const desc = $('hero-prev-desc');
+  if (label) {
+    label.textContent = $('hero-label')?.value || 'Travel Journal';
+    label.style.color = $('hero-label-color')?.value || '#f5c518';
+  }
+  if (title) {
+    const raw = $('hero-title')?.value || 'New Places.';
+    title.innerHTML = raw.replace(/\n/g, '<br>');
+    title.style.color = $('hero-title-color')?.value || '#ffffff';
+    title.style.fontWeight = $('hero-title-weight')?.value || '900';
+    title.style.fontStyle = $('hero-title-style')?.value || 'normal';
+  }
+  if (desc) {
+    desc.textContent = $('hero-desc')?.value || 'Description…';
+    desc.style.color = $('hero-desc-color')?.value || 'rgba(255,255,255,0.7)';
+  }
+  const img = $('hero-image')?.value.trim();
+  if (box) {
+    if (img) { box.style.backgroundImage = 'url(' + img + ')'; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
+    else box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
+  }
+}
 function saveHero() {
   write('hh_hero', {
     active: $('hero-active').checked,
     image: $('hero-image').value.trim(),
     label: $('hero-label').value.trim(),
+    labelColor: $('hero-label-color')?.value || '#f5c518',
     sign: $('hero-sign').value.trim(),
     title: $('hero-title').value.trim(),
+    titleColor: $('hero-title-color')?.value || '#ffffff',
+    titleWeight: $('hero-title-weight')?.value || '900',
+    titleStyle: $('hero-title-style')?.value || 'normal',
     desc: $('hero-desc').value.trim(),
+    descColor: $('hero-desc-color')?.value || '#a7f3d0',
     btnText: $('hero-btn-text').value.trim(),
     btnLink: $('hero-btn-link').value.trim()
   });
+  updateHeroPreview();
   toast('Hero သိမ်းပြီးပါပြီ။');
 }
 function updateSponsorPreview() {
@@ -1059,8 +1279,19 @@ function updateSponsorPreview() {
   badge.textContent = $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor';
   const bg = $('admin-sponsor-badge-bg')?.value || '#f5c518';
   const fg = $('admin-sponsor-badge-color')?.value || '#000000';
+  const pad = $('admin-sponsor-badge-pad')?.value || 8;
+  const fs = $('admin-sponsor-badge-fs')?.value || 10;
+  const rad = $('admin-sponsor-badge-radius')?.value || 24;
+  const wt = $('admin-sponsor-badge-weight')?.value || 900;
   badge.style.background = bg;
   badge.style.color = fg;
+  badge.style.padding = Math.round(pad/2) + 'px ' + pad + 'px';
+  badge.style.fontSize = fs + 'px';
+  badge.style.borderRadius = (parseInt(rad,10) >= 24 ? '999px' : rad + 'px');
+  badge.style.fontWeight = wt;
+  if ($('val-badge-pad')) $('val-badge-pad').textContent = pad + 'px';
+  if ($('val-badge-fs')) $('val-badge-fs').textContent = fs + 'px';
+  if ($('val-badge-radius')) $('val-badge-radius').textContent = (parseInt(rad,10) >= 24 ? 'pill' : rad + 'px');
   if (title) title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
   if (desc) desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
   const imgUrl = $('admin-sponsor-img')?.value.trim();
@@ -1094,6 +1325,10 @@ function saveSponsor() {
     badge: $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor',
     badgeBg: $('admin-sponsor-badge-bg')?.value || '#f5c518',
     badgeColor: $('admin-sponsor-badge-color')?.value || '#000000',
+    badgePad: parseInt($('admin-sponsor-badge-pad')?.value || '8', 10),
+    badgeFs: parseInt($('admin-sponsor-badge-fs')?.value || '10', 10),
+    badgeRadius: parseInt($('admin-sponsor-badge-radius')?.value || '24', 10),
+    badgeWeight: $('admin-sponsor-badge-weight')?.value || '900',
     title: $('admin-sponsor-title').value.trim(),
     desc: $('admin-sponsor-desc').value.trim(),
     link: $('admin-sponsor-link').value.trim(),
@@ -1104,28 +1339,68 @@ function saveSponsor() {
   updateSponsorPreview();
   toast('Official Sponsor သိမ်းပြီးပါပြီ။');
 }
+function updateUpcomingPreview() {
+  if ($('up-prev-heading')) $('up-prev-heading').textContent = $('up-heading')?.value || 'Upcoming';
+  const st = $('up-section-title')?.value || '';
+  if ($('up-prev-section-title')) { $('up-prev-section-title').textContent = st; $('up-prev-section-title').style.display = st ? '' : 'none'; }
+  if ($('up-prev-label')) {
+    $('up-prev-label').textContent = $('up-label')?.value || 'Featured';
+    $('up-prev-label').style.color = $('up-label-color')?.value || '#f5c518';
+  }
+  if ($('up-prev-title')) {
+    $('up-prev-title').textContent = $('up-title')?.value || 'Title';
+    $('up-prev-title').style.color = $('up-title-color')?.value || '#ffffff';
+    $('up-prev-title').style.fontWeight = $('up-title-weight')?.value || '900';
+  }
+  if ($('up-prev-desc')) $('up-prev-desc').textContent = $('up-desc')?.value || 'Desc';
+  const img = $('up-image')?.value.trim();
+  const box = $('up-live-preview');
+  if (box) {
+    if (img) { box.style.backgroundImage = 'url(' + img + ')'; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
+    else box.style.backgroundImage = 'linear-gradient(90deg,#1a1a1a,#333)';
+  }
+}
 function saveUpcoming() {
   write('hh_upcoming', {
     active: $('up-active').checked,
     heading: $('up-heading').value.trim(),
     sectionTitle: $('up-section-title')?.value.trim() || '',
     label: $('up-label').value.trim(),
+    labelColor: $('up-label-color')?.value || '#f5c518',
     title: $('up-title').value.trim(),
+    titleColor: $('up-title-color')?.value || '#ffffff',
+    titleWeight: $('up-title-weight')?.value || '900',
     desc: $('up-desc').value.trim(),
     image: $('up-image').value.trim()
   });
+  updateUpcomingPreview();
   toast('Upcoming သိမ်းပြီးပါပြီ။');
+}
+function updateYoutubePreview() {
+  if ($('yt-prev-label')) $('yt-prev-label').textContent = $('yt-label')?.value || 'Watch My YouTube';
+  if ($('yt-prev-title')) {
+    $('yt-prev-title').textContent = $('yt-title')?.value || 'Channel Title';
+    $('yt-prev-title').style.color = $('yt-title-color')?.value || '#ffffff';
+    $('yt-prev-title').style.fontWeight = $('yt-title-weight')?.value || '900';
+  }
+  if ($('yt-prev-desc')) $('yt-prev-desc').textContent = $('yt-desc')?.value || 'Description';
+  const bg = $('yt-bg')?.value.trim();
+  const box = $('yt-live-preview');
+  if (box && bg) { box.style.backgroundImage = 'url(' + bg + ')'; box.style.backgroundSize = 'cover'; }
 }
 function saveYoutube() {
   write('hh_youtube', {
     active: $('yt-active').checked,
     label: $('yt-label').value.trim(),
     title: $('yt-title').value.trim(),
+    titleColor: $('yt-title-color')?.value || '#ffffff',
+    titleWeight: $('yt-title-weight')?.value || '900',
     desc: $('yt-desc').value.trim(),
     link: $('yt-link').value.trim(),
     thumb: $('yt-thumb').value.trim(),
     bgImage: $('yt-bg').value.trim()
   });
+  updateYoutubePreview();
   toast('YouTube Section သိမ်းပြီးပါပြီ။');
 }
 function saveAbout() {
@@ -1155,8 +1430,13 @@ function getMenu() { return read('hh_menu', []); }
 function renderMenuList() {
   const list = $('menu-list');
   const items = getMenu();
+  const prev = $('menu-preview-box');
+  if (prev) {
+    const show = items.length ? items : [{label:'Home'},{label:'Travel Stories'},{label:'YouTube'},{label:'About'},{label:'Contact'}];
+    prev.innerHTML = show.map(m => '<div class="rounded-lg px-3 py-2 hover:bg-emerald-900/40">› ' + safe(m.label) + '</div>').join('');
+  }
   if (!items.length) {
-    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Menu မရှိသေးပါ။ Default menu သုံးနေပါတယ်။</p>';
+    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Menu မရှိသေး — Default menu သုံးနေပါတယ်။</p>';
     return;
   }
   list.innerHTML = items.map((m, i) => `
