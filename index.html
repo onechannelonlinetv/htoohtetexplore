@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Htoo Htet Explore - Travel Blog</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
@@ -193,7 +195,34 @@
                     </section>`;
             }).join('');
         }
-        document.addEventListener('DOMContentLoaded', () => { loadBlogData(); renderExtraHomeSections(); });
+        const firebaseConfig = {
+  apiKey: "AIzaSyAIZE_qJV__lUPaXl9kIfEeMWwMEP5OIY",
+  authDomain: "htoo-htet-explore.firebaseapp.com",
+  databaseURL: "https://htoo-htet-explore-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "htoo-htet-explore",
+  storageBucket: "htoo-htet-explore.firebasestorage.app",
+  messagingSenderId: "526326382849",
+  appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
+  measurementId: "G-2WNFC5MMEJ"
+};
+        let publicFirebaseReady = false;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const publicDb = firebase.database();
+            publicDb.ref('siteData').on('value', snapshot => {
+                const data = snapshot.val() || {};
+                ['hh_social','hh_sponsor','hh_posts','hh_home_sections'].forEach(key => {
+                    if (Object.prototype.hasOwnProperty.call(data, key)) localStorage.setItem(key, JSON.stringify(data[key]));
+                    else localStorage.removeItem(key);
+                });
+                publicFirebaseReady = true;
+                loadBlogData();
+                renderExtraHomeSections();
+            }, error => { console.error('Firebase read error:', error); loadBlogData(); renderExtraHomeSections(); });
+        } catch (error) { console.error('Firebase setup error:', error); }
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!publicFirebaseReady) { loadBlogData(); renderExtraHomeSections(); }
+        });
     </script>
 </body>
 </html>
