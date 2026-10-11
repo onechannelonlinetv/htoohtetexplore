@@ -361,7 +361,7 @@
 <main id="home">
 
   <!-- HERO -->
-  <section id="hero-section" class="relative overflow-hidden mx-auto" style="min-height: var(--hero-min-h); max-width: var(--hero-max-w);">
+  <section id="hero-section" class="relative overflow-hidden" style="min-height: var(--hero-min-h); max-width: 100%; width: 100%;">
     <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
     <div class="hero-overlay absolute inset-0"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15"></div>
@@ -950,6 +950,55 @@ function loadBlogData() {
   if (hero.btnLink) $('hero-btn').href = hero.btnLink;
   if (hero.sign) $('hero-sign').textContent = hero.sign;
   $('hero-section').classList.toggle('hidden', hero.active === false);
+
+  // Banner frame: Height / Width / Align  (container only)
+  (function applyHeroFrame() {
+    const sec = $('hero-section');
+    const wrap = $('hero-content-wrap');
+    if (!sec) return;
+    sec.style.overflow = 'hidden';
+    const fh = hero.frameH || null;
+    const fw = (hero.frameW != null) ? hero.frameW : 100;
+    const unit = hero.frameWUnit || '%';
+    const fal = hero.frameAlign || 'center';
+    if (fh) {
+      document.documentElement.style.setProperty('--hero-min-h', fh + 'px');
+      sec.style.minHeight = fh + 'px';
+      sec.style.height = fh + 'px';
+      if (wrap) { wrap.style.minHeight = fh + 'px'; wrap.style.height = '100%'; }
+    }
+    if (unit === 'px') {
+      sec.style.setProperty('width', fw + 'px', 'important');
+      sec.style.setProperty('max-width', '100%', 'important');
+    } else {
+      sec.style.setProperty('width', fw + '%', 'important');
+      sec.style.setProperty('max-width', (fw >= 100) ? '100%' : fw + '%', 'important');
+    }
+    const isFull = (unit === '%' && fw >= 100);
+    if (!isFull) {
+      if (fal === 'left') { sec.style.marginLeft = '0'; sec.style.marginRight = 'auto'; }
+      else if (fal === 'right') { sec.style.marginLeft = 'auto'; sec.style.marginRight = '0'; }
+      else { sec.style.marginLeft = 'auto'; sec.style.marginRight = 'auto'; }
+    } else {
+      sec.style.marginLeft = '0';
+      sec.style.marginRight = '0';
+    }
+  })();
+
+  // Image zoom (independent of frame)
+  (function applyHeroImgZoom() {
+    const bg = $('hero-img');
+    if (!bg) return;
+    const zoom = (hero.imgZoom != null) ? hero.imgZoom : 100;
+    const ix = hero.imgPosX != null ? hero.imgPosX : 50;
+    const iy = hero.imgPosY != null ? hero.imgPosY : 50;
+    bg.style.objectFit = 'cover';
+    bg.style.objectPosition = ix + '% ' + iy + '%';
+    bg.style.transformOrigin = ix + '% ' + iy + '%';
+    bg.style.transform = 'scale(' + (zoom / 100) + ')';
+    bg.style.width = '100%';
+    bg.style.height = '100%';
+  })();
 
   siteMenu = read('hh_menu', []);
   renderMenu();
