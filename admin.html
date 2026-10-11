@@ -276,12 +276,32 @@ main > div {
 <input type="hidden" id="set-mode" value="dark">
 <input type="hidden" id="mode-dark-btn"><input type="hidden" id="mode-light-btn">
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-            <div><label class="label">Brand Name *</label><input id="set-brand-name" class="field" placeholder="HTOO HTET"></div>
-            <div><label class="label">Tagline (Footer / optional under logo)</label><input id="set-brand-tagline" class="field" placeholder="Travel Journal & Beyond"></div>
-            <div class="md:col-span-2">
-              <label class="toggle-row mb-0"><input type="checkbox" id="set-show-tagline"><span class="text-sm">Logo အောက်မှာ Tagline ပြမယ် (ပုံမှန် = Menu ထဲသာ)</span></label>
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
+            <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Brand Name</p>
+            <div class="form-row form-row-typo w-full">
+              <div><label class="label">စာသား *</label><input id="set-brand-name" class="field" placeholder="HTOO HTET"></div>
+              <div><label class="label">Color</label><input id="set-brand-name-color" type="color" value="#e5edf7" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent"></div>
+              <div><label class="label flex justify-between">Size <span id="val-brand-name-fs" class="range-val">18px</span></label>
+                <input type="range" id="set-brand-name-fs" min="12" max="40" value="18" class="w-full accent-emerald-500" oninput="document.getElementById('val-brand-name-fs').textContent=this.value+'px'"></div>
+              <div><label class="label">Weight</label><select id="set-brand-name-weight" class="field"><option value="400">Regular</option><option value="600">Semi</option><option value="700" selected>Bold</option><option value="900">Black</option></select></div>
+              <div><label class="label">Style</label><select id="set-brand-name-style" class="field"><option value="normal">Normal</option><option value="italic">Italic</option></select></div>
             </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
+            <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Tagline</p>
+            <div class="form-row form-row-typo w-full">
+              <div><label class="label">စာသား</label><input id="set-brand-tagline" class="field" placeholder="Travel Journal & Beyond"></div>
+              <div><label class="label">Color</label><input id="set-brand-tagline-color" type="color" value="#94a3b8" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent"></div>
+              <div><label class="label flex justify-between">Size <span id="val-brand-tagline-fs" class="range-val">12px</span></label>
+                <input type="range" id="set-brand-tagline-fs" min="10" max="28" value="12" class="w-full accent-emerald-500" oninput="document.getElementById('val-brand-tagline-fs').textContent=this.value+'px'"></div>
+              <div><label class="label">Weight</label><select id="set-brand-tagline-weight" class="field"><option value="400" selected>Regular</option><option value="600">Semi</option><option value="700">Bold</option><option value="900">Black</option></select></div>
+              <div><label class="label">Style</label><select id="set-brand-tagline-style" class="field"><option value="normal">Normal</option><option value="italic">Italic</option></select></div>
+            </div>
+            <label class="toggle-row mb-0 mt-1"><input type="checkbox" id="set-show-tagline"><span class="text-sm">Logo အောက်မှာ Tagline ပြမယ်</span></label>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             <div class="md:col-span-2">
               <label class="label">Logo Image</label>
               <div class="flex flex-col sm:flex-row gap-2">
@@ -292,8 +312,21 @@ main > div {
             </div>
             <div><label class="label">Contact Email</label><input id="set-email" class="field" placeholder="htoohtet@gmail.com"></div>
             <div><label class="label">Contact Location</label><input id="set-location" class="field" placeholder="Yangon, Myanmar"></div>
-            <div class="md:col-span-2"><label class="label">Footer Tagline</label><textarea id="set-footer-tagline" class="field min-h-16" placeholder="Good Vibes&#10;Better Journeys"></textarea></div>
-          </div><!-- /brand form grid -->
+          </div>
+
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
+            <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Footer Tagline</p>
+            <div class="form-row form-row-typo w-full">
+              <div><label class="label">စာသား</label><textarea id="set-footer-tagline" class="field min-h-16" placeholder="Good Vibes&#10;Better Journeys"></textarea></div>
+              <div><label class="label">Color</label><input id="set-footer-tagline-color" type="color" value="#94a3b8" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent"></div>
+              <div><label class="label flex justify-between">Size <span id="val-footer-tagline-fs" class="range-val">13px</span></label>
+                <input type="range" id="set-footer-tagline-fs" min="10" max="28" value="13" class="w-full accent-emerald-500" oninput="document.getElementById('val-footer-tagline-fs').textContent=this.value+'px'"></div>
+              <div><label class="label">Weight</label><select id="set-footer-tagline-weight" class="field"><option value="400" selected>Regular</option><option value="600">Semi</option><option value="700">Bold</option><option value="900">Black</option></select></div>
+              <div><label class="label">Style</label><select id="set-footer-tagline-style" class="field"><option value="normal">Normal</option><option value="italic">Italic</option></select></div>
+            </div>
+          </div>
+
+          <button type="button" onclick="saveSettings()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Brand</button>
 
           <!-- hidden layout fields (kept for data compatibility) -->
           <input type="hidden" id="set-stories-heading" value="">
@@ -331,6 +364,7 @@ main > div {
             <div class="flex flex-wrap items-center gap-3 px-1 mb-2">
               <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider shrink-0">Live Preview · Hero</span>
               <span class="tiny ml-auto" id="hero-preview-dims">100% × 360px</span>
+              <button type="button" class="btn btn-muted text-[10px] py-1 px-2" onclick="var p=document.getElementById('hero-phone-wrap');if(p)p.classList.toggle('hidden')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone Preview</button>
             </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4 items-start">
@@ -348,7 +382,7 @@ main > div {
               </div>
 
               <!-- Phone preview always visible beside -->
-              <div id="hero-phone-wrap" class="justify-self-center xl:justify-self-end">
+              <div id="hero-phone-wrap" class="hidden justify-self-center xl:justify-self-end">
                 <p class="text-[10px] font-bold text-slate-400 mb-1.5 text-center"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</p>
                 <div class="relative mx-auto" style="width:180px;padding:10px 8px 14px;background:linear-gradient(145deg,#1a1a1a,#0d0d0d);border-radius:28px;border:3px solid #3f3f46;box-shadow:0 12px 36px rgba(0,0,0,.5), inset 0 0 0 1px #52525b;">
                   <div class="mx-auto mb-1.5 relative" style="width:64px;height:16px;border-radius:0 0 10px 10px;background:#0a0a0a;">
@@ -378,7 +412,7 @@ main > div {
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
               <div>
                 <label class="label flex justify-between">Height <span id="val-hero-frame" class="range-val">360px</span></label>
-                <input type="range" id="hero-frame-h" min="80" max="900" step="10" value="360" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
+                <input type="range" id="hero-frame-h" min="40" max="900" step="10" value="360" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
                 <p class="tiny mt-1">၈၀px – ၉၀၀px</p>
               </div>
               <div>
@@ -1790,12 +1824,24 @@ function loadAll() {
 
   const s = read('hh_settings', {});
   $('set-brand-name').value = s.brandName || 'HTOO HTET';
+  if ($('set-brand-name-color')) $('set-brand-name-color').value = s.brandNameColor || '#e5edf7';
+  if ($('set-brand-name-fs')) { $('set-brand-name-fs').value = s.brandNameFs || 18; if ($('val-brand-name-fs')) $('val-brand-name-fs').textContent = (s.brandNameFs || 18) + 'px'; }
+  if ($('set-brand-name-weight')) $('set-brand-name-weight').value = s.brandNameWeight || '700';
+  if ($('set-brand-name-style')) $('set-brand-name-style').value = s.brandNameStyle || 'normal';
   $('set-brand-tagline').value = s.brandTagline || 'Travel Journal & Beyond';
-  $('set-show-tagline').checked = s.showBrandTagline === true;
+  if ($('set-brand-tagline-color')) $('set-brand-tagline-color').value = s.brandTaglineColor || '#94a3b8';
+  if ($('set-brand-tagline-fs')) { $('set-brand-tagline-fs').value = s.brandTaglineFs || 12; if ($('val-brand-tagline-fs')) $('val-brand-tagline-fs').textContent = (s.brandTaglineFs || 12) + 'px'; }
+  if ($('set-brand-tagline-weight')) $('set-brand-tagline-weight').value = s.brandTaglineWeight || '400';
+  if ($('set-brand-tagline-style')) $('set-brand-tagline-style').value = s.brandTaglineStyle || 'normal';
+  if ($('set-show-tagline')) $('set-show-tagline').checked = s.showBrandTagline === true;
   setImageFieldValue('set-logo-url', s.logoUrl || '');
   $('set-email').value = s.contactEmail || '';
   $('set-location').value = s.contactLocation || '';
   $('set-footer-tagline').value = s.footerTagline || '';
+  if ($('set-footer-tagline-color')) $('set-footer-tagline-color').value = s.footerTaglineColor || '#94a3b8';
+  if ($('set-footer-tagline-fs')) { $('set-footer-tagline-fs').value = s.footerTaglineFs || 13; if ($('val-footer-tagline-fs')) $('val-footer-tagline-fs').textContent = (s.footerTaglineFs || 13) + 'px'; }
+  if ($('set-footer-tagline-weight')) $('set-footer-tagline-weight').value = s.footerTaglineWeight || '400';
+  if ($('set-footer-tagline-style')) $('set-footer-tagline-style').value = s.footerTaglineStyle || 'normal';
   $('set-stories-heading').value = s.storiesHeading || '';
   $('set-stories-sub').value = s.storiesSub || '';
   $('set-font').value = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
@@ -2036,7 +2082,15 @@ function saveSettings() {
     theme,
     mode: $('set-mode')?.value || 'dark',
     brandName: $('set-brand-name').value.trim() || 'HTOO HTET',
+    brandNameColor: $('set-brand-name-color')?.value || '#e5edf7',
+    brandNameFs: parseInt($('set-brand-name-fs')?.value || '18', 10),
+    brandNameWeight: $('set-brand-name-weight')?.value || '700',
+    brandNameStyle: $('set-brand-name-style')?.value || 'normal',
     brandTagline: $('set-brand-tagline').value.trim(),
+    brandTaglineColor: $('set-brand-tagline-color')?.value || '#94a3b8',
+    brandTaglineFs: parseInt($('set-brand-tagline-fs')?.value || '12', 10),
+    brandTaglineWeight: $('set-brand-tagline-weight')?.value || '400',
+    brandTaglineStyle: $('set-brand-tagline-style')?.value || 'normal',
     showBrandTagline: $('set-show-tagline').checked,
     logoUrl: imageFieldValue('set-logo-url'),
     accentColor: customAccent || preset.accentColor,
@@ -2060,6 +2114,10 @@ function saveSettings() {
     contactEmail: $('set-email').value.trim(),
     contactLocation: $('set-location').value.trim(),
     footerTagline: $('set-footer-tagline').value.trim(),
+    footerTaglineColor: $('set-footer-tagline-color')?.value || '#94a3b8',
+    footerTaglineFs: parseInt($('set-footer-tagline-fs')?.value || '13', 10),
+    footerTaglineWeight: $('set-footer-tagline-weight')?.value || '400',
+    footerTaglineStyle: $('set-footer-tagline-style')?.value || 'normal',
     storiesHeading: $('set-stories-heading').value.trim(),
     storiesSub: $('set-stories-sub').value.trim()
   });
@@ -2424,7 +2482,7 @@ function updatePhoneHeroPreview() {
   const zoom = parseInt($('hero-img-zoom')?.value || '100', 10);
   const fh = parseInt($('hero-frame-h')?.value || '360', 10);
   // phone screen height scales with frame H but capped for device frame
-  const phoneH = Math.max(160, Math.min(280, Math.round(fh * 0.65)));
+  const phoneH = Math.max(60, Math.min(280, Math.round(fh * 0.7)));
   phone.style.height = phoneH + 'px';
   phone.style.overflow = 'hidden';
   if (typeof applyLiveBg === 'function') applyLiveBg(phone, bgUrl, ix, iy, zoom);
