@@ -74,13 +74,13 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
 <!-- APP -->
 <div id="app" class="hidden min-h-screen">
-  <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-800 bg-[#091220] p-5 lg:block overflow-y-auto">
+  <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-800 bg-[#091220] p-5 lg:flex lg:flex-col overflow-y-auto">
     <a href="index.html" target="_blank" class="mb-6 flex items-center gap-3">
       <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-700 text-xl"><i class="fa-solid fa-mountain-sun"></i></div>
       <div><div class="font-black leading-tight">HTOO HTET</div><div class="text-sm font-bold text-emerald-300">Admin Studio</div></div>
     </a>
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
-    <nav class="space-y-0.5 pb-20">
+    <nav class="space-y-0.5 flex-1">
       <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
       <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Hero</button>
       <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
@@ -93,9 +93,34 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
       <button class="navbtn" data-view="social" onclick="showView('social',this)"><i class="fa-solid fa-share-nodes w-4"></i> Social Links</button>
     </nav>
-    <div class="absolute bottom-5 left-5 right-5">
-      <a href="index.html" target="_blank" class="btn btn-muted block text-center"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>View Live Website</a>
-        <button type="button" class="btn btn-muted text-xs" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
+    <div class="mt-6 border-t border-slate-800 pt-4 space-y-2">
+      <p class="px-1 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Page Preview</p>
+      <div id="sidebar-site-preview" class="rounded-xl border border-slate-700 bg-[#050a12] overflow-hidden" style="height:200px;">
+        <div class="h-full overflow-y-auto text-[0px] pointer-events-none">
+          <div id="ssp-hero" class="relative w-full overflow-hidden" style="height:72px;background:linear-gradient(135deg,#0a1f18,#061510);">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute left-2 bottom-2 right-2">
+              <div id="ssp-label" class="text-[6px] font-bold uppercase tracking-wider text-yellow-400">Travel</div>
+              <div id="ssp-title" class="text-[8px] font-black text-white leading-tight truncate">Hero Title</div>
+            </div>
+          </div>
+          <div id="ssp-sponsor" class="mx-1 mt-1 rounded overflow-hidden relative" style="height:28px;background:#1a1a1a;display:none;">
+            <div id="ssp-sp-title" class="absolute left-1 top-1 text-[6px] font-bold text-white truncate max-w-[70%]">Sponsor</div>
+          </div>
+          <div class="px-1.5 pt-1.5 space-y-1">
+            <div class="h-1.5 w-12 rounded bg-emerald-800/50"></div>
+            <div class="grid grid-cols-2 gap-1">
+              <div class="rounded bg-slate-800/80" style="height:28px"></div>
+              <div class="rounded bg-slate-800/80" style="height:28px"></div>
+            </div>
+            <div class="h-1.5 w-10 rounded bg-slate-700/50 mt-1"></div>
+            <div class="rounded bg-slate-800/60" style="height:20px"></div>
+          </div>
+        </div>
+      </div>
+      <p class="text-[9px] text-slate-500 px-1">စာမျက်နှာ အကျဉ်းချုပ် · Live site ဖွင့်ကြည့်ရန် ↓</p>
+      <a href="index.html" target="_blank" class="btn btn-muted block text-center text-xs py-2"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
+      <button type="button" class="btn btn-muted text-xs w-full" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
     </div>
   </aside>
 
@@ -1443,8 +1468,8 @@ function applyLiveBg(container, url, posX, posY) {
       if (z < 1) ch.style.zIndex = '1';
     }
   });
-  const px = (posX != null && !isNaN(posX)) ? posX : 50;
-  const py = (posY != null && !isNaN(posY)) ? posY : 50;
+  const px = (posX != null && !isNaN(Number(posX))) ? Number(posX) : 50;
+  const py = (posY != null && !isNaN(Number(posY))) ? Number(posY) : 50;
   const ok = isRealImageUrl(url);
   if (ok) {
     img.onload = function() { img.style.display = 'block'; };
@@ -1457,10 +1482,19 @@ function applyLiveBg(container, url, posX, posY) {
         container.style.backgroundPosition = px + '% ' + py + '%';
       } catch (e) {}
     };
-    img.src = url;
+    if (img.getAttribute('src') !== url) img.src = url;
     img.style.display = 'block';
+    img.style.objectFit = 'cover';
     img.style.objectPosition = px + '% ' + py + '%';
-    container.style.backgroundImage = 'none';
+    // also mirror on container bg as backup so Y always visible
+    try {
+      container.style.backgroundImage = 'url("' + String(url).replace(/"/g, '\\"') + '")';
+      container.style.backgroundSize = 'cover';
+      container.style.backgroundPosition = px + '% ' + py + '%';
+      img.style.opacity = '1';
+    } catch (e2) {
+      container.style.backgroundImage = 'none';
+    }
   } else {
     img.removeAttribute('src');
     img.style.display = 'none';
@@ -1997,6 +2031,7 @@ function updateHeroPreview() {
   initHeroLineDrag();
   initHeroImageDrag();
   try { updatePhoneHeroPreview(); } catch (e) {}
+  try { refreshSidebarSitePreview(); } catch (e) {}
 }
 let _heroDragState = null;
 
@@ -2207,14 +2242,73 @@ function initHeroLineDrag() {
   }
 }
 
+
+function refreshSidebarSitePreview() {
+  const heroBox = $('ssp-hero');
+  if (!heroBox) return;
+  const img = (typeof imageFieldValue === 'function') ? imageFieldValue('hero-image') : '';
+  const ix = parseInt($('hero-img-x')?.value || '50', 10);
+  const iy = parseInt($('hero-img-y')?.value || '50', 10);
+  if (img && typeof isRealImageUrl === 'function' && isRealImageUrl(img)) {
+    heroBox.style.backgroundImage = 'url("' + String(img).replace(/"/g, '\\"') + '")';
+    heroBox.style.backgroundSize = 'cover';
+    heroBox.style.backgroundPosition = ix + '% ' + iy + '%';
+  } else {
+    heroBox.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
+  }
+  if ($('ssp-label')) {
+    $('ssp-label').textContent = ($('hero-label')?.value || 'Travel').slice(0, 24);
+    $('ssp-label').style.color = $('hero-label-color')?.value || '#f5c518';
+  }
+  if ($('ssp-title')) {
+    $('ssp-title').textContent = (($('hero-title')?.value || 'Hero Title').replace(/\\n/g, ' ')).slice(0, 40);
+    $('ssp-title').style.color = $('hero-title-color')?.value || '#fff';
+  }
+  // sponsor strip
+  const spBox = $('ssp-sponsor');
+  if (spBox) {
+    try {
+      const list = (typeof getSponsorList === 'function') ? getSponsorList() : [];
+      const sp = list.find(function(s){ return s && s.active !== false; }) || list[0];
+      if (sp && (sp.title || sp.bgImage)) {
+        spBox.style.display = '';
+        if (sp.bgImage) {
+          spBox.style.backgroundImage = 'url("' + String(sp.bgImage).replace(/"/g, '\\"') + '")';
+          spBox.style.backgroundSize = 'cover';
+          spBox.style.backgroundPosition = (sp.imgPosX||50) + '% ' + (sp.imgPosY||50) + '%';
+        }
+        if ($('ssp-sp-title')) $('ssp-sp-title').textContent = (sp.title || sp.badge || 'Sponsor').slice(0, 28);
+      } else {
+        spBox.style.display = 'none';
+      }
+    } catch (e) { spBox.style.display = 'none'; }
+  }
+}
+
 function updatePhoneHeroPreview() {
   const phone = $('hero-phone-preview');
   if (!phone) return;
   const bgUrl = (typeof imageFieldValue === 'function') ? imageFieldValue('hero-image') : '';
   const ix = parseInt($('hero-img-x')?.value || '50', 10);
   const iy = parseInt($('hero-img-y')?.value || '50', 10);
+  // Frame H → phone height (scaled into phone frame)
+  const fh = parseInt($('hero-frame-h')?.value || '200', 10);
+  const phoneH = Math.max(120, Math.min(240, Math.round(fh * 0.55)));
+  phone.style.height = phoneH + 'px';
+  phone.style.aspectRatio = 'auto';
+  phone.style.maxHeight = '240px';
   if (typeof applyLiveBg === 'function') applyLiveBg(phone, bgUrl, ix, iy);
+  // force Y position on phone bg img
+  const pimg = phone.querySelector('.live-bg-img');
+  if (pimg) {
+    pimg.style.objectPosition = ix + '% ' + iy + '%';
+    pimg.style.display = 'block';
+  }
   if (!bgUrl) phone.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
+  else {
+    phone.style.backgroundPosition = ix + '% ' + iy + '%';
+    phone.style.backgroundSize = 'cover';
+  }
 
   const pos = function(id, def) { return parseInt($(id)?.value || def, 10); };
   const lx = pos('hero-label-x', 8), ly = pos('hero-label-y', 18);
@@ -2654,6 +2748,7 @@ function updateSponsorPreview() {
   if ($('sponsor-preview-dims')) $('sponsor-preview-dims').textContent = wPct + '% × ' + h + 'px';
   initSponsorDrag();
   updatePhoneSponsorPreview();
+  try { refreshSidebarSitePreview(); } catch (e) {}
 }
 
 
