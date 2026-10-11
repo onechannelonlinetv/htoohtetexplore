@@ -140,6 +140,7 @@ main > div {
     </a>
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
     <nav class="space-y-0.5 flex-1">
+      <button class="navbtn" data-view="pagepreview" onclick="showView('pagepreview',this)"><i class="fa-solid fa-eye w-4"></i> Preview</button>
       <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
       <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Hero</button>
       <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
@@ -147,6 +148,7 @@ main > div {
       <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
       <button class="navbtn" data-view="upcoming" onclick="showView('upcoming',this)"><i class="fa-solid fa-map-location-dot w-4"></i> Upcoming</button>
       <button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Latest Travel</button>
+      <button class="navbtn" data-view="travelposts" onclick="showView('travelposts',this)"><i class="fa-solid fa-pen-to-square w-4"></i> Travel Posts</button>
       <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
       <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
       <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
@@ -206,40 +208,151 @@ main > div {
 
       <!-- BRAND & SETTINGS -->
       
-      <section id="view-pagepreview" class="view space-y-4">
+      <section id="view-pagepreview" class="view space-y-3">
+        <!-- Top bar: device + save -->
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-xl font-black">Page Preview</h2>
-            <p class="mt-1 text-sm text-slate-400">Website UI တစ်ခုလုံး · ဒီမှာကြည့်ပြီး အောက်က ခလုတ်နဲ့ သက်ဆိုင်ရာနေရာကို ပြင်နိုင်ပါတယ်</p>
+            <h2 class="text-xl font-black flex items-center gap-2"><i class="fa-solid fa-eye text-emerald-400"></i> Website Preview</h2>
+            <p class="mt-0.5 text-sm text-slate-400">Overall adjust · Desktop / Tablet / Mobile · သင့် site အစစ်ကို ဒီမှာကြည့်</p>
           </div>
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex rounded-xl border border-slate-700 overflow-hidden text-xs font-bold">
+              <button type="button" id="pv-btn-desktop" onclick="setPagePreviewWidth('desktop')" class="px-3 py-2 bg-emerald-600 text-white"><i class="fa-solid fa-desktop mr-1"></i>Desktop</button>
+              <button type="button" id="pv-btn-tablet" onclick="setPagePreviewWidth('tablet')" class="px-3 py-2 bg-slate-900 text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
+              <button type="button" id="pv-btn-mobile" onclick="setPagePreviewWidth('mobile')" class="px-3 py-2 bg-slate-900 text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-mobile-screen mr-1"></i>Mobile</button>
+            </div>
             <button type="button" class="btn btn-muted text-xs" onclick="refreshPagePreviewIframe()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
-            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
-            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
-            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
-            <a href="index.html" target="_blank" class="btn btn-green text-xs"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Tab</a>
+            <button type="button" class="btn btn-green text-xs" onclick="applyPreviewAdjustments()"><i class="fa-solid fa-floppy-disk mr-1"></i>Apply & Save</button>
           </div>
         </div>
-        <div class="flex flex-wrap gap-2 text-xs">
-          <button type="button" class="btn btn-muted" onclick="showView('settings'); setTimeout(function(){var a=document.getElementById('hero-editor-anchor');if(a)a.scrollIntoView({behavior:'smooth'});},80)">✏️ Edit Hero</button>
-          <button type="button" class="btn btn-muted" onclick="showView('sponsor')">✏️ Edit Sponsor</button>
-          <button type="button" class="btn btn-muted" onclick="showView('upcoming')">✏️ Edit Upcoming</button>
-          <button type="button" class="btn btn-muted" onclick="showView('posts')">✏️ Edit Latest Travel</button>
-          <button type="button" class="btn btn-muted" onclick="showView('menu')">✏️ Edit Menu</button>
-          <button type="button" class="btn btn-muted" onclick="showView('youtube')">✏️ Edit YouTube</button>
-        </div>
-        <div class="panel editor-shell p-2 sm:p-4 bg-[#050a12]">
-          <div id="page-preview-frame-wrap" class="mx-auto transition-all" style="width:100%;max-width:100%;">
-            <div class="rounded-xl border border-slate-700 overflow-hidden bg-black shadow-2xl">
-              <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-900 border-b border-slate-800">
-                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                <span class="ml-2 text-[10px] text-slate-500 truncate">index.html · live preview</span>
+
+        <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4 items-start">
+          <!-- Center: live site iframe -->
+          <div class="panel editor-shell p-2 sm:p-3 bg-[#050a12] min-w-0">
+            <div id="page-preview-frame-wrap" class="mx-auto transition-all" style="width:100%;max-width:100%;">
+              <div class="rounded-xl border border-slate-700 overflow-hidden bg-black shadow-2xl">
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-900 border-b border-slate-800">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span class="ml-2 text-[10px] text-slate-500 truncate">htoohtet · live preview</span>
+                </div>
+                <iframe id="page-preview-iframe" src="index.html" title="Site Preview" class="w-full bg-[#061510]" style="height:min(78vh,860px);border:0;"></iframe>
               </div>
-              <iframe id="page-preview-iframe" src="index.html" title="Site Preview" class="w-full bg-white" style="height:min(78vh,820px);border:0;"></iframe>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3 text-[11px]">
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('settings')">✏️ Brand & Hero</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('sponsor')">✏️ Official Sponsor</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('upcoming')">✏️ Upcoming</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('posts')">✏️ Latest Travel</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('sections')">✏️ Custom Rows</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('youtube')">✏️ YouTube</button>
             </div>
           </div>
+
+          <!-- Right: overall adjustment panel -->
+          <aside class="panel p-4 space-y-4 sticky top-20 max-h-[min(85vh,900px)] overflow-y-auto">
+            <div>
+              <h3 class="font-black text-sm flex items-center gap-2"><i class="fa-solid fa-sliders text-emerald-400"></i> Overall Adjust</h3>
+              <p class="tiny mt-1">Website တစ်ခုလုံး ချိန် · Apply & Save နှိပ်ပါ</p>
+            </div>
+
+            <div class="flex gap-1 rounded-lg border border-slate-700 p-0.5 text-[11px] font-bold">
+              <button type="button" class="pv-tab flex-1 py-1.5 rounded-md bg-emerald-600 text-white" data-pvtab="general" onclick="switchPvTab('general')">General</button>
+              <button type="button" class="pv-tab flex-1 py-1.5 rounded-md text-slate-400" data-pvtab="sections" onclick="switchPvTab('sections')">Sections</button>
+              <button type="button" class="pv-tab flex-1 py-1.5 rounded-md text-slate-400" data-pvtab="style" onclick="switchPvTab('style')">Style</button>
+            </div>
+
+            <!-- GENERAL -->
+            <div id="pv-panel-general" class="pv-panel space-y-3">
+              <div>
+                <label class="label flex justify-between">Content Max Width <span id="pv-val-maxw" class="text-emerald-400">1200px</span></label>
+                <input type="range" id="pv-content-maxw" min="900" max="1400" step="20" value="1200" class="w-full accent-emerald-500" oninput="$('pv-val-maxw').textContent=this.value+'px'">
+              </div>
+              <div>
+                <label class="label">Theme</label>
+                <select id="pv-theme" class="field">
+                  <option value="forest">Forest Dark</option>
+                  <option value="ocean">Ocean</option>
+                  <option value="sunset">Sunset</option>
+                  <option value="navy">Navy Light</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Mode</label>
+                <select id="pv-mode" class="field">
+                  <option value="dark">Dark</option>
+                  <option value="light">Light</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Brand Name</label>
+                <input id="pv-brand-name" class="field" placeholder="HTOO HTET">
+              </div>
+              <div>
+                <label class="label flex justify-between">Hero Height <span id="pv-val-hero-h" class="text-emerald-400">480px</span></label>
+                <input type="range" id="pv-hero-h" min="200" max="800" step="10" value="480" class="w-full accent-emerald-500" oninput="$('pv-val-hero-h').textContent=this.value+'px'">
+              </div>
+              <div>
+                <label class="label flex justify-between">Card Image Height <span id="pv-val-card-h" class="text-emerald-400">11rem</span></label>
+                <input type="range" id="pv-card-h" min="6" max="20" step="0.5" value="11" class="w-full accent-emerald-500" oninput="$('pv-val-card-h').textContent=this.value+'rem'">
+              </div>
+            </div>
+
+            <!-- SECTIONS -->
+            <div id="pv-panel-sections" class="pv-panel space-y-3 hidden">
+              <p class="text-xs text-slate-400">Website section အစဉ် (အပေါ်မှ အောက်)</p>
+              <ol class="text-sm space-y-2 text-slate-200">
+                <li class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black w-5">1</span> Hero</li>
+                <li class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black w-5">2</span> Proud Sponsors</li>
+                <li class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black w-5">3</span> Official Sponsor</li>
+                <li class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black w-5">4</span> Upcoming</li>
+                <li class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black w-5">5</span> Travel Stories</li>
+                <li class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black w-5">6</span> Custom Rows (Recent Trip, Destination…)</li>
+                <li class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black w-5">7</span> YouTube · About</li>
+              </ol>
+              <button type="button" class="btn btn-muted w-full text-xs" onclick="showView('sections')"><i class="fa-solid fa-layer-group mr-1"></i>Custom Rows စီမံရန်</button>
+              <button type="button" class="btn btn-muted w-full text-xs" onclick="showView('upcoming')"><i class="fa-solid fa-map-location-dot mr-1"></i>Upcoming ပြင်ရန်</button>
+              <button type="button" class="btn btn-muted w-full text-xs" onclick="showView('sponsor')"><i class="fa-solid fa-rectangle-ad mr-1"></i>Official Sponsor ပြင်ရန်</button>
+            </div>
+
+            <!-- STYLE -->
+            <div id="pv-panel-style" class="pv-panel space-y-3 hidden">
+              <div>
+                <label class="label">Accent Color</label>
+                <input id="pv-accent" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent">
+              </div>
+              <div>
+                <label class="label">Body Font</label>
+                <select id="pv-font" class="field">
+                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
+                  <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
+                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
+                  <option value="'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif">Space Grotesk</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Heading Font</label>
+                <select id="pv-heading-font" class="field">
+                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
+                  <option value="'Playfair Display', 'Noto Sans Myanmar', serif">Playfair</option>
+                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
+                  <option value="'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif">Space Grotesk</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Stories Heading</label>
+                <input id="pv-stories-heading" class="field" placeholder="Travel Stories">
+              </div>
+              <div>
+                <label class="label">Stories Subtitle</label>
+                <input id="pv-stories-sub" class="field" placeholder="မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ">
+              </div>
+            </div>
+
+            <button type="button" onclick="applyPreviewAdjustments()" class="btn btn-green w-full"><i class="fa-solid fa-check mr-1"></i>Apply Changes</button>
+            <a href="index.html" target="_blank" class="btn btn-muted w-full text-center text-xs block"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Live Website</a>
+          </aside>
         </div>
       </section>
 
@@ -747,29 +860,22 @@ main > div {
                 </div>
               </div>
 
-              <!-- Phone preview — real device frame, banner W% visible -->
-              <div class="justify-self-center lg:justify-self-end shrink-0">
-                <p class="text-[10px] font-bold text-slate-400 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-mobile-screen"></i> Phone (တကယ့်ဖုန်းလို)</p>
-                <div class="mx-auto" style="width:220px;padding:12px 10px 18px;background:linear-gradient(160deg,#1a1a1a,#0d0d0d);border-radius:32px;border:3px solid #3f3f46;box-shadow:0 12px 32px rgba(0,0,0,.55), inset 0 0 0 1px #52525b">
-                  <div class="mx-auto mb-2.5 flex items-center justify-center">
-                    <div style="width:52px;height:6px;border-radius:4px;background:#27272a"></div>
-                  </div>
-                  <div style="background:#061510;border-radius:14px;padding:8px 6px;min-height:150px;">
-                    <div class="w-full flex justify-center">
-                      <div id="sponsor-phone-preview" class="relative overflow-hidden bg-slate-900" style="width:100%;height:90px;border-radius:10px;">
-                        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent z-[1] pointer-events-none"></div>
-                        <span id="sp-phone-badge" class="absolute z-10 inline-block text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black" style="left:4%;top:10%;">Official</span>
-                        <div id="sp-phone-title" class="absolute z-10 text-[10px] font-black text-white leading-tight" style="left:4%;top:32%;max-width:72%;">Sponsor Title</div>
-                        <div id="sp-phone-desc" class="absolute z-10 text-[7px] text-white/70 line-clamp-2" style="left:4%;top:58%;max-width:65%;">Description…</div>
-                        <div id="sp-phone-logo-wrap" class="absolute z-10 rounded-md bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="left:88%;top:40%;width:28px;height:28px;">
-                          <img id="sp-phone-logo" src="" class="w-full h-full object-contain hidden" alt="">
-                          <i class="fa-solid fa-image text-white/30 text-[9px]" id="sp-phone-logo-icon"></i>
-                        </div>
-                      </div>
+              <!-- Phone preview frame -->
+              <div class="justify-self-center xl:justify-self-end">
+                <p class="text-[10px] font-bold text-slate-400 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-mobile-screen"></i> Phone (auto layout)</p>
+                <div class="mx-auto" style="width:200px;padding:10px 8px 16px;background:#0a0a0a;border-radius:28px;border:2px solid #334155;box-shadow:0 8px 24px rgba(0,0,0,.5)">
+                  <div class="mx-auto mb-2" style="width:48px;height:5px;border-radius:4px;background:#1e293b"></div>
+                  <div id="sponsor-phone-preview" class="relative overflow-hidden bg-slate-900" style="width:100%;aspect-ratio:16/9;border-radius:12px;">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent z-[1] pointer-events-none"></div>
+                    <span id="sp-phone-badge" class="absolute z-10 inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black" style="left:4%;top:10%;">Official</span>
+                    <div id="sp-phone-title" class="absolute z-10 text-[11px] font-black text-white leading-tight" style="left:4%;top:32%;max-width:72%;">Sponsor Title</div>
+                    <div id="sp-phone-desc" class="absolute z-10 text-[8px] text-white/70 line-clamp-2" style="left:4%;top:58%;max-width:65%;">Description…</div>
+                    <div id="sp-phone-logo-wrap" class="absolute z-10 rounded-md bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="right:3%;top:50%;transform:translateY(-50%);width:36px;height:36px;">
+                      <img id="sp-phone-logo" src="" class="w-full h-full object-contain hidden" alt="">
+                      <i class="fa-solid fa-image text-white/30 text-[10px]" id="sp-phone-logo-icon"></i>
                     </div>
-                    <p id="sp-phone-w-label" class="text-[8px] text-emerald-400/80 text-center mt-1.5">W 100% · H auto</p>
                   </div>
-                  <p class="text-[8px] text-slate-500 text-center mt-2">W% ပြောင်း → ဖုန်းထဲ banner အကျဉ်း/ကျယ်</p>
+                  <p class="text-[8px] text-slate-500 text-center mt-2">ဖုန်းမှာ အလိုအလျောက် ၁၆:၉ · rounded</p>
                 </div>
               </div>
             </div>
@@ -1792,7 +1898,7 @@ adminAuth?.onAuthStateChanged(user => { if (!user) { adminUser = null; remoteSyn
 function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 
 const titles = {
-  overview: 'Overview', pagepreview: 'Page Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
+  overview: 'Overview', pagepreview: 'Website Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
   proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Latest Travel',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
@@ -1808,6 +1914,81 @@ function setPagePreviewWidth(mode) {
   if (mode === 'mobile') { w.style.maxWidth = '390px'; }
   else if (mode === 'tablet') { w.style.maxWidth = '768px'; }
   else { w.style.maxWidth = '100%'; }
+  ['desktop','tablet','mobile'].forEach(function(m) {
+    const b = $('pv-btn-' + m);
+    if (!b) return;
+    if (m === mode) {
+      b.className = 'px-3 py-2 bg-emerald-600 text-white';
+    } else {
+      b.className = 'px-3 py-2 bg-slate-900 text-slate-300 hover:bg-slate-800';
+    }
+  });
+}
+function switchPvTab(tab) {
+  document.querySelectorAll('.pv-panel').forEach(function(p) { p.classList.add('hidden'); });
+  document.querySelectorAll('.pv-tab').forEach(function(b) {
+    const on = b.getAttribute('data-pvtab') === tab;
+    b.className = 'pv-tab flex-1 py-1.5 rounded-md ' + (on ? 'bg-emerald-600 text-white' : 'text-slate-400');
+  });
+  const panel = $('pv-panel-' + tab);
+  if (panel) panel.classList.remove('hidden');
+}
+function loadPreviewPanel() {
+  const s = read('hh_settings', {});
+  if ($('pv-theme')) $('pv-theme').value = s.theme || 'forest';
+  if ($('pv-mode')) $('pv-mode').value = s.mode || 'dark';
+  if ($('pv-brand-name')) $('pv-brand-name').value = s.brandName || 'HTOO HTET';
+  if ($('pv-hero-h')) {
+    $('pv-hero-h').value = s.heroHeight || 480;
+    if ($('pv-val-hero-h')) $('pv-val-hero-h').textContent = (s.heroHeight || 480) + 'px';
+  }
+  if ($('pv-card-h')) {
+    $('pv-card-h').value = s.cardImgHeight || 11;
+    if ($('pv-val-card-h')) $('pv-val-card-h').textContent = (s.cardImgHeight || 11) + 'rem';
+  }
+  if ($('pv-content-maxw')) {
+    const mw = s.contentMaxWidth || 1200;
+    $('pv-content-maxw').value = mw;
+    if ($('pv-val-maxw')) $('pv-val-maxw').textContent = mw + 'px';
+  }
+  if ($('pv-accent')) $('pv-accent').value = s.accentColor || '#f5c518';
+  if ($('pv-font') && s.fontFamily) $('pv-font').value = s.fontFamily;
+  if ($('pv-heading-font') && s.headingFont) $('pv-heading-font').value = s.headingFont;
+  if ($('pv-stories-heading')) $('pv-stories-heading').value = s.storiesHeading || '';
+  if ($('pv-stories-sub')) $('pv-stories-sub').value = s.storiesSub || '';
+}
+function applyPreviewAdjustments() {
+  try {
+    const s = read('hh_settings', {});
+    const theme = ($('pv-theme') && $('pv-theme').value) || s.theme || 'forest';
+    const preset = (typeof THEME_PRESETS !== 'undefined' && THEME_PRESETS[theme]) ? THEME_PRESETS[theme] : {};
+    s.theme = theme;
+    s.mode = ($('pv-mode') && $('pv-mode').value) || s.mode || 'dark';
+    s.brandName = ($('pv-brand-name') && $('pv-brand-name').value.trim()) || s.brandName || 'HTOO HTET';
+    s.heroHeight = parseInt(($('pv-hero-h') && $('pv-hero-h').value) || s.heroHeight || 480, 10);
+    s.cardImgHeight = parseFloat(($('pv-card-h') && $('pv-card-h').value) || s.cardImgHeight || 11);
+    s.contentMaxWidth = parseInt(($('pv-content-maxw') && $('pv-content-maxw').value) || 1200, 10);
+    s.accentColor = ($('pv-accent') && $('pv-accent').value) || s.accentColor || preset.accentColor || '#f5c518';
+    if (preset.bgColor) s.bgColor = preset.bgColor;
+    if (preset.surfaceColor) s.surfaceColor = preset.surfaceColor;
+    if (preset.cardColor) s.cardColor = preset.cardColor;
+    if ($('pv-font')) s.fontFamily = $('pv-font').value;
+    if ($('pv-heading-font')) s.headingFont = $('pv-heading-font').value;
+    if ($('pv-stories-heading')) s.storiesHeading = $('pv-stories-heading').value.trim();
+    if ($('pv-stories-sub')) s.storiesSub = $('pv-stories-sub').value.trim();
+    // mirror into Brand form if present
+    if ($('set-theme')) $('set-theme').value = s.theme;
+    if ($('set-mode')) $('set-mode').value = s.mode;
+    if ($('set-brand-name')) $('set-brand-name').value = s.brandName;
+    if ($('set-hero-height')) $('set-hero-height').value = s.heroHeight;
+    if ($('set-card-img-h')) $('set-card-img-h').value = s.cardImgHeight;
+    write('hh_settings', s);
+    toast('Overall settings သိမ်းပြီး · Preview refresh လုပ်နေသည်…');
+    setTimeout(refreshPagePreviewIframe, 400);
+  } catch (e) {
+    console.error(e);
+    toast('Apply မရပါ: ' + (e.message || 'error'));
+  }
 }
 
 function showView(name, button) {
@@ -1819,7 +2000,9 @@ function showView(name, button) {
     }, 50);
   }
   if (name === 'pagepreview') {
-    setTimeout(function() { try { refreshPagePreviewIframe(); } catch (e) {} }, 100);
+    setTimeout(function() {
+      try { loadPreviewPanel(); refreshPagePreviewIframe(); } catch (e) {}
+    }, 80);
   }
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1829,7 +2012,9 @@ function showView(name, button) {
   $('page-title').textContent = titles[name] || 'Overview';
   $('mobile-nav').classList.add('hidden');
   if (name === 'sections') renderHomeSectionsList();
-  if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
+  if (name === 'posts') { if (typeof updatePostPreview === 'function') updatePostPreview(); }
+  if (name === 'travelposts') { if (typeof renderPostsList === 'function') renderPostsList(); }
+  if (name === 'overview') { if (typeof renderOverview === 'function') renderOverview(); }
   if (name === 'menu') renderMenuList();
   if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
   if (name === 'hero' && typeof updateHeroPreview === 'function') updateHeroPreview();
@@ -2848,29 +3033,11 @@ function setTextKeepHandle(el, text, resizeKey) {
 function updatePhoneSponsorPreview() {
   const phone = $('sponsor-phone-preview');
   if (!phone) return;
-  const wPct = parseInt($('admin-sponsor-width')?.value || '100', 10);
-  const h = parseInt($('admin-sponsor-height-local')?.value || '180', 10);
-  const phoneH = Math.max(56, Math.min(120, Math.round(h * 0.42)));
-  phone.style.display = 'block';
-  phone.style.width = wPct + '%';
-  phone.style.maxWidth = '100%';
-  phone.style.height = phoneH + 'px';
-  phone.style.marginLeft = 'auto';
-  phone.style.marginRight = 'auto';
-  const shape = $('admin-sponsor-shape')?.value || 'rounded';
-  const radiusMap = { square: '0px', soft: '10px', rounded: '10px', pill: '16px', circle: '16px' };
-  phone.style.borderRadius = radiusMap[shape] || '10px';
-  if ($('sp-phone-w-label')) $('sp-phone-w-label').textContent = 'W ' + wPct + '% · H ' + h + 'px';
-
   const bgUrl = imageFieldValue('admin-sponsor-bg');
   const ix = parseInt($('sp-img-x')?.value || '50', 10);
   const iy = parseInt($('sp-img-y')?.value || '50', 10);
-  if (typeof applyLiveBg === 'function') applyLiveBg(phone, bgUrl, ix, iy);
-  if (!bgUrl) {
-    phone.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
-    phone.style.backgroundSize = 'cover';
-    phone.style.backgroundPosition = 'center';
-  }
+  applyLiveBg(phone, bgUrl, ix, iy);
+  if (!bgUrl) phone.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
 
   const badge = $('sp-phone-badge');
   const title = $('sp-phone-title');
@@ -2879,40 +3046,18 @@ function updatePhoneSponsorPreview() {
     badge.textContent = ($('admin-sponsor-badge')?.value.trim() || 'Official Sponsor').slice(0, 22);
     badge.style.background = $('admin-sponsor-badge-bg')?.value || '#f5c518';
     badge.style.color = $('admin-sponsor-badge-color')?.value || '#000';
-    badge.style.fontSize = Math.max(6, Math.round((parseInt($('admin-sponsor-badge-fs')?.value || '12', 10) || 12) * 0.55)) + 'px';
-    badge.style.fontWeight = $('admin-sponsor-badge-weight')?.value || '900';
-    badge.style.fontStyle = ($('admin-sponsor-badge-style')?.value || 'normal');
-    badge.style.left = (parseInt($('sp-badge-x')?.value || '4', 10)) + '%';
-    badge.style.top = (parseInt($('sp-badge-y')?.value || '12', 10)) + '%';
   }
   if (title) {
     title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
     title.style.color = $('admin-sponsor-title-color')?.value || '#fff';
-    title.style.fontSize = Math.max(8, Math.round((parseInt($('admin-sponsor-title-fs')?.value || '22', 10) || 22) * 0.4)) + 'px';
-    title.style.fontWeight = $('admin-sponsor-title-weight')?.value || '900';
-    title.style.left = (parseInt($('sp-title-x')?.value || '4', 10)) + '%';
-    title.style.top = (parseInt($('sp-title-y')?.value || '38', 10)) + '%';
   }
   if (desc) {
     desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
     desc.style.color = $('admin-sponsor-desc-color')?.value || '#ccc';
-    desc.style.fontSize = Math.max(6, Math.round((parseInt($('admin-sponsor-desc-fs')?.value || '12', 10) || 12) * 0.55)) + 'px';
-    desc.style.left = (parseInt($('sp-desc-x')?.value || '4', 10)) + '%';
-    desc.style.top = (parseInt($('sp-desc-y')?.value || '62', 10)) + '%';
   }
   const logo = $('sp-phone-logo');
   const logoIcon = $('sp-phone-logo-icon');
-  const logoWrap = $('sp-phone-logo-wrap');
-  if (typeof applyLiveLogo === 'function') applyLiveLogo(logo, logoIcon, imageFieldValue('admin-sponsor-img'));
-  if (logoWrap) {
-    const ls = Math.max(22, Math.round((parseInt($('sp-logo-size')?.value || '80', 10) || 80) * 0.32));
-    logoWrap.style.width = ls + 'px';
-    logoWrap.style.height = ls + 'px';
-    logoWrap.style.left = (parseInt($('sp-logo-x')?.value || '88', 10)) + '%';
-    logoWrap.style.top = (parseInt($('sp-logo-y')?.value || '40', 10)) + '%';
-    logoWrap.style.right = 'auto';
-    logoWrap.style.transform = 'none';
-  }
+  applyLiveLogo(logo, logoIcon, imageFieldValue('admin-sponsor-img'));
 }
 
 function updateSponsorPreview() {
