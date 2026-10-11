@@ -40,6 +40,10 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
 .live-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none!important}
 #sponsor-live-preview,#hero-live-preview,#up-live-preview,#yt-live-preview{position:relative!important;overflow:hidden}
+.sp-resize-handle{position:absolute;right:-4px;bottom:-4px;width:12px;height:12px;background:#34d399;border:2px solid #fff;border-radius:3px;cursor:nwse-resize;z-index:30;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+#sp-prev-badge,#sp-prev-title,#sp-prev-desc{position:absolute}
+#sp-prev-badge .sp-resize-handle,#sp-prev-title .sp-resize-handle,#sp-prev-desc .sp-resize-handle{pointer-events:auto}
+
 #hero-live-preview [id^="hero-prev-"]{z-index:10}
 #content-live-preview img{max-width:100%;border-radius:10px;display:block;margin:8px 0}
 #sp-prev-logo{width:100%!important;height:100%!important;object-fit:contain!important}
@@ -530,24 +534,31 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
           <!-- Live Preview -->
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
               <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Sponsor</span>
-              <span class="tiny" id="sponsor-preview-dims">180px</span>
+              <div class="flex items-center gap-3 flex-1 justify-end min-w-[200px]">
+                <label class="flex items-center gap-2 text-[11px] text-emerald-200/80 shrink-0">
+                  <span>Height</span>
+                  <input type="range" id="admin-sponsor-height-local" min="120" max="360" step="10" value="180" class="w-28 accent-emerald-500" oninput="updateSponsorPreview()">
+                  <span id="val-sp-h-local" class="tabular-nums w-10 text-right">180px</span>
+                </label>
+                <span class="tiny" id="sponsor-preview-dims">180px</span>
+              </div>
             </div>
             <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="min-height:140px;height:160px;background:linear-gradient(90deg,#111,#333);cursor:grab;">
               <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent pointer-events-none z-[1]"></div>
               <div class="relative z-10 flex items-center justify-between gap-3 p-4 h-full" style="min-height:140px;">
                 <div class="min-w-0 flex-1 relative" style="min-height:100px;">
-                  <span id="sp-prev-badge" class="absolute inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black cursor-move" style="left:0;top:8%;">Official Sponsor</span>
-                  <div id="sp-prev-title" class="absolute text-base font-black text-white truncate cursor-move max-w-[90%]" style="left:0;top:32%;">Sponsor Title</div>
-                  <div id="sp-prev-desc" class="absolute text-[11px] text-white/60 line-clamp-2 cursor-move max-w-[90%]" style="left:0;top:58%;">Description…</div>
+                  <span id="sp-prev-badge" class="absolute inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black cursor-move" style="left:0;top:8%;">Official Sponsor<span class="sp-resize-handle" data-resize="badge" title="ဆိုဒ်"></span></span>
+                  <div id="sp-prev-title" class="absolute text-base font-black text-white truncate cursor-move max-w-[90%]" style="left:0;top:32%;">Sponsor Title<span class="sp-resize-handle" data-resize="title" title="ဆိုဒ်"></span></div>
+                  <div id="sp-prev-desc" class="absolute text-[11px] text-white/60 line-clamp-2 cursor-move max-w-[90%]" style="left:0;top:58%;">Description…<span class="sp-resize-handle" data-resize="desc" title="ဆိုဒ်"></span></div>
                 </div>
                 <div id="sp-prev-logo-wrap" class="w-16 h-16 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden relative z-10">
                   <img id="sp-prev-logo" src="" class="w-full h-full object-contain hidden" alt="">
                   <i class="fa-solid fa-image text-white/30 text-lg" id="sp-prev-logo-icon"></i>
                 </div>
               </div>
-              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ပုံ / စာ ဖိဆွဲ၍ နေရာချိန်ပါ</p>
+              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ပုံဖိဆွဲ · စာဖိဆွဲရွှေ့ · ထောင့်စတုရန်း = ဆိုဒ်</p>
             </div>
           </div>
 
@@ -630,10 +641,6 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                 <label class="label flex justify-between">Desc Size <span id="val-sp-desc-fs">12px</span></label>
                 <input type="range" id="admin-sponsor-desc-fs" min="10" max="22" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
               </div>
-            </div>
-            <div>
-              <label class="label flex justify-between">Banner Height <span id="val-sp-h-local">180px</span></label>
-              <input type="range" id="admin-sponsor-height-local" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
@@ -2260,6 +2267,20 @@ function saveCurrentSponsor() {
 }
 function saveSponsor() { saveCurrentSponsor(); }
 
+
+function setTextKeepHandle(el, text, resizeKey) {
+  if (!el) return;
+  let handle = el.querySelector('.sp-resize-handle');
+  el.textContent = text;
+  if (!handle) {
+    handle = document.createElement('span');
+    handle.className = 'sp-resize-handle';
+    handle.setAttribute('data-resize', resizeKey);
+    handle.title = 'ဆိုဒ်';
+  }
+  el.appendChild(handle);
+}
+
 function updateSponsorPreview() {
   const badge = $('sp-prev-badge');
   const title = $('sp-prev-title');
@@ -2268,7 +2289,7 @@ function updateSponsorPreview() {
   const logoIcon = $('sp-prev-logo-icon');
   const box = $('sponsor-live-preview');
   if (!badge) return;
-  badge.textContent = $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor';
+  setTextKeepHandle(badge, $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor', 'badge');
   const bg = $('admin-sponsor-badge-bg')?.value || '#f5c518';
   const fg = $('admin-sponsor-badge-color')?.value || '#000000';
   const pad = $('admin-sponsor-badge-pad')?.value || 8;
@@ -2291,7 +2312,7 @@ function updateSponsorPreview() {
   if ($('val-badge-fs')) $('val-badge-fs').textContent = fs + 'px';
   if ($('val-badge-radius')) $('val-badge-radius').textContent = (parseInt(rad,10) >= 24 ? 'pill' : rad + 'px');
   if (title) {
-    title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
+    setTextKeepHandle(title, $('admin-sponsor-title')?.value.trim() || 'Sponsor Title', 'title');
     title.style.color = $('admin-sponsor-title-color')?.value || '#ffffff';
     const tfs = $('admin-sponsor-title-fs')?.value || 22;
     title.style.fontSize = Math.max(11, Math.round(tfs * 0.65)) + 'px';
@@ -2305,7 +2326,7 @@ function updateSponsorPreview() {
     if ($('val-sp-title-fs')) $('val-sp-title-fs').textContent = tfs + 'px';
   }
   if (desc) {
-    desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
+    setTextKeepHandle(desc, $('admin-sponsor-desc')?.value.trim() || 'Description…', 'desc');
     desc.style.color = $('admin-sponsor-desc-color')?.value || '#cccccc';
     const dfs = $('admin-sponsor-desc-fs')?.value || 12;
     desc.style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
@@ -2339,6 +2360,7 @@ function updateSponsorPreview() {
   initSponsorDrag();
 }
 
+
 let _spDrag = null;
 function initSponsorDrag() {
   const box = $('sponsor-live-preview');
@@ -2346,13 +2368,37 @@ function initSponsorDrag() {
   box._spDragReady = true;
   function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
   const textIds = { 'sp-prev-badge': ['sp-badge-x','sp-badge-y'], 'sp-prev-title': ['sp-title-x','sp-title-y'], 'sp-prev-desc': ['sp-desc-x','sp-desc-y'] };
+  const sizeMap = {
+    badge: { input: 'admin-sponsor-badge-fs', min: 8, max: 20 },
+    title: { input: 'admin-sponsor-title-fs', min: 12, max: 48 },
+    desc: { input: 'admin-sponsor-desc-fs', min: 10, max: 28 }
+  };
   function onStart(e) {
     const t = e.target;
-    const id = t && t.id;
     const r = box.getBoundingClientRect();
     const p = pt(e);
+    // resize handle
+    if (t && t.classList && t.classList.contains('sp-resize-handle')) {
+      const key = t.getAttribute('data-resize');
+      const cfg = sizeMap[key];
+      if (cfg) {
+        _spDrag = { type: 'resize', input: cfg.input, min: cfg.min, max: cfg.max, sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10) };
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+    }
+    const id = t && t.id;
     if (id && textIds[id]) {
       _spDrag = { type: 'text', keys: textIds[id], sx: p.clientX, sy: p.clientY, ox: parseInt($(textIds[id][0])?.value||'0',10), oy: parseInt($(textIds[id][1])?.value||'0',10), rw: r.width, rh: r.height };
+      e.preventDefault();
+      return;
+    }
+    // clicking child text of badge/title/desc
+    const parent = t && t.closest && t.closest('#sp-prev-badge, #sp-prev-title, #sp-prev-desc');
+    if (parent && textIds[parent.id]) {
+      const pid = parent.id;
+      _spDrag = { type: 'text', keys: textIds[pid], sx: p.clientX, sy: p.clientY, ox: parseInt($(textIds[pid][0])?.value||'0',10), oy: parseInt($(textIds[pid][1])?.value||'0',10), rw: r.width, rh: r.height };
       e.preventDefault();
       return;
     }
@@ -2368,7 +2414,13 @@ function initSponsorDrag() {
     function onMove(e) {
       if (!_spDrag) return;
       const p = pt(e);
-      if (_spDrag.type === 'text') {
+      if (_spDrag.type === 'resize') {
+        // drag down = bigger, up = smaller
+        const delta = Math.round((_spDrag.sy - p.clientY) / 3);
+        const nv = Math.max(_spDrag.min, Math.min(_spDrag.max, _spDrag.ox + delta));
+        if ($(_spDrag.input)) $(_spDrag.input).value = nv;
+        updateSponsorPreview();
+      } else if (_spDrag.type === 'text') {
         const nx = Math.max(0, Math.min(90, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
         const ny = Math.max(0, Math.min(90, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
         if ($(_spDrag.keys[0])) $(_spDrag.keys[0]).value = nx;
