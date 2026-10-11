@@ -856,6 +856,9 @@ function loadBlogData() {
   if (hero.image && (String(hero.image).indexOf('http') === 0 || String(hero.image).indexOf('data:image/') === 0) && String(hero.image).indexOf('Preview') === -1) {
     $('hero-img').src = hero.image;
   }
+  const hix = hero.imgPosX != null ? hero.imgPosX : 50;
+  const hiy = hero.imgPosY != null ? hero.imgPosY : 50;
+  if ($('hero-img')) $('hero-img').style.objectPosition = hix + '% ' + hiy + '%';
   if (hero.label) $('hero-label').textContent = hero.label;
   if (hero.labelColor) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
   if (hero.labelFs) setStyle($('hero-label'), 'font-size', hero.labelFs + 'px');
