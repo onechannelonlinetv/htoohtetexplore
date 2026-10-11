@@ -509,63 +509,147 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       </section>
 
       <!-- OFFICIAL SPONSOR -->
+      
       <section id="view-sponsor" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Official Sponsor Banner</h2><p class="mt-1 text-sm text-slate-400">Badge အရောင် · Preview နဲ့ ချိန် · ပုံ Upload</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="admin-sponsor-active" checked onchange="updateSponsorPreview()"><span class="text-sm font-semibold">Sponsor Banner ပြမယ်</span></label>
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black">Official Sponsors</h2>
+            <p class="mt-1 text-sm text-slate-400">Hero လို Preview · ပုံဖိဆွဲ · Sponsor အများကြီး Add လုပ်နိုင်</p>
+          </div>
+          <button type="button" onclick="addNewSponsor()" class="btn btn-green"><i class="fa-solid fa-plus mr-2"></i>Add Sponsor</button>
+        </div>
 
-          <!-- Live Sponsor Preview -->
+        <div id="sponsor-list" class="space-y-2"></div>
+
+        <div class="panel p-5 sm:p-6 space-y-4" id="sponsor-editor">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="font-bold text-white" id="sponsor-editor-title">Sponsor တည်းဖြတ်</h3>
+            <label class="toggle-row mb-0"><input type="checkbox" id="admin-sponsor-active" checked onchange="updateSponsorPreview()"><span class="text-sm font-semibold">ပြမယ်</span></label>
+          </div>
+          <input type="hidden" id="admin-sponsor-edit-id" value="">
+
+          <!-- Live Preview -->
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
             <div class="flex items-center justify-between mb-2">
               <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Sponsor</span>
               <span class="tiny" id="sponsor-preview-dims">180px</span>
             </div>
-            <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700" style="min-height:120px; background:linear-gradient(90deg,#111,#333);">
-              <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent"></div>
-              <div class="relative z-10 flex items-center justify-between gap-3 p-4" style="min-height:120px;">
-                <div class="min-w-0 flex-1">
-                  <span id="sp-prev-badge" class="inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black">Official Sponsor</span>
-                  <div id="sp-prev-title" class="mt-1.5 text-base font-black text-white truncate">Sponsor Title</div>
-                  <div id="sp-prev-desc" class="text-[11px] text-white/60 mt-0.5 line-clamp-2">Description…</div>
+            <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="min-height:140px;height:160px;background:linear-gradient(90deg,#111,#333);cursor:grab;">
+              <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent pointer-events-none z-[1]"></div>
+              <div class="relative z-10 flex items-center justify-between gap-3 p-4 h-full" style="min-height:140px;">
+                <div class="min-w-0 flex-1 relative" style="min-height:100px;">
+                  <span id="sp-prev-badge" class="absolute inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black cursor-move" style="left:0;top:8%;">Official Sponsor</span>
+                  <div id="sp-prev-title" class="absolute text-base font-black text-white truncate cursor-move max-w-[90%]" style="left:0;top:32%;">Sponsor Title</div>
+                  <div id="sp-prev-desc" class="absolute text-[11px] text-white/60 line-clamp-2 cursor-move max-w-[90%]" style="left:0;top:58%;">Description…</div>
                 </div>
-                <div id="sp-prev-logo-wrap" class="w-16 h-16 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+                <div id="sp-prev-logo-wrap" class="w-16 h-16 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden relative z-10">
                   <img id="sp-prev-logo" src="" class="w-full h-full object-contain hidden" alt="">
                   <i class="fa-solid fa-image text-white/30 text-lg" id="sp-prev-logo-icon"></i>
                 </div>
               </div>
+              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ပုံ / စာ ဖိဆွဲ၍ နေရာချိန်ပါ</p>
             </div>
           </div>
 
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="md:col-span-2">
+              <label class="label">Background Image</label>
+              <div class="flex gap-2">
+                <input id="admin-sponsor-bg" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'admin-sponsor-bg'); setTimeout(updateSponsorPreview,800)"></label>
+              </div>
+              <div id="admin-sponsor-bg-preview" class="mt-2"></div>
+              <div class="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+                <div>Image X <input type="range" id="sp-img-x" min="0" max="100" value="50" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-spix">50</span>%</div>
+                <div>Image Y <input type="range" id="sp-img-y" min="0" max="100" value="50" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-spiy">50</span>%</div>
+              </div>
+            </div>
+            <div>
+              <label class="label">Logo</label>
+              <div class="flex gap-2">
+                <input id="admin-sponsor-img" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'admin-sponsor-img'); setTimeout(updateSponsorPreview,800)"></label>
+              </div>
+              <div id="admin-sponsor-img-preview" class="mt-2"></div>
+            </div>
+            <div>
+              <label class="label">Link</label>
+              <input id="admin-sponsor-link" class="field" placeholder="https://...">
+            </div>
+
+            <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
+              <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Badge / Title / Desc — Preview မှာ ဖိဆွဲပါ</p>
+              <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
+                <div>Badge X <input type="range" id="sp-badge-x" min="0" max="90" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spbx">0</span>%</div>
+                <div>Badge Y <input type="range" id="sp-badge-y" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spby">8</span>%</div>
+                <div>Title X <input type="range" id="sp-title-x" min="0" max="90" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-sptx">0</span>%</div>
+                <div>Title Y <input type="range" id="sp-title-y" min="0" max="90" value="32" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spty">32</span>%</div>
+                <div>Desc X <input type="range" id="sp-desc-x" min="0" max="90" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdx">0</span>%</div>
+                <div>Desc Y <input type="range" id="sp-desc-y" min="0" max="90" value="58" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdy">58</span>%</div>
+              </div>
+            </div>
+
             <div>
               <label class="label">Badge Text</label>
               <input id="admin-sponsor-badge" class="field" placeholder="Exclusive Partner" oninput="updateSponsorPreview()">
-              <p class="tiny mt-1">Official · Exclusive Partner · Main · Co Sponsor</p>
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="label">Badge နောက်ခံအရောင်</label>
+                <label class="label">Badge နောက်ခံ</label>
                 <input id="admin-sponsor-badge-bg" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
               </div>
               <div>
                 <label class="label">Badge စာအရောင်</label>
                 <input id="admin-sponsor-badge-color" type="color" value="#000000" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
               </div>
+            </div>
+            <div>
+              <label class="label">Sponsor Title</label>
+              <input id="admin-sponsor-title" class="field" placeholder="Veezoom Myanmar" oninput="updateSponsorPreview()">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="label flex justify-between">Badge Padding <span class="range-val" id="val-badge-pad">8px</span></label>
-                <input type="range" id="admin-sponsor-badge-pad" min="4" max="20" step="1" value="8" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+                <label class="label">Title အရောင်</label>
+                <input id="admin-sponsor-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
               </div>
               <div>
-                <label class="label flex justify-between">Badge Font Size <span class="range-val" id="val-badge-fs">10px</span></label>
-                <input type="range" id="admin-sponsor-badge-fs" min="8" max="16" step="1" value="10" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+                <label class="label flex justify-between">Title Size <span id="val-sp-title-fs">22px</span></label>
+                <input type="range" id="admin-sponsor-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+              </div>
+            </div>
+            <div class="md:col-span-2">
+              <label class="label">Description</label>
+              <textarea id="admin-sponsor-desc" class="field min-h-16" oninput="updateSponsorPreview()"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label">Desc အရောင်</label>
+                <input id="admin-sponsor-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
               </div>
               <div>
-                <label class="label flex justify-between">Badge Radius <span class="range-val" id="val-badge-radius">999px</span></label>
-                <input type="range" id="admin-sponsor-badge-radius" min="0" max="24" step="1" value="24" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-                <p class="tiny mt-1">0 = စတုရန်း · 24 = အဝိုင်း</p>
+                <label class="label flex justify-between">Desc Size <span id="val-sp-desc-fs">12px</span></label>
+                <input type="range" id="admin-sponsor-desc-fs" min="10" max="22" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+              </div>
+            </div>
+            <div>
+              <label class="label flex justify-between">Banner Height <span id="val-sp-h-local">180px</span></label>
+              <input type="range" id="admin-sponsor-height-local" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label flex justify-between">Badge Pad <span id="val-badge-pad">8px</span></label>
+                <input type="range" id="admin-sponsor-badge-pad" min="4" max="20" value="8" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
               </div>
               <div>
-                <label class="label">Badge Font Weight</label>
+                <label class="label flex justify-between">Badge Font <span id="val-badge-fs">10px</span></label>
+                <input type="range" id="admin-sponsor-badge-fs" min="8" max="16" value="10" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Badge Radius <span id="val-badge-radius">24</span></label>
+                <input type="range" id="admin-sponsor-badge-radius" min="0" max="24" value="24" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+              </div>
+              <div>
+                <label class="label">Badge Weight</label>
                 <select id="admin-sponsor-badge-weight" class="field" onchange="updateSponsorPreview()">
                   <option value="400">Regular</option>
                   <option value="600">Semi Bold</option>
@@ -573,72 +657,26 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                   <option value="900" selected>Black</option>
                 </select>
               </div>
-            </div>
-            <div>
-              <label class="label">Sponsor Title</label>
-              <input id="admin-sponsor-title" class="field" placeholder="Veezoom Myanmar" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label">Sponsor Link</label>
-              <input id="admin-sponsor-link" class="field" placeholder="https://...">
-            </div>
-            <div>
-              <label class="label">Title အရောင်</label>
-              <input id="admin-sponsor-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label flex justify-between">Title Size <span class="range-val" id="val-sp-title-fs">22px</span></label>
-              <input type="range" id="admin-sponsor-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label">Title Weight</label>
-              <select id="admin-sponsor-title-weight" class="field" onchange="updateSponsorPreview()">
-                <option value="400">Regular</option>
-                <option value="600">Semi Bold</option>
-                <option value="700">Bold</option>
-                <option value="900" selected>Black</option>
-              </select>
-            </div>
-            <div class="md:col-span-2">
-              <label class="label">Description</label>
-              <textarea id="admin-sponsor-desc" class="field min-h-16" oninput="updateSponsorPreview()"></textarea>
-            </div>
-            <div>
-              <label class="label">Desc အရောင်</label>
-              <input id="admin-sponsor-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label flex justify-between">Desc Size <span class="range-val" id="val-sp-desc-fs">12px</span></label>
-              <input type="range" id="admin-sponsor-desc-fs" min="10" max="22" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-            </div>
-            <div>
-              <label class="label">Logo / Image</label>
-              <div class="flex gap-2">
-                <input id="admin-sponsor-img" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-img')"></label>
+              <div>
+                <label class="label">Title Weight</label>
+                <select id="admin-sponsor-title-weight" class="field" onchange="updateSponsorPreview()">
+                  <option value="400">Regular</option>
+                  <option value="600">Semi Bold</option>
+                  <option value="700">Bold</option>
+                  <option value="900" selected>Black</option>
+                </select>
               </div>
-              <div id="admin-sponsor-img-preview" class="mt-2"></div>
-            </div>
-            <div>
-              <label class="label">Background Image</label>
-              <div class="flex gap-2">
-                <input id="admin-sponsor-bg" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'admin-sponsor-bg')"></label>
-              </div>
-              <div id="admin-sponsor-bg-preview" class="mt-2"></div>
-            </div>
-            <div class="md:col-span-2">
-              <label class="label flex justify-between">Banner Height <span class="range-val" id="val-sp-h-local">180px</span></label>
-              <input type="range" id="admin-sponsor-height-local" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="document.getElementById('set-sponsor-height') &amp;&amp; (document.getElementById('set-sponsor-height').value=this.value); updateSponsorPreview(); if(typeof updateSizePreview==='function') updateSizePreview();">
-              <p class="tiny mt-1">Brand &amp; Layout မှာလည်း ရှိ — ဒီမှာ တိုက်ရိုက် ချိန်လို့ရ</p>
             </div>
           </div>
-          <button onclick="saveSponsor()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Official Sponsor</button>
+
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="saveCurrentSponsor()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Sponsor</button>
+            <button type="button" onclick="resetSponsorForm()" class="btn btn-muted">Clear Form</button>
+          </div>
         </div>
       </section>
 
-      <!-- UPCOMING -->
-      <section id="view-upcoming" class="view space-y-5">
+<section id="view-upcoming" class="view space-y-5">
         <div><h2 class="text-xl font-black">Upcoming Section</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန် · စာအရောင်</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="up-active" checked onchange="updateUpcomingPreview()"><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
@@ -1457,7 +1495,7 @@ async function signInAdmin() {
         if (v !== null) { try { seed[k] = JSON.parse(v); } catch { seed[k] = v; } }
       });
       if (!seed.hh_social) seed.hh_social = { fb: '', tt: '', yt: '', vb: '' };
-      if (!seed.hh_sponsor) seed.hh_sponsor = { active: true, title: 'Veezoom Myanmar', desc: '', link: '', img: '' };
+      if (!seed.hh_sponsor) seed.hh_sponsor = [{ id: 1, active: true, title: 'Veezoom Myanmar', badge: 'Official Sponsor', desc: '', link: '', img: '' }];
       if (!seed.hh_posts) seed.hh_posts = [];
       if (!seed.hh_home_sections) seed.hh_home_sections = [];
       if (!seed.hh_settings) seed.hh_settings = { brandName: 'HTOO HTET', brandTagline: 'Travel Journal & Beyond' };
@@ -1574,27 +1612,9 @@ function loadAll() {
   showPreviewIfUrl('hero-image');
   if (typeof updateHeroPreview === 'function') updateHeroPreview();
 
-  const sp = read('hh_sponsor', {});
-  $('admin-sponsor-active').checked = sp.active !== false;
-  if ($('admin-sponsor-badge')) $('admin-sponsor-badge').value = sp.badge || 'Official Sponsor';
-  if ($('admin-sponsor-badge-bg')) $('admin-sponsor-badge-bg').value = sp.badgeBg || '#f5c518';
-  if ($('admin-sponsor-badge-color')) $('admin-sponsor-badge-color').value = sp.badgeColor || '#000000';
-  if ($('admin-sponsor-badge-pad')) $('admin-sponsor-badge-pad').value = sp.badgePad || 8;
-  if ($('admin-sponsor-badge-fs')) $('admin-sponsor-badge-fs').value = sp.badgeFs || 10;
-  if ($('admin-sponsor-badge-radius')) $('admin-sponsor-badge-radius').value = sp.badgeRadius != null ? sp.badgeRadius : 24;
-  if ($('admin-sponsor-badge-weight')) $('admin-sponsor-badge-weight').value = sp.badgeWeight || '900';
-  $('admin-sponsor-title').value = sp.title || '';
-  if ($('admin-sponsor-title-color')) $('admin-sponsor-title-color').value = sp.titleColor || '#ffffff';
-  if ($('admin-sponsor-title-fs')) $('admin-sponsor-title-fs').value = sp.titleFs || 22;
-  if ($('admin-sponsor-title-weight')) $('admin-sponsor-title-weight').value = sp.titleWeight || '900';
-  if ($('admin-sponsor-desc-color')) $('admin-sponsor-desc-color').value = sp.descColor || '#cccccc';
-  if ($('admin-sponsor-desc-fs')) $('admin-sponsor-desc-fs').value = sp.descFs || 12;
-  $('admin-sponsor-desc').value = sp.desc || '';
-  $('admin-sponsor-link').value = sp.link || '';
-  setImageFieldValue('admin-sponsor-img', sp.img || '');
-  setImageFieldValue('admin-sponsor-bg', sp.bgImage || '');
-  showPreviewIfUrl('admin-sponsor-img');
-  showPreviewIfUrl('admin-sponsor-bg');
+  // Sponsors (array) — form left empty until edit; list rendered
+  try { renderSponsorList(); } catch (e) {}
+  try { resetSponsorForm(); } catch (e) {}
 
   const up = read('hh_upcoming', {});
   $('up-active').checked = up.active !== false;
@@ -2044,6 +2064,202 @@ function saveHero() {
   updateHeroPreview();
   toast('Hero သိမ်းပြီးပါပြီ။ Live site / ဖုန်းမှာ refresh လုပ်ပါ။');
 }
+
+function getSponsorList() {
+  let raw = read('hh_sponsor', null);
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === 'object' && (raw.title || raw.img || raw.bgImage)) {
+    return [{ ...raw, id: raw.id || Date.now() }];
+  }
+  return [];
+}
+function writeSponsorList(list) {
+  write('hh_sponsor', list);
+  renderSponsorList();
+  renderOverview();
+}
+function renderSponsorList() {
+  const box = $('sponsor-list');
+  if (!box) return;
+  const list = getSponsorList();
+  if (!list.length) {
+    box.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 p-4 text-sm text-slate-500">Sponsor မရှိသေးပါ။ Add Sponsor နှိပ်ပါ။</div>';
+    return;
+  }
+  box.innerHTML = list.map((s, i) => {
+    const title = safe(s.title || s.badge || 'Sponsor #' + (i+1));
+    const on = s.active !== false;
+    return `<div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/50 p-3">
+      <div class="w-12 h-12 rounded-lg bg-slate-800 border border-slate-600 overflow-hidden shrink-0 flex items-center justify-center">
+        ${s.img ? `<img src="${safe(s.img)}" class="w-full h-full object-contain" alt="">` : (s.bgImage ? `<img src="${safe(s.bgImage)}" class="w-full h-full object-cover" alt="">` : '<i class="fa-solid fa-rectangle-ad text-slate-500"></i>')}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="font-bold text-white truncate">${title}</div>
+        <div class="tiny">${on ? '<span class="text-emerald-400">Active</span>' : '<span class="text-slate-500">Hidden</span>'} · ${safe(s.badge || '')}</div>
+      </div>
+      <div class="flex gap-1 shrink-0">
+        <button type="button" class="btn btn-muted px-2" onclick="editSponsor(${i})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+        <button type="button" class="btn btn-muted px-2" onclick="moveSponsor(${i},-1)" title="Up"><i class="fa-solid fa-arrow-up"></i></button>
+        <button type="button" class="btn btn-muted px-2" onclick="moveSponsor(${i},1)" title="Down"><i class="fa-solid fa-arrow-down"></i></button>
+        <button type="button" class="btn btn-red px-2" onclick="deleteSponsor(${i})" title="Delete"><i class="fa-regular fa-trash-can"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function resetSponsorForm() {
+  $('admin-sponsor-edit-id').value = '';
+  $('admin-sponsor-active').checked = true;
+  $('admin-sponsor-badge').value = 'Official Sponsor';
+  if ($('admin-sponsor-badge-bg')) $('admin-sponsor-badge-bg').value = '#f5c518';
+  if ($('admin-sponsor-badge-color')) $('admin-sponsor-badge-color').value = '#000000';
+  if ($('admin-sponsor-badge-pad')) $('admin-sponsor-badge-pad').value = 8;
+  if ($('admin-sponsor-badge-fs')) $('admin-sponsor-badge-fs').value = 10;
+  if ($('admin-sponsor-badge-radius')) $('admin-sponsor-badge-radius').value = 24;
+  if ($('admin-sponsor-badge-weight')) $('admin-sponsor-badge-weight').value = '900';
+  $('admin-sponsor-title').value = '';
+  if ($('admin-sponsor-title-color')) $('admin-sponsor-title-color').value = '#ffffff';
+  if ($('admin-sponsor-title-fs')) $('admin-sponsor-title-fs').value = 22;
+  if ($('admin-sponsor-title-weight')) $('admin-sponsor-title-weight').value = '900';
+  $('admin-sponsor-desc').value = '';
+  if ($('admin-sponsor-desc-color')) $('admin-sponsor-desc-color').value = '#cccccc';
+  if ($('admin-sponsor-desc-fs')) $('admin-sponsor-desc-fs').value = 12;
+  $('admin-sponsor-link').value = '';
+  setImageFieldValue('admin-sponsor-img', '');
+  setImageFieldValue('admin-sponsor-bg', '');
+  if ($('sp-img-x')) $('sp-img-x').value = 50;
+  if ($('sp-img-y')) $('sp-img-y').value = 50;
+  if ($('sp-badge-x')) $('sp-badge-x').value = 0;
+  if ($('sp-badge-y')) $('sp-badge-y').value = 8;
+  if ($('sp-title-x')) $('sp-title-x').value = 0;
+  if ($('sp-title-y')) $('sp-title-y').value = 32;
+  if ($('sp-desc-x')) $('sp-desc-x').value = 0;
+  if ($('sp-desc-y')) $('sp-desc-y').value = 58;
+  if ($('admin-sponsor-height-local')) $('admin-sponsor-height-local').value = 180;
+  if ($('sponsor-editor-title')) $('sponsor-editor-title').textContent = 'Sponsor အသစ်';
+  if ($('admin-sponsor-img-preview')) $('admin-sponsor-img-preview').innerHTML = '';
+  if ($('admin-sponsor-bg-preview')) $('admin-sponsor-bg-preview').innerHTML = '';
+  updateSponsorPreview();
+}
+function addNewSponsor() {
+  resetSponsorForm();
+  $('admin-sponsor-edit-id').value = 'new';
+  if ($('sponsor-editor-title')) $('sponsor-editor-title').textContent = 'Sponsor အသစ်';
+  $('sponsor-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function editSponsor(index) {
+  const list = getSponsorList();
+  const s = list[index];
+  if (!s) return;
+  $('admin-sponsor-edit-id').value = String(index);
+  $('admin-sponsor-active').checked = s.active !== false;
+  $('admin-sponsor-badge').value = s.badge || 'Official Sponsor';
+  if ($('admin-sponsor-badge-bg')) $('admin-sponsor-badge-bg').value = s.badgeBg || '#f5c518';
+  if ($('admin-sponsor-badge-color')) $('admin-sponsor-badge-color').value = s.badgeColor || '#000000';
+  if ($('admin-sponsor-badge-pad')) $('admin-sponsor-badge-pad').value = s.badgePad || 8;
+  if ($('admin-sponsor-badge-fs')) $('admin-sponsor-badge-fs').value = s.badgeFs || 10;
+  if ($('admin-sponsor-badge-radius')) $('admin-sponsor-badge-radius').value = s.badgeRadius != null ? s.badgeRadius : 24;
+  if ($('admin-sponsor-badge-weight')) $('admin-sponsor-badge-weight').value = s.badgeWeight || '900';
+  $('admin-sponsor-title').value = s.title || '';
+  if ($('admin-sponsor-title-color')) $('admin-sponsor-title-color').value = s.titleColor || '#ffffff';
+  if ($('admin-sponsor-title-fs')) $('admin-sponsor-title-fs').value = s.titleFs || 22;
+  if ($('admin-sponsor-title-weight')) $('admin-sponsor-title-weight').value = s.titleWeight || '900';
+  $('admin-sponsor-desc').value = s.desc || '';
+  if ($('admin-sponsor-desc-color')) $('admin-sponsor-desc-color').value = s.descColor || '#cccccc';
+  if ($('admin-sponsor-desc-fs')) $('admin-sponsor-desc-fs').value = s.descFs || 12;
+  $('admin-sponsor-link').value = s.link || '';
+  setImageFieldValue('admin-sponsor-img', s.img || '');
+  setImageFieldValue('admin-sponsor-bg', s.bgImage || '');
+  showPreviewIfUrl('admin-sponsor-img');
+  showPreviewIfUrl('admin-sponsor-bg');
+  if ($('sp-img-x')) $('sp-img-x').value = s.imgPosX != null ? s.imgPosX : 50;
+  if ($('sp-img-y')) $('sp-img-y').value = s.imgPosY != null ? s.imgPosY : 50;
+  if ($('sp-badge-x')) $('sp-badge-x').value = s.badgeX != null ? s.badgeX : 0;
+  if ($('sp-badge-y')) $('sp-badge-y').value = s.badgeY != null ? s.badgeY : 8;
+  if ($('sp-title-x')) $('sp-title-x').value = s.titleX != null ? s.titleX : 0;
+  if ($('sp-title-y')) $('sp-title-y').value = s.titleY != null ? s.titleY : 32;
+  if ($('sp-desc-x')) $('sp-desc-x').value = s.descX != null ? s.descX : 0;
+  if ($('sp-desc-y')) $('sp-desc-y').value = s.descY != null ? s.descY : 58;
+  if ($('admin-sponsor-height-local')) $('admin-sponsor-height-local').value = s.height || 180;
+  if ($('sponsor-editor-title')) $('sponsor-editor-title').textContent = 'တည်းဖြတ် · ' + (s.title || 'Sponsor');
+  updateSponsorPreview();
+  $('sponsor-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function deleteSponsor(index) {
+  if (!confirm('ဤ Sponsor ကို ဖျက်မလား?')) return;
+  const list = getSponsorList();
+  list.splice(index, 1);
+  writeSponsorList(list);
+  resetSponsorForm();
+  toast('Sponsor ဖျက်ပြီး');
+}
+function moveSponsor(index, dir) {
+  const list = getSponsorList();
+  const j = index + dir;
+  if (j < 0 || j >= list.length) return;
+  const t = list[index]; list[index] = list[j]; list[j] = t;
+  writeSponsorList(list);
+}
+function collectSponsorForm() {
+  return {
+    id: Date.now(),
+    active: $('admin-sponsor-active').checked,
+    badge: $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor',
+    badgeBg: $('admin-sponsor-badge-bg')?.value || '#f5c518',
+    badgeColor: $('admin-sponsor-badge-color')?.value || '#000000',
+    badgePad: parseInt($('admin-sponsor-badge-pad')?.value || '8', 10),
+    badgeFs: parseInt($('admin-sponsor-badge-fs')?.value || '10', 10),
+    badgeRadius: parseInt($('admin-sponsor-badge-radius')?.value || '24', 10),
+    badgeWeight: $('admin-sponsor-badge-weight')?.value || '900',
+    badgeX: parseInt($('sp-badge-x')?.value || '0', 10),
+    badgeY: parseInt($('sp-badge-y')?.value || '8', 10),
+    title: $('admin-sponsor-title').value.trim(),
+    titleColor: $('admin-sponsor-title-color')?.value || '#ffffff',
+    titleFs: parseInt($('admin-sponsor-title-fs')?.value || '22', 10),
+    titleWeight: $('admin-sponsor-title-weight')?.value || '900',
+    titleX: parseInt($('sp-title-x')?.value || '0', 10),
+    titleY: parseInt($('sp-title-y')?.value || '32', 10),
+    desc: $('admin-sponsor-desc').value.trim(),
+    descColor: $('admin-sponsor-desc-color')?.value || '#cccccc',
+    descFs: parseInt($('admin-sponsor-desc-fs')?.value || '12', 10),
+    descX: parseInt($('sp-desc-x')?.value || '0', 10),
+    descY: parseInt($('sp-desc-y')?.value || '58', 10),
+    link: $('admin-sponsor-link').value.trim(),
+    img: imageFieldValue('admin-sponsor-img'),
+    bgImage: imageFieldValue('admin-sponsor-bg'),
+    imgPosX: parseInt($('sp-img-x')?.value || '50', 10),
+    imgPosY: parseInt($('sp-img-y')?.value || '50', 10),
+    height: parseInt($('admin-sponsor-height-local')?.value || '180', 10)
+  };
+}
+function saveCurrentSponsor() {
+  const data = collectSponsorForm();
+  if (!data.title && !data.img && !data.bgImage) {
+    toast('Title သို့မဟုတ် ပုံ ထည့်ပါ');
+    return;
+  }
+  const list = getSponsorList();
+  const editId = ($('admin-sponsor-edit-id').value || '').trim();
+  if (editId === '' || editId === 'new') {
+    list.push(data);
+  } else {
+    const idx = parseInt(editId, 10);
+    if (!isNaN(idx) && list[idx]) {
+      data.id = list[idx].id || data.id;
+      list[idx] = data;
+    } else {
+      list.push(data);
+    }
+  }
+  // persist height into settings (use max or first)
+  const s = read('hh_settings', {});
+  s.sponsorHeight = data.height || 180;
+  write('hh_settings', s);
+  writeSponsorList(list);
+  updateSponsorPreview();
+  toast('Sponsor သိမ်းပြီးပါပြီ');
+}
+function saveSponsor() { saveCurrentSponsor(); }
+
 function updateSponsorPreview() {
   const badge = $('sp-prev-badge');
   const title = $('sp-prev-title');
@@ -2065,6 +2281,12 @@ function updateSponsorPreview() {
   badge.style.fontSize = fs + 'px';
   badge.style.borderRadius = (parseInt(rad,10) >= 24 ? '999px' : rad + 'px');
   badge.style.fontWeight = wt;
+  const bx = parseInt($('sp-badge-x')?.value || '0', 10);
+  const by = parseInt($('sp-badge-y')?.value || '8', 10);
+  badge.style.left = bx + '%';
+  badge.style.top = by + '%';
+  if ($('val-spbx')) $('val-spbx').textContent = bx;
+  if ($('val-spby')) $('val-spby').textContent = by;
   if ($('val-badge-pad')) $('val-badge-pad').textContent = pad + 'px';
   if ($('val-badge-fs')) $('val-badge-fs').textContent = fs + 'px';
   if ($('val-badge-radius')) $('val-badge-radius').textContent = (parseInt(rad,10) >= 24 ? 'pill' : rad + 'px');
@@ -2074,6 +2296,12 @@ function updateSponsorPreview() {
     const tfs = $('admin-sponsor-title-fs')?.value || 22;
     title.style.fontSize = Math.max(11, Math.round(tfs * 0.65)) + 'px';
     title.style.fontWeight = $('admin-sponsor-title-weight')?.value || '900';
+    const tx = parseInt($('sp-title-x')?.value || '0', 10);
+    const ty = parseInt($('sp-title-y')?.value || '32', 10);
+    title.style.left = tx + '%';
+    title.style.top = ty + '%';
+    if ($('val-sptx')) $('val-sptx').textContent = tx;
+    if ($('val-spty')) $('val-spty').textContent = ty;
     if ($('val-sp-title-fs')) $('val-sp-title-fs').textContent = tfs + 'px';
   }
   if (desc) {
@@ -2081,53 +2309,97 @@ function updateSponsorPreview() {
     desc.style.color = $('admin-sponsor-desc-color')?.value || '#cccccc';
     const dfs = $('admin-sponsor-desc-fs')?.value || 12;
     desc.style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
+    const dx = parseInt($('sp-desc-x')?.value || '0', 10);
+    const dy = parseInt($('sp-desc-y')?.value || '58', 10);
+    desc.style.left = dx + '%';
+    desc.style.top = dy + '%';
+    if ($('val-spdx')) $('val-spdx').textContent = dx;
+    if ($('val-spdy')) $('val-spdy').textContent = dy;
     if ($('val-sp-desc-fs')) $('val-sp-desc-fs').textContent = dfs + 'px';
   }
   const imgUrl = imageFieldValue('admin-sponsor-img');
   applyLiveLogo(logo, logoIcon, imgUrl);
   const bgUrl = imageFieldValue('admin-sponsor-bg');
+  const ix = parseInt($('sp-img-x')?.value || '50', 10);
+  const iy = parseInt($('sp-img-y')?.value || '50', 10);
+  if ($('val-spix')) $('val-spix').textContent = ix;
+  if ($('val-spiy')) $('val-spiy').textContent = iy;
   if (box) {
-    applyLiveBg(box, bgUrl);
+    applyLiveBg(box, bgUrl, ix, iy);
     if (!bgUrl) box.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
   }
-  const h = $('admin-sponsor-height-local')?.value || $('set-sponsor-height')?.value || 180;
+  const h = $('admin-sponsor-height-local')?.value || 180;
   if ($('val-sp-h-local')) $('val-sp-h-local').textContent = h + 'px';
-  if (box) box.style.minHeight = Math.max(80, Math.round(parseInt(h,10) / 1.5)) + 'px';
-  if ($('sponsor-preview-dims')) $('sponsor-preview-dims').textContent = h + 'px';
-}
-function saveSponsor() {
-  const hLocal = $('admin-sponsor-height-local')?.value;
-  if (hLocal && $('set-sponsor-height')) {
-    $('set-sponsor-height').value = hLocal;
-    // also persist height into settings
-    const s = read('hh_settings', {});
-    s.sponsorHeight = parseInt(hLocal, 10);
-    write('hh_settings', s);
+  if (box) {
+    const ph = Math.max(100, Math.round(parseInt(h,10) / 1.2));
+    box.style.height = ph + 'px';
+    box.style.minHeight = ph + 'px';
   }
-  write('hh_sponsor', {
-    active: $('admin-sponsor-active').checked,
-    badge: $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor',
-    badgeBg: $('admin-sponsor-badge-bg')?.value || '#f5c518',
-    badgeColor: $('admin-sponsor-badge-color')?.value || '#000000',
-    badgePad: parseInt($('admin-sponsor-badge-pad')?.value || '8', 10),
-    badgeFs: parseInt($('admin-sponsor-badge-fs')?.value || '10', 10),
-    badgeRadius: parseInt($('admin-sponsor-badge-radius')?.value || '24', 10),
-    badgeWeight: $('admin-sponsor-badge-weight')?.value || '900',
-    title: $('admin-sponsor-title').value.trim(),
-    titleColor: $('admin-sponsor-title-color')?.value || '#ffffff',
-    titleFs: parseInt($('admin-sponsor-title-fs')?.value || '22', 10),
-    titleWeight: $('admin-sponsor-title-weight')?.value || '900',
-    desc: $('admin-sponsor-desc').value.trim(),
-    descColor: $('admin-sponsor-desc-color')?.value || '#cccccc',
-    descFs: parseInt($('admin-sponsor-desc-fs')?.value || '12', 10),
-    link: $('admin-sponsor-link').value.trim(),
-    img: imageFieldValue('admin-sponsor-img'),
-    bgImage: imageFieldValue('admin-sponsor-bg')
-  });
-  renderOverview();
-  updateSponsorPreview();
-  toast('Official Sponsor သိမ်းပြီးပါပြီ။');
+  if ($('sponsor-preview-dims')) $('sponsor-preview-dims').textContent = h + 'px';
+  initSponsorDrag();
 }
+
+let _spDrag = null;
+function initSponsorDrag() {
+  const box = $('sponsor-live-preview');
+  if (!box || box._spDragReady) return;
+  box._spDragReady = true;
+  function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
+  const textIds = { 'sp-prev-badge': ['sp-badge-x','sp-badge-y'], 'sp-prev-title': ['sp-title-x','sp-title-y'], 'sp-prev-desc': ['sp-desc-x','sp-desc-y'] };
+  function onStart(e) {
+    const t = e.target;
+    const id = t && t.id;
+    const r = box.getBoundingClientRect();
+    const p = pt(e);
+    if (id && textIds[id]) {
+      _spDrag = { type: 'text', keys: textIds[id], sx: p.clientX, sy: p.clientY, ox: parseInt($(textIds[id][0])?.value||'0',10), oy: parseInt($(textIds[id][1])?.value||'0',10), rw: r.width, rh: r.height };
+      e.preventDefault();
+      return;
+    }
+    if (t && t.closest && t.closest('#sp-prev-logo-wrap')) return;
+    _spDrag = { type: 'img', sx: p.clientX, sy: p.clientY, ox: parseInt($('sp-img-x')?.value||'50',10), oy: parseInt($('sp-img-y')?.value||'50',10), rw: r.width, rh: r.height };
+    box.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+  box.addEventListener('mousedown', onStart);
+  box.addEventListener('touchstart', onStart, { passive: false });
+  if (!window._spDragWin) {
+    window._spDragWin = true;
+    function onMove(e) {
+      if (!_spDrag) return;
+      const p = pt(e);
+      if (_spDrag.type === 'text') {
+        const nx = Math.max(0, Math.min(90, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
+        const ny = Math.max(0, Math.min(90, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
+        if ($(_spDrag.keys[0])) $(_spDrag.keys[0]).value = nx;
+        if ($(_spDrag.keys[1])) $(_spDrag.keys[1]).value = ny;
+        updateSponsorPreview();
+      } else {
+        const nx = Math.max(0, Math.min(100, Math.round(_spDrag.ox - ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
+        const ny = Math.max(0, Math.min(100, Math.round(_spDrag.oy - ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
+        if ($('sp-img-x')) $('sp-img-x').value = nx;
+        if ($('sp-img-y')) $('sp-img-y').value = ny;
+        const bg = box.querySelector('.live-bg-img');
+        if (bg) bg.style.objectPosition = nx + '% ' + ny + '%';
+        if ($('val-spix')) $('val-spix').textContent = nx;
+        if ($('val-spiy')) $('val-spiy').textContent = ny;
+      }
+      if (e.cancelable) e.preventDefault();
+    }
+    function onUp() {
+      if (_spDrag && _spDrag.type === 'img') {
+        const b = $('sponsor-live-preview');
+        if (b) b.style.cursor = 'grab';
+      }
+      _spDrag = null;
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+  }
+}
+
 function updateUpcomingPreview() {
   const box = $('up-live-preview');
   const fh = parseInt($('up-frame-h')?.value || '160', 10);
@@ -2997,11 +3269,12 @@ function deleteHomeSection(i) {
 }
 
 function renderOverview() {
-  const posts = getPosts(), sections = getHomeSections(), proud = getProud(), sp = read('hh_sponsor', {});
+  const posts = getPosts(), sections = getHomeSections(), proud = getProud(), sp = {};
   $('stat-posts').textContent = posts.length;
   $('stat-sections').textContent = sections.length;
   $('stat-proud').textContent = proud.length;
-  $('stat-sponsor').textContent = sp.active === false ? 'Off' : (sp.title || 'On');
+  const _spl = (typeof getSponsorList==='function') ? getSponsorList() : [];
+  $('stat-sponsor').textContent = _spl.length ? (_spl.filter(s=>s.active!==false).length + '/' + _spl.length) : '0';
 }
 
 /* ---- Theme Presets (full layout snapshot) ---- */
