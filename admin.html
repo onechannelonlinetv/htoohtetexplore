@@ -342,16 +342,24 @@ main > div {
               <div id="hero-prev-sign" class="absolute z-10 cursor-move border border-dashed border-emerald-400/30 rounded px-1.5 py-0.5 text-[10px]" style="left:8%;top:78%;color:#6ee7b7;touch-action:none;"><span class="sp-resize-handle" data-resize="hero-sign" title="ဆိုဒ်"></span></div>
             </div>
 
-            <div id="hero-phone-wrap" class="hidden flex justify-center pt-2">
-              <div style="width:160px;padding:8px 6px 12px;background:#0a0a0a;border-radius:22px;border:2px solid #334155;">
-                <div class="mx-auto mb-1.5" style="width:36px;height:4px;border-radius:3px;background:#1e293b"></div>
-                <div id="hero-phone-preview" class="relative overflow-hidden" style="width:100%;height:140px;border-radius:10px;background:linear-gradient(135deg,#0a1f18,#061510);">
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-[1]"></div>
-                  <div id="hero-phone-label" class="absolute z-10 text-[7px] font-bold uppercase tracking-widest text-yellow-400" style="left:6%;top:18%;">Travel Journal</div>
-                  <div id="hero-phone-title" class="absolute z-10 text-[11px] font-black text-white leading-tight" style="left:6%;top:28%;max-width:88%;">New Places.</div>
-                  <div id="hero-phone-desc" class="absolute z-10 text-[8px] text-white/70 line-clamp-3" style="left:6%;top:48%;max-width:85%;">Description…</div>
-                  <div id="hero-phone-sign" class="absolute z-10 text-[7px] text-emerald-300" style="left:6%;top:78%;"></div>
+            <div id="hero-phone-wrap" class="hidden flex justify-center pt-3 pb-1">
+              <div class="relative" style="width:200px;padding:12px 10px 16px;background:linear-gradient(145deg,#1a1a1a,#0d0d0d);border-radius:32px;border:3px solid #3f3f46;box-shadow:0 12px 40px rgba(0,0,0,.55), inset 0 0 0 1px #52525b;">
+                <div class="mx-auto mb-2 relative" style="width:72px;height:18px;border-radius:0 0 12px 12px;background:#0a0a0a;">
+                  <div class="absolute left-1/2 top-1 -translate-x-1/2" style="width:36px;height:4px;border-radius:4px;background:#27272a"></div>
                 </div>
+                <div class="flex items-center justify-between px-1 mb-1" style="height:14px;">
+                  <span class="text-[8px] text-white/80 font-semibold">9:41</span>
+                  <span class="text-[8px] text-white/60"><i class="fa-solid fa-signal"></i> <i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
+                </div>
+                <div id="hero-phone-preview" class="relative overflow-hidden" style="width:100%;height:280px;border-radius:4px;background:linear-gradient(135deg,#0a1f18,#061510);">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent z-[1] pointer-events-none"></div>
+                  <div id="hero-phone-label" class="absolute z-10 text-[8px] font-bold uppercase tracking-widest text-yellow-400" style="left:6%;top:16%;">Travel Journal</div>
+                  <div id="hero-phone-title" class="absolute z-10 text-[13px] font-black text-white leading-tight" style="left:6%;top:26%;max-width:88%;">New Places.</div>
+                  <div id="hero-phone-desc" class="absolute z-10 text-[9px] text-white/70 line-clamp-3" style="left:6%;top:48%;max-width:85%;">Description…</div>
+                  <div id="hero-phone-sign" class="absolute z-10 text-[8px] text-emerald-300" style="left:6%;top:78%;"></div>
+                </div>
+                <div class="mx-auto mt-2" style="width:40px;height:4px;border-radius:4px;background:#3f3f46"></div>
+                <p class="text-[9px] text-slate-500 text-center mt-1.5">ဖုန်းမျက်နှာပြင် · auto layout</p>
               </div>
             </div>
           </div>
@@ -2006,6 +2014,26 @@ function saveSettings() {
   });
   toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
 }
+
+function setHeroPrevText(el, text, resizeKey) {
+  if (!el) return;
+  let handle = el.querySelector('.sp-resize-handle');
+  // keep only handle, replace text via first text nodes / clear and rebuild
+  while (el.firstChild) el.removeChild(el.firstChild);
+  const parts = String(text || '').split('\n');
+  parts.forEach(function(line, i) {
+    if (i) el.appendChild(document.createElement('br'));
+    el.appendChild(document.createTextNode(line));
+  });
+  if (!handle) {
+    handle = document.createElement('span');
+    handle.className = 'sp-resize-handle';
+    handle.setAttribute('data-resize', resizeKey);
+    handle.title = 'ဆိုဒ်';
+  }
+  el.appendChild(handle);
+}
+
 function updateHeroPreview() {
   const box = $('hero-live-preview');
   const label = $('hero-prev-label');
@@ -2029,7 +2057,7 @@ function updateHeroPreview() {
   if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
 
   if (label) {
-    label.textContent = $('hero-label')?.value || 'Travel Journal';
+    setHeroPrevText(label, $('hero-label')?.value || 'Travel Journal', 'hero-label');
     label.style.color = $('hero-label-color')?.value || '#f5c518';
     label.style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
     label.style.fontWeight = $('hero-label-weight')?.value || '700';
@@ -2038,7 +2066,7 @@ function updateHeroPreview() {
   }
   if (title) {
     const raw = $('hero-title')?.value || 'New Places.';
-    title.innerHTML = raw.replace(/\n/g, '<br>');
+    setHeroPrevText(title, raw, 'hero-title');
     title.style.color = $('hero-title-color')?.value || '#ffffff';
     title.style.fontWeight = $('hero-title-weight')?.value || '900';
     title.style.fontStyle = $('hero-title-style')?.value || 'normal';
@@ -2046,7 +2074,7 @@ function updateHeroPreview() {
     title.style.left = tx + '%'; title.style.top = ty + '%';
   }
   if (desc) {
-    desc.textContent = $('hero-desc')?.value || 'Description…';
+    setHeroPrevText(desc, $('hero-desc')?.value || 'Description…', 'hero-desc');
     desc.style.color = $('hero-desc-color')?.value || 'rgba(255,255,255,0.7)';
     desc.style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
     desc.style.fontWeight = $('hero-desc-weight')?.value || '400';
@@ -2054,12 +2082,12 @@ function updateHeroPreview() {
     desc.style.left = dx + '%'; desc.style.top = dy + '%';
   }
   if (sign) {
-    sign.textContent = $('hero-sign')?.value || '';
+    setHeroPrevText(sign, $('hero-sign')?.value || '', 'hero-sign');
     sign.style.color = $('hero-sign-color')?.value || '#6ee7b7';
     sign.style.fontWeight = $('hero-sign-weight')?.value || '600';
     sign.style.fontStyle = $('hero-sign-style')?.value || 'normal';
     sign.style.left = sx + '%'; sign.style.top = sy + '%';
-    sign.style.display = (sign.textContent ? '' : 'none');
+    sign.style.display = (($('hero-sign')?.value || '').trim() ? '' : 'none');
   }
   const img = imageFieldValue('hero-image');
   const ix = parseInt($('hero-img-x')?.value || '50', 10);
@@ -2163,64 +2191,10 @@ function initHeroImageDrag() {
 }
 
 
+
 function initHeroLineDrag() {
   const box = $('hero-live-preview');
   if (!box) return;
-  if (!box._heroResizeWin) {
-    box._heroResizeWin = true;
-    const sizeMap = {
-      'hero-label': { input: 'hero-label-fs', min: 8, max: 72 },
-      'hero-title': { input: 'hero-title-fs', min: 14, max: 140 },
-      'hero-desc': { input: 'hero-desc-fs', min: 10, max: 80 },
-      'hero-sign': { input: 'hero-label-fs', min: 8, max: 48 }
-    };
-    function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
-    let resizeState = null;
-    box.addEventListener('mousedown', function(e) {
-      const t = e.target;
-      if (t && t.classList && t.classList.contains('sp-resize-handle')) {
-        const key = t.getAttribute('data-resize');
-        const cfg = sizeMap[key];
-        if (!cfg) return;
-        const p = pt(e);
-        resizeState = { input: cfg.input, min: cfg.min, max: cfg.max, sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10) };
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    });
-    window.addEventListener('mousemove', function(e) {
-      if (!resizeState) return;
-      const p = pt(e);
-      const delta = Math.round((resizeState.sy - p.clientY) / 3);
-      const nv = Math.max(resizeState.min, Math.min(resizeState.max, resizeState.ox + delta));
-      if ($(resizeState.input)) $(resizeState.input).value = nv;
-      updateHeroPreview();
-    });
-    window.addEventListener('mouseup', function() { resizeState = null; });
-    window.addEventListener('touchstart', function(e) {
-      const t = e.target;
-      if (t && t.classList && t.classList.contains('sp-resize-handle')) {
-        const key = t.getAttribute('data-resize');
-        const cfg = sizeMap[key];
-        if (!cfg) return;
-        const p = pt(e);
-        resizeState = { input: cfg.input, min: cfg.min, max: cfg.max, sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10) };
-        e.preventDefault();
-      }
-    }, { passive: false });
-    window.addEventListener('touchmove', function(e) {
-      if (!resizeState) return;
-      const p = pt(e);
-      const delta = Math.round((resizeState.sy - p.clientY) / 3);
-      const nv = Math.max(resizeState.min, Math.min(resizeState.max, resizeState.ox + delta));
-      if ($(resizeState.input)) $(resizeState.input).value = nv;
-      updateHeroPreview();
-      e.preventDefault();
-    }, { passive: false });
-    window.addEventListener('touchend', function() { resizeState = null; });
-  }
-  if (box._dragReady) return;
-  box._dragReady = true;
 
   const map = {
     'hero-prev-label': { xi: 'hero-label-x', yi: 'hero-label-y', vx: 'val-hlx', vy: 'val-hly' },
@@ -2228,128 +2202,130 @@ function initHeroLineDrag() {
     'hero-prev-desc':  { xi: 'hero-desc-x',  yi: 'hero-desc-y',  vx: 'val-hdx', vy: 'val-hdy' },
     'hero-prev-sign':  { xi: 'hero-sign-x',  yi: 'hero-sign-y',  vx: 'val-hsx', vy: 'val-hsy' }
   };
+  const sizeMap = {
+    'hero-label': { input: 'hero-label-fs', min: 8, max: 72 },
+    'hero-title': { input: 'hero-title-fs', min: 14, max: 140 },
+    'hero-desc': { input: 'hero-desc-fs', min: 10, max: 80 },
+    'hero-sign': { input: 'hero-label-fs', min: 8, max: 48 }
+  };
 
-  Object.keys(map).forEach(id => {
+  Object.keys(map).forEach(function(id) {
     const el = $(id);
     if (!el) return;
     el.style.cursor = 'grab';
     el.style.userSelect = 'none';
     el.style.touchAction = 'none';
     el.style.zIndex = '20';
+    el.style.pointerEvents = 'auto';
   });
 
-  function getPt(e) {
+  if (box._heroDelegated) return;
+  box._heroDelegated = true;
+
+  function pt(e) {
     if (e.touches && e.touches[0]) return e.touches[0];
     if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
     return e;
   }
 
-  function onDown(e) {
-    if (e.target && e.target.classList && e.target.classList.contains('sp-resize-handle')) return;
-    const el = e.currentTarget;
-    const cfg = map[el.id];
-    if (!cfg) return;
-    const pt = getPt(e);
+  function findPrevEl(t) {
+    if (!t) return null;
+    if (t.classList && t.classList.contains('sp-resize-handle')) return t;
+    if (t.id && map[t.id]) return t;
+    if (t.closest) {
+      const h = t.closest('.sp-resize-handle');
+      if (h) return h;
+      const p = t.closest('[id^="hero-prev-"]');
+      if (p && map[p.id]) return p;
+    }
+    return null;
+  }
+
+  function onStart(e) {
+    const t = findPrevEl(e.target);
+    if (!t) return;
+    const p = pt(e);
     const rect = box.getBoundingClientRect();
+
+    if (t.classList && t.classList.contains('sp-resize-handle')) {
+      const key = t.getAttribute('data-resize');
+      const cfg = sizeMap[key];
+      if (!cfg) return;
+      _heroDragState = {
+        type: 'resize',
+        input: cfg.input, min: cfg.min, max: cfg.max,
+        sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10)
+      };
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    const cfg = map[t.id];
+    if (!cfg) return;
     _heroDragState = {
-      el, cfg,
-      startX: pt.clientX, startY: pt.clientY,
-      origL: parseFloat(el.style.left) || 0,
-      origT: parseFloat(el.style.top) || 0,
+      type: 'move',
+      el: t, cfg: cfg,
+      startX: p.clientX, startY: p.clientY,
+      origL: parseFloat(t.style.left) || 0,
+      origT: parseFloat(t.style.top) || 0,
       rectW: rect.width, rectH: rect.height
     };
-    el.style.cursor = 'grabbing';
-    el.style.borderColor = 'rgba(34,211,238,0.9)';
+    t.style.cursor = 'grabbing';
+    t.style.borderColor = 'rgba(34,211,238,0.9)';
     e.preventDefault();
     e.stopPropagation();
   }
 
   function onMove(e) {
     if (!_heroDragState) return;
-    const pt = getPt(e);
-    const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
-    const nx = Math.max(-5, Math.min(105, origL + ((pt.clientX - startX) / rectW) * 100));
-    const ny = Math.max(-5, Math.min(105, origT + ((pt.clientY - startY) / rectH) * 100));
-    el.style.left = nx + '%';
-    el.style.top = ny + '%';
-    if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
-    if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
-    if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
-    if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
-    try { updatePhoneHeroPreview(); } catch (err) {}
-    e.preventDefault();
+    const p = pt(e);
+    if (_heroDragState.type === 'resize') {
+      const delta = Math.round((_heroDragState.sy - p.clientY) / 3);
+      const nv = Math.max(_heroDragState.min, Math.min(_heroDragState.max, _heroDragState.ox + delta));
+      if ($(_heroDragState.input)) $(_heroDragState.input).value = nv;
+      // light update: only font sizes on preview els
+      const lfs = parseInt($('hero-label-fs')?.value || '12', 10);
+      const tfs = parseInt($('hero-title-fs')?.value || '28', 10);
+      const dfs = parseInt($('hero-desc-fs')?.value || '14', 10);
+      if ($('hero-prev-label')) $('hero-prev-label').style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
+      if ($('hero-prev-title')) $('hero-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
+      if ($('hero-prev-desc')) $('hero-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
+      if ($('val-hero-label-fs')) $('val-hero-label-fs').textContent = lfs + 'px';
+      if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
+      if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
+      try { updatePhoneHeroPreview(); } catch (err) {}
+    } else if (_heroDragState.type === 'move') {
+      const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
+      const nx = Math.max(-5, Math.min(105, origL + ((p.clientX - startX) / rectW) * 100));
+      const ny = Math.max(-5, Math.min(105, origT + ((p.clientY - startY) / rectH) * 100));
+      el.style.left = nx + '%';
+      el.style.top = ny + '%';
+      if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
+      if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
+      if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
+      if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
+      try { updatePhoneHeroPreview(); } catch (err) {}
+    }
+    if (e.cancelable) e.preventDefault();
   }
 
   function onUp() {
-    if (_heroDragState) {
+    if (_heroDragState && _heroDragState.type === 'move' && _heroDragState.el) {
       _heroDragState.el.style.cursor = 'grab';
       _heroDragState.el.style.borderColor = '';
-      _heroDragState = null;
-      try { updatePhoneHeroPreview(); } catch (err) {}
     }
+    _heroDragState = null;
   }
 
-  Object.keys(map).forEach(id => {
-    const el = $(id);
-    if (!el || el._heroDragBound) return;
-    el._heroDragBound = true;
-    el.addEventListener('mousedown', onDown);
-    el.addEventListener('touchstart', onDown, { passive: false });
-  });
-  if (!window._heroLineDragWin) {
-    window._heroLineDragWin = true;
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('mouseup', onUp);
-    window.addEventListener('touchend', onUp);
-  }
+  box.addEventListener('mousedown', onStart);
+  box.addEventListener('touchstart', onStart, { passive: false });
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
 }
 
-
-function refreshSidebarSitePreview() {
-  /* sidebar mini preview removed — full Page Preview view instead */
-  if (!$('ssp-hero')) return;
-
-  const heroBox = $('ssp-hero');
-  if (!heroBox) return;
-  const img = (typeof imageFieldValue === 'function') ? imageFieldValue('hero-image') : '';
-  const ix = parseInt($('hero-img-x')?.value || '50', 10);
-  const iy = parseInt($('hero-img-y')?.value || '50', 10);
-  if (img && typeof isRealImageUrl === 'function' && isRealImageUrl(img)) {
-    heroBox.style.backgroundImage = 'url("' + String(img).replace(/"/g, '\\"') + '")';
-    heroBox.style.backgroundSize = 'cover';
-    heroBox.style.backgroundPosition = ix + '% ' + iy + '%';
-  } else {
-    heroBox.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
-  }
-  if ($('ssp-label')) {
-    $('ssp-label').textContent = ($('hero-label')?.value || 'Travel').slice(0, 24);
-    $('ssp-label').style.color = $('hero-label-color')?.value || '#f5c518';
-  }
-  if ($('ssp-title')) {
-    $('ssp-title').textContent = (($('hero-title')?.value || 'Hero Title').replace(/\\n/g, ' ')).slice(0, 40);
-    $('ssp-title').style.color = $('hero-title-color')?.value || '#fff';
-  }
-  // sponsor strip
-  const spBox = $('ssp-sponsor');
-  if (spBox) {
-    try {
-      const list = (typeof getSponsorList === 'function') ? getSponsorList() : [];
-      const sp = list.find(function(s){ return s && s.active !== false; }) || list[0];
-      if (sp && (sp.title || sp.bgImage)) {
-        spBox.style.display = '';
-        if (sp.bgImage) {
-          spBox.style.backgroundImage = 'url("' + String(sp.bgImage).replace(/"/g, '\\"') + '")';
-          spBox.style.backgroundSize = 'cover';
-          spBox.style.backgroundPosition = (sp.imgPosX||50) + '% ' + (sp.imgPosY||50) + '%';
-        }
-        if ($('ssp-sp-title')) $('ssp-sp-title').textContent = (sp.title || sp.badge || 'Sponsor').slice(0, 28);
-      } else {
-        spBox.style.display = 'none';
-      }
-    } catch (e) { spBox.style.display = 'none'; }
-  }
-}
 
 function updatePhoneHeroPreview() {
   const phone = $('hero-phone-preview');
@@ -2359,10 +2335,11 @@ function updatePhoneHeroPreview() {
   const iy = parseInt($('hero-img-y')?.value || '50', 10);
   // Frame H → phone height (scaled into phone frame)
   const fh = parseInt($('hero-frame-h')?.value || '200', 10);
-  const phoneH = Math.max(120, Math.min(240, Math.round(fh * 0.55)));
+  // phone screen ~ real mobile hero strip
+  const phoneH = Math.max(180, Math.min(320, Math.round(fh * 0.75)));
   phone.style.height = phoneH + 'px';
   phone.style.aspectRatio = 'auto';
-  phone.style.maxHeight = '240px';
+  phone.style.maxHeight = '320px';
   if (typeof applyLiveBg === 'function') applyLiveBg(phone, bgUrl, ix, iy);
   // force Y position on phone bg img
   const pimg = phone.querySelector('.live-bg-img');
