@@ -853,7 +853,9 @@ function loadBlogData() {
   if (siteSettings.footerTagline) $('footer-tagline').innerHTML = siteSettings.footerTagline.replace(/\n/g, '<br>');
 
   const hero = read('hh_hero', {});
-  if (hero.image) $('hero-img').src = hero.image;
+  if (hero.image && (String(hero.image).indexOf('http') === 0 || String(hero.image).indexOf('data:image/') === 0) && String(hero.image).indexOf('Preview') === -1) {
+    $('hero-img').src = hero.image;
+  }
   if (hero.label) $('hero-label').textContent = hero.label;
   if (hero.labelColor) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
   if (hero.labelFs) setStyle($('hero-label'), 'font-size', hero.labelFs + 'px');
