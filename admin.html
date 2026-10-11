@@ -94,31 +94,6 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       <button class="navbtn" data-view="social" onclick="showView('social',this)"><i class="fa-solid fa-share-nodes w-4"></i> Social Links</button>
     </nav>
     <div class="mt-6 border-t border-slate-800 pt-4 space-y-2">
-      <p class="px-1 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Page Preview</p>
-      <div id="sidebar-site-preview" class="rounded-xl border border-slate-700 bg-[#050a12] overflow-hidden" style="height:200px;">
-        <div class="h-full overflow-y-auto text-[0px] pointer-events-none">
-          <div id="ssp-hero" class="relative w-full overflow-hidden" style="height:72px;background:linear-gradient(135deg,#0a1f18,#061510);">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div class="absolute left-2 bottom-2 right-2">
-              <div id="ssp-label" class="text-[6px] font-bold uppercase tracking-wider text-yellow-400">Travel</div>
-              <div id="ssp-title" class="text-[8px] font-black text-white leading-tight truncate">Hero Title</div>
-            </div>
-          </div>
-          <div id="ssp-sponsor" class="mx-1 mt-1 rounded overflow-hidden relative" style="height:28px;background:#1a1a1a;display:none;">
-            <div id="ssp-sp-title" class="absolute left-1 top-1 text-[6px] font-bold text-white truncate max-w-[70%]">Sponsor</div>
-          </div>
-          <div class="px-1.5 pt-1.5 space-y-1">
-            <div class="h-1.5 w-12 rounded bg-emerald-800/50"></div>
-            <div class="grid grid-cols-2 gap-1">
-              <div class="rounded bg-slate-800/80" style="height:28px"></div>
-              <div class="rounded bg-slate-800/80" style="height:28px"></div>
-            </div>
-            <div class="h-1.5 w-10 rounded bg-slate-700/50 mt-1"></div>
-            <div class="rounded bg-slate-800/60" style="height:20px"></div>
-          </div>
-        </div>
-      </div>
-      <p class="text-[9px] text-slate-500 px-1">စာမျက်နှာ အကျဉ်းချုပ် · Live site ဖွင့်ကြည့်ရန် ↓</p>
       <a href="index.html" target="_blank" class="btn btn-muted block text-center text-xs py-2"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
       <button type="button" class="btn btn-muted text-xs w-full" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
     </div>
@@ -139,6 +114,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
     <div id="mobile-nav" class="hidden border-b border-slate-800 bg-[#091220] p-3 lg:hidden">
       <div class="grid grid-cols-2 gap-2">
         <button class="navbtn" onclick="showView('overview')">Overview</button>
+        <button class="navbtn" onclick="showView('pagepreview')">Page Preview</button>
         <button class="navbtn" onclick="showView('settings')">Brand & Hero</button>
         <button class="navbtn" onclick="showView('menu')">Menu</button>
         <button class="navbtn" onclick="showView('proud')">Proud Sponsors</button>
@@ -170,7 +146,45 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       </section>
 
       <!-- BRAND & SETTINGS -->
-      <section id="view-settings" class="view space-y-5">
+      
+      <section id="view-pagepreview" class="view space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black">Page Preview</h2>
+            <p class="mt-1 text-sm text-slate-400">Website UI တစ်ခုလုံး · ဒီမှာကြည့်ပြီး အောက်က ခလုတ်နဲ့ သက်ဆိုင်ရာနေရာကို ပြင်နိုင်ပါတယ်</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="btn btn-muted text-xs" onclick="refreshPagePreviewIframe()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
+            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
+            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
+            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
+            <a href="index.html" target="_blank" class="btn btn-green text-xs"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Tab</a>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <button type="button" class="btn btn-muted" onclick="showView('settings'); setTimeout(function(){var a=document.getElementById('hero-editor-anchor');if(a)a.scrollIntoView({behavior:'smooth'});},80)">✏️ Edit Hero</button>
+          <button type="button" class="btn btn-muted" onclick="showView('sponsor')">✏️ Edit Sponsor</button>
+          <button type="button" class="btn btn-muted" onclick="showView('upcoming')">✏️ Edit Upcoming</button>
+          <button type="button" class="btn btn-muted" onclick="showView('posts')">✏️ Edit Latest Travel</button>
+          <button type="button" class="btn btn-muted" onclick="showView('menu')">✏️ Edit Menu</button>
+          <button type="button" class="btn btn-muted" onclick="showView('youtube')">✏️ Edit YouTube</button>
+        </div>
+        <div class="panel p-2 sm:p-4 bg-[#050a12]">
+          <div id="page-preview-frame-wrap" class="mx-auto transition-all" style="width:100%;max-width:100%;">
+            <div class="rounded-xl border border-slate-700 overflow-hidden bg-black shadow-2xl">
+              <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-900 border-b border-slate-800">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="ml-2 text-[10px] text-slate-500 truncate">index.html · live preview</span>
+              </div>
+              <iframe id="page-preview-iframe" src="index.html" title="Site Preview" class="w-full bg-white" style="height:min(78vh,820px);border:0;"></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
+<section id="view-settings" class="view space-y-5">
         <div><h2 class="text-xl font-black">Brand & Hero</h2><p class="mt-1 text-sm text-slate-400">Theme · Logo · Layout · Hero Banner (PC + Phone preview)</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <div>
@@ -200,15 +214,8 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <input type="hidden" id="set-theme" value="forest">
           </div>
 
-          <div>
-            <label class="label mb-2">Default Light / Dark (Website မှာ User ကိုယ်တိုင်လည်း ပြောင်းနိုင်)</label>
-            <div class="flex gap-2">
-              <button type="button" id="mode-dark-btn" onclick="selectMode('dark')" class="btn btn-green flex-1"><i class="fa-solid fa-moon mr-2"></i>Dark</button>
-              <button type="button" id="mode-light-btn" onclick="selectMode('light')" class="btn btn-muted flex-1"><i class="fa-solid fa-sun mr-2"></i>Light</button>
-            </div>
-            <p class="tiny mt-1">Website header မှာ 🌙/☀️ ခလုတ် ရှိပါတယ် — visitor ကိုယ်တိုင် ပြောင်းနိုင်</p>
-            <input type="hidden" id="set-mode" value="dark">
-          </div>
+<input type="hidden" id="set-mode" value="dark">
+<input type="hidden" id="mode-dark-btn"><input type="hidden" id="mode-light-btn">
 
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Brand Name *</label><input id="set-brand-name" class="field" placeholder="HTOO HTET"></div>
@@ -227,143 +234,33 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <div><label class="label">Contact Email</label><input id="set-email" class="field" placeholder="htoohtet@gmail.com"></div>
             <div><label class="label">Contact Location</label><input id="set-location" class="field" placeholder="Yangon, Myanmar"></div>
             <div class="md:col-span-2"><label class="label">Footer Tagline</label><textarea id="set-footer-tagline" class="field min-h-16" placeholder="Good Vibes&#10;Better Journeys"></textarea></div>
-            <div><label class="label">Stories Section Heading</label><input id="set-stories-heading" class="field" placeholder="Travel Stories"></div>
-            <div><label class="label">Stories Subtitle</label><input id="set-stories-sub" class="field" placeholder="မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ"></div>
-          </div>
+            
+          <!-- hidden layout fields (kept for data compatibility) -->
+          <input type="hidden" id="set-stories-heading" value="">
+          <input type="hidden" id="set-stories-sub" value="">
+          <input type="hidden" id="set-hero-height" value="480">
+          <input type="hidden" id="set-hero-maxw" value="1400">
+          <input type="hidden" id="set-hero-text-align" value="left">
+          <input type="hidden" id="set-hero-v-align" value="center">
+          <input type="hidden" id="set-text-maxw" value="36">
+          <input type="hidden" id="set-sponsor-h" value="180">
+          <input type="hidden" id="set-upcoming-h" value="160">
+          <input type="hidden" id="set-card-img-h" value="11">
+          <input type="hidden" id="set-font" value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">
+          <input type="hidden" id="set-heading-font" value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">
+          <input type="hidden" id="set-heading-weight" value="700">
+          <input type="hidden" id="set-heading-style" value="normal">
+          <input type="hidden" id="set-body-color" value="#ffffff">
+          <input type="hidden" id="set-heading-color" value="#ffffff">
+          <input type="hidden" id="set-accent" value="#f5c518">
+          <span id="val-hero-h" class="hidden">480px</span>
+          <span id="val-hero-w" class="hidden">100%</span>
+          <span id="preview-dims" class="hidden"></span>
+          <div id="layout-preview" class="hidden"></div>
+          <div id="layout-preview-inner" class="hidden"></div>
+          <div id="layout-preview-text" class="hidden"></div>
 
-          <div class="border-t border-slate-700 pt-4 mt-2 space-y-5">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">🎨 Visual Layout Studio — ကိုယ်တိုင် ချိန်ပါ</p>
-            <p class="tiny">အောက်က preview box မှာ အရွယ် / စာနေရာ ကို တိုက်ရိုက် မြင်ရပါတယ်။ Save လုပ်မှ website မှာ သက်ရောက်မယ်။</p>
-
-            <!-- LIVE PREVIEW BOX -->
-            <div class="rounded-xl border-2 border-dashed border-emerald-700/50 bg-[#050a12] p-3">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero Banner</span>
-                <span class="tiny" id="preview-dims">480 × full</span>
-              </div>
-              <div id="layout-preview" class="relative mx-auto overflow-hidden rounded-lg border border-slate-700 bg-cover bg-center transition-all"
-                   style="height:160px; max-width:100%; background-image:linear-gradient(135deg,#0a1f18,#061510);">
-                <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent"></div>
-                <div id="layout-preview-inner" class="relative z-10 h-full flex flex-col p-4" style="justify-content:center;">
-                  <div id="layout-preview-text" style="text-align:left; max-width:60%;">
-                    <div class="text-[9px] font-bold uppercase tracking-widest text-yellow-400 mb-1">Travel Journal</div>
-                    <div class="text-sm font-black text-white leading-tight">New Places.<br>Same Curiosity.</div>
-                    <div class="text-[10px] text-white/60 mt-1 line-clamp-2">Stories, people, and the road ahead.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label class="label flex justify-between">Hero Height <span class="range-val" id="val-hero-h">480px</span></label>
-                <input type="range" id="set-hero-height" min="280" max="800" step="20" value="480" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Hero Max Width <span class="range-val" id="val-hero-w">100%</span></label>
-                <input type="range" id="set-hero-maxw" min="600" max="1400" step="50" value="1400" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label">စာသား အလျားလိုက် နေရာ (Text Align)</label>
-                <div class="flex gap-2">
-                  <button type="button" class="btn btn-muted flex-1 align-btn" data-align="left" onclick="setHeroAlign('left')">◀ Left</button>
-                  <button type="button" class="btn btn-muted flex-1 align-btn" data-align="center" onclick="setHeroAlign('center')">● Center</button>
-                  <button type="button" class="btn btn-muted flex-1 align-btn" data-align="right" onclick="setHeroAlign('right')">Right ▶</button>
-                </div>
-                <input type="hidden" id="set-hero-text-align" value="left">
-              </div>
-              <div>
-                <label class="label">စာသား ဒေါင်လိုက် နေရာ (Vertical)</label>
-                <div class="flex gap-2">
-                  <button type="button" class="btn btn-muted flex-1 valign-btn" data-valign="top" onclick="setHeroVAlign('top')">⬆ Top</button>
-                  <button type="button" class="btn btn-muted flex-1 valign-btn" data-valign="center" onclick="setHeroVAlign('center')">● Middle</button>
-                  <button type="button" class="btn btn-muted flex-1 valign-btn" data-valign="bottom" onclick="setHeroVAlign('bottom')">⬇ Bottom</button>
-                </div>
-                <input type="hidden" id="set-hero-v-align" value="center">
-              </div>
-              <div>
-                <label class="label flex justify-between">Text Box Max Width <span class="range-val" id="val-text-mw">36rem</span></label>
-                <input type="range" id="set-hero-text-maxw" min="16" max="48" step="1" value="36" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-                <p class="tiny mt-1">စာကော်လံ အကျဉ်း/အကျယ်</p>
-              </div>
-              <div>
-                <label class="label flex justify-between">Sponsor Banner Height <span class="range-val" id="val-sp-h">180px</span></label>
-                <input type="range" id="set-sponsor-height" min="120" max="360" step="10" value="180" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Upcoming Banner Height <span class="range-val" id="val-up-h">200px</span></label>
-                <input type="range" id="set-upcoming-height" min="120" max="400" step="10" value="200" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Card Image Height <span class="range-val" id="val-card-h">11rem</span></label>
-                <input type="range" id="set-card-img-h" min="6" max="18" step="0.5" value="11" class="w-full accent-emerald-500" oninput="updateSizePreview()">
-              </div>
-              <div>
-                <label class="label">Body Font</label>
-                <select id="set-font" class="field">
-                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
-                  <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
-                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
-                  <option value="'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif">Space Grotesk</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Heading Font</label>
-                <select id="set-heading-font" class="field">
-                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
-                  <option value="'Playfair Display', 'Noto Sans Myanmar', serif">Playfair (serif)</option>
-                  <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
-                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Default Heading Weight</label>
-                <select id="set-heading-weight" class="field">
-                  <option value="400">Regular</option>
-                  <option value="600">Semi Bold</option>
-                  <option value="700" selected>Bold</option>
-                  <option value="900">Black</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Default Heading Style</label>
-                <select id="set-heading-style" class="field">
-                  <option value="normal">Normal</option>
-                  <option value="italic">Italic</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Body Text အရောင် (optional)</label>
-                <input id="set-body-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent">
-              </div>
-              <div>
-                <label class="label">Heading Text အရောင် (optional)</label>
-                <input id="set-heading-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent">
-              </div>
-              <div>
-                <label class="label">Custom Accent Color</label>
-                <div class="flex gap-2">
-                  <input id="set-accent-color" type="color" class="h-11 w-14 rounded-lg border border-slate-600 cursor-pointer bg-transparent">
-                  <input id="set-accent-hex" class="field flex-1" placeholder="#f5c518" oninput="syncColorFromHex()">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button onclick="saveSettings()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Brand & Layout</button>
-
-          <!-- CUSTOM THEME PRESETS -->
-          <div class="border-t border-slate-700 pt-5 mt-2 space-y-3">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">💾 My Theme Presets — ပြင်ထားသမျှ Save / ပြန်သုံး</p>
-            <p class="tiny">လက်ရှိ Layout + Hero/Sponsor/Upcoming/YouTube/About on-off + အရောင်/အရွယ် အားလုံးကို နာမည်ပေးပြီး သိမ်းနိုင်ပါတယ်။ နောက်မှ Load ပြန်လုပ်ရင် အတိုင်းအတာ ပြန်ရမယ်။</p>
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input id="preset-name" class="field flex-1" placeholder="Theme နာမည် ဥပမာ: My Travel Look">
-              <button type="button" onclick="saveThemePreset()" class="btn btn-purple shrink-0"><i class="fa-solid fa-floppy-disk mr-1"></i>Save as Theme</button>
-            </div>
-            <div id="preset-list" class="space-y-2"></div>
-          </div>
-        </div>
-      <div id="hero-editor-anchor" class="space-y-5 pt-6 border-t border-slate-700">
+<div id="hero-editor-anchor" class="space-y-5 pt-6 border-t border-slate-700">
         <div><h2 class="text-xl font-black">Hero Banner</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန် · စာအရောင် · Font weight</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
@@ -1654,10 +1551,24 @@ adminAuth?.onAuthStateChanged(user => { if (!user) { adminUser = null; remoteSyn
 function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 
 const titles = {
-  overview: 'Overview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
+  overview: 'Overview', pagepreview: 'Page Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
   proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Latest Travel',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
+
+function refreshPagePreviewIframe() {
+  const f = $('page-preview-iframe');
+  if (!f) return;
+  try { f.src = 'index.html?t=' + Date.now(); } catch (e) { f.src = 'index.html'; }
+}
+function setPagePreviewWidth(mode) {
+  const w = $('page-preview-frame-wrap');
+  if (!w) return;
+  if (mode === 'mobile') { w.style.maxWidth = '390px'; }
+  else if (mode === 'tablet') { w.style.maxWidth = '768px'; }
+  else { w.style.maxWidth = '100%'; }
+}
+
 function showView(name, button) {
   if (name === 'hero') {
     name = 'settings';
@@ -1665,6 +1576,9 @@ function showView(name, button) {
       const a = document.getElementById('hero-editor-anchor');
       if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
+  }
+  if (name === 'pagepreview') {
+    setTimeout(function() { try { refreshPagePreviewIframe(); } catch (e) {} }, 100);
   }
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -2244,6 +2158,9 @@ function initHeroLineDrag() {
 
 
 function refreshSidebarSitePreview() {
+  /* sidebar mini preview removed — full Page Preview view instead */
+  if (!$('ssp-hero')) return;
+
   const heroBox = $('ssp-hero');
   if (!heroBox) return;
   const img = (typeof imageFieldValue === 'function') ? imageFieldValue('hero-image') : '';
