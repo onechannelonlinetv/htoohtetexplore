@@ -352,7 +352,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               </label>
             <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 select-none" style="height:200px; background:linear-gradient(135deg,#0a1f18,#061510);">
               <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none"></div>
-              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">စာတစ်ကြောင်းချင်း ဖိဆွဲပါ</p>
+              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ပုံ / စာ ဖိဆွဲ၍ နေရာချိန်ပါ</p>
               <div id="hero-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%; top:18%; color:#f5c518; font-size:10px; touch-action:none; max-width:80%;">Travel Journal</div>
               <div id="hero-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%; top:32%; font-size:16px; touch-action:none; max-width:85%;">New Places.</div>
               <div id="hero-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1.5 py-0.5 line-clamp-3" style="left:8%; top:55%; color:rgba(255,255,255,0.75); font-size:11px; touch-action:none; max-width:80%;">Description…</div>
@@ -368,6 +368,14 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                 <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'hero-image'); setTimeout(updateHeroPreview,800)"></label>
               </div>
               <div id="hero-image-preview" class="mt-2"></div>
+              <div class="mt-3 rounded-xl border border-emerald-700/40 bg-emerald-950/20 p-3">
+                <p class="text-[11px] font-bold text-emerald-300 mb-1">🖱️ ပုံ နေရာချိန် — Preview ပေါ်မှာ ဖိဆွဲပါ (သို့) Slider</p>
+                <p class="tiny mb-2">ပုံရဲ့ ဘယ် / ညာ / အပေါ် / အောက် ကို ချိန်ပြီး Save Hero နှိပ်ပါ</p>
+                <div class="grid grid-cols-2 gap-2 text-[11px]">
+                  <div>Image X <input type="range" id="hero-img-x" min="0" max="100" value="50" class="w-full accent-emerald-500" oninput="updateHeroPreview()"><span id="val-hix">50</span>%</div>
+                  <div>Image Y <input type="range" id="hero-img-y" min="0" max="100" value="50" class="w-full accent-emerald-500" oninput="updateHeroPreview()"><span id="val-hiy">50</span>%</div>
+                </div>
+              </div>
             </div>
             <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
               <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Label / Title / Desc / Sign — တစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
@@ -1279,7 +1287,7 @@ function setImagePreview(previewBox, url, msg) {
     (msg ? '<div class="tiny mt-1 text-emerald-300">' + msg + '</div>' : '');
 }
 /** Put image into a live-preview container as real <img> (works with data-URL + http) */
-function applyLiveBg(container, url) {
+function applyLiveBg(container, url, posX, posY) {
   if (!container) return;
   container.style.position = 'relative';
   container.style.overflow = 'hidden';
@@ -1291,28 +1299,29 @@ function applyLiveBg(container, url) {
     img.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;display:none;';
     container.insertBefore(img, container.firstChild);
   }
-  // ensure overlays stay above the bg image
   Array.from(container.children).forEach(function(ch) {
     if (ch !== img && !ch.classList.contains('live-bg-img')) {
       const z = parseInt(ch.style.zIndex || '0', 10);
       if (z < 1) ch.style.zIndex = '1';
     }
   });
+  const px = (posX != null && !isNaN(posX)) ? posX : 50;
+  const py = (posY != null && !isNaN(posY)) ? posY : 50;
   const ok = isRealImageUrl(url);
   if (ok) {
     img.onload = function() { img.style.display = 'block'; };
     img.onerror = function() {
       console.warn('live bg load fail');
       img.style.display = 'none';
-      // CSS background fallback
       try {
         container.style.backgroundImage = 'url("' + String(url).replace(/"/g, '\\"') + '")';
         container.style.backgroundSize = 'cover';
-        container.style.backgroundPosition = 'center';
+        container.style.backgroundPosition = px + '% ' + py + '%';
       } catch (e) {}
     };
     img.src = url;
     img.style.display = 'block';
+    img.style.objectPosition = px + '% ' + py + '%';
     container.style.backgroundImage = 'none';
   } else {
     img.removeAttribute('src');
@@ -1320,6 +1329,7 @@ function applyLiveBg(container, url) {
     container.style.backgroundImage = '';
   }
 }
+
 function applyLiveLogo(imgEl, iconEl, url) {
   if (!imgEl) return;
   if (url) {
@@ -1534,6 +1544,8 @@ function loadAll() {
   const h = read('hh_hero', {});
   $('hero-active').checked = h.active !== false;
   setImageFieldValue('hero-image', h.image || '');
+  if ($('hero-img-x')) $('hero-img-x').value = h.imgPosX != null ? h.imgPosX : 50;
+  if ($('hero-img-y')) $('hero-img-y').value = h.imgPosY != null ? h.imgPosY : 50;
   $('hero-label').value = h.label || '';
   if ($('hero-label-color')) $('hero-label-color').value = h.labelColor || '#f5c518';
   if ($('hero-label-fs')) $('hero-label-fs').value = h.labelFs || 12;
@@ -1830,13 +1842,80 @@ function updateHeroPreview() {
     sign.style.display = (sign.textContent ? '' : 'none');
   }
   const img = imageFieldValue('hero-image');
+  const ix = parseInt($('hero-img-x')?.value || '50', 10);
+  const iy = parseInt($('hero-img-y')?.value || '50', 10);
+  if ($('val-hix')) $('val-hix').textContent = ix;
+  if ($('val-hiy')) $('val-hiy').textContent = iy;
   if (box) {
-    applyLiveBg(box, img);
+    applyLiveBg(box, img, ix, iy);
     if (!img) box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
   }
   initHeroLineDrag();
+  initHeroImageDrag();
 }
 let _heroDragState = null;
+
+
+let _heroImgDrag = null;
+function initHeroImageDrag() {
+  const box = $('hero-live-preview');
+  if (!box || box._heroImgDragReady) return;
+  box._heroImgDragReady = true;
+  function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
+  function onStart(e) {
+    // only drag background, not text labels
+    const t = e.target;
+    if (t && t.id && String(t.id).indexOf('hero-prev-') === 0) return;
+    if (t && t.closest && t.closest('[id^="hero-prev-"]')) return;
+    const p = pt(e);
+    const r = box.getBoundingClientRect();
+    _heroImgDrag = {
+      sx: p.clientX, sy: p.clientY,
+      ox: parseInt($('hero-img-x')?.value || '50', 10),
+      oy: parseInt($('hero-img-y')?.value || '50', 10),
+      rw: r.width, rh: r.height
+    };
+    box.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+  box.addEventListener('mousedown', onStart);
+  box.addEventListener('touchstart', onStart, { passive: false });
+  if (!window._heroImgDragWin) {
+    window._heroImgDragWin = true;
+    window.addEventListener('mousemove', function(e) {
+      if (!_heroImgDrag) return;
+      const p = pt(e);
+      // drag image with finger: moving right shows more left side -> decrease X
+      const nx = Math.max(0, Math.min(100, Math.round(_heroImgDrag.ox - ((p.clientX - _heroImgDrag.sx) / _heroImgDrag.rw) * 100)));
+      const ny = Math.max(0, Math.min(100, Math.round(_heroImgDrag.oy - ((p.clientY - _heroImgDrag.sy) / _heroImgDrag.rh) * 100)));
+      if ($('hero-img-x')) $('hero-img-x').value = nx;
+      if ($('hero-img-y')) $('hero-img-y').value = ny;
+      if ($('val-hix')) $('val-hix').textContent = nx;
+      if ($('val-hiy')) $('val-hiy').textContent = ny;
+      const bg = box.querySelector('.live-bg-img');
+      if (bg) bg.style.objectPosition = nx + '% ' + ny + '%';
+    });
+    window.addEventListener('touchmove', function(e) {
+      if (!_heroImgDrag) return;
+      const p = pt(e);
+      const nx = Math.max(0, Math.min(100, Math.round(_heroImgDrag.ox - ((p.clientX - _heroImgDrag.sx) / _heroImgDrag.rw) * 100)));
+      const ny = Math.max(0, Math.min(100, Math.round(_heroImgDrag.oy - ((p.clientY - _heroImgDrag.sy) / _heroImgDrag.rh) * 100)));
+      if ($('hero-img-x')) $('hero-img-x').value = nx;
+      if ($('hero-img-y')) $('hero-img-y').value = ny;
+      if ($('val-hix')) $('val-hix').textContent = nx;
+      if ($('val-hiy')) $('val-hiy').textContent = ny;
+      const bg = box.querySelector('.live-bg-img');
+      if (bg) bg.style.objectPosition = nx + '% ' + ny + '%';
+      e.preventDefault();
+    }, { passive: false });
+    window.addEventListener('mouseup', function() {
+      if (_heroImgDrag) { const b = $('hero-live-preview'); if (b) b.style.cursor = 'grab'; }
+      _heroImgDrag = null;
+    });
+    window.addEventListener('touchend', function() { _heroImgDrag = null; });
+  }
+  box.style.cursor = 'grab';
+}
 
 function initHeroLineDrag() {
   const box = $('hero-live-preview');
@@ -1934,6 +2013,8 @@ function saveHero() {
   write('hh_hero', {
     active: $('hero-active').checked,
     image: heroImg,
+    imgPosX: parseInt($('hero-img-x')?.value || '50', 10),
+    imgPosY: parseInt($('hero-img-y')?.value || '50', 10),
     label: $('hero-label').value.trim(),
     labelColor: $('hero-label-color')?.value || '#f5c518',
     labelFs: parseInt($('hero-label-fs')?.value || '12', 10),
