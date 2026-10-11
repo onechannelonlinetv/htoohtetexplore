@@ -82,8 +82,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
     <nav class="space-y-0.5 pb-20">
       <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
-      <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Layout</button>
-      <button class="navbtn" data-view="hero" onclick="showView('hero',this)"><i class="fa-solid fa-image w-4"></i> Hero Banner</button>
+      <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Hero</button>
       <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
       <button class="navbtn" data-view="proud" onclick="showView('proud',this)"><i class="fa-solid fa-handshake w-4"></i> Proud Sponsors</button>
       <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
@@ -115,8 +114,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
     <div id="mobile-nav" class="hidden border-b border-slate-800 bg-[#091220] p-3 lg:hidden">
       <div class="grid grid-cols-2 gap-2">
         <button class="navbtn" onclick="showView('overview')">Overview</button>
-        <button class="navbtn" onclick="showView('settings')">Brand</button>
-        <button class="navbtn" onclick="showView('hero')">Hero</button>
+        <button class="navbtn" onclick="showView('settings')">Brand & Hero</button>
         <button class="navbtn" onclick="showView('menu')">Menu</button>
         <button class="navbtn" onclick="showView('proud')">Proud Sponsors</button>
         <button class="navbtn" onclick="showView('sponsor')">Official Sponsor</button>
@@ -148,7 +146,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <!-- BRAND & SETTINGS -->
       <section id="view-settings" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Brand & Layout</h2><p class="mt-1 text-sm text-slate-400">Theme (၄ မျိုး ဒီဇိုင်းကွဲ), Logo, Font, အရောင်, အရွယ်အစား, Contact</p></div>
+        <div><h2 class="text-xl font-black">Brand & Hero</h2><p class="mt-1 text-sm text-slate-400">Theme · Logo · Layout · Hero Banner (PC + Phone preview)</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <div>
             <label class="label mb-3">Website Theme — ဒီဇိုင်း ၄ မျိုး ကွဲပြား</label>
@@ -340,27 +338,45 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <div id="preset-list" class="space-y-2"></div>
           </div>
         </div>
-      </section>
-
-      <!-- HERO -->
-      <section id="view-hero" class="view space-y-5">
+      <div id="hero-editor-anchor" class="space-y-5 pt-6 border-t border-slate-700">
         <div><h2 class="text-xl font-black">Hero Banner</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန် · စာအရောင် · Font weight</p></div>
         <div class="panel p-5 sm:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
 
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero</span>
-              <label class="tiny flex items-center gap-2 ml-auto">Frame
-                <input type="range" id="hero-frame-h" min="120" max="800" value="200" class="w-28 accent-emerald-500" oninput="var b=document.getElementById('hero-live-preview');if(b)b.style.height=this.value+'px';var v=document.getElementById('val-hero-frame');if(v)v.textContent=this.value+'px'">
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 space-y-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero</span>
+              <label class="tiny flex items-center gap-2 ml-auto">Frame H
+                <input type="range" id="hero-frame-h" min="120" max="800" value="200" class="w-28 accent-emerald-500" oninput="updateHeroPreview()">
                 <span id="val-hero-frame">200px</span>
               </label>
-            <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 select-none" style="height:200px; background:linear-gradient(135deg,#0a1f18,#061510);">
-              <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none"></div>
-              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ပုံ / စာ ဖိဆွဲ၍ နေရာချိန်ပါ</p>
-              <div id="hero-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%; top:18%; color:#f5c518; font-size:10px; touch-action:none; max-width:80%;">Travel Journal</div>
-              <div id="hero-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%; top:32%; font-size:16px; touch-action:none; max-width:85%;">New Places.</div>
-              <div id="hero-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1.5 py-0.5 line-clamp-3" style="left:8%; top:55%; color:rgba(255,255,255,0.75); font-size:11px; touch-action:none; max-width:80%;">Description…</div>
-              <div id="hero-prev-sign" class="absolute z-10 cursor-move border border-dashed border-emerald-400/30 rounded px-1.5 py-0.5 text-[10px]" style="left:8%; top:78%; color:#6ee7b7; touch-action:none;"></div>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4 items-start">
+              <div>
+                <p class="text-[10px] font-bold text-slate-400 mb-1"><i class="fa-solid fa-desktop"></i> PC</p>
+                <div id="hero-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="height:200px; background:linear-gradient(135deg,#0a1f18,#061510);cursor:grab;">
+                  <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none z-[1]"></div>
+                  <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ဖိဆွဲရွှေ့ · ထောင့် = ဆိုဒ်</p>
+                  <div id="hero-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%; top:18%; color:#f5c518; font-size:10px; touch-action:none;">Travel Journal<span class="sp-resize-handle" data-resize="hero-label" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%; top:32%; font-size:16px; touch-action:none;">New Places.<span class="sp-resize-handle" data-resize="hero-title" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1.5 py-0.5" style="left:8%; top:55%; color:rgba(255,255,255,0.75); font-size:11px; touch-action:none;">Description…<span class="sp-resize-handle" data-resize="hero-desc" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-sign" class="absolute z-10 cursor-move border border-dashed border-emerald-400/30 rounded px-1.5 py-0.5 text-[10px]" style="left:8%; top:78%; color:#6ee7b7; touch-action:none;"><span class="sp-resize-handle" data-resize="hero-sign" title="ဆိုဒ်"></span></div>
+                </div>
+              </div>
+              <div class="justify-self-center">
+                <p class="text-[10px] font-bold text-slate-400 mb-1"><i class="fa-solid fa-mobile-screen"></i> Phone</p>
+                <div style="width:180px;padding:8px 6px 12px;background:#0a0a0a;border-radius:24px;border:2px solid #334155;">
+                  <div class="mx-auto mb-1.5" style="width:40px;height:4px;border-radius:3px;background:#1e293b"></div>
+                  <div id="hero-phone-preview" class="relative overflow-hidden" style="width:100%;aspect-ratio:9/14;max-height:220px;border-radius:10px;background:linear-gradient(135deg,#0a1f18,#061510);">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-[1]"></div>
+                    <div id="hero-phone-label" class="absolute z-10 text-[7px] font-bold uppercase tracking-widest text-yellow-400" style="left:6%;top:18%;">Travel Journal</div>
+                    <div id="hero-phone-title" class="absolute z-10 text-[11px] font-black text-white leading-tight" style="left:6%;top:28%;max-width:88%;">New Places.</div>
+                    <div id="hero-phone-desc" class="absolute z-10 text-[8px] text-white/70 line-clamp-3" style="left:6%;top:48%;max-width:85%;">Description…</div>
+                    <div id="hero-phone-sign" class="absolute z-10 text-[7px] text-emerald-300" style="left:6%;top:78%;"></div>
+                  </div>
+                  <p class="text-[8px] text-slate-500 text-center mt-1">ဖုန်း auto layout</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -469,9 +485,13 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           </div>
           <button onclick="saveHero()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Hero</button>
         </div>
-      </section>
+      </div>
 
       <!-- MENU -->
+      
+      </section>
+
+      <!-- HERO -->
       <section id="view-menu" class="view space-y-5">
         <div><h2 class="text-xl font-black">Menu Items</h2><p class="mt-1 text-sm text-slate-400">Hamburger menu ထဲမှာ ပြမယ်</p></div>
         <div class="panel p-5 sm:p-6">
@@ -1600,11 +1620,19 @@ adminAuth?.onAuthStateChanged(user => { if (!user) { adminUser = null; remoteSyn
 function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 
 const titles = {
-  overview: 'Overview', settings: 'Brand & Layout', hero: 'Hero Banner', menu: 'Menu Items',
+  overview: 'Overview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
   proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Latest Travel',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
 function showView(name, button) {
+  if (name === 'hero') {
+    name = 'settings';
+    setTimeout(function() {
+      const a = document.getElementById('hero-editor-anchor');
+      if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const view = $('view-' + name);
   if (view) view.classList.add('active');
@@ -1950,8 +1978,25 @@ function updateHeroPreview() {
     applyLiveBg(box, img, ix, iy);
     if (!img) box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
   }
+  const fh = parseInt($('hero-frame-h')?.value || '200', 10);
+  if ($('val-hero-frame')) $('val-hero-frame').textContent = fh + 'px';
+  if ($('hero-live-preview')) $('hero-live-preview').style.height = fh + 'px';
+  // re-attach resize handles if textContent wiped them
+  ['hero-prev-label|hero-label', 'hero-prev-title|hero-title', 'hero-prev-desc|hero-desc', 'hero-prev-sign|hero-sign'].forEach(function(pair) {
+    const parts = pair.split('|');
+    const el = $(parts[0]);
+    if (!el) return;
+    if (!el.querySelector('.sp-resize-handle')) {
+      const h = document.createElement('span');
+      h.className = 'sp-resize-handle';
+      h.setAttribute('data-resize', parts[1]);
+      h.title = 'ဆိုဒ်';
+      el.appendChild(h);
+    }
+  });
   initHeroLineDrag();
   initHeroImageDrag();
+  try { updatePhoneHeroPreview(); } catch (e) {}
 }
 let _heroDragState = null;
 
@@ -2017,9 +2062,64 @@ function initHeroImageDrag() {
   box.style.cursor = 'grab';
 }
 
+
 function initHeroLineDrag() {
   const box = $('hero-live-preview');
-  if (!box || box._dragReady) return;
+  if (!box) return;
+  if (!box._heroResizeWin) {
+    box._heroResizeWin = true;
+    const sizeMap = {
+      'hero-label': { input: 'hero-label-fs', min: 8, max: 72 },
+      'hero-title': { input: 'hero-title-fs', min: 14, max: 140 },
+      'hero-desc': { input: 'hero-desc-fs', min: 10, max: 80 },
+      'hero-sign': { input: 'hero-label-fs', min: 8, max: 48 }
+    };
+    function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
+    let resizeState = null;
+    box.addEventListener('mousedown', function(e) {
+      const t = e.target;
+      if (t && t.classList && t.classList.contains('sp-resize-handle')) {
+        const key = t.getAttribute('data-resize');
+        const cfg = sizeMap[key];
+        if (!cfg) return;
+        const p = pt(e);
+        resizeState = { input: cfg.input, min: cfg.min, max: cfg.max, sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10) };
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+    window.addEventListener('mousemove', function(e) {
+      if (!resizeState) return;
+      const p = pt(e);
+      const delta = Math.round((resizeState.sy - p.clientY) / 3);
+      const nv = Math.max(resizeState.min, Math.min(resizeState.max, resizeState.ox + delta));
+      if ($(resizeState.input)) $(resizeState.input).value = nv;
+      updateHeroPreview();
+    });
+    window.addEventListener('mouseup', function() { resizeState = null; });
+    window.addEventListener('touchstart', function(e) {
+      const t = e.target;
+      if (t && t.classList && t.classList.contains('sp-resize-handle')) {
+        const key = t.getAttribute('data-resize');
+        const cfg = sizeMap[key];
+        if (!cfg) return;
+        const p = pt(e);
+        resizeState = { input: cfg.input, min: cfg.min, max: cfg.max, sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10) };
+        e.preventDefault();
+      }
+    }, { passive: false });
+    window.addEventListener('touchmove', function(e) {
+      if (!resizeState) return;
+      const p = pt(e);
+      const delta = Math.round((resizeState.sy - p.clientY) / 3);
+      const nv = Math.max(resizeState.min, Math.min(resizeState.max, resizeState.ox + delta));
+      if ($(resizeState.input)) $(resizeState.input).value = nv;
+      updateHeroPreview();
+      e.preventDefault();
+    }, { passive: false });
+    window.addEventListener('touchend', function() { resizeState = null; });
+  }
+  if (box._dragReady) return;
   box._dragReady = true;
 
   const map = {
@@ -2045,6 +2145,7 @@ function initHeroLineDrag() {
   }
 
   function onDown(e) {
+    if (e.target && e.target.classList && e.target.classList.contains('sp-resize-handle')) return;
     const el = e.currentTarget;
     const cfg = map[el.id];
     if (!cfg) return;
@@ -2067,8 +2168,8 @@ function initHeroLineDrag() {
     if (!_heroDragState) return;
     const pt = getPt(e);
     const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
-    const nx = Math.max(0, Math.min(100, origL + ((pt.clientX - startX) / rectW) * 100));
-    const ny = Math.max(0, Math.min(100, origT + ((pt.clientY - startY) / rectH) * 100));
+    const nx = Math.max(-5, Math.min(105, origL + ((pt.clientX - startX) / rectW) * 100));
+    const ny = Math.max(-5, Math.min(105, origT + ((pt.clientY - startY) / rectH) * 100));
     el.style.left = nx + '%';
     el.style.top = ny + '%';
     if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
@@ -2078,31 +2179,50 @@ function initHeroLineDrag() {
     e.preventDefault();
   }
 
-  function onUp(e) {
-    if (!_heroDragState) return;
-    _heroDragState.el.style.cursor = 'grab';
-    _heroDragState.el.style.borderColor = '';
-    _heroDragState = null;
+  function onUp() {
+    if (_heroDragState) {
+      _heroDragState.el.style.cursor = 'grab';
+      _heroDragState.el.style.borderColor = '';
+      _heroDragState = null;
+      try { updatePhoneHeroPreview(); } catch (err) {}
+    }
   }
 
   Object.keys(map).forEach(id => {
     const el = $(id);
-    if (!el || el._boundDrag) return;
-    el._boundDrag = true;
+    if (!el || el._heroDragBound) return;
+    el._heroDragBound = true;
     el.addEventListener('mousedown', onDown);
     el.addEventListener('touchstart', onDown, { passive: false });
   });
-
-  // single window listeners
-  if (!window._heroDragWin) {
-    window._heroDragWin = true;
+  if (!window._heroLineDragWin) {
+    window._heroLineDragWin = true;
     window.addEventListener('mousemove', onMove);
     window.addEventListener('touchmove', onMove, { passive: false });
     window.addEventListener('mouseup', onUp);
     window.addEventListener('touchend', onUp);
-    window.addEventListener('touchcancel', onUp);
   }
 }
+
+function updatePhoneHeroPreview() {
+  const phone = $('hero-phone-preview');
+  if (!phone) return;
+  const bgUrl = (typeof imageFieldValue === 'function') ? imageFieldValue('hero-image') : '';
+  const ix = parseInt($('hero-img-x')?.value || '50', 10);
+  const iy = parseInt($('hero-img-y')?.value || '50', 10);
+  if (typeof applyLiveBg === 'function') applyLiveBg(phone, bgUrl, ix, iy);
+  const set = (id, text, color) => {
+    const el = $(id);
+    if (!el) return;
+    el.textContent = text || '';
+    if (color) el.style.color = color;
+  };
+  set('hero-phone-label', $('hero-label')?.value || 'Travel Journal', $('hero-label-color')?.value);
+  set('hero-phone-title', ($('hero-title')?.value || 'New Places.').replace(/\\n/g, ' '), $('hero-title-color')?.value);
+  set('hero-phone-desc', $('hero-desc')?.value || '', $('hero-desc-color')?.value);
+  set('hero-phone-sign', $('hero-sign')?.value || '', $('hero-sign-color')?.value);
+}
+
 
 function saveHero() {
   const heroImg = imageFieldValue('hero-image');
