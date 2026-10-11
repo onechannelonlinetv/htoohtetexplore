@@ -912,6 +912,10 @@ function loadBlogData() {
     if (listBox) {
       listBox.innerHTML = sponsors.map(function(sponsor) {
         const h = sponsor.height || (siteSettings.sponsorHeight) || 180;
+        const wPct = sponsor.widthPct != null ? sponsor.widthPct : 100;
+        const shape = sponsor.shape || 'rounded';
+        const radiusMap = { square: '0px', soft: '16px', rounded: '1rem', pill: '9999px', circle: '9999px' };
+        const radius = radiusMap[shape] || '1rem';
         const badgeBg = sponsor.badgeBg || '';
         const badgeStyle = [
           badgeBg ? 'background:' + badgeBg : '',
@@ -923,7 +927,7 @@ function loadBlogData() {
         ].filter(Boolean).join(';');
         const titleStyle = [
           sponsor.titleColor ? 'color:' + sponsor.titleColor : '',
-          sponsor.titleFs ? 'font-size:clamp(1rem, 3.5vw, ' + sponsor.titleFs + 'px)' : '',
+          sponsor.titleFs ? 'font-size:clamp(1rem, 4vw, ' + sponsor.titleFs + 'px)' : '',
           sponsor.titleWeight ? 'font-weight:' + sponsor.titleWeight : ''
         ].filter(Boolean).join(';');
         const descStyle = [
@@ -933,18 +937,29 @@ function loadBlogData() {
         const bgPos = (sponsor.imgPosX != null ? sponsor.imgPosX : 50) + '% ' + (sponsor.imgPosY != null ? sponsor.imgPosY : 50) + '%';
         const bgSrc = sponsor.bgImage || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&q=80';
         const link = sponsor.link || '#';
-        const logo = sponsor.img ? '<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shrink-0"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-2"></div>' : '';
-        return '<div class="relative overflow-hidden rounded-2xl border border-emerald-800/40 shadow-xl" style="min-height:' + h + 'px">' +
+        const logoSize = sponsor.logoSize || 96;
+        const logoX = sponsor.logoX != null ? sponsor.logoX : null;
+        const logoY = sponsor.logoY != null ? sponsor.logoY : null;
+        let logoHtml = '';
+        if (sponsor.img) {
+          const logoPos = (logoX != null)
+            ? 'position:absolute;left:' + logoX + '%;top:' + logoY + '%;width:' + logoSize + 'px;height:' + logoSize + 'px;z-index:15;'
+            : 'width:' + logoSize + 'px;height:' + logoSize + 'px;';
+          logoHtml = '<div class="rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shrink-0" style="' + logoPos + '"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-1"></div>';
+        }
+        const useAbsLogo = !!(sponsor.img && logoX != null);
+        return '<div class="relative overflow-hidden border border-emerald-800/40 shadow-xl mx-auto" style="min-height:' + h + 'px;width:' + wPct + '%;border-radius:' + radius + '">' +
           '<img src="' + safe(bgSrc) + '" alt="" class="absolute inset-0 w-full h-full object-cover" style="object-position:' + bgPos + '">' +
           '<div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent"></div>' +
           '<div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 p-5 sm:p-7" style="min-height:' + h + 'px">' +
-            '<div class="min-w-0 flex-1">' +
+            '<div class="min-w-0 flex-1 relative" style="min-height:4rem">' +
               '<span class="inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge || 'Official Sponsor') + '</span>' +
               '<h2 class="mt-2.5 text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight" style="' + titleStyle + '">' + safe(sponsor.title || '') + '</h2>' +
               (sponsor.desc ? '<p class="mt-1.5 text-sm text-emerald-100/80 max-w-lg leading-relaxed" style="' + descStyle + '">' + safe(sponsor.desc) + '</p>' : '') +
               (sponsor.link ? '<a href="' + safe(link) + '" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-4 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition">' + t('visitSponsor') + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>' : '') +
-            '</div>' + logo +
-          '</div></div>';
+            '</div>' + (useAbsLogo ? '' : logoHtml) +
+          '</div>' + (useAbsLogo ? logoHtml : '') +
+          '</div>';
       }).join('');
     }
   }
