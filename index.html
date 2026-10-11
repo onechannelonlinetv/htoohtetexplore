@@ -345,6 +345,9 @@
 
   <!-- TRAVEL STORIES -->
   <section id="stories" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9">
+    <div id="stories-banner-wrap" class="hidden mb-5 overflow-hidden border border-emerald-800/40 shadow-xl">
+      <img id="stories-banner-img-public" src="" alt="" class="w-full object-cover">
+    </div>
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
       <div>
         <div class="flex items-center gap-2 mb-1">
@@ -1032,6 +1035,19 @@ function loadBlogData() {
 
   if (siteSettings.storiesHeading) $('stories-heading').textContent = siteSettings.storiesHeading;
   if (siteSettings.storiesSub) $('stories-sub').textContent = siteSettings.storiesSub;
+  const sbw = $('stories-banner-wrap');
+  const sbi = $('stories-banner-img-public');
+  if (sbw && sbi && siteSettings.storiesBanner && (String(siteSettings.storiesBanner).indexOf('http') === 0 || String(siteSettings.storiesBanner).indexOf('data:image/') === 0)) {
+    sbi.src = siteSettings.storiesBanner;
+    const bh = siteSettings.storiesBannerH || 160;
+    sbi.style.height = bh + 'px';
+    sbi.style.objectFit = 'cover';
+    const smap = { square: '0', soft: '16px', rounded: '1rem', pill: '9999px' };
+    sbw.style.borderRadius = smap[siteSettings.storiesBannerShape] || '1rem';
+    sbw.classList.remove('hidden');
+  } else if (sbw) {
+    sbw.classList.add('hidden');
+  }
 
   allStoryPosts = read('hh_posts', []);
   const cats = [...new Set(allStoryPosts.map(p => p.category || p.type || p.location || '').filter(Boolean))];
