@@ -320,30 +320,11 @@
   </section>
 
   <!-- OFFICIAL SPONSOR -->
-  <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
-    <div class="relative overflow-hidden rounded-2xl border border-emerald-800/40 shadow-xl" style="min-height: var(--sponsor-min-h);">
-      <img id="sponsor-bg" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&q=80" alt="" class="absolute inset-0 w-full h-full object-cover">
-      <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/25"></div>
-      <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 p-5 sm:p-7" style="min-height: var(--sponsor-min-h);">
-        <div class="flex-1 min-w-0">
-          <span id="sponsor-badge" class="inline-block accent-bg text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Official Sponsor</span>
-          <h2 id="sponsor-title" class="mt-2.5 text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">Veezoom Myanmar</h2>
-          <p id="sponsor-desc" class="mt-1.5 text-sm text-emerald-100/80 max-w-lg leading-relaxed"></p>
-          <a id="sponsor-link" href="#" target="_blank" class="inline-flex items-center gap-2 mt-4 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition">
-            Visit Sponsor <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
-          </a>
-        </div>
-        <div class="shrink-0">
-          <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden border-2 border-emerald-500/30 bg-black/40 backdrop-blur flex items-center justify-center shadow-xl">
-            <img id="sponsor-img" src="" alt="Sponsor" class="w-full h-full object-contain p-2" onerror="this.style.display='none'">
-          </div>
-        </div>
-      </div>
-    </div>
+    <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+    <div id="sponsor-list-public" class="space-y-5"></div>
   </section>
 
-  <!-- UPCOMING -->
-  <section id="upcoming-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 hidden">
+<section id="upcoming-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 hidden">
     <!-- Section heading ABOVE the banner (separated) -->
     <div class="mb-3 sm:mb-4">
       <h2 id="upcoming-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
@@ -917,43 +898,55 @@ function loadBlogData() {
     }).join('');
   } else proudSec.classList.add('hidden');
 
-  const sponsor = read('hh_sponsor', {});
+  // Official sponsors (array or legacy object)
+  let sponsorRaw = read('hh_sponsor', []);
+  let sponsors = Array.isArray(sponsorRaw) ? sponsorRaw : (sponsorRaw && (sponsorRaw.title || sponsorRaw.img || sponsorRaw.bgImage) ? [sponsorRaw] : []);
+  sponsors = sponsors.filter(s => s && s.active !== false && (s.title || s.img || s.bgImage));
   const sc = $('sponsor-container');
-  if (sponsor.active === false || (!sponsor.title && !sponsor.img)) {
-    sc.classList.add('hidden');
+  const listBox = $('sponsor-list-public');
+  if (!sponsors.length) {
+    if (sc) sc.classList.add('hidden');
+    if (listBox) listBox.innerHTML = '';
   } else {
-    sc.classList.remove('hidden');
-    const badge = $('sponsor-badge');
-    badge.textContent = sponsor.badge || 'Official Sponsor';
-    if (sponsor.badgeBg) {
-      badge.style.background = sponsor.badgeBg;
-      badge.classList.remove('accent-bg');
-    } else {
-      badge.style.background = '';
-      badge.classList.add('accent-bg');
+    if (sc) sc.classList.remove('hidden');
+    if (listBox) {
+      listBox.innerHTML = sponsors.map(function(sponsor) {
+        const h = sponsor.height || (siteSettings.sponsorHeight) || 180;
+        const badgeBg = sponsor.badgeBg || '';
+        const badgeStyle = [
+          badgeBg ? 'background:' + badgeBg : '',
+          sponsor.badgeColor ? 'color:' + sponsor.badgeColor : '',
+          sponsor.badgePad ? 'padding:' + Math.round(sponsor.badgePad/2) + 'px ' + sponsor.badgePad + 'px' : '',
+          sponsor.badgeFs ? 'font-size:' + sponsor.badgeFs + 'px' : '',
+          sponsor.badgeRadius != null ? ('border-radius:' + (sponsor.badgeRadius >= 24 ? '9999px' : sponsor.badgeRadius + 'px')) : '',
+          sponsor.badgeWeight ? 'font-weight:' + sponsor.badgeWeight : ''
+        ].filter(Boolean).join(';');
+        const titleStyle = [
+          sponsor.titleColor ? 'color:' + sponsor.titleColor : '',
+          sponsor.titleFs ? 'font-size:clamp(1rem, 3.5vw, ' + sponsor.titleFs + 'px)' : '',
+          sponsor.titleWeight ? 'font-weight:' + sponsor.titleWeight : ''
+        ].filter(Boolean).join(';');
+        const descStyle = [
+          sponsor.descColor ? 'color:' + sponsor.descColor : '',
+          sponsor.descFs ? 'font-size:' + sponsor.descFs + 'px' : ''
+        ].filter(Boolean).join(';');
+        const bgPos = (sponsor.imgPosX != null ? sponsor.imgPosX : 50) + '% ' + (sponsor.imgPosY != null ? sponsor.imgPosY : 50) + '%';
+        const bgSrc = sponsor.bgImage || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&q=80';
+        const link = sponsor.link || '#';
+        const logo = sponsor.img ? '<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shrink-0"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-2"></div>' : '';
+        return '<div class="relative overflow-hidden rounded-2xl border border-emerald-800/40 shadow-xl" style="min-height:' + h + 'px">' +
+          '<img src="' + safe(bgSrc) + '" alt="" class="absolute inset-0 w-full h-full object-cover" style="object-position:' + bgPos + '">' +
+          '<div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent"></div>' +
+          '<div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 p-5 sm:p-7" style="min-height:' + h + 'px">' +
+            '<div class="min-w-0 flex-1">' +
+              '<span class="inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge || 'Official Sponsor') + '</span>' +
+              '<h2 class="mt-2.5 text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight" style="' + titleStyle + '">' + safe(sponsor.title || '') + '</h2>' +
+              (sponsor.desc ? '<p class="mt-1.5 text-sm text-emerald-100/80 max-w-lg leading-relaxed" style="' + descStyle + '">' + safe(sponsor.desc) + '</p>' : '') +
+              (sponsor.link ? '<a href="' + safe(link) + '" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-4 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition">' + t('visitSponsor') + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>' : '') +
+            '</div>' + logo +
+          '</div></div>';
+      }).join('');
     }
-    if (sponsor.badgeColor) badge.style.color = sponsor.badgeColor;
-    else badge.style.color = '';
-    if (sponsor.badgePad) badge.style.padding = Math.round(sponsor.badgePad/2) + 'px ' + sponsor.badgePad + 'px';
-    if (sponsor.badgeFs) badge.style.fontSize = sponsor.badgeFs + 'px';
-    if (sponsor.badgeRadius != null) badge.style.borderRadius = (sponsor.badgeRadius >= 24 ? '9999px' : sponsor.badgeRadius + 'px');
-    if (sponsor.badgeWeight) badge.style.fontWeight = sponsor.badgeWeight;
-    if (sponsor.title) $('sponsor-title').textContent = sponsor.title;
-    if (sponsor.titleColor) setStyle($('sponsor-title'), 'color', sponsor.titleColor);
-    if (sponsor.titleFs) setStyle($('sponsor-title'), 'font-size', 'clamp(1rem, 3.5vw, ' + sponsor.titleFs + 'px)');
-    if (sponsor.titleWeight) setStyle($('sponsor-title'), 'font-weight', sponsor.titleWeight);
-    if (sponsor.desc) {
-      const d = $('sponsor-desc');
-      if (d) {
-        d.textContent = sponsor.desc;
-        if (sponsor.descColor) setStyle(d, 'color', sponsor.descColor);
-        if (sponsor.descFs) setStyle(d, 'font-size', sponsor.descFs + 'px');
-      }
-    }
-    if (sponsor.desc) $('sponsor-desc').textContent = sponsor.desc;
-    if (sponsor.link) $('sponsor-link').href = sponsor.link;
-    if (sponsor.img) { $('sponsor-img').src = sponsor.img; $('sponsor-img').style.display = ''; }
-    if (sponsor.bgImage) $('sponsor-bg').src = sponsor.bgImage;
   }
 
   const up = read('hh_upcoming', {});
