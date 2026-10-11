@@ -71,7 +71,7 @@ input[type=color].field-color,input[type=color].h-11{
   min-height:2.75rem;width:100%;padding:2px;cursor:pointer
 }
 #sponsor-live-preview,#up-live-preview{
-  max-width:100%;
+  width:100%!important;max-width:100%!important
 }
 #hero-live-preview{
   max-width:100%;
@@ -94,9 +94,9 @@ input[type=color].field-color,input[type=color].h-11{
   box-sizing: border-box;
 }
 #sponsor-live-preview {
-  max-width: 100%;
-  display: block;
-  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
 }
 #hero-live-preview {
   max-width: 100% !important;
@@ -729,9 +729,9 @@ main > div {
               </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-start">
+            <div class="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4 items-start">
               <!-- Desktop preview -->
-              <div class="min-w-0">
+              <div>
                 <p class="text-[10px] font-bold text-slate-400 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-desktop"></i> PC / Desktop</p>
                 <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="min-height:140px;height:160px;background:linear-gradient(90deg,#111,#333);cursor:grab;">
                   <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent pointer-events-none z-[1]"></div>
@@ -747,22 +747,29 @@ main > div {
                 </div>
               </div>
 
-              <!-- Phone preview frame -->
-              <div class="justify-self-center xl:justify-self-end">
-                <p class="text-[10px] font-bold text-slate-400 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-mobile-screen"></i> Phone (auto layout)</p>
-                <div class="mx-auto" style="width:200px;padding:10px 8px 16px;background:#0a0a0a;border-radius:28px;border:2px solid #334155;box-shadow:0 8px 24px rgba(0,0,0,.5)">
-                  <div class="mx-auto mb-2" style="width:48px;height:5px;border-radius:4px;background:#1e293b"></div>
-                  <div id="sponsor-phone-preview" class="relative overflow-hidden bg-slate-900" style="width:100%;aspect-ratio:16/9;border-radius:12px;">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent z-[1] pointer-events-none"></div>
-                    <span id="sp-phone-badge" class="absolute z-10 inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black" style="left:4%;top:10%;">Official</span>
-                    <div id="sp-phone-title" class="absolute z-10 text-[11px] font-black text-white leading-tight" style="left:4%;top:32%;max-width:72%;">Sponsor Title</div>
-                    <div id="sp-phone-desc" class="absolute z-10 text-[8px] text-white/70 line-clamp-2" style="left:4%;top:58%;max-width:65%;">Description…</div>
-                    <div id="sp-phone-logo-wrap" class="absolute z-10 rounded-md bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="right:3%;top:50%;transform:translateY(-50%);width:36px;height:36px;">
-                      <img id="sp-phone-logo" src="" class="w-full h-full object-contain hidden" alt="">
-                      <i class="fa-solid fa-image text-white/30 text-[10px]" id="sp-phone-logo-icon"></i>
-                    </div>
+              <!-- Phone preview — real device frame, banner W% visible -->
+              <div class="justify-self-center lg:justify-self-end shrink-0">
+                <p class="text-[10px] font-bold text-slate-400 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-mobile-screen"></i> Phone (တကယ့်ဖုန်းလို)</p>
+                <div class="mx-auto" style="width:220px;padding:12px 10px 18px;background:linear-gradient(160deg,#1a1a1a,#0d0d0d);border-radius:32px;border:3px solid #3f3f46;box-shadow:0 12px 32px rgba(0,0,0,.55), inset 0 0 0 1px #52525b">
+                  <div class="mx-auto mb-2.5 flex items-center justify-center">
+                    <div style="width:52px;height:6px;border-radius:4px;background:#27272a"></div>
                   </div>
-                  <p class="text-[8px] text-slate-500 text-center mt-2">ဖုန်းမှာ အလိုအလျောက် ၁၆:၉ · rounded</p>
+                  <div style="background:#061510;border-radius:14px;padding:8px 6px;min-height:150px;">
+                    <div class="w-full flex justify-center">
+                      <div id="sponsor-phone-preview" class="relative overflow-hidden bg-slate-900" style="width:100%;height:90px;border-radius:10px;">
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent z-[1] pointer-events-none"></div>
+                        <span id="sp-phone-badge" class="absolute z-10 inline-block text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black" style="left:4%;top:10%;">Official</span>
+                        <div id="sp-phone-title" class="absolute z-10 text-[10px] font-black text-white leading-tight" style="left:4%;top:32%;max-width:72%;">Sponsor Title</div>
+                        <div id="sp-phone-desc" class="absolute z-10 text-[7px] text-white/70 line-clamp-2" style="left:4%;top:58%;max-width:65%;">Description…</div>
+                        <div id="sp-phone-logo-wrap" class="absolute z-10 rounded-md bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="left:88%;top:40%;width:28px;height:28px;">
+                          <img id="sp-phone-logo" src="" class="w-full h-full object-contain hidden" alt="">
+                          <i class="fa-solid fa-image text-white/30 text-[9px]" id="sp-phone-logo-icon"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <p id="sp-phone-w-label" class="text-[8px] text-emerald-400/80 text-center mt-1.5">W 100% · H auto</p>
+                  </div>
+                  <p class="text-[8px] text-slate-500 text-center mt-2">W% ပြောင်း → ဖုန်းထဲ banner အကျဉ်း/ကျယ်</p>
                 </div>
               </div>
             </div>
@@ -801,59 +808,30 @@ main > div {
               <input id="admin-sponsor-link" class="field" placeholder="https://...">
             </div>
 
-            <!-- position inputs (hidden) — drag on preview still updates these -->
-            <input type="hidden" id="sp-badge-x" value="4">
-            <input type="hidden" id="sp-badge-y" value="12">
-            <input type="hidden" id="sp-title-x" value="4">
-            <input type="hidden" id="sp-title-y" value="38">
-            <input type="hidden" id="sp-desc-x" value="4">
-            <input type="hidden" id="sp-desc-y" value="62">
-            <span id="val-spbx" class="hidden">0</span>
-            <span id="val-spby" class="hidden">8</span>
-            <span id="val-sptx" class="hidden">0</span>
-            <span id="val-spty" class="hidden">32</span>
-            <span id="val-spdx" class="hidden">0</span>
-            <span id="val-spdy" class="hidden">58</span>
+            <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
+              <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Badge / Title / Desc — Preview မှာ ဖိဆွဲပါ</p>
+              <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
+                <div>Badge X <input type="range" id="sp-badge-x" min="0" max="100" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spbx">0</span>%</div>
+                <div>Badge Y <input type="range" id="sp-badge-y" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spby">8</span>%</div>
+                <div>Title X <input type="range" id="sp-title-x" min="0" max="100" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-sptx">0</span>%</div>
+                <div>Title Y <input type="range" id="sp-title-y" min="0" max="100" value="32" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spty">32</span>%</div>
+                <div>Desc X <input type="range" id="sp-desc-x" min="0" max="100" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdx">0</span>%</div>
+                <div>Desc Y <input type="range" id="sp-desc-y" min="0" max="100" value="58" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdy">58</span>%</div>
+              </div>
+            </div>
 
-            <div class="md:col-span-2">
+            <div>
               <label class="label">Badge Text</label>
               <input id="admin-sponsor-badge" class="field" placeholder="Exclusive Partner" oninput="updateSponsorPreview()">
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
-                <div>
-                  <label class="label">Badge နောက်ခံ</label>
-                  <input id="admin-sponsor-badge-bg" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
-                </div>
-                <div>
-                  <label class="label">စာအရောင်</label>
-                  <input id="admin-sponsor-badge-color" type="color" value="#000000" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
-                </div>
-                <div>
-                  <label class="label flex justify-between">Font Size <span id="val-badge-fs">12px</span></label>
-                  <input type="range" id="admin-sponsor-badge-fs" min="8" max="48" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-                </div>
-                <div>
-                  <label class="label">Font Style</label>
-                  <select id="admin-sponsor-badge-style" class="field" onchange="updateSponsorPreview()">
-                    <option value="normal" selected>Normal</option>
-                    <option value="italic">Italic</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="label">Weight</label>
-                  <select id="admin-sponsor-badge-weight" class="field" onchange="updateSponsorPreview()">
-                    <option value="400">Regular</option>
-                    <option value="700">Bold</option>
-                    <option value="900" selected>Black</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="label flex justify-between">Pad <span id="val-badge-pad">8px</span></label>
-                  <input type="range" id="admin-sponsor-badge-pad" min="4" max="20" value="8" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-                </div>
-                <div>
-                  <label class="label flex justify-between">Radius <span id="val-badge-radius">24</span></label>
-                  <input type="range" id="admin-sponsor-badge-radius" min="0" max="24" value="24" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label">Badge နောက်ခံ</label>
+                <input id="admin-sponsor-badge-bg" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
+              </div>
+              <div>
+                <label class="label">Badge စာအရောင်</label>
+                <input id="admin-sponsor-badge-color" type="color" value="#000000" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
               </div>
             </div>
             <div>
@@ -885,6 +863,27 @@ main > div {
               </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label flex justify-between">Badge Pad <span id="val-badge-pad">8px</span></label>
+                <input type="range" id="admin-sponsor-badge-pad" min="4" max="20" value="8" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Badge Font <span id="val-badge-fs">10px</span></label>
+                <input type="range" id="admin-sponsor-badge-fs" min="8" max="48" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+              </div>
+              <div>
+                <label class="label flex justify-between">Badge Radius <span id="val-badge-radius">24</span></label>
+                <input type="range" id="admin-sponsor-badge-radius" min="0" max="24" value="24" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+              </div>
+              <div>
+                <label class="label">Badge Weight</label>
+                <select id="admin-sponsor-badge-weight" class="field" onchange="updateSponsorPreview()">
+                  <option value="400">Regular</option>
+                  <option value="600">Semi Bold</option>
+                  <option value="700">Bold</option>
+                  <option value="900" selected>Black</option>
+                </select>
+              </div>
               <div>
                 <label class="label">Title Weight</label>
                 <select id="admin-sponsor-title-weight" class="field" onchange="updateSponsorPreview()">
@@ -2849,7 +2848,20 @@ function setTextKeepHandle(el, text, resizeKey) {
 function updatePhoneSponsorPreview() {
   const phone = $('sponsor-phone-preview');
   if (!phone) return;
+  const wPct = parseInt($('admin-sponsor-width')?.value || '100', 10);
+  const h = parseInt($('admin-sponsor-height-local')?.value || '180', 10);
+  const phoneH = Math.max(56, Math.min(120, Math.round(h * 0.42)));
   phone.style.display = 'block';
+  phone.style.width = wPct + '%';
+  phone.style.maxWidth = '100%';
+  phone.style.height = phoneH + 'px';
+  phone.style.marginLeft = 'auto';
+  phone.style.marginRight = 'auto';
+  const shape = $('admin-sponsor-shape')?.value || 'rounded';
+  const radiusMap = { square: '0px', soft: '10px', rounded: '10px', pill: '16px', circle: '16px' };
+  phone.style.borderRadius = radiusMap[shape] || '10px';
+  if ($('sp-phone-w-label')) $('sp-phone-w-label').textContent = 'W ' + wPct + '% · H ' + h + 'px';
+
   const bgUrl = imageFieldValue('admin-sponsor-bg');
   const ix = parseInt($('sp-img-x')?.value || '50', 10);
   const iy = parseInt($('sp-img-y')?.value || '50', 10);
@@ -2867,16 +2879,16 @@ function updatePhoneSponsorPreview() {
     badge.textContent = ($('admin-sponsor-badge')?.value.trim() || 'Official Sponsor').slice(0, 22);
     badge.style.background = $('admin-sponsor-badge-bg')?.value || '#f5c518';
     badge.style.color = $('admin-sponsor-badge-color')?.value || '#000';
-    badge.style.fontSize = Math.max(7, Math.round((parseInt($('admin-sponsor-badge-fs')?.value || '12', 10) || 12) * 0.65)) + 'px';
+    badge.style.fontSize = Math.max(6, Math.round((parseInt($('admin-sponsor-badge-fs')?.value || '12', 10) || 12) * 0.55)) + 'px';
     badge.style.fontWeight = $('admin-sponsor-badge-weight')?.value || '900';
-    badge.style.fontStyle = $('admin-sponsor-badge-style')?.value || 'normal';
+    badge.style.fontStyle = ($('admin-sponsor-badge-style')?.value || 'normal');
     badge.style.left = (parseInt($('sp-badge-x')?.value || '4', 10)) + '%';
     badge.style.top = (parseInt($('sp-badge-y')?.value || '12', 10)) + '%';
   }
   if (title) {
     title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
     title.style.color = $('admin-sponsor-title-color')?.value || '#fff';
-    title.style.fontSize = Math.max(9, Math.round((parseInt($('admin-sponsor-title-fs')?.value || '22', 10) || 22) * 0.45)) + 'px';
+    title.style.fontSize = Math.max(8, Math.round((parseInt($('admin-sponsor-title-fs')?.value || '22', 10) || 22) * 0.4)) + 'px';
     title.style.fontWeight = $('admin-sponsor-title-weight')?.value || '900';
     title.style.left = (parseInt($('sp-title-x')?.value || '4', 10)) + '%';
     title.style.top = (parseInt($('sp-title-y')?.value || '38', 10)) + '%';
@@ -2884,7 +2896,7 @@ function updatePhoneSponsorPreview() {
   if (desc) {
     desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
     desc.style.color = $('admin-sponsor-desc-color')?.value || '#ccc';
-    desc.style.fontSize = Math.max(7, Math.round((parseInt($('admin-sponsor-desc-fs')?.value || '12', 10) || 12) * 0.6)) + 'px';
+    desc.style.fontSize = Math.max(6, Math.round((parseInt($('admin-sponsor-desc-fs')?.value || '12', 10) || 12) * 0.55)) + 'px';
     desc.style.left = (parseInt($('sp-desc-x')?.value || '4', 10)) + '%';
     desc.style.top = (parseInt($('sp-desc-y')?.value || '62', 10)) + '%';
   }
@@ -2893,7 +2905,7 @@ function updatePhoneSponsorPreview() {
   const logoWrap = $('sp-phone-logo-wrap');
   if (typeof applyLiveLogo === 'function') applyLiveLogo(logo, logoIcon, imageFieldValue('admin-sponsor-img'));
   if (logoWrap) {
-    const ls = Math.max(28, Math.round((parseInt($('sp-logo-size')?.value || '80', 10) || 80) * 0.4));
+    const ls = Math.max(22, Math.round((parseInt($('sp-logo-size')?.value || '80', 10) || 80) * 0.32));
     logoWrap.style.width = ls + 'px';
     logoWrap.style.height = ls + 'px';
     logoWrap.style.left = (parseInt($('sp-logo-x')?.value || '88', 10)) + '%';
@@ -2924,7 +2936,6 @@ function updateSponsorPreview() {
   badge.style.fontSize = fs + 'px';
   badge.style.borderRadius = (parseInt(rad,10) >= 24 ? '999px' : rad + 'px');
   badge.style.fontWeight = wt;
-  badge.style.fontStyle = ($('admin-sponsor-badge-style')?.value || 'normal');
   const bx = parseInt($('sp-badge-x')?.value || '0', 10);
   const by = parseInt($('sp-badge-y')?.value || '8', 10);
   badge.style.left = bx + '%';
@@ -3003,10 +3014,8 @@ function updateSponsorPreview() {
     box.style.height = Math.max(60, Math.round(h * 0.85)) + 'px';
     box.style.minHeight = box.style.height;
     box.style.width = wPct + '%';
-    box.style.maxWidth = '100%';
     box.style.marginLeft = 'auto';
     box.style.marginRight = 'auto';
-    box.style.display = 'block';
     const radiusMap = { square: '0px', soft: '16px', rounded: '16px', pill: '9999px', circle: '9999px' };
     box.style.borderRadius = radiusMap[shape] || '16px';
   }
