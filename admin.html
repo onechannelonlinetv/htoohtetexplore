@@ -1504,7 +1504,7 @@ function setImagePreview(previewBox, url, msg) {
     (msg ? '<div class="tiny mt-1 text-emerald-300">' + msg + '</div>' : '');
 }
 /** Put image into a live-preview container as real <img> (works with data-URL + http) */
-function applyLiveBg(container, url, posX, posY) {
+function applyLiveBg(container, url, posX, posY, scale) {
   if (!container) return;
   container.style.position = 'relative';
   container.style.overflow = 'hidden';
@@ -1540,6 +1540,14 @@ function applyLiveBg(container, url, posX, posY) {
     img.style.display = 'block';
     img.style.objectFit = 'cover';
     img.style.objectPosition = px + '% ' + py + '%';
+    var sc = (scale != null && !isNaN(Number(scale))) ? Number(scale) : 100;
+    img.style.transformOrigin = px + '% ' + py + '%';
+    img.style.transform = 'scale(' + (sc / 100) + ')';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.left = '0';
+    img.style.top = '0';
+    container.style.overflow = 'hidden';
     // also mirror on container bg as backup so Y always visible
     try {
       container.style.backgroundImage = 'url("' + String(url).replace(/"/g, '\\"') + '")';
@@ -1797,9 +1805,11 @@ function loadAll() {
   setImageFieldValue('hero-image', h.image || '');
   if ($('hero-img-x')) $('hero-img-x').value = h.imgPosX != null ? h.imgPosX : 50;
   if ($('hero-img-y')) $('hero-img-y').value = h.imgPosY != null ? h.imgPosY : 50;
+  if ($('hero-frame-w-unit')) $('hero-frame-w-unit').value = h.frameWUnit || '%';
   if ($('hero-frame-w')) $('hero-frame-w').value = h.frameW != null ? h.frameW : 100;
   if ($('hero-frame-h')) $('hero-frame-h').value = h.frameH != null ? h.frameH : 360;
   if ($('hero-frame-align')) $('hero-frame-align').value = h.frameAlign || 'center';
+  if ($('hero-img-zoom')) $('hero-img-zoom').value = h.imgZoom != null ? h.imgZoom : 100;
   $('hero-label').value = h.label || '';
   if ($('hero-label-color')) $('hero-label-color').value = h.labelColor || '#f5c518';
   if ($('hero-label-fs')) $('hero-label-fs').value = h.labelFs || 12;
@@ -2116,23 +2126,36 @@ function updateHeroPreview() {
   const img = imageFieldValue('hero-image');
   const ix = parseInt($('hero-img-x')?.value || '50', 10);
   const iy = parseInt($('hero-img-y')?.value || '50', 10);
+  const zoom = parseInt($('hero-img-zoom')?.value || '100', 10);
   if ($('val-hix')) $('val-hix').textContent = ix;
   if ($('val-hiy')) $('val-hiy').textContent = iy;
+  if ($('val-hero-zoom')) $('val-hero-zoom').textContent = zoom;
   if (box) {
-    applyLiveBg(box, img, ix, iy);
+    applyLiveBg(box, img, ix, iy, zoom);
     if (!img) box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
   }
   const fh = parseInt($('hero-frame-h')?.value || '360', 10);
-  const fw = parseInt($('hero-frame-w')?.value || '100', 10);
+  let fw = parseInt($('hero-frame-w')?.value || '100', 10);
+  const fwUnit = $('hero-frame-w-unit')?.value || '%';
   const fal = $('hero-frame-align')?.value || 'center';
+  // adjust slider range when unit changes
+  const wSlider = $('hero-frame-w');
+  if (wSlider) {
+    if (fwUnit === 'px') {
+      if (wSlider.max !== '1600') { wSlider.min = 200; wSlider.max = 1600; wSlider.step = 20; if (fw <= 100) { fw = 800; wSlider.value = fw; } }
+    } else {
+      if (wSlider.max !== '100') { wSlider.min = 30; wSlider.max = 100; wSlider.step = 5; if (fw > 100) { fw = 100; wSlider.value = fw; } }
+    }
+  }
   if ($('val-hero-frame')) $('val-hero-frame').textContent = fh + 'px';
-  if ($('val-hero-frame-w')) $('val-hero-frame-w').textContent = fw + '%';
-  if ($('hero-preview-dims')) $('hero-preview-dims').textContent = fw + '% × ' + fh + 'px · ' + fal;
+  if ($('val-hero-frame-w')) $('val-hero-frame-w').textContent = fw + fwUnit;
+  if ($('hero-preview-dims')) $('hero-preview-dims').textContent = fw + fwUnit + ' × ' + fh + 'px · ' + fal;
   const boxEl = $('hero-live-preview');
   if (boxEl) {
     boxEl.style.height = fh + 'px';
-    boxEl.style.width = fw + '%';
+    boxEl.style.width = fw + fwUnit;
     boxEl.style.maxWidth = '100%';
+    boxEl.style.overflow = 'hidden';
     boxEl.style.marginLeft = (fal === 'right') ? 'auto' : (fal === 'center' ? 'auto' : '0');
     boxEl.style.marginRight = (fal === 'left') ? 'auto' : (fal === 'center' ? 'auto' : '0');
   }
@@ -2375,11 +2398,13 @@ function updatePhoneHeroPreview() {
   phone.style.height = phoneH + 'px';
   phone.style.aspectRatio = 'auto';
   phone.style.maxHeight = '320px';
-  if (typeof applyLiveBg === 'function') applyLiveBg(phone, bgUrl, ix, iy);
-  // force Y position on phone bg img
+  const zoom = parseInt($('hero-img-zoom')?.value || '100', 10);
+  if (typeof applyLiveBg === 'function') applyLiveBg(phone, bgUrl, ix, iy, zoom);
   const pimg = phone.querySelector('.live-bg-img');
   if (pimg) {
     pimg.style.objectPosition = ix + '% ' + iy + '%';
+    pimg.style.transformOrigin = ix + '% ' + iy + '%';
+    pimg.style.transform = 'scale(' + (zoom / 100) + ')';
     pimg.style.display = 'block';
   }
   if (!bgUrl) phone.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
@@ -2435,8 +2460,10 @@ function saveHero() {
     imgPosX: parseInt($('hero-img-x')?.value || '50', 10),
     imgPosY: parseInt($('hero-img-y')?.value || '50', 10),
     frameW: parseInt($('hero-frame-w')?.value || '100', 10),
+    frameWUnit: $('hero-frame-w-unit')?.value || '%',
     frameH: parseInt($('hero-frame-h')?.value || '360', 10),
     frameAlign: $('hero-frame-align')?.value || 'center',
+    imgZoom: parseInt($('hero-img-zoom')?.value || '100', 10),
     label: $('hero-label').value.trim(),
     labelColor: $('hero-label-color')?.value || '#f5c518',
     labelFs: parseInt($('hero-label-fs')?.value || '12', 10),
