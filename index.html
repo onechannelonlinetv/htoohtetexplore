@@ -211,12 +211,13 @@
   .sp-banner .sp-desc { max-width: 70%; }
   @media (max-width: 640px) {
     .sp-banner {
-      width: 100% !important;
+      /* keep admin widthPct on phone (do not force 100%) */
+      max-width: 100% !important;
       height: auto !important;
-      min-height: 110px !important;
-      max-height: 150px !important;
+      min-height: 100px !important;
+      max-height: 160px !important;
       aspect-ratio: 2 / 1;
-      border-radius: 0.75rem !important; /* no circle/pill on phone */
+      border-radius: 0.75rem !important;
     }
     .sp-banner[data-shape="square"] { border-radius: 0.5rem !important; }
     #hero-section {
@@ -861,34 +862,16 @@ function applyColors(s) {
 }
 
 function setLogo(url) {
-  const u = String(url || '').trim();
-  // Accept https/http or data:image — reject placeholders & blob
-  const ok = u.length > 8
-    && u.indexOf('Preview') === -1
-    && u.indexOf('blob:') !== 0
-    && (u.indexOf('http://') === 0 || u.indexOf('https://') === 0 || u.indexOf('data:image/') === 0);
+  const ok = url && String(url).length > 4 && String(url).indexOf('Preview') === -1;
   ['brand-logo-img', 'footer-logo-img'].forEach(id => {
     const img = $(id);
     const icon = $(id.replace('-img', '-icon'));
     if (!img) return;
     if (ok) {
-      img.onload = function() {
-        img.classList.remove('hidden');
-        img.style.display = 'block';
-        if (icon) { icon.classList.add('hidden'); icon.style.display = 'none'; }
-      };
-      img.onerror = function() {
-        img.classList.add('hidden');
-        img.style.display = 'none';
-        if (icon) { icon.classList.remove('hidden'); icon.style.display = ''; }
-      };
-      img.src = u;
-      // if already cached, onload may not fire
-      if (img.complete && img.naturalWidth > 0) {
-        img.classList.remove('hidden');
-        img.style.display = 'block';
-        if (icon) { icon.classList.add('hidden'); icon.style.display = 'none'; }
-      }
+      img.src = url;
+      img.classList.remove('hidden');
+      img.style.display = 'block';
+      if (icon) { icon.classList.add('hidden'); icon.style.display = 'none'; }
     } else {
       img.removeAttribute('src');
       img.classList.add('hidden');
@@ -1170,18 +1153,21 @@ function loadBlogData() {
 
   const up = read('hh_upcoming', {});
   const upSec = $('upcoming-section');
-  if (up.active === false || !up.title) {
+  const upHasContent = !!(up && (up.title || up.image || up.label || up.desc || up.heading));
+  if (!upSec) { /* skip */ }
+  else if (up.active === false || !upHasContent) {
     upSec.classList.add('hidden');
   } else {
     upSec.classList.remove('hidden');
-    $('upcoming-heading-text').textContent = up.heading || 'Upcoming';
-    // Optional section subtitle ABOVE banner (separate from on-image title)
+    if ($('upcoming-heading-text')) $('upcoming-heading-text').textContent = up.heading || 'Upcoming';
     const secTitle = $('upcoming-section-title');
-    if (up.sectionTitle) {
-      secTitle.textContent = up.sectionTitle;
-      secTitle.classList.remove('hidden');
-    } else {
-      secTitle.classList.add('hidden');
+    if (secTitle) {
+      if (up.sectionTitle) {
+        secTitle.textContent = up.sectionTitle;
+        secTitle.classList.remove('hidden');
+      } else {
+        secTitle.classList.add('hidden');
+      }
     }
     if (up.label) $('upcoming-label').textContent = up.label;
     if (up.labelColor) { setStyle($('upcoming-label'), 'color', up.labelColor); $('upcoming-label').classList.remove('accent-text'); }
