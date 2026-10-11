@@ -68,7 +68,7 @@
     backdrop-filter: blur(16px);
   }
   body.theme-ocean #hero-section {
-    /* no angled clip — hero stays rectangular */
+    /* rectangular hero — no skew */
   }
   body.theme-ocean .card-bg {
     border-radius: 1.5rem;
@@ -839,45 +839,41 @@ function applyHeroLayout(s) {
 
 function applyColors(s) {
   s = s || {};
-  const THEME_COLORS = {
+  var THEME_COLORS = {
     forest: { accentColor: '#f5c518', bgColor: '#061510', surfaceColor: '#0a1f18', cardColor: '#0f2e24' },
     ocean:  { accentColor: '#22d3ee', bgColor: '#0a1628', surfaceColor: '#0c1e36', cardColor: '#132f4c' },
     sunset: { accentColor: '#f97316', bgColor: '#1a120b', surfaceColor: '#241810', cardColor: '#2d2015' },
     navy:   { accentColor: '#1e3a5f', bgColor: '#f8fafc', surfaceColor: '#ffffff', cardColor: '#ffffff' }
   };
-  const theme = s.theme || 'forest';
-  const preset = THEME_COLORS[theme] || THEME_COLORS.forest;
-  const accent = s.accentColor || preset.accentColor;
-  const bg = s.bgColor || preset.bgColor;
-  const surface = s.surfaceColor || preset.surfaceColor;
-  const card = s.cardColor || preset.cardColor;
-  const root = document.documentElement;
-  root.style.setProperty('--brand-accent', accent);
-  root.style.setProperty('--brand-bg', bg);
-  root.style.setProperty('--brand-surface', surface);
-  root.style.setProperty('--brand-card', card);
-  if (s.fontFamily) root.style.setProperty('--brand-font', s.fontFamily);
-  if (s.headingFont) root.style.setProperty('--brand-heading-font', s.headingFont);
-  if (s.headingWeight) root.style.setProperty('--heading-weight', s.headingWeight);
-  if (s.headingStyle) root.style.setProperty('--heading-style', s.headingStyle);
-  if (s.bodyColor) root.style.setProperty('--brand-text', s.bodyColor);
-  if (s.headingColor) root.style.setProperty('--heading-color', s.headingColor);
-  if (s.heroHeight) root.style.setProperty('--hero-min-h', s.heroHeight + 'px');
-  if (s.heroMaxWidth) root.style.setProperty('--hero-max-w', s.heroMaxWidth === 100 ? '100%' : s.heroMaxWidth + 'px');
-  if (s.cardImgHeight) root.style.setProperty('--card-img-h', s.cardImgHeight + 'rem');
-  if (s.sponsorHeight) root.style.setProperty('--sponsor-min-h', s.sponsorHeight + 'px');
-  if (s.upcomingHeight) root.style.setProperty('--upcoming-min-h', s.upcomingHeight + 'px');
-  // navy theme defaults to light mode unless user overrode
+  var theme = s.theme || 'forest';
+  var preset = THEME_COLORS[theme] || THEME_COLORS.forest;
+  var accent = s.accentColor || preset.accentColor;
+  var bg = s.bgColor || preset.bgColor;
+  var surface = s.surfaceColor || preset.surfaceColor;
+  var card = s.cardColor || preset.cardColor;
+  document.documentElement.style.setProperty('--brand-accent', accent);
+  document.documentElement.style.setProperty('--brand-bg', bg);
+  document.documentElement.style.setProperty('--brand-surface', surface);
+  document.documentElement.style.setProperty('--brand-card', card);
+  if (false && s.accentColor) document.documentElement.style.setProperty('--brand-accent', s.accentColor);
+  if (false && s.bgColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-bg', s.bgColor);
+  if (false && s.surfaceColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-surface', s.surfaceColor);
+  if (false && s.cardColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-card', s.cardColor);
+  if (s.fontFamily) document.documentElement.style.setProperty('--brand-font', s.fontFamily);
+  if (s.headingFont) document.documentElement.style.setProperty('--brand-heading-font', s.headingFont);
+  if (s.headingWeight) document.documentElement.style.setProperty('--heading-weight', s.headingWeight);
+  if (s.headingStyle) document.documentElement.style.setProperty('--heading-style', s.headingStyle);
+  if (s.bodyColor) document.documentElement.style.setProperty('--brand-text', s.bodyColor);
+  if (s.headingColor) document.documentElement.style.setProperty('--heading-color', s.headingColor);
+  if (s.heroHeight) document.documentElement.style.setProperty('--hero-min-h', s.heroHeight + 'px');
+  if (s.heroMaxWidth) document.documentElement.style.setProperty('--hero-max-w', s.heroMaxWidth === 100 ? '100%' : s.heroMaxWidth + 'px');
+  if (s.cardImgHeight) document.documentElement.style.setProperty('--card-img-h', s.cardImgHeight + 'rem');
+  if (s.sponsorHeight) document.documentElement.style.setProperty('--sponsor-min-h', s.sponsorHeight + 'px');
+  if (s.upcomingHeight) document.documentElement.style.setProperty('--upcoming-min-h', s.upcomingHeight + 'px');
+  // User preference overrides admin default for light/dark
   const userMode = localStorage.getItem('hh_user_mode');
-  let mode = userMode || s.mode || 'dark';
-  if (!userMode && theme === 'navy' && !s.mode) mode = 'light';
-  if (theme === 'navy' && (s.mode === 'light' || mode === 'light')) {
-    root.style.setProperty('--brand-bg', '#f8fafc');
-    root.style.setProperty('--brand-surface', '#ffffff');
-    root.style.setProperty('--brand-card', '#ffffff');
-    root.style.setProperty('--brand-text', '#0f172a');
-  }
-  applyThemeClass(theme, mode);
+  const mode = userMode || s.mode || 'dark';
+  applyThemeClass(s.theme, mode);
   applyHeroLayout(s);
 }
 
