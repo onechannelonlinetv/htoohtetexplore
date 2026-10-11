@@ -88,7 +88,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       <button class="navbtn" data-view="proud" onclick="showView('proud',this)"><i class="fa-solid fa-handshake w-4"></i> Proud Sponsors</button>
       <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
       <button class="navbtn" data-view="upcoming" onclick="showView('upcoming',this)"><i class="fa-solid fa-map-location-dot w-4"></i> Upcoming</button>
-      <button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Travel Posts</button>
+      <button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Latest Travel</button>
       <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
       <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
       <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
@@ -351,7 +351,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Hero</span>
               <label class="tiny flex items-center gap-2 ml-auto">Frame
-                <input type="range" id="hero-frame-h" min="120" max="360" value="200" class="w-28 accent-emerald-500" oninput="var b=document.getElementById('hero-live-preview');if(b)b.style.height=this.value+'px';var v=document.getElementById('val-hero-frame');if(v)v.textContent=this.value+'px'">
+                <input type="range" id="hero-frame-h" min="120" max="800" value="200" class="w-28 accent-emerald-500" oninput="var b=document.getElementById('hero-live-preview');if(b)b.style.height=this.value+'px';var v=document.getElementById('val-hero-frame');if(v)v.textContent=this.value+'px'">
                 <span id="val-hero-frame">200px</span>
               </label>
             <div id="hero-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 select-none" style="height:200px; background:linear-gradient(135deg,#0a1f18,#061510);">
@@ -385,14 +385,14 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Label / Title / Desc / Sign — တစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
               <p class="tiny">နေရာရွှေ့ပြီး Save Hero နှိပ်ပါ။ Slider နဲ့လည်း ချိန်နိုင်ပါတယ်။</p>
               <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
-                <div>Label X <input type="range" id="hero-label-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hlx">8</span>%</div>
-                <div>Label Y <input type="range" id="hero-label-y" min="0" max="90" value="18" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hly">18</span>%</div>
-                <div>Title X <input type="range" id="hero-title-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-htx">8</span>%</div>
-                <div>Title Y <input type="range" id="hero-title-y" min="0" max="90" value="32" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hty">32</span>%</div>
-                <div>Desc X <input type="range" id="hero-desc-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdx">8</span>%</div>
-                <div>Desc Y <input type="range" id="hero-desc-y" min="0" max="90" value="55" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdy">55</span>%</div>
-                <div>Sign X <input type="range" id="hero-sign-x" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsx">8</span>%</div>
-                <div>Sign Y <input type="range" id="hero-sign-y" min="0" max="90" value="78" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsy">78</span>%</div>
+                <div>Label X <input type="range" id="hero-label-x" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hlx">8</span>%</div>
+                <div>Label Y <input type="range" id="hero-label-y" min="0" max="100" value="18" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hly">18</span>%</div>
+                <div>Title X <input type="range" id="hero-title-x" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-htx">8</span>%</div>
+                <div>Title Y <input type="range" id="hero-title-y" min="0" max="100" value="32" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hty">32</span>%</div>
+                <div>Desc X <input type="range" id="hero-desc-x" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdx">8</span>%</div>
+                <div>Desc Y <input type="range" id="hero-desc-y" min="0" max="100" value="55" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdy">55</span>%</div>
+                <div>Sign X <input type="range" id="hero-sign-x" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsx">8</span>%</div>
+                <div>Sign Y <input type="range" id="hero-sign-y" min="0" max="100" value="78" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsy">78</span>%</div>
               </div>
               <input type="hidden" id="hero-text-x" value="8"><input type="hidden" id="hero-text-y" value="35">
             </div>
@@ -407,7 +407,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               </div>
               <div>
                 <label class="label flex justify-between">Label Size <span class="range-val" id="val-hero-label-fs">12px</span></label>
-                <input type="range" id="hero-label-fs" min="8" max="24" value="12" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
+                <input type="range" id="hero-label-fs" min="8" max="72" value="12" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
               </div>
             </div>
             <div class="md:col-span-2">
@@ -420,7 +420,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             </div>
             <div>
               <label class="label flex justify-between">Title Size <span class="range-val" id="val-hero-title-fs">28px</span></label>
-              <input type="range" id="hero-title-fs" min="14" max="56" value="28" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
+              <input type="range" id="hero-title-fs" min="14" max="140" value="28" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
             </div>
             <div>
               <label class="label">Title Font Weight</label>
@@ -448,7 +448,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             </div>
             <div>
               <label class="label flex justify-between">Desc Size <span class="range-val" id="val-hero-desc-fs">14px</span></label>
-              <input type="range" id="hero-desc-fs" min="10" max="28" value="14" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
+              <input type="range" id="hero-desc-fs" min="10" max="80" value="14" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
             </div>
             <div>
               <label class="label">Signature</label>
@@ -574,7 +574,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                   <span class="sp-resize-handle" data-resize="logo" title="Logo ဆိုဒ်"></span>
                 </div>
               </div>
-              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ပုံဖိဆွဲ · စာဖိဆွဲရွှေ့ · ထောင့်စတုရန်း = ဆိုဒ်</p>
+              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ပုံ/စာ — ဘန်နာတစ်ပြင်လုံး ဖိဆွဲရွှေ့ · ထောင့် = ဆိုဒ်</p>
             </div>
           </div>
 
@@ -601,8 +601,8 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <p class="tiny mt-1">GIF looping ပုံလည်း တင်နိုင်ပါတယ် · Preview မှာ Logo ဖိဆွဲ / ထောင့်စတုရန်း = ဆိုဒ်</p>
               <div class="mt-2 grid grid-cols-2 gap-2 text-[11px]">
                 <div>Logo Size <input type="range" id="sp-logo-size" min="40" max="280" value="80" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-spls">80</span>px</div>
-                <div>Logo X <input type="range" id="sp-logo-x" min="0" max="95" value="88" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-splx">88</span>%</div>
-                <div>Logo Y <input type="range" id="sp-logo-y" min="0" max="95" value="40" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-sply">40</span>%</div>
+                <div>Logo X <input type="range" id="sp-logo-x" min="0" max="100" value="88" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-splx">88</span>%</div>
+                <div>Logo Y <input type="range" id="sp-logo-y" min="0" max="100" value="40" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-sply">40</span>%</div>
               </div>
             </div>
             <div>
@@ -613,12 +613,12 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
               <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Badge / Title / Desc — Preview မှာ ဖိဆွဲပါ</p>
               <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
-                <div>Badge X <input type="range" id="sp-badge-x" min="0" max="90" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spbx">0</span>%</div>
-                <div>Badge Y <input type="range" id="sp-badge-y" min="0" max="90" value="8" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spby">8</span>%</div>
-                <div>Title X <input type="range" id="sp-title-x" min="0" max="90" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-sptx">0</span>%</div>
-                <div>Title Y <input type="range" id="sp-title-y" min="0" max="90" value="32" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spty">32</span>%</div>
-                <div>Desc X <input type="range" id="sp-desc-x" min="0" max="90" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdx">0</span>%</div>
-                <div>Desc Y <input type="range" id="sp-desc-y" min="0" max="90" value="58" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdy">58</span>%</div>
+                <div>Badge X <input type="range" id="sp-badge-x" min="0" max="100" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spbx">0</span>%</div>
+                <div>Badge Y <input type="range" id="sp-badge-y" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spby">8</span>%</div>
+                <div>Title X <input type="range" id="sp-title-x" min="0" max="100" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-sptx">0</span>%</div>
+                <div>Title Y <input type="range" id="sp-title-y" min="0" max="100" value="32" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spty">32</span>%</div>
+                <div>Desc X <input type="range" id="sp-desc-x" min="0" max="100" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdx">0</span>%</div>
+                <div>Desc Y <input type="range" id="sp-desc-y" min="0" max="100" value="58" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdy">58</span>%</div>
               </div>
             </div>
 
@@ -715,7 +715,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <div class="mt-2 mb-1 text-xs font-bold text-white" id="up-prev-heading">Upcoming</div>
             <div class="text-[10px] text-emerald-400/70 mb-2" id="up-prev-section-title"></div>
             <label class="tiny flex items-center gap-2 mb-2">Frame အမြင့်
-              <input type="range" id="up-frame-h" min="100" max="320" value="160" class="w-32 accent-emerald-500" oninput="updateUpcomingPreview()">
+              <input type="range" id="up-frame-h" min="80" max="800" value="160" class="w-32 accent-emerald-500" oninput="updateUpcomingPreview()">
               <span id="val-up-frame-h">160px</span>
             </label>
             <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="height:160px;background:#1a1a1a;">
@@ -726,12 +726,12 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             </div>
             <p class="tiny mt-1">စာတစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
             <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
-              <div>Label X <input type="range" id="up-label-x" min="0" max="90" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-ulx">6</span>%</div>
-              <div>Label Y <input type="range" id="up-label-y" min="0" max="90" value="40" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uly">40</span>%</div>
-              <div>Title X <input type="range" id="up-title-x" min="0" max="90" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-utx">6</span>%</div>
-              <div>Title Y <input type="range" id="up-title-y" min="0" max="90" value="55" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uty">55</span>%</div>
-              <div>Desc X <input type="range" id="up-desc-x" min="0" max="90" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udx">6</span>%</div>
-              <div>Desc Y <input type="range" id="up-desc-y" min="0" max="90" value="72" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udy">72</span>%</div>
+              <div>Label X <input type="range" id="up-label-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-ulx">6</span>%</div>
+              <div>Label Y <input type="range" id="up-label-y" min="0" max="100" value="40" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uly">40</span>%</div>
+              <div>Title X <input type="range" id="up-title-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-utx">6</span>%</div>
+              <div>Title Y <input type="range" id="up-title-y" min="0" max="100" value="55" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uty">55</span>%</div>
+              <div>Desc X <input type="range" id="up-desc-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udx">6</span>%</div>
+              <div>Desc Y <input type="range" id="up-desc-y" min="0" max="100" value="72" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udy">72</span>%</div>
             </div>
           </div>
 
@@ -750,7 +750,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             </div>
             <div>
               <label class="label flex justify-between">Title Size <span class="range-val" id="val-up-title-fs">22px</span></label>
-              <input type="range" id="up-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
+              <input type="range" id="up-title-fs" min="12" max="120" value="22" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
             </div>
             <div>
               <label class="label">Title Weight</label>
@@ -763,11 +763,11 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             </div>
             <div>
               <label class="label">Label Size</label>
-              <input type="range" id="up-label-fs" min="8" max="20" value="11" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
+              <input type="range" id="up-label-fs" min="8" max="72" value="11" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
             </div>
             <div>
               <label class="label">Desc Size</label>
-              <input type="range" id="up-desc-fs" min="10" max="22" value="13" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
+              <input type="range" id="up-desc-fs" min="10" max="64" value="13" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
             </div>
             <div>
               <label class="label">Desc အရောင်</label>
@@ -788,7 +788,35 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       </section>
 
       <section id="view-posts" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Travel Posts</h2><p class="mt-1 text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload ရနိုင်</p></div>
+        <div><h2 class="text-xl font-black">Latest Travel</h2><p class="mt-1 text-sm text-slate-400">Post များ · Section ခေါင်းစဉ် · Banner — Hero/Sponsor လို ချိန်နိုင်</p></div>
+        <div class="panel p-5 sm:p-6 space-y-3">
+          <h3 class="font-bold text-white text-sm">Section ခေါင်းစဉ် (Live site · Travel Stories အပေါ်)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div><label class="label">Heading</label><input id="stories-heading-input" class="field" placeholder="Travel Stories"></div>
+            <div><label class="label">Subtitle</label><input id="stories-sub-input" class="field" placeholder="မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ"></div>
+          </div>
+          <div>
+            <label class="label">Section Banner Image (optional)</label>
+            <div class="flex gap-2">
+              <input id="stories-banner-img" class="field flex-1" placeholder="URL / Upload / GIF">
+              <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this,'stories-banner-img')"></label>
+            </div>
+            <div id="stories-banner-img-preview" class="mt-2"></div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div>Banner H <input type="range" id="stories-banner-h" min="80" max="480" value="160" class="w-full accent-emerald-500" oninput="document.getElementById('val-stories-bh').textContent=this.value+'px'"><span id="val-stories-bh">160px</span></div>
+            <div>Shape
+              <select id="stories-banner-shape" class="field py-1 text-[11px]">
+                <option value="rounded">Rounded</option>
+                <option value="square">Square</option>
+                <option value="soft">Soft</option>
+                <option value="pill">Pill</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" onclick="saveStoriesSection()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Latest Travel Section</button>
+        </div>
+        <div><h3 class="font-bold text-white">Posts စာရင်း</h3><p class="text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload</p></div>
         <div class="panel p-5 sm:p-6">
           <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
@@ -1033,7 +1061,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1550,7 +1578,7 @@ function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 
 const titles = {
   overview: 'Overview', settings: 'Brand & Layout', hero: 'Hero Banner', menu: 'Menu Items',
-  proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Travel Posts',
+  proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Latest Travel',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
 function showView(name, button) {
@@ -1715,7 +1743,7 @@ function loadAll() {
   if (_sh && $('admin-sponsor-height-local')) $('admin-sponsor-height-local').value = _sh;
 
   // Enable friendly Base64 display for image URL fields
-  ['set-logo-url','hero-image','admin-sponsor-img','admin-sponsor-bg','up-image','admin-post-img','yt-thumb','yt-bg','proud-logo'].forEach(enableImageFieldEditing);
+  ['set-logo-url','hero-image','admin-sponsor-img','admin-sponsor-bg','up-image','admin-post-img','yt-thumb','yt-bg','proud-logo','stories-banner-img'].forEach(enableImageFieldEditing);
 }
 
 const THEME_PRESETS = {
@@ -1775,7 +1803,7 @@ function updateSizePreview() {
   if (text) {
     const a = $('set-hero-text-align')?.value || 'left';
     text.style.textAlign = a;
-    text.style.maxWidth = Math.min(90, Math.round((parseInt(tmw,10) / 48) * 90)) + '%';
+    text.style.maxWidth = Math.min(100, Math.round((parseInt(tmw,10) / 48) * 90)) + '%';
     if (a === 'center') { text.style.marginLeft = 'auto'; text.style.marginRight = 'auto'; }
     else if (a === 'right') { text.style.marginLeft = 'auto'; text.style.marginRight = '0'; }
     else { text.style.marginLeft = '0'; text.style.marginRight = 'auto'; }
@@ -2016,8 +2044,8 @@ function initHeroLineDrag() {
     if (!_heroDragState) return;
     const pt = getPt(e);
     const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
-    const nx = Math.max(0, Math.min(90, origL + ((pt.clientX - startX) / rectW) * 100));
-    const ny = Math.max(0, Math.min(90, origT + ((pt.clientY - startY) / rectH) * 100));
+    const nx = Math.max(0, Math.min(100, origL + ((pt.clientX - startX) / rectW) * 100));
+    const ny = Math.max(0, Math.min(100, origT + ((pt.clientY - startY) / rectH) * 100));
     el.style.left = nx + '%';
     el.style.top = ny + '%';
     if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
@@ -2493,14 +2521,14 @@ function initSponsorDrag() {
         if ($(_spDrag.input)) $(_spDrag.input).value = nv;
         updateSponsorPreview();
       } else if (_spDrag.type === 'text') {
-        const nx = Math.max(0, Math.min(90, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
-        const ny = Math.max(0, Math.min(90, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
+        const nx = Math.max(0, Math.min(100, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
+        const ny = Math.max(0, Math.min(100, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
         if ($(_spDrag.keys[0])) $(_spDrag.keys[0]).value = nx;
         if ($(_spDrag.keys[1])) $(_spDrag.keys[1]).value = ny;
         updateSponsorPreview();
       } else if (_spDrag.type === 'logo') {
-        const nx = Math.max(0, Math.min(95, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
-        const ny = Math.max(0, Math.min(95, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
+        const nx = Math.max(0, Math.min(100, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
+        const ny = Math.max(0, Math.min(100, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
         if ($('sp-logo-x')) $('sp-logo-x').value = nx;
         if ($('sp-logo-y')) $('sp-logo-y').value = ny;
         updateSponsorPreview();
@@ -2528,6 +2556,28 @@ function initSponsorDrag() {
     window.addEventListener('mouseup', onUp);
     window.addEventListener('touchend', onUp);
   }
+}
+
+
+function saveStoriesSection() {
+  const s = read('hh_settings', {});
+  s.storiesHeading = ($('stories-heading-input')?.value || '').trim();
+  s.storiesSub = ($('stories-sub-input')?.value || '').trim();
+  s.storiesBanner = imageFieldValue('stories-banner-img');
+  s.storiesBannerH = parseInt($('stories-banner-h')?.value || '160', 10);
+  s.storiesBannerShape = $('stories-banner-shape')?.value || 'rounded';
+  write('hh_settings', s);
+  toast('Latest Travel section သိမ်းပြီး');
+}
+function loadStoriesSectionForm() {
+  const s = read('hh_settings', {});
+  if ($('stories-heading-input')) $('stories-heading-input').value = s.storiesHeading || '';
+  if ($('stories-sub-input')) $('stories-sub-input').value = s.storiesSub || '';
+  if ($('stories-banner-img')) setImageFieldValue('stories-banner-img', s.storiesBanner || '');
+  if ($('stories-banner-h')) $('stories-banner-h').value = s.storiesBannerH || 160;
+  if ($('val-stories-bh')) $('val-stories-bh').textContent = (s.storiesBannerH || 160) + 'px';
+  if ($('stories-banner-shape')) $('stories-banner-shape').value = s.storiesBannerShape || 'rounded';
+  try { showPreviewIfUrl('stories-banner-img'); } catch(e) {}
 }
 
 function updateUpcomingPreview() {
@@ -2621,8 +2671,8 @@ function initUpcomingDrag() {
     window.addEventListener('mousemove', function(e){
       if (!_upDrag) return;
       const p = pt(e);
-      const nx = Math.max(0, Math.min(90, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
-      const ny = Math.max(0, Math.min(90, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
+      const nx = Math.max(0, Math.min(100, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
+      const ny = Math.max(0, Math.min(100, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
       _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
       if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
       if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
@@ -2632,8 +2682,8 @@ function initUpcomingDrag() {
     window.addEventListener('touchmove', function(e){
       if (!_upDrag) return;
       const p = pt(e);
-      const nx = Math.max(0, Math.min(90, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
-      const ny = Math.max(0, Math.min(90, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
+      const nx = Math.max(0, Math.min(100, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
+      const ny = Math.max(0, Math.min(100, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
       _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
       if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
       if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
@@ -3437,7 +3487,7 @@ function loadThemePreset(id) {
   const p = getPresets().find(x => String(x.id) === String(id));
   if (!p) return alert('Theme မတွေ့ပါ။');
   if (!confirm('"' + p.name + '" ကို Load မယ် — လက်ရှိ layout အချို့ ပြောင်းသွားမယ်။')) return;
-  const keys = ['hh_settings','hh_hero','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social'];
+  const keys = ['hh_settings','hh_hero','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social'];
   keys.forEach(k => { if (p[k] != null) write(k, p[k]); });
   loadAll();
   toast('Theme "' + p.name + '" Load ပြီးပါပြီ။');
