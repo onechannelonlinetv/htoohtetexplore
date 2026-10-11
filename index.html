@@ -68,7 +68,7 @@
     backdrop-filter: blur(16px);
   }
   body.theme-ocean #hero-section {
-    clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+    /* no angled clip — hero stays rectangular */
   }
   body.theme-ocean .card-bg {
     border-radius: 1.5rem;
@@ -211,13 +211,12 @@
   .sp-banner .sp-desc { max-width: 70%; }
   @media (max-width: 640px) {
     .sp-banner {
-      /* keep admin widthPct on phone (do not force 100%) */
-      max-width: 100% !important;
+      width: 100% !important;
       height: auto !important;
-      min-height: 100px !important;
-      max-height: 160px !important;
+      min-height: 110px !important;
+      max-height: 150px !important;
       aspect-ratio: 2 / 1;
-      border-radius: 0.75rem !important;
+      border-radius: 0.75rem !important; /* no circle/pill on phone */
     }
     .sp-banner[data-shape="square"] { border-radius: 0.5rem !important; }
     #hero-section {
@@ -839,25 +838,46 @@ function applyHeroLayout(s) {
 }
 
 function applyColors(s) {
-  if (s.accentColor) document.documentElement.style.setProperty('--brand-accent', s.accentColor);
-  if (s.bgColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-bg', s.bgColor);
-  if (s.surfaceColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-surface', s.surfaceColor);
-  if (s.cardColor && s.mode !== 'light') document.documentElement.style.setProperty('--brand-card', s.cardColor);
-  if (s.fontFamily) document.documentElement.style.setProperty('--brand-font', s.fontFamily);
-  if (s.headingFont) document.documentElement.style.setProperty('--brand-heading-font', s.headingFont);
-  if (s.headingWeight) document.documentElement.style.setProperty('--heading-weight', s.headingWeight);
-  if (s.headingStyle) document.documentElement.style.setProperty('--heading-style', s.headingStyle);
-  if (s.bodyColor) document.documentElement.style.setProperty('--brand-text', s.bodyColor);
-  if (s.headingColor) document.documentElement.style.setProperty('--heading-color', s.headingColor);
-  if (s.heroHeight) document.documentElement.style.setProperty('--hero-min-h', s.heroHeight + 'px');
-  if (s.heroMaxWidth) document.documentElement.style.setProperty('--hero-max-w', s.heroMaxWidth === 100 ? '100%' : s.heroMaxWidth + 'px');
-  if (s.cardImgHeight) document.documentElement.style.setProperty('--card-img-h', s.cardImgHeight + 'rem');
-  if (s.sponsorHeight) document.documentElement.style.setProperty('--sponsor-min-h', s.sponsorHeight + 'px');
-  if (s.upcomingHeight) document.documentElement.style.setProperty('--upcoming-min-h', s.upcomingHeight + 'px');
-  // User preference overrides admin default for light/dark
+  s = s || {};
+  const THEME_COLORS = {
+    forest: { accentColor: '#f5c518', bgColor: '#061510', surfaceColor: '#0a1f18', cardColor: '#0f2e24' },
+    ocean:  { accentColor: '#22d3ee', bgColor: '#0a1628', surfaceColor: '#0c1e36', cardColor: '#132f4c' },
+    sunset: { accentColor: '#f97316', bgColor: '#1a120b', surfaceColor: '#241810', cardColor: '#2d2015' },
+    navy:   { accentColor: '#1e3a5f', bgColor: '#f8fafc', surfaceColor: '#ffffff', cardColor: '#ffffff' }
+  };
+  const theme = s.theme || 'forest';
+  const preset = THEME_COLORS[theme] || THEME_COLORS.forest;
+  const accent = s.accentColor || preset.accentColor;
+  const bg = s.bgColor || preset.bgColor;
+  const surface = s.surfaceColor || preset.surfaceColor;
+  const card = s.cardColor || preset.cardColor;
+  const root = document.documentElement;
+  root.style.setProperty('--brand-accent', accent);
+  root.style.setProperty('--brand-bg', bg);
+  root.style.setProperty('--brand-surface', surface);
+  root.style.setProperty('--brand-card', card);
+  if (s.fontFamily) root.style.setProperty('--brand-font', s.fontFamily);
+  if (s.headingFont) root.style.setProperty('--brand-heading-font', s.headingFont);
+  if (s.headingWeight) root.style.setProperty('--heading-weight', s.headingWeight);
+  if (s.headingStyle) root.style.setProperty('--heading-style', s.headingStyle);
+  if (s.bodyColor) root.style.setProperty('--brand-text', s.bodyColor);
+  if (s.headingColor) root.style.setProperty('--heading-color', s.headingColor);
+  if (s.heroHeight) root.style.setProperty('--hero-min-h', s.heroHeight + 'px');
+  if (s.heroMaxWidth) root.style.setProperty('--hero-max-w', s.heroMaxWidth === 100 ? '100%' : s.heroMaxWidth + 'px');
+  if (s.cardImgHeight) root.style.setProperty('--card-img-h', s.cardImgHeight + 'rem');
+  if (s.sponsorHeight) root.style.setProperty('--sponsor-min-h', s.sponsorHeight + 'px');
+  if (s.upcomingHeight) root.style.setProperty('--upcoming-min-h', s.upcomingHeight + 'px');
+  // navy theme defaults to light mode unless user overrode
   const userMode = localStorage.getItem('hh_user_mode');
-  const mode = userMode || s.mode || 'dark';
-  applyThemeClass(s.theme, mode);
+  let mode = userMode || s.mode || 'dark';
+  if (!userMode && theme === 'navy' && !s.mode) mode = 'light';
+  if (theme === 'navy' && (s.mode === 'light' || mode === 'light')) {
+    root.style.setProperty('--brand-bg', '#f8fafc');
+    root.style.setProperty('--brand-surface', '#ffffff');
+    root.style.setProperty('--brand-card', '#ffffff');
+    root.style.setProperty('--brand-text', '#0f172a');
+  }
+  applyThemeClass(theme, mode);
   applyHeroLayout(s);
 }
 
@@ -1153,21 +1173,18 @@ function loadBlogData() {
 
   const up = read('hh_upcoming', {});
   const upSec = $('upcoming-section');
-  const upHasContent = !!(up && (up.title || up.image || up.label || up.desc || up.heading));
-  if (!upSec) { /* skip */ }
-  else if (up.active === false || !upHasContent) {
+  if (up.active === false || !up.title) {
     upSec.classList.add('hidden');
   } else {
     upSec.classList.remove('hidden');
-    if ($('upcoming-heading-text')) $('upcoming-heading-text').textContent = up.heading || 'Upcoming';
+    $('upcoming-heading-text').textContent = up.heading || 'Upcoming';
+    // Optional section subtitle ABOVE banner (separate from on-image title)
     const secTitle = $('upcoming-section-title');
-    if (secTitle) {
-      if (up.sectionTitle) {
-        secTitle.textContent = up.sectionTitle;
-        secTitle.classList.remove('hidden');
-      } else {
-        secTitle.classList.add('hidden');
-      }
+    if (up.sectionTitle) {
+      secTitle.textContent = up.sectionTitle;
+      secTitle.classList.remove('hidden');
+    } else {
+      secTitle.classList.add('hidden');
     }
     if (up.label) $('upcoming-label').textContent = up.label;
     if (up.labelColor) { setStyle($('upcoming-label'), 'color', up.labelColor); $('upcoming-label').classList.remove('accent-text'); }
