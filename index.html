@@ -921,6 +921,10 @@ function loadBlogData() {
         const radius = radiusMap[shape] || '1rem';
         const badgeBg = sponsor.badgeBg || '';
         const badgeStyle = [
+          'position:absolute',
+          'left:' + (sponsor.badgeX != null ? sponsor.badgeX : 4) + '%',
+          'top:' + (sponsor.badgeY != null ? sponsor.badgeY : 12) + '%',
+          'z-index:12',
           badgeBg ? 'background:' + badgeBg : '',
           sponsor.badgeColor ? 'color:' + sponsor.badgeColor : '',
           sponsor.badgePad ? 'padding:' + Math.round(sponsor.badgePad/2) + 'px ' + sponsor.badgePad + 'px' : '',
@@ -929,11 +933,21 @@ function loadBlogData() {
           sponsor.badgeWeight ? 'font-weight:' + sponsor.badgeWeight : ''
         ].filter(Boolean).join(';');
         const titleStyle = [
+          'position:absolute',
+          'left:' + (sponsor.titleX != null ? sponsor.titleX : 4) + '%',
+          'top:' + (sponsor.titleY != null ? sponsor.titleY : 38) + '%',
+          'z-index:12',
+          'max-width:90%',
           sponsor.titleColor ? 'color:' + sponsor.titleColor : '',
           sponsor.titleFs ? 'font-size:clamp(1rem, 4vw, ' + sponsor.titleFs + 'px)' : '',
           sponsor.titleWeight ? 'font-weight:' + sponsor.titleWeight : ''
         ].filter(Boolean).join(';');
         const descStyle = [
+          'position:absolute',
+          'left:' + (sponsor.descX != null ? sponsor.descX : 4) + '%',
+          'top:' + (sponsor.descY != null ? sponsor.descY : 62) + '%',
+          'z-index:12',
+          'max-width:70%',
           sponsor.descColor ? 'color:' + sponsor.descColor : '',
           sponsor.descFs ? 'font-size:' + sponsor.descFs + 'px' : ''
         ].filter(Boolean).join(';');
@@ -941,27 +955,22 @@ function loadBlogData() {
         const bgSrc = sponsor.bgImage || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&q=80';
         const link = sponsor.link || '#';
         const logoSize = sponsor.logoSize || 96;
-        const logoX = sponsor.logoX != null ? sponsor.logoX : null;
-        const logoY = sponsor.logoY != null ? sponsor.logoY : null;
+        const logoX = sponsor.logoX != null ? sponsor.logoX : 88;
+        const logoY = sponsor.logoY != null ? sponsor.logoY : 40;
         let logoHtml = '';
         if (sponsor.img) {
-          const logoPos = (logoX != null)
-            ? 'position:absolute;left:' + logoX + '%;top:' + logoY + '%;width:' + logoSize + 'px;height:' + logoSize + 'px;z-index:15;'
-            : 'width:' + logoSize + 'px;height:' + logoSize + 'px;';
-          logoHtml = '<div class="rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shrink-0" style="' + logoPos + '"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-1"></div>';
+          logoHtml = '<div class="rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="position:absolute;left:' + logoX + '%;top:' + logoY + '%;width:' + logoSize + 'px;height:' + logoSize + 'px;z-index:15"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-1"></div>';
         }
-        const useAbsLogo = !!(sponsor.img && logoX != null);
-        return '<div class="relative overflow-hidden border border-emerald-800/40 shadow-xl mx-auto" style="min-height:' + h + 'px;width:' + wPct + '%;border-radius:' + radius + '">' +
+        const linkHtml = sponsor.link
+          ? '<a href="' + safe(link) + '" target="_blank" rel="noopener" class="absolute z-20 inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:4%;bottom:12%">' + t('visitSponsor') + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
+          : '';
+        return '<div class="relative overflow-hidden border border-emerald-800/40 shadow-xl mx-auto" style="min-height:' + h + 'px;height:' + h + 'px;width:' + wPct + '%;border-radius:' + radius + '">' +
           '<img src="' + safe(bgSrc) + '" alt="" class="absolute inset-0 w-full h-full object-cover" style="object-position:' + bgPos + '">' +
-          '<div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent"></div>' +
-          '<div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 p-5 sm:p-7" style="min-height:' + h + 'px">' +
-            '<div class="min-w-0 flex-1 relative" style="min-height:4rem">' +
-              '<span class="inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge || 'Official Sponsor') + '</span>' +
-              '<h2 class="mt-2.5 text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight" style="' + titleStyle + '">' + safe(sponsor.title || '') + '</h2>' +
-              (sponsor.desc ? '<p class="mt-1.5 text-sm text-emerald-100/80 max-w-lg leading-relaxed" style="' + descStyle + '">' + safe(sponsor.desc) + '</p>' : '') +
-              (sponsor.link ? '<a href="' + safe(link) + '" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-4 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition">' + t('visitSponsor') + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>' : '') +
-            '</div>' + (useAbsLogo ? '' : logoHtml) +
-          '</div>' + (useAbsLogo ? logoHtml : '') +
+          '<div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent"></div>' +
+          '<span class="inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge || 'Official Sponsor') + '</span>' +
+          '<h2 class="font-black text-white tracking-tight" style="' + titleStyle + '">' + safe(sponsor.title || '') + '</h2>' +
+          (sponsor.desc ? '<p class="text-sm text-emerald-100/80 leading-relaxed" style="' + descStyle + '">' + safe(sponsor.desc) + '</p>' : '') +
+          linkHtml + logoHtml +
           '</div>';
       }).join('');
     }
