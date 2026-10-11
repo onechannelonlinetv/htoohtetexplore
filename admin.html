@@ -532,9 +532,9 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           </div>
           <input type="hidden" id="admin-sponsor-edit-id" value="">
 
-          <!-- Live Preview -->
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <div class="flex flex-wrap items-center gap-3 mb-2">
+          <!-- Live Preview · Desktop + Phone -->
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 space-y-3">
+            <div class="flex flex-wrap items-center gap-3">
               <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider shrink-0">Live Preview · Sponsor</span>
               <div class="flex flex-wrap items-center gap-3 flex-1 justify-end">
                 <label class="flex items-center gap-1.5 text-[11px] text-emerald-200/80">
@@ -560,20 +560,46 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                 <span class="tiny" id="sponsor-preview-dims">100% × 180px</span>
               </div>
             </div>
-            <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="min-height:140px;height:160px;background:linear-gradient(90deg,#111,#333);cursor:grab;">
-              <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent pointer-events-none z-[1]"></div>
-              <!-- text + logo: full banner coordinates (0–100%) -->
-              <span id="sp-prev-badge" class="absolute z-10 inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black cursor-move" style="left:4%;top:12%;">Official Sponsor<span class="sp-resize-handle" data-resize="badge" title="ဆိုဒ်"></span></span>
-              <div id="sp-prev-title" class="absolute z-10 text-base font-black text-white cursor-move" style="left:4%;top:38%;max-width:none;white-space:nowrap;">Sponsor Title<span class="sp-resize-handle" data-resize="title" title="ဆိုဒ်"></span></div>
-              <div id="sp-prev-desc" class="absolute z-10 text-[11px] text-white/70 cursor-move" style="left:4%;top:62%;max-width:70%;">Description…<span class="sp-resize-handle" data-resize="desc" title="ဆိုဒ်"></span></div>
-              <div id="sp-prev-logo-wrap" class="absolute z-10 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden cursor-move" style="left:88%;top:40%;width:64px;height:64px;">
-                <img id="sp-prev-logo" src="" class="w-full h-full object-contain hidden" alt="">
-                <i class="fa-solid fa-image text-white/30 text-lg" id="sp-prev-logo-icon"></i>
-                <span class="sp-resize-handle" data-resize="logo" title="Logo ဆိုဒ်"></span>
+
+            <div class="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4 items-start">
+              <!-- Desktop preview -->
+              <div>
+                <p class="text-[10px] font-bold text-slate-400 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-desktop"></i> PC / Desktop</p>
+                <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="min-height:140px;height:160px;background:linear-gradient(90deg,#111,#333);cursor:grab;">
+                  <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent pointer-events-none z-[1]"></div>
+                  <span id="sp-prev-badge" class="absolute z-10 inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black cursor-move" style="left:4%;top:12%;">Official Sponsor<span class="sp-resize-handle" data-resize="badge" title="ဆိုဒ်"></span></span>
+                  <div id="sp-prev-title" class="absolute z-10 text-base font-black text-white cursor-move" style="left:4%;top:38%;max-width:none;white-space:nowrap;">Sponsor Title<span class="sp-resize-handle" data-resize="title" title="ဆိုဒ်"></span></div>
+                  <div id="sp-prev-desc" class="absolute z-10 text-[11px] text-white/70 cursor-move" style="left:4%;top:62%;max-width:70%;">Description…<span class="sp-resize-handle" data-resize="desc" title="ဆိုဒ်"></span></div>
+                  <div id="sp-prev-logo-wrap" class="absolute z-10 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden cursor-move" style="left:88%;top:40%;width:64px;height:64px;">
+                    <img id="sp-prev-logo" src="" class="w-full h-full object-contain hidden" alt="">
+                    <i class="fa-solid fa-image text-white/30 text-lg" id="sp-prev-logo-icon"></i>
+                    <span class="sp-resize-handle" data-resize="logo" title="Logo ဆိုဒ်"></span>
+                  </div>
+                  <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ဖိဆွဲရွှေ့ · ထောင့် = ဆိုဒ်</p>
+                </div>
               </div>
-              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ဘန်နာတစ်ပြင်လုံး ဖိဆွဲရွှေ့ · ထောင့်စတုရန်း = ဆိုဒ်</p>
+
+              <!-- Phone preview frame -->
+              <div class="justify-self-center xl:justify-self-end">
+                <p class="text-[10px] font-bold text-slate-400 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-mobile-screen"></i> Phone (auto layout)</p>
+                <div class="mx-auto" style="width:200px;padding:10px 8px 16px;background:#0a0a0a;border-radius:28px;border:2px solid #334155;box-shadow:0 8px 24px rgba(0,0,0,.5)">
+                  <div class="mx-auto mb-2" style="width:48px;height:5px;border-radius:4px;background:#1e293b"></div>
+                  <div id="sponsor-phone-preview" class="relative overflow-hidden bg-slate-900" style="width:100%;aspect-ratio:16/9;border-radius:12px;">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent z-[1] pointer-events-none"></div>
+                    <span id="sp-phone-badge" class="absolute z-10 inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black" style="left:4%;top:10%;">Official</span>
+                    <div id="sp-phone-title" class="absolute z-10 text-[11px] font-black text-white leading-tight" style="left:4%;top:32%;max-width:72%;">Sponsor Title</div>
+                    <div id="sp-phone-desc" class="absolute z-10 text-[8px] text-white/70 line-clamp-2" style="left:4%;top:58%;max-width:65%;">Description…</div>
+                    <div id="sp-phone-logo-wrap" class="absolute z-10 rounded-md bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="right:3%;top:50%;transform:translateY(-50%);width:36px;height:36px;">
+                      <img id="sp-phone-logo" src="" class="w-full h-full object-contain hidden" alt="">
+                      <i class="fa-solid fa-image text-white/30 text-[10px]" id="sp-phone-logo-icon"></i>
+                    </div>
+                  </div>
+                  <p class="text-[8px] text-slate-500 text-center mt-2">ဖုန်းမှာ အလိုအလျောက် ၁၆:၉ · rounded</p>
+                </div>
+              </div>
             </div>
           </div>
+
 
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="md:col-span-2">
@@ -2343,6 +2369,37 @@ function setTextKeepHandle(el, text, resizeKey) {
   el.appendChild(handle);
 }
 
+
+function updatePhoneSponsorPreview() {
+  const phone = $('sponsor-phone-preview');
+  if (!phone) return;
+  const bgUrl = imageFieldValue('admin-sponsor-bg');
+  const ix = parseInt($('sp-img-x')?.value || '50', 10);
+  const iy = parseInt($('sp-img-y')?.value || '50', 10);
+  applyLiveBg(phone, bgUrl, ix, iy);
+  if (!bgUrl) phone.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
+
+  const badge = $('sp-phone-badge');
+  const title = $('sp-phone-title');
+  const desc = $('sp-phone-desc');
+  if (badge) {
+    badge.textContent = ($('admin-sponsor-badge')?.value.trim() || 'Official Sponsor').slice(0, 22);
+    badge.style.background = $('admin-sponsor-badge-bg')?.value || '#f5c518';
+    badge.style.color = $('admin-sponsor-badge-color')?.value || '#000';
+  }
+  if (title) {
+    title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
+    title.style.color = $('admin-sponsor-title-color')?.value || '#fff';
+  }
+  if (desc) {
+    desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
+    desc.style.color = $('admin-sponsor-desc-color')?.value || '#ccc';
+  }
+  const logo = $('sp-phone-logo');
+  const logoIcon = $('sp-phone-logo-icon');
+  applyLiveLogo(logo, logoIcon, imageFieldValue('admin-sponsor-img'));
+}
+
 function updateSponsorPreview() {
   const badge = $('sp-prev-badge');
   const title = $('sp-prev-title');
@@ -2449,6 +2506,7 @@ function updateSponsorPreview() {
   }
   if ($('sponsor-preview-dims')) $('sponsor-preview-dims').textContent = wPct + '% × ' + h + 'px';
   initSponsorDrag();
+  updatePhoneSponsorPreview();
 }
 
 
