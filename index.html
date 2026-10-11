@@ -224,9 +224,9 @@
       max-width: 100% !important;
       margin-left: 0 !important;
       margin-right: 0 !important;
-      min-height: min(var(--hero-min-h, 280px), 42vh) !important;
-      height: auto !important;
-      max-height: 48vh;
+      min-height: var(--hero-min-h, 120px) !important;
+      height: var(--hero-min-h, 120px) !important;
+      max-height: none;
     }
     #hero-section #hero-title { font-size: clamp(1.1rem, 5.5vw, 1.65rem) !important; }
     #hero-section #hero-desc { font-size: clamp(0.72rem, 3vw, 0.92rem) !important; }
@@ -912,6 +912,28 @@ function loadBlogData() {
   applyColors(siteSettings);
 
   const brand = siteSettings.brandName || 'HTOO HTET';
+  const brandEl = document.getElementById('brand-name') || document.querySelector('[data-brand-name]');
+  if (brandEl) {
+    brandEl.textContent = brand;
+    if (siteSettings.brandNameColor) brandEl.style.color = siteSettings.brandNameColor;
+    if (siteSettings.brandNameFs) brandEl.style.fontSize = siteSettings.brandNameFs + 'px';
+    if (siteSettings.brandNameWeight) brandEl.style.fontWeight = siteSettings.brandNameWeight;
+    if (siteSettings.brandNameStyle) brandEl.style.fontStyle = siteSettings.brandNameStyle;
+  }
+  const tagEl = document.getElementById('brand-tagline') || document.querySelector('[data-brand-tagline]');
+  if (tagEl) {
+    if (siteSettings.brandTaglineColor) tagEl.style.color = siteSettings.brandTaglineColor;
+    if (siteSettings.brandTaglineFs) tagEl.style.fontSize = siteSettings.brandTaglineFs + 'px';
+    if (siteSettings.brandTaglineWeight) tagEl.style.fontWeight = siteSettings.brandTaglineWeight;
+    if (siteSettings.brandTaglineStyle) tagEl.style.fontStyle = siteSettings.brandTaglineStyle;
+  }
+  const footEl = document.getElementById('footer-tagline');
+  if (footEl) {
+    if (siteSettings.footerTaglineColor) footEl.style.color = siteSettings.footerTaglineColor;
+    if (siteSettings.footerTaglineFs) footEl.style.fontSize = siteSettings.footerTaglineFs + 'px';
+    if (siteSettings.footerTaglineWeight) footEl.style.fontWeight = siteSettings.footerTaglineWeight;
+    if (siteSettings.footerTaglineStyle) footEl.style.fontStyle = siteSettings.footerTaglineStyle;
+  }
   const tagline = siteSettings.brandTagline || 'Travel Journal & Beyond';
   ['brand-name', 'footer-brand-name', 'mobile-brand-name', 'footer-copy-name'].forEach(id => { if ($(id)) $(id).textContent = brand; });
   const showTagline = siteSettings.showBrandTagline === true;
