@@ -994,21 +994,37 @@ function compactContentDataUrls(raw) {
 }
 
 /* ---- Image URL fields: hide long Base64 in the visible input ---- */
+function isRealImageUrl(v) {
+  v = String(v || '').trim();
+  if (!v) return false;
+  // reject our UI placeholder
+  if (v.indexOf('Preview မှာပေါ်') !== -1) return false;
+  if (v.indexOf('data:image…') === 0 || v.indexOf('data:image...') === 0) return false;
+  if (v.indexOf('blob:') === 0) return false;
+  return v.indexOf('http://') === 0 || v.indexOf('https://') === 0 || v.indexOf('data:image/') === 0;
+}
 function imageFieldValue(id) {
   const el = $(id);
   if (!el) return '';
-  return (el.dataset.fullUrl || el.value || '').trim();
+  const full = (el.dataset.fullUrl || '').trim();
+  if (isRealImageUrl(full)) return full;
+  const v = (el.value || '').trim();
+  if (isRealImageUrl(v)) return v;
+  return '';
 }
 function setImageFieldValue(id, url) {
   const el = $(id);
   if (!el) return;
   const v = (url || '').trim();
-  if (v.startsWith('data:image') && v.length > 60) {
+  if (isRealImageUrl(v) && v.indexOf('data:image/') === 0 && v.length > 60) {
     el.dataset.fullUrl = v;
     el.value = 'data:image… (Base64 · Preview မှာပေါ်နေပါပြီ)';
-  } else {
+  } else if (isRealImageUrl(v)) {
     delete el.dataset.fullUrl;
     el.value = v;
+  } else {
+    delete el.dataset.fullUrl;
+    el.value = '';
   }
 }
 function enableImageFieldEditing(id) {
@@ -1016,22 +1032,29 @@ function enableImageFieldEditing(id) {
   if (!el || el._imgFieldReady) return;
   el._imgFieldReady = true;
   el.addEventListener('focus', function() {
-    if (el.dataset.fullUrl) {
+    if (el.dataset.fullUrl && isRealImageUrl(el.dataset.fullUrl)) {
       el.value = el.dataset.fullUrl;
     }
   });
   el.addEventListener('blur', function() {
     const v = (el.value || '').trim();
-    if (v.startsWith('data:image') && v.length > 60) {
+    if (isRealImageUrl(v) && v.indexOf('data:image/') === 0 && v.length > 60) {
       el.dataset.fullUrl = v;
       el.value = 'data:image… (Base64 · Preview မှာပေါ်နေပါပြီ)';
-    } else if (!v.startsWith('data:')) {
+    } else if (isRealImageUrl(v)) {
+      delete el.dataset.fullUrl;
+      el.value = v;
+    } else if (!v) {
       delete el.dataset.fullUrl;
     }
+    // do NOT clear dataset.fullUrl when value is the short placeholder
   });
   el.addEventListener('input', function() {
+    // Only clear stored Base64 when user types a non-data URL (e.g. https paste)
     const v = (el.value || '').trim();
-    if (!v.startsWith('data:') || v.length < 60) delete el.dataset.fullUrl;
+    if (v && !v.startsWith('data:') && v.indexOf('Preview') === -1) {
+      delete el.dataset.fullUrl;
+    }
   });
 }
 
@@ -1268,21 +1291,33 @@ function applyLiveBg(container, url) {
     img.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;display:none;';
     container.insertBefore(img, container.firstChild);
   }
-  // ensure overlays stay above
+  // ensure overlays stay above the bg image
   Array.from(container.children).forEach(function(ch) {
     if (ch !== img && !ch.classList.contains('live-bg-img')) {
-      if (!ch.style.zIndex || ch.style.zIndex === '0') ch.style.zIndex = '1';
+      const z = parseInt(ch.style.zIndex || '0', 10);
+      if (z < 1) ch.style.zIndex = '1';
     }
   });
-  if (url) {
+  const ok = isRealImageUrl(url);
+  if (ok) {
     img.onload = function() { img.style.display = 'block'; };
-    img.onerror = function() { console.warn('live bg load fail'); };
+    img.onerror = function() {
+      console.warn('live bg load fail');
+      img.style.display = 'none';
+      // CSS background fallback
+      try {
+        container.style.backgroundImage = 'url("' + String(url).replace(/"/g, '\\"') + '")';
+        container.style.backgroundSize = 'cover';
+        container.style.backgroundPosition = 'center';
+      } catch (e) {}
+    };
     img.src = url;
     img.style.display = 'block';
     container.style.backgroundImage = 'none';
   } else {
     img.removeAttribute('src');
     img.style.display = 'none';
+    container.style.backgroundImage = '';
   }
 }
 function applyLiveLogo(imgEl, iconEl, url) {
@@ -1891,9 +1926,14 @@ function initHeroLineDrag() {
 }
 
 function saveHero() {
+  const heroImg = imageFieldValue('hero-image');
+  if (($('hero-image').value || '').indexOf('Preview') !== -1 && !heroImg) {
+    toast('Hero ပုံ မရပါ — Upload ခလုတ်နဲ့ ပုံပြန်တင်ပါ');
+    return;
+  }
   write('hh_hero', {
     active: $('hero-active').checked,
-    image: imageFieldValue('hero-image'),
+    image: heroImg,
     label: $('hero-label').value.trim(),
     labelColor: $('hero-label-color')?.value || '#f5c518',
     labelFs: parseInt($('hero-label-fs')?.value || '12', 10),
