@@ -320,15 +320,8 @@ main > div {
           <!-- FULL-BLEED LIVE PREVIEW (website-width) -->
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-2 sm:p-3 space-y-2 w-full">
             <div class="flex flex-wrap items-center gap-3 px-1">
-              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider shrink-0">Live Preview · Hero (Full width)</span>
-              <label class="flex items-center gap-1.5 text-[11px] text-emerald-200/80">
-                <span>Height</span>
-                <input type="range" id="hero-frame-h" min="160" max="720" step="10" value="360" class="w-36 accent-emerald-500" oninput="updateHeroPreview()">
-                <span id="val-hero-frame" class="tabular-nums w-12">360px</span>
-              </label>
-              <input type="hidden" id="hero-frame-w" value="100">
-              <span id="val-hero-frame-w" class="hidden">100%</span>
-              <span class="tiny ml-auto" id="hero-preview-dims">Full × 360px</span>
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider shrink-0">Live Preview · Hero</span>
+              <span class="tiny ml-auto" id="hero-preview-dims">100% × 360px</span>
               <button type="button" class="btn btn-muted text-[10px] py-1 px-2" onclick="var p=$('hero-phone-wrap');if(p)p.classList.toggle('hidden')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
             </div>
 
@@ -360,6 +353,32 @@ main > div {
                 </div>
                 <div class="mx-auto mt-2" style="width:40px;height:4px;border-radius:4px;background:#3f3f46"></div>
                 <p class="text-[9px] text-slate-500 text-center mt-1.5">ဖုန်းမျက်နှာပြင် · auto layout</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Frame Size · Align -->
+          <div class="rounded-xl border border-emerald-700/40 bg-emerald-950/20 p-4 space-y-3">
+            <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Banner Frame · Size & Align</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+              <div>
+                <label class="label flex justify-between">Height <span id="val-hero-frame" class="range-val">360px</span></label>
+                <input type="range" id="hero-frame-h" min="80" max="900" step="10" value="360" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
+                <p class="tiny mt-1">၈၀px – ၉၀၀px</p>
+              </div>
+              <div>
+                <label class="label flex justify-between">Width <span id="val-hero-frame-w" class="range-val">100%</span></label>
+                <input type="range" id="hero-frame-w" min="30" max="100" step="5" value="100" class="w-full accent-emerald-500" oninput="updateHeroPreview()">
+                <p class="tiny mt-1">၃၀% – ၁၀၀%</p>
+              </div>
+              <div>
+                <label class="label">Align (W &lt; 100% မှာ)</label>
+                <div class="flex gap-2">
+                  <button type="button" class="btn btn-muted flex-1 hero-align-btn" data-align="left" onclick="setHeroFrameAlign('left')">Left</button>
+                  <button type="button" class="btn btn-muted flex-1 hero-align-btn" data-align="center" onclick="setHeroFrameAlign('center')">Center</button>
+                  <button type="button" class="btn btn-muted flex-1 hero-align-btn" data-align="right" onclick="setHeroFrameAlign('right')">Right</button>
+                </div>
+                <input type="hidden" id="hero-frame-align" value="center">
               </div>
             </div>
           </div>
@@ -1779,7 +1798,8 @@ function loadAll() {
   if ($('hero-img-x')) $('hero-img-x').value = h.imgPosX != null ? h.imgPosX : 50;
   if ($('hero-img-y')) $('hero-img-y').value = h.imgPosY != null ? h.imgPosY : 50;
   if ($('hero-frame-w')) $('hero-frame-w').value = h.frameW != null ? h.frameW : 100;
-  if ($('hero-frame-h')) $('hero-frame-h').value = h.frameH != null ? h.frameH : 280;
+  if ($('hero-frame-h')) $('hero-frame-h').value = h.frameH != null ? h.frameH : 360;
+  if ($('hero-frame-align')) $('hero-frame-align').value = h.frameAlign || 'center';
   $('hero-label').value = h.label || '';
   if ($('hero-label-color')) $('hero-label-color').value = h.labelColor || '#f5c518';
   if ($('hero-label-fs')) $('hero-label-fs').value = h.labelFs || 12;
@@ -2015,6 +2035,10 @@ function saveSettings() {
   toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
 }
 
+function setHeroFrameAlign(align) {
+  if ($('hero-frame-align')) $('hero-frame-align').value = align || 'center';
+  updateHeroPreview();
+}
 function setHeroPrevText(el, text, resizeKey) {
   if (!el) return;
   let handle = el.querySelector('.sp-resize-handle');
@@ -2099,13 +2123,24 @@ function updateHeroPreview() {
     if (!img) box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
   }
   const fh = parseInt($('hero-frame-h')?.value || '360', 10);
+  const fw = parseInt($('hero-frame-w')?.value || '100', 10);
+  const fal = $('hero-frame-align')?.value || 'center';
   if ($('val-hero-frame')) $('val-hero-frame').textContent = fh + 'px';
-  if ($('hero-preview-dims')) $('hero-preview-dims').textContent = 'Full × ' + fh + 'px';
-  if ($('hero-live-preview')) {
-    $('hero-live-preview').style.height = fh + 'px';
-    $('hero-live-preview').style.width = '100%';
-    $('hero-live-preview').style.maxWidth = '100%';
+  if ($('val-hero-frame-w')) $('val-hero-frame-w').textContent = fw + '%';
+  if ($('hero-preview-dims')) $('hero-preview-dims').textContent = fw + '% × ' + fh + 'px · ' + fal;
+  const boxEl = $('hero-live-preview');
+  if (boxEl) {
+    boxEl.style.height = fh + 'px';
+    boxEl.style.width = fw + '%';
+    boxEl.style.maxWidth = '100%';
+    boxEl.style.marginLeft = (fal === 'right') ? 'auto' : (fal === 'center' ? 'auto' : '0');
+    boxEl.style.marginRight = (fal === 'left') ? 'auto' : (fal === 'center' ? 'auto' : '0');
   }
+  document.querySelectorAll('.hero-align-btn').forEach(function(b) {
+    const on = b.getAttribute('data-align') === fal;
+    b.classList.toggle('btn-green', on);
+    b.classList.toggle('btn-muted', !on);
+  });
   // re-attach resize handles if textContent wiped them
   ['hero-prev-label|hero-label', 'hero-prev-title|hero-title', 'hero-prev-desc|hero-desc', 'hero-prev-sign|hero-sign'].forEach(function(pair) {
     const parts = pair.split('|');
@@ -2400,7 +2435,8 @@ function saveHero() {
     imgPosX: parseInt($('hero-img-x')?.value || '50', 10),
     imgPosY: parseInt($('hero-img-y')?.value || '50', 10),
     frameW: parseInt($('hero-frame-w')?.value || '100', 10),
-    frameH: parseInt($('hero-frame-h')?.value || '280', 10),
+    frameH: parseInt($('hero-frame-h')?.value || '360', 10),
+    frameAlign: $('hero-frame-align')?.value || 'center',
     label: $('hero-label').value.trim(),
     labelColor: $('hero-label-color')?.value || '#f5c518',
     labelFs: parseInt($('hero-label-fs')?.value || '12', 10),
