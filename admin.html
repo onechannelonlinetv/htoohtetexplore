@@ -73,6 +73,31 @@ input[type=color].field-color,input[type=color].h-11{
 #hero-live-preview,#sponsor-live-preview,#up-live-preview{
   width:100%!important;max-width:100%!important
 }
+
+/* Force full-width editors (match Latest Travel stretch) */
+#view-settings.view.active,
+#view-settings .panel,
+#view-settings #hero-editor-anchor,
+#view-sponsor.view.active,
+#view-sponsor .panel,
+#view-upcoming.view.active,
+#view-upcoming .panel,
+#view-posts.view.active,
+#view-posts .panel {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+#hero-live-preview,
+#sponsor-live-preview {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+}
+main > div {
+  width: 100%;
+  max-width: none !important;
+}
 </style>
 </head>
 <body class="min-h-screen">
@@ -242,7 +267,7 @@ input[type=color].field-color,input[type=color].h-11{
 <input type="hidden" id="set-mode" value="dark">
 <input type="hidden" id="mode-dark-btn"><input type="hidden" id="mode-light-btn">
 
-          <div class="form-row-2">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             <div><label class="label">Brand Name *</label><input id="set-brand-name" class="field" placeholder="HTOO HTET"></div>
             <div><label class="label">Tagline (Footer / optional under logo)</label><input id="set-brand-tagline" class="field" placeholder="Travel Journal & Beyond"></div>
             <div class="md:col-span-2">
@@ -259,7 +284,8 @@ input[type=color].field-color,input[type=color].h-11{
             <div><label class="label">Contact Email</label><input id="set-email" class="field" placeholder="htoohtet@gmail.com"></div>
             <div><label class="label">Contact Location</label><input id="set-location" class="field" placeholder="Yangon, Myanmar"></div>
             <div class="md:col-span-2"><label class="label">Footer Tagline</label><textarea id="set-footer-tagline" class="field min-h-16" placeholder="Good Vibes&#10;Better Journeys"></textarea></div>
-            
+          </div><!-- /brand form grid -->
+
           <!-- hidden layout fields (kept for data compatibility) -->
           <input type="hidden" id="set-stories-heading" value="">
           <input type="hidden" id="set-stories-sub" value="">
@@ -284,14 +310,15 @@ input[type=color].field-color,input[type=color].h-11{
           <div id="layout-preview" class="hidden"></div>
           <div id="layout-preview-inner" class="hidden"></div>
           <div id="layout-preview-text" class="hidden"></div>
+        </div><!-- /brand panel -->
 
-<div id="hero-editor-anchor" class="space-y-5 pt-6 border-t border-slate-700">
+        <div id="hero-editor-anchor" class="space-y-5 pt-2 w-full max-w-none">
         <div><h2 class="text-xl font-black">Hero Banner</h2><p class="mt-1 text-sm text-slate-400">Preview အပြည့် · စာတစ်ကြောင်းချင်း Font / Color / Size / Style</p></div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-5">
           <label class="toggle-row"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
 
           <!-- FULL-BLEED LIVE PREVIEW (website-width) -->
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-2 sm:p-3 space-y-2">
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-2 sm:p-3 space-y-2 w-full">
             <div class="flex flex-wrap items-center gap-3 px-1">
               <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider shrink-0">Live Preview · Hero (Full width)</span>
               <label class="flex items-center gap-1.5 text-[11px] text-emerald-200/80">
@@ -346,7 +373,7 @@ input[type=color].field-color,input[type=color].h-11{
           <!-- LABEL row: text | color | size | weight | style -->
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Label</p>
-            <div class="form-row form-row-typo">
+            <div class="form-row form-row-typo w-full">
               <div>
                 <label class="label">စာသား</label>
                 <input id="hero-label" class="field" placeholder="Travel Journal" oninput="updateHeroPreview()">
@@ -381,7 +408,7 @@ input[type=color].field-color,input[type=color].h-11{
           <!-- TITLE -->
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Title</p>
-            <div class="form-row form-row-typo">
+            <div class="form-row form-row-typo w-full">
               <div>
                 <label class="label">စာသား</label>
                 <textarea id="hero-title" class="field min-h-16" placeholder="New Places.&#10;Same Curiosity." oninput="updateHeroPreview()"></textarea>
@@ -416,7 +443,7 @@ input[type=color].field-color,input[type=color].h-11{
           <!-- DESC -->
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Description</p>
-            <div class="form-row form-row-typo">
+            <div class="form-row form-row-typo w-full">
               <div>
                 <label class="label">စာသား</label>
                 <textarea id="hero-desc" class="field min-h-16" oninput="updateHeroPreview()"></textarea>
@@ -451,7 +478,7 @@ input[type=color].field-color,input[type=color].h-11{
           <!-- SIGN -->
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Signature</p>
-            <div class="form-row form-row-typo">
+            <div class="form-row form-row-typo w-full">
               <div>
                 <label class="label">စာသား</label>
                 <input id="hero-sign" class="field" placeholder="— Htoo Htet" oninput="updateHeroPreview()">
