@@ -48,6 +48,31 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 #content-live-preview img{max-width:100%;border-radius:10px;display:block;margin:8px 0}
 #sp-prev-logo{width:100%!important;height:100%!important;object-fit:contain!important}
 .preview-thumb{max-height:140px!important;max-width:240px!important;object-fit:contain!important;display:block!important}
+
+/* Full-width editor layout */
+.editor-shell{width:100%;max-width:100%}
+.form-row{display:grid;gap:0.75rem;align-items:end}
+@media (min-width: 640px){
+  .form-row-typo{grid-template-columns:minmax(0,2fr) minmax(72px,90px) minmax(100px,1fr) minmax(90px,120px) minmax(90px,120px)}
+}
+@media (max-width: 639px){
+  .form-row-typo{grid-template-columns:1fr}
+}
+.form-row-2{display:grid;gap:0.75rem}
+@media (min-width: 768px){
+  .form-row-2{grid-template-columns:1fr 1fr}
+}
+.form-row-3{display:grid;gap:0.75rem}
+@media (min-width: 768px){
+  .form-row-3{grid-template-columns:1fr 1fr 1fr}
+}
+.panel{width:100%}
+input[type=color].field-color,input[type=color].h-11{
+  min-height:2.75rem;width:100%;padding:2px;cursor:pointer
+}
+#hero-live-preview,#sponsor-live-preview,#up-live-preview{
+  width:100%!important;max-width:100%!important
+}
 </style>
 </head>
 <body class="min-h-screen">
@@ -128,7 +153,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       </div>
     </div>
 
-    <div class="mx-auto max-w-7xl space-y-6 p-4 sm:p-8">
+    <div class="w-full max-w-none space-y-6 p-3 sm:p-5 lg:p-6 xl:px-8">
 
       <!-- OVERVIEW -->
       <section id="view-overview" class="view active space-y-6">
@@ -169,7 +194,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           <button type="button" class="btn btn-muted" onclick="showView('menu')">✏️ Edit Menu</button>
           <button type="button" class="btn btn-muted" onclick="showView('youtube')">✏️ Edit YouTube</button>
         </div>
-        <div class="panel p-2 sm:p-4 bg-[#050a12]">
+        <div class="panel editor-shell p-2 sm:p-4 bg-[#050a12]">
           <div id="page-preview-frame-wrap" class="mx-auto transition-all" style="width:100%;max-width:100%;">
             <div class="rounded-xl border border-slate-700 overflow-hidden bg-black shadow-2xl">
               <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-900 border-b border-slate-800">
@@ -186,7 +211,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
 <section id="view-settings" class="view space-y-5">
         <div><h2 class="text-xl font-black">Brand & Hero</h2><p class="mt-1 text-sm text-slate-400">Theme · Logo · Layout · Hero Banner (PC + Phone preview)</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div>
             <label class="label mb-3">Website Theme — ဒီဇိုင်း ၄ မျိုး ကွဲပြား</label>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="theme-selector">
@@ -217,7 +242,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 <input type="hidden" id="set-mode" value="dark">
 <input type="hidden" id="mode-dark-btn"><input type="hidden" id="mode-light-btn">
 
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div class="form-row-2">
             <div><label class="label">Brand Name *</label><input id="set-brand-name" class="field" placeholder="HTOO HTET"></div>
             <div><label class="label">Tagline (Footer / optional under logo)</label><input id="set-brand-tagline" class="field" placeholder="Travel Journal & Beyond"></div>
             <div class="md:col-span-2">
@@ -262,7 +287,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
 <div id="hero-editor-anchor" class="space-y-5 pt-6 border-t border-slate-700">
         <div><h2 class="text-xl font-black">Hero Banner</h2><p class="mt-1 text-sm text-slate-400">Preview အပြည့် · စာတစ်ကြောင်းချင်း Font / Color / Size / Style</p></div>
-        <div class="panel p-5 sm:p-6 space-y-5">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-5">
           <label class="toggle-row"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
 
           <!-- FULL-BLEED LIVE PREVIEW (website-width) -->
@@ -321,8 +346,8 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           <!-- LABEL row: text | color | size | weight | style -->
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Label</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 items-end">
-              <div class="lg:col-span-2">
+            <div class="form-row form-row-typo">
+              <div>
                 <label class="label">စာသား</label>
                 <input id="hero-label" class="field" placeholder="Travel Journal" oninput="updateHeroPreview()">
               </div>
@@ -356,8 +381,8 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           <!-- TITLE -->
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Title</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 items-end">
-              <div class="lg:col-span-2">
+            <div class="form-row form-row-typo">
+              <div>
                 <label class="label">စာသား</label>
                 <textarea id="hero-title" class="field min-h-16" placeholder="New Places.&#10;Same Curiosity." oninput="updateHeroPreview()"></textarea>
               </div>
@@ -391,8 +416,8 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           <!-- DESC -->
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Description</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 items-end">
-              <div class="lg:col-span-2">
+            <div class="form-row form-row-typo">
+              <div>
                 <label class="label">စာသား</label>
                 <textarea id="hero-desc" class="field min-h-16" oninput="updateHeroPreview()"></textarea>
               </div>
@@ -426,8 +451,8 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           <!-- SIGN -->
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Signature</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 items-end">
-              <div class="lg:col-span-2">
+            <div class="form-row form-row-typo">
+              <div>
                 <label class="label">စာသား</label>
                 <input id="hero-sign" class="field" placeholder="— Htoo Htet" oninput="updateHeroPreview()">
               </div>
@@ -451,8 +476,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                   <option value="italic">Italic</option>
                 </select>
               </div>
-              <div class="sm:col-span-2 lg:col-span-1"></div>
-            </div>
+              </div>
           </div>
 
           <!-- Button -->
@@ -495,7 +519,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       <!-- HERO -->
       <section id="view-menu" class="view space-y-5">
         <div><h2 class="text-xl font-black">Menu Items</h2><p class="mt-1 text-sm text-slate-400">Hamburger menu ထဲမှာ ပြမယ်</p></div>
-        <div class="panel p-5 sm:p-6">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Preview · Menu Drawer</span>
             <div id="menu-preview-box" class="mt-2 space-y-1 text-sm text-emerald-100"></div>
@@ -512,7 +536,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       <!-- PROUD SPONSORS -->
       <section id="view-proud" class="view space-y-5">
         <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ကြည့် · logo Upload</p></div>
-        <div class="panel p-5 sm:p-6">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Proud Bar</span>
             <div id="proud-preview-bar" class="mt-2 flex flex-wrap items-center gap-4 min-h-[40px]"></div>
@@ -546,7 +570,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
         <div id="sponsor-list" class="space-y-2"></div>
 
-        <div class="panel p-5 sm:p-6 space-y-4" id="sponsor-editor">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4" id="sponsor-editor">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="font-bold text-white" id="sponsor-editor-title">Sponsor တည်းဖြတ်</h3>
             <label class="toggle-row mb-0"><input type="checkbox" id="admin-sponsor-active" checked onchange="updateSponsorPreview()"><span class="text-sm font-semibold">ပြမယ်</span></label>
@@ -751,7 +775,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
 <section id="view-upcoming" class="view space-y-5">
         <div><h2 class="text-xl font-black">Upcoming Section</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန် · စာအရောင်</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="up-active" checked onchange="updateUpcomingPreview()"><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
 
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
@@ -833,7 +857,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <section id="view-posts" class="view space-y-5">
         <div><h2 class="text-xl font-black">Latest Travel</h2><p class="mt-1 text-sm text-slate-400">Post များ · Section ခေါင်းစဉ် · Banner — Hero/Sponsor လို ချိန်နိုင်</p></div>
-        <div class="panel p-5 sm:p-6 space-y-3">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-3">
           <h3 class="font-bold text-white text-sm">Section ခေါင်းစဉ် (Live site · Travel Stories အပေါ်)</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div><label class="label">Heading</label><input id="stories-heading-input" class="field" placeholder="Travel Stories"></div>
@@ -861,7 +885,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           <button type="button" onclick="saveStoriesSection()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Latest Travel Section</button>
         </div>
         <div><h3 class="font-bold text-white">Posts စာရင်း</h3><p class="text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload</p></div>
-        <div class="panel p-5 sm:p-6">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Post Card</span>
@@ -945,7 +969,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
             <button id="post-cancel-button" onclick="cancelPostEdit()" class="btn btn-muted hidden">Cancel</button>
           </div>
         </div>
-        <div class="panel p-5 sm:p-6">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="mb-4 flex items-center justify-between"><h3 class="font-bold">Saved Posts</h3><span id="post-count" class="tiny">0 posts</span></div>
           <div id="posts-list" class="space-y-3"></div>
         </div>
@@ -954,7 +978,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       <!-- CUSTOM ROWS -->
       <section id="view-sections" class="view space-y-5">
         <div><h2 class="text-xl font-black">Custom Rows / Sections</h2><p class="mt-1 text-sm text-slate-400">Homepage မှာ extra row တွေ ထည့်နိုင်တယ်</p></div>
-        <div class="panel p-5 sm:p-6">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Row ခေါင်းစဉ် *</label><input id="section-title" class="field" placeholder="Featured Destinations"></div>
             <div><label class="label">Subtitle</label><input id="section-subtitle" class="field" placeholder="Explore more"></div>
@@ -967,7 +991,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
           </div>
           <button onclick="addHomeSection()" class="btn btn-purple mt-4"><i class="fa-solid fa-plus mr-2"></i>Add Row</button>
         </div>
-        <div class="panel p-5 sm:p-6">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="mb-4 flex items-center justify-between"><h3 class="font-bold">Created Rows</h3><span id="section-count" class="tiny">0 rows</span></div>
           <div id="home-sections-list" class="space-y-3"></div>
         </div>
@@ -976,7 +1000,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
       <!-- YOUTUBE -->
       <section id="view-youtube" class="view space-y-5">
         <div><h2 class="text-xl font-black">YouTube Section</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန်</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="yt-active" checked onchange="updateYoutubePreview()"><span class="text-sm font-semibold">YouTube Section ပြမယ်</span></label>
 
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
@@ -1036,7 +1060,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <section id="view-about" class="view space-y-5">
         <div><h2 class="text-xl font-black">About Section</h2><p class="mt-1 text-sm text-slate-400">Preview · စာအရောင် · Font weight</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="about-active" checked onchange="updateAboutPreview()"><span class="text-sm font-semibold">About ပြမယ်</span></label>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · About</span>
@@ -1065,7 +1089,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
       <section id="view-social" class="view space-y-5">
         <div><h2 class="text-xl font-black">Social Links</h2><p class="mt-1 text-sm text-slate-400">Search icon ဘေး + Header / Footer မှာ ပြမယ် (Facebook, YouTube, TikTok, Viber)</p></div>
-        <div class="panel p-5 sm:p-6 space-y-4">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label class="toggle-row mb-1"><input type="checkbox" id="social-show-fb" checked><span class="text-sm font-semibold">Facebook ပြမယ်</span></label>
