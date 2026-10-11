@@ -193,6 +193,73 @@
   body.mode-light #youtube-section .text-white,
   body.mode-light #article-page .text-white { color: #ffffff !important; }
   #article-body img { cursor: zoom-in; border-radius: 12px; }
+  /* Official Sponsor — responsive */
+  .sp-banner {
+    position: relative;
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid rgba(6, 78, 59, 0.4);
+    box-shadow: 0 10px 25px rgba(0,0,0,.25);
+  }
+  .sp-banner img.sp-bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .sp-banner .sp-grad { position:absolute; inset:0; background: linear-gradient(to right, rgba(0,0,0,.75), rgba(0,0,0,.4), transparent); }
+  .sp-banner .sp-badge, .sp-banner .sp-title, .sp-banner .sp-desc, .sp-banner .sp-logo, .sp-banner .sp-link {
+    position: absolute; z-index: 12;
+  }
+  .sp-banner .sp-title { max-width: 90%; }
+  .sp-banner .sp-desc { max-width: 70%; }
+  @media (max-width: 640px) {
+    .sp-banner {
+      width: 100% !important;
+      height: auto !important;
+      min-height: 140px !important;
+      max-height: 200px !important;
+      aspect-ratio: 16 / 9;
+      border-radius: 1rem !important; /* no circle/pill on phone */
+    }
+    .sp-banner[data-shape="square"] { border-radius: 0.5rem !important; }
+    .sp-banner .sp-badge {
+      font-size: clamp(9px, 2.8vw, 12px) !important;
+      left: 4% !important;
+      top: 10% !important;
+      max-width: 92%;
+    }
+    .sp-banner .sp-title {
+      font-size: clamp(14px, 4.5vw, 22px) !important;
+      left: 4% !important;
+      top: 32% !important;
+      max-width: 75% !important;
+      line-height: 1.2;
+      white-space: normal !important;
+    }
+    .sp-banner .sp-desc {
+      font-size: clamp(11px, 3.2vw, 14px) !important;
+      left: 4% !important;
+      top: 58% !important;
+      max-width: 70% !important;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .sp-banner .sp-logo {
+      width: clamp(48px, 14vw, 72px) !important;
+      height: clamp(48px, 14vw, 72px) !important;
+      left: auto !important;
+      right: 3% !important;
+      top: 50% !important;
+      transform: translateY(-50%);
+    }
+    .sp-banner .sp-link {
+      left: 4% !important;
+      bottom: 8% !important;
+      top: auto !important;
+      font-size: 12px !important;
+      padding: 6px 12px !important;
+    }
+  }
+
   #article-body img:hover { opacity: 0.95; }
 
   /* Custom typography from admin — win over Tailwind on mobile */
@@ -917,59 +984,52 @@ function loadBlogData() {
         const h = sponsor.height || (siteSettings.sponsorHeight) || 180;
         const wPct = sponsor.widthPct != null ? sponsor.widthPct : 100;
         const shape = sponsor.shape || 'rounded';
-        const radiusMap = { square: '0px', soft: '16px', rounded: '1rem', pill: '9999px', circle: '9999px' };
-        const radius = radiusMap[shape] || '1rem';
+        const radiusMap = { square: '0px', soft: '16px', rounded: '1rem', pill: '1.25rem', circle: '1.25rem' };
+        // Desktop can still use pill/circle; phone CSS overrides to soft rounded
+        const radiusDesktop = (shape === 'pill' || shape === 'circle')
+          ? (shape === 'circle' ? '9999px' : '9999px')
+          : (radiusMap[shape] || '1rem');
         const badgeBg = sponsor.badgeBg || '';
         const badgeStyle = [
-          'position:absolute',
-          'left:' + (sponsor.badgeX != null ? sponsor.badgeX : 4) + '%',
-          'top:' + (sponsor.badgeY != null ? sponsor.badgeY : 12) + '%',
-          'z-index:12',
           badgeBg ? 'background:' + badgeBg : '',
           sponsor.badgeColor ? 'color:' + sponsor.badgeColor : '',
           sponsor.badgePad ? 'padding:' + Math.round(sponsor.badgePad/2) + 'px ' + sponsor.badgePad + 'px' : '',
           sponsor.badgeFs ? 'font-size:' + sponsor.badgeFs + 'px' : '',
           sponsor.badgeRadius != null ? ('border-radius:' + (sponsor.badgeRadius >= 24 ? '9999px' : sponsor.badgeRadius + 'px')) : '',
-          sponsor.badgeWeight ? 'font-weight:' + sponsor.badgeWeight : ''
+          sponsor.badgeWeight ? 'font-weight:' + sponsor.badgeWeight : '',
+          'left:' + (sponsor.badgeX != null ? sponsor.badgeX : 4) + '%',
+          'top:' + (sponsor.badgeY != null ? sponsor.badgeY : 12) + '%'
         ].filter(Boolean).join(';');
         const titleStyle = [
-          'position:absolute',
-          'left:' + (sponsor.titleX != null ? sponsor.titleX : 4) + '%',
-          'top:' + (sponsor.titleY != null ? sponsor.titleY : 38) + '%',
-          'z-index:12',
-          'max-width:90%',
           sponsor.titleColor ? 'color:' + sponsor.titleColor : '',
-          sponsor.titleFs ? 'font-size:clamp(1rem, 4vw, ' + sponsor.titleFs + 'px)' : '',
-          sponsor.titleWeight ? 'font-weight:' + sponsor.titleWeight : ''
+          sponsor.titleFs ? 'font-size:clamp(1rem, 3.2vw, ' + sponsor.titleFs + 'px)' : '',
+          sponsor.titleWeight ? 'font-weight:' + sponsor.titleWeight : '',
+          'left:' + (sponsor.titleX != null ? sponsor.titleX : 4) + '%',
+          'top:' + (sponsor.titleY != null ? sponsor.titleY : 38) + '%'
         ].filter(Boolean).join(';');
         const descStyle = [
-          'position:absolute',
-          'left:' + (sponsor.descX != null ? sponsor.descX : 4) + '%',
-          'top:' + (sponsor.descY != null ? sponsor.descY : 62) + '%',
-          'z-index:12',
-          'max-width:70%',
           sponsor.descColor ? 'color:' + sponsor.descColor : '',
-          sponsor.descFs ? 'font-size:' + sponsor.descFs + 'px' : ''
+          sponsor.descFs ? 'font-size:' + sponsor.descFs + 'px' : '',
+          'left:' + (sponsor.descX != null ? sponsor.descX : 4) + '%',
+          'top:' + (sponsor.descY != null ? sponsor.descY : 62) + '%'
         ].filter(Boolean).join(';');
         const bgPos = (sponsor.imgPosX != null ? sponsor.imgPosX : 50) + '% ' + (sponsor.imgPosY != null ? sponsor.imgPosY : 50) + '%';
         const bgSrc = sponsor.bgImage || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&q=80';
-        const link = sponsor.link || '#';
         const logoSize = sponsor.logoSize || 96;
         const logoX = sponsor.logoX != null ? sponsor.logoX : 88;
         const logoY = sponsor.logoY != null ? sponsor.logoY : 40;
-        let logoHtml = '';
-        if (sponsor.img) {
-          logoHtml = '<div class="rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="position:absolute;left:' + logoX + '%;top:' + logoY + '%;width:' + logoSize + 'px;height:' + logoSize + 'px;z-index:15"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-1"></div>';
-        }
-        const linkHtml = sponsor.link
-          ? '<a href="' + safe(link) + '" target="_blank" rel="noopener" class="absolute z-20 inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:4%;bottom:12%">' + t('visitSponsor') + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
+        const logoHtml = sponsor.img
+          ? '<div class="sp-logo rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="left:' + logoX + '%;top:' + logoY + '%;width:' + logoSize + 'px;height:' + logoSize + 'px"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-1"></div>'
           : '';
-        return '<div class="relative overflow-hidden border border-emerald-800/40 shadow-xl mx-auto" style="min-height:' + h + 'px;height:' + h + 'px;width:' + wPct + '%;border-radius:' + radius + '">' +
-          '<img src="' + safe(bgSrc) + '" alt="" class="absolute inset-0 w-full h-full object-cover" style="object-position:' + bgPos + '">' +
-          '<div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent"></div>' +
-          '<span class="inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge || 'Official Sponsor') + '</span>' +
-          '<h2 class="font-black text-white tracking-tight" style="' + titleStyle + '">' + safe(sponsor.title || '') + '</h2>' +
-          (sponsor.desc ? '<p class="text-sm text-emerald-100/80 leading-relaxed" style="' + descStyle + '">' + safe(sponsor.desc) + '</p>' : '') +
+        const linkHtml = sponsor.link
+          ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:4%;bottom:12%">' + t('visitSponsor') + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
+          : '';
+        return '<div class="sp-banner" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;border-radius:' + radiusDesktop + '">' +
+          '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
+          '<div class="sp-grad"></div>' +
+          '<span class="sp-badge inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge || 'Official Sponsor') + '</span>' +
+          '<h2 class="sp-title font-black text-white tracking-tight" style="' + titleStyle + '">' + safe(sponsor.title || '') + '</h2>' +
+          (sponsor.desc ? '<p class="sp-desc text-sm text-emerald-100/80 leading-relaxed" style="' + descStyle + '">' + safe(sponsor.desc) + '</p>' : '') +
           linkHtml + logoHtml +
           '</div>';
       }).join('');
