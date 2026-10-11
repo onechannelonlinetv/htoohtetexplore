@@ -397,21 +397,21 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                 </div>
               </div>
             </div>
-            <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
-              <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Label / Title / Desc / Sign — တစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
-              <p class="tiny">နေရာရွှေ့ပြီး Save Hero နှိပ်ပါ။ Slider နဲ့လည်း ချိန်နိုင်ပါတယ်။</p>
-              <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
-                <div>Label X <input type="range" id="hero-label-x" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hlx">8</span>%</div>
-                <div>Label Y <input type="range" id="hero-label-y" min="0" max="100" value="18" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hly">18</span>%</div>
-                <div>Title X <input type="range" id="hero-title-x" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-htx">8</span>%</div>
-                <div>Title Y <input type="range" id="hero-title-y" min="0" max="100" value="32" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hty">32</span>%</div>
-                <div>Desc X <input type="range" id="hero-desc-x" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdx">8</span>%</div>
-                <div>Desc Y <input type="range" id="hero-desc-y" min="0" max="100" value="55" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hdy">55</span>%</div>
-                <div>Sign X <input type="range" id="hero-sign-x" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsx">8</span>%</div>
-                <div>Sign Y <input type="range" id="hero-sign-y" min="0" max="100" value="78" class="w-full accent-sky-500" oninput="updateHeroPreview()"><span id="val-hsy">78</span>%</div>
-              </div>
-              <input type="hidden" id="hero-text-x" value="8"><input type="hidden" id="hero-text-y" value="35">
-            </div>
+            <!-- position values (hidden) — drag on preview only -->
+            <input type="hidden" id="hero-label-x" value="8">
+            <input type="hidden" id="hero-label-y" value="18">
+            <input type="hidden" id="hero-title-x" value="8">
+            <input type="hidden" id="hero-title-y" value="32">
+            <input type="hidden" id="hero-desc-x" value="8">
+            <input type="hidden" id="hero-desc-y" value="55">
+            <input type="hidden" id="hero-sign-x" value="8">
+            <input type="hidden" id="hero-sign-y" value="78">
+            <input type="hidden" id="hero-text-x" value="8">
+            <input type="hidden" id="hero-text-y" value="35">
+            <span id="val-hlx" class="hidden">8</span><span id="val-hly" class="hidden">18</span>
+            <span id="val-htx" class="hidden">8</span><span id="val-hty" class="hidden">32</span>
+            <span id="val-hdx" class="hidden">8</span><span id="val-hdy" class="hidden">55</span>
+            <span id="val-hsx" class="hidden">8</span><span id="val-hsy" class="hidden">78</span>
             <div>
               <label class="label">Small Label</label>
               <input id="hero-label" class="field" placeholder="Travel Journal" oninput="updateHeroPreview()">
@@ -2037,6 +2037,7 @@ function initHeroImageDrag() {
       if ($('hero-img-y')) $('hero-img-y').value = ny;
       if ($('val-hix')) $('val-hix').textContent = nx;
       if ($('val-hiy')) $('val-hiy').textContent = ny;
+      try { updatePhoneHeroPreview(); } catch (e) {}
       const bg = box.querySelector('.live-bg-img');
       if (bg) bg.style.objectPosition = nx + '% ' + ny + '%';
     });
@@ -2049,6 +2050,7 @@ function initHeroImageDrag() {
       if ($('hero-img-y')) $('hero-img-y').value = ny;
       if ($('val-hix')) $('val-hix').textContent = nx;
       if ($('val-hiy')) $('val-hiy').textContent = ny;
+      try { updatePhoneHeroPreview(); } catch (e) {}
       const bg = box.querySelector('.live-bg-img');
       if (bg) bg.style.objectPosition = nx + '% ' + ny + '%';
       e.preventDefault();
@@ -2176,6 +2178,7 @@ function initHeroLineDrag() {
     if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
     if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
     if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
+    try { updatePhoneHeroPreview(); } catch (err) {}
     e.preventDefault();
   }
 
@@ -2211,16 +2214,40 @@ function updatePhoneHeroPreview() {
   const ix = parseInt($('hero-img-x')?.value || '50', 10);
   const iy = parseInt($('hero-img-y')?.value || '50', 10);
   if (typeof applyLiveBg === 'function') applyLiveBg(phone, bgUrl, ix, iy);
-  const set = (id, text, color) => {
+  if (!bgUrl) phone.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
+
+  const pos = function(id, def) { return parseInt($(id)?.value || def, 10); };
+  const lx = pos('hero-label-x', 8), ly = pos('hero-label-y', 18);
+  const tx = pos('hero-title-x', 8), ty = pos('hero-title-y', 32);
+  const dx = pos('hero-desc-x', 8), dy = pos('hero-desc-y', 55);
+  const sx = pos('hero-sign-x', 8), sy = pos('hero-sign-y', 78);
+  const lfs = pos('hero-label-fs', 12), tfs = pos('hero-title-fs', 28), dfs = pos('hero-desc-fs', 14);
+
+  function applyText(id, txt, color, left, top, fs, extra) {
     const el = $(id);
     if (!el) return;
-    el.textContent = text || '';
+    el.textContent = txt || '';
     if (color) el.style.color = color;
-  };
-  set('hero-phone-label', $('hero-label')?.value || 'Travel Journal', $('hero-label-color')?.value);
-  set('hero-phone-title', ($('hero-title')?.value || 'New Places.').replace(/\\n/g, ' '), $('hero-title-color')?.value);
-  set('hero-phone-desc', $('hero-desc')?.value || '', $('hero-desc-color')?.value);
-  set('hero-phone-sign', $('hero-sign')?.value || '', $('hero-sign-color')?.value);
+    el.style.left = left + '%';
+    el.style.top = top + '%';
+    if (fs) el.style.fontSize = fs + 'px';
+    if (extra) {
+      if (extra.weight) el.style.fontWeight = extra.weight;
+      if (extra.style) el.style.fontStyle = extra.style;
+      if (extra.display != null) el.style.display = extra.display;
+    }
+  }
+  applyText('hero-phone-label', $('hero-label')?.value || 'Travel Journal', $('hero-label-color')?.value || '#f5c518', lx, ly, Math.max(6, Math.round(lfs * 0.55)));
+  const titleRaw = ($('hero-title')?.value || 'New Places.').replace(/\n/g, ' ');
+  applyText('hero-phone-title', titleRaw, $('hero-title-color')?.value || '#fff', tx, ty, Math.max(9, Math.round(tfs * 0.4)), {
+    weight: $('hero-title-weight')?.value || '900',
+    style: $('hero-title-style')?.value || 'normal'
+  });
+  applyText('hero-phone-desc', $('hero-desc')?.value || '', $('hero-desc-color')?.value || 'rgba(255,255,255,0.7)', dx, dy, Math.max(7, Math.round(dfs * 0.55)));
+  const signVal = $('hero-sign')?.value || '';
+  applyText('hero-phone-sign', signVal, $('hero-sign-color')?.value || '#6ee7b7', sx, sy, Math.max(6, Math.round(lfs * 0.5)), {
+    display: signVal ? '' : 'none'
+  });
 }
 
 
