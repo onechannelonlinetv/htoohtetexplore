@@ -561,20 +561,17 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               </div>
             </div>
             <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="min-height:140px;height:160px;background:linear-gradient(90deg,#111,#333);cursor:grab;">
-              <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent pointer-events-none z-[1]"></div>
-              <div class="relative z-10 flex items-center justify-between gap-3 p-4 h-full" style="min-height:140px;">
-                <div class="min-w-0 flex-1 relative" style="min-height:100px;">
-                  <span id="sp-prev-badge" class="absolute inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black cursor-move" style="left:0;top:8%;">Official Sponsor<span class="sp-resize-handle" data-resize="badge" title="ဆိုဒ်"></span></span>
-                  <div id="sp-prev-title" class="absolute text-base font-black text-white truncate cursor-move max-w-[90%]" style="left:0;top:32%;">Sponsor Title<span class="sp-resize-handle" data-resize="title" title="ဆိုဒ်"></span></div>
-                  <div id="sp-prev-desc" class="absolute text-[11px] text-white/60 line-clamp-2 cursor-move max-w-[90%]" style="left:0;top:58%;">Description…<span class="sp-resize-handle" data-resize="desc" title="ဆိုဒ်"></span></div>
-                </div>
-                <div id="sp-prev-logo-wrap" class="absolute rounded-lg bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden z-10 cursor-move" style="right:4%;top:50%;transform:translateY(-50%);width:64px;height:64px;">
-                  <img id="sp-prev-logo" src="" class="w-full h-full object-contain hidden" alt="">
-                  <i class="fa-solid fa-image text-white/30 text-lg" id="sp-prev-logo-icon"></i>
-                  <span class="sp-resize-handle" data-resize="logo" title="Logo ဆိုဒ်"></span>
-                </div>
+              <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent pointer-events-none z-[1]"></div>
+              <!-- text + logo: full banner coordinates (0–100%) -->
+              <span id="sp-prev-badge" class="absolute z-10 inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black cursor-move" style="left:4%;top:12%;">Official Sponsor<span class="sp-resize-handle" data-resize="badge" title="ဆိုဒ်"></span></span>
+              <div id="sp-prev-title" class="absolute z-10 text-base font-black text-white cursor-move" style="left:4%;top:38%;max-width:none;white-space:nowrap;">Sponsor Title<span class="sp-resize-handle" data-resize="title" title="ဆိုဒ်"></span></div>
+              <div id="sp-prev-desc" class="absolute z-10 text-[11px] text-white/70 cursor-move" style="left:4%;top:62%;max-width:70%;">Description…<span class="sp-resize-handle" data-resize="desc" title="ဆိုဒ်"></span></div>
+              <div id="sp-prev-logo-wrap" class="absolute z-10 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden cursor-move" style="left:88%;top:40%;width:64px;height:64px;">
+                <img id="sp-prev-logo" src="" class="w-full h-full object-contain hidden" alt="">
+                <i class="fa-solid fa-image text-white/30 text-lg" id="sp-prev-logo-icon"></i>
+                <span class="sp-resize-handle" data-resize="logo" title="Logo ဆိုဒ်"></span>
               </div>
-              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ပုံ/စာ — ဘန်နာတစ်ပြင်လုံး ဖိဆွဲရွှေ့ · ထောင့် = ဆိုဒ်</p>
+              <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ဘန်နာတစ်ပြင်လုံး ဖိဆွဲရွှေ့ · ထောင့်စတုရန်း = ဆိုဒ်</p>
             </div>
           </div>
 
@@ -2521,8 +2518,8 @@ function initSponsorDrag() {
         if ($(_spDrag.input)) $(_spDrag.input).value = nv;
         updateSponsorPreview();
       } else if (_spDrag.type === 'text') {
-        const nx = Math.max(0, Math.min(100, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
-        const ny = Math.max(0, Math.min(100, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
+        const nx = Math.max(-5, Math.min(105, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
+        const ny = Math.max(-5, Math.min(105, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
         if ($(_spDrag.keys[0])) $(_spDrag.keys[0]).value = nx;
         if ($(_spDrag.keys[1])) $(_spDrag.keys[1]).value = ny;
         updateSponsorPreview();
