@@ -71,7 +71,7 @@ input[type=color].field-color,input[type=color].h-11{
   min-height:2.75rem;width:100%;padding:2px;cursor:pointer
 }
 #sponsor-live-preview,#up-live-preview{
-  width:100%!important;max-width:100%!important
+  max-width:100%;
 }
 #hero-live-preview{
   max-width:100%;
@@ -94,9 +94,9 @@ input[type=color].field-color,input[type=color].h-11{
   box-sizing: border-box;
 }
 #sponsor-live-preview {
-  width: 100% !important;
-  max-width: 100% !important;
-  display: block !important;
+  max-width: 100%;
+  display: block;
+  box-sizing: border-box;
 }
 #hero-live-preview {
   max-width: 100% !important;
@@ -147,7 +147,6 @@ main > div {
       <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
       <button class="navbtn" data-view="upcoming" onclick="showView('upcoming',this)"><i class="fa-solid fa-map-location-dot w-4"></i> Upcoming</button>
       <button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Latest Travel</button>
-      <button class="navbtn" data-view="travelposts" onclick="showView('travelposts',this)"><i class="fa-solid fa-pen-to-square w-4"></i> Travel Posts</button>
       <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
       <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
       <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
@@ -180,8 +179,7 @@ main > div {
         <button class="navbtn" onclick="showView('proud')">Proud Sponsors</button>
         <button class="navbtn" onclick="showView('sponsor')">Official Sponsor</button>
         <button class="navbtn" onclick="showView('upcoming')">Upcoming</button>
-        <button class="navbtn" onclick="showView('posts')">Latest Travel</button>
-        <button class="navbtn" onclick="showView('travelposts')">Travel Posts</button>
+        <button class="navbtn" onclick="showView('posts')">Posts</button>
         <button class="navbtn" onclick="showView('sections')">Custom Rows</button>
         <button class="navbtn" onclick="showView('youtube')">YouTube</button>
         <button class="navbtn" onclick="showView('about')">About</button>
@@ -660,71 +658,23 @@ main > div {
 
       <!-- PROUD SPONSORS -->
       <section id="view-proud" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Proud / Product Sponsors</h2><p class="mt-1 text-sm text-slate-400">Logo Upload · Name · Remark · Banner Preview</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Product Sponsor Banner</span>
-            <div id="proud-banner-preview" class="mt-2 relative min-h-[120px] rounded-xl overflow-hidden bg-gradient-to-r from-emerald-950 to-slate-900 border border-emerald-800/40 p-4">
-              <div id="proud-preview-bar" class="flex flex-wrap items-center gap-4 min-h-[48px]"></div>
-            </div>
+        <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ကြည့် · logo Upload</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Proud Bar</span>
+            <div id="proud-preview-bar" class="mt-2 flex flex-wrap items-center gap-4 min-h-[40px]"></div>
           </div>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-4 mb-4">
+            <div><label class="label">Name *</label><input id="proud-name" class="field" placeholder="AYA Bank"></div>
             <div>
-              <label class="label">Name *</label>
-              <input id="proud-name" class="field" placeholder="AYA Bank">
-              <div class="grid grid-cols-4 gap-2 mt-2">
-                <div><label class="label">Color</label><input id="proud-name-color" type="color" value="#ffffff" class="h-10 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent"></div>
-                <div><label class="label">Size</label><input id="proud-name-fs" type="number" min="10" max="48" value="14" class="field"></div>
-                <div><label class="label">Weight</label>
-                  <select id="proud-name-weight" class="field">
-                    <option value="400">Regular</option>
-                    <option value="600">Semi</option>
-                    <option value="700" selected>Bold</option>
-                    <option value="900">Black</option>
-                  </select>
-                </div>
-                <div><label class="label">Style</label>
-                  <select id="proud-name-style" class="field">
-                    <option value="normal" selected>Normal</option>
-                    <option value="italic">Italic</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div>
-              <label class="label">Remark / စာရေးရန်</label>
-              <input id="proud-remark" class="field" placeholder="Official Partner · 2026">
-              <div class="grid grid-cols-4 gap-2 mt-2">
-                <div><label class="label">Color</label><input id="proud-remark-color" type="color" value="#94a3b8" class="h-10 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent"></div>
-                <div><label class="label">Size</label><input id="proud-remark-fs" type="number" min="10" max="32" value="12" class="field"></div>
-                <div><label class="label">Weight</label>
-                  <select id="proud-remark-weight" class="field">
-                    <option value="400" selected>Regular</option>
-                    <option value="600">Semi</option>
-                    <option value="700">Bold</option>
-                  </select>
-                </div>
-                <div><label class="label">Style</label>
-                  <select id="proud-remark-style" class="field">
-                    <option value="normal" selected>Normal</option>
-                    <option value="italic">Italic</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div>
-              <label class="label">Logo Upload</label>
-              <div class="flex gap-2">
+              <label class="label">Logo</label>
+              <div class="flex gap-1">
                 <input id="proud-logo" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'proud-logo')"></label>
+                <label class="btn btn-muted cursor-pointer px-3"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'proud-logo')"></label>
               </div>
-              <div id="proud-logo-preview" class="mt-2"></div>
             </div>
-            <div>
-              <label class="label">Link</label>
-              <input id="proud-link" class="field" placeholder="https://...">
-              <button onclick="addProud()" class="btn btn-purple w-full mt-3"><i class="fa-solid fa-plus mr-1"></i>Add Product Sponsor</button>
-            </div>
+            <div><label class="label">Link</label><input id="proud-link" class="field" placeholder="https://..."></div>
+            <div class="flex items-end"><button onclick="addProud()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add</button></div>
           </div>
           <div id="proud-list" class="space-y-2"></div>
         </div>
@@ -779,9 +729,9 @@ main > div {
               </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4 items-start">
+            <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-start">
               <!-- Desktop preview -->
-              <div>
+              <div class="min-w-0">
                 <p class="text-[10px] font-bold text-slate-400 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-desktop"></i> PC / Desktop</p>
                 <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="min-height:140px;height:160px;background:linear-gradient(90deg,#111,#333);cursor:grab;">
                   <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent pointer-events-none z-[1]"></div>
@@ -851,30 +801,59 @@ main > div {
               <input id="admin-sponsor-link" class="field" placeholder="https://...">
             </div>
 
-            <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
-              <p class="text-[11px] font-bold text-sky-300 mb-1">🖱️ Badge / Title / Desc — Preview မှာ ဖိဆွဲပါ</p>
-              <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
-                <div>Badge X <input type="range" id="sp-badge-x" min="0" max="100" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spbx">0</span>%</div>
-                <div>Badge Y <input type="range" id="sp-badge-y" min="0" max="100" value="8" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spby">8</span>%</div>
-                <div>Title X <input type="range" id="sp-title-x" min="0" max="100" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-sptx">0</span>%</div>
-                <div>Title Y <input type="range" id="sp-title-y" min="0" max="100" value="32" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spty">32</span>%</div>
-                <div>Desc X <input type="range" id="sp-desc-x" min="0" max="100" value="0" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdx">0</span>%</div>
-                <div>Desc Y <input type="range" id="sp-desc-y" min="0" max="100" value="58" class="w-full accent-sky-500" oninput="updateSponsorPreview()"><span id="val-spdy">58</span>%</div>
-              </div>
-            </div>
+            <!-- position inputs (hidden) — drag on preview still updates these -->
+            <input type="hidden" id="sp-badge-x" value="4">
+            <input type="hidden" id="sp-badge-y" value="12">
+            <input type="hidden" id="sp-title-x" value="4">
+            <input type="hidden" id="sp-title-y" value="38">
+            <input type="hidden" id="sp-desc-x" value="4">
+            <input type="hidden" id="sp-desc-y" value="62">
+            <span id="val-spbx" class="hidden">0</span>
+            <span id="val-spby" class="hidden">8</span>
+            <span id="val-sptx" class="hidden">0</span>
+            <span id="val-spty" class="hidden">32</span>
+            <span id="val-spdx" class="hidden">0</span>
+            <span id="val-spdy" class="hidden">58</span>
 
-            <div>
+            <div class="md:col-span-2">
               <label class="label">Badge Text</label>
               <input id="admin-sponsor-badge" class="field" placeholder="Exclusive Partner" oninput="updateSponsorPreview()">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="label">Badge နောက်ခံ</label>
-                <input id="admin-sponsor-badge-bg" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
-              </div>
-              <div>
-                <label class="label">Badge စာအရောင်</label>
-                <input id="admin-sponsor-badge-color" type="color" value="#000000" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                <div>
+                  <label class="label">Badge နောက်ခံ</label>
+                  <input id="admin-sponsor-badge-bg" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
+                </div>
+                <div>
+                  <label class="label">စာအရောင်</label>
+                  <input id="admin-sponsor-badge-color" type="color" value="#000000" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSponsorPreview()">
+                </div>
+                <div>
+                  <label class="label flex justify-between">Font Size <span id="val-badge-fs">12px</span></label>
+                  <input type="range" id="admin-sponsor-badge-fs" min="8" max="48" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+                </div>
+                <div>
+                  <label class="label">Font Style</label>
+                  <select id="admin-sponsor-badge-style" class="field" onchange="updateSponsorPreview()">
+                    <option value="normal" selected>Normal</option>
+                    <option value="italic">Italic</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label">Weight</label>
+                  <select id="admin-sponsor-badge-weight" class="field" onchange="updateSponsorPreview()">
+                    <option value="400">Regular</option>
+                    <option value="700">Bold</option>
+                    <option value="900" selected>Black</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label flex justify-between">Pad <span id="val-badge-pad">8px</span></label>
+                  <input type="range" id="admin-sponsor-badge-pad" min="4" max="20" value="8" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+                </div>
+                <div>
+                  <label class="label flex justify-between">Radius <span id="val-badge-radius">24</span></label>
+                  <input type="range" id="admin-sponsor-badge-radius" min="0" max="24" value="24" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+                </div>
               </div>
             </div>
             <div>
@@ -906,27 +885,6 @@ main > div {
               </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="label flex justify-between">Badge Pad <span id="val-badge-pad">8px</span></label>
-                <input type="range" id="admin-sponsor-badge-pad" min="4" max="20" value="8" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Badge Font <span id="val-badge-fs">10px</span></label>
-                <input type="range" id="admin-sponsor-badge-fs" min="8" max="48" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-              </div>
-              <div>
-                <label class="label flex justify-between">Badge Radius <span id="val-badge-radius">24</span></label>
-                <input type="range" id="admin-sponsor-badge-radius" min="0" max="24" value="24" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
-              </div>
-              <div>
-                <label class="label">Badge Weight</label>
-                <select id="admin-sponsor-badge-weight" class="field" onchange="updateSponsorPreview()">
-                  <option value="400">Regular</option>
-                  <option value="600">Semi Bold</option>
-                  <option value="700">Bold</option>
-                  <option value="900" selected>Black</option>
-                </select>
-              </div>
               <div>
                 <label class="label">Title Weight</label>
                 <select id="admin-sponsor-title-weight" class="field" onchange="updateSponsorPreview()">
@@ -1057,7 +1015,7 @@ main > div {
           </div>
           <button type="button" onclick="saveStoriesSection()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Latest Travel Section</button>
         </div>
-        <div><h3 class="font-bold text-white">Post ရေးရန် / Save Post</h3><p class="text-sm text-slate-400">Cover ပုံ Upload · Publish — စာရင်းကို Travel Posts မှာ ကြည့်ပါ</p></div>
+        <div><h3 class="font-bold text-white">Posts စာရင်း</h3><p class="text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload</p></div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
@@ -1142,21 +1100,9 @@ main > div {
             <button id="post-cancel-button" onclick="cancelPostEdit()" class="btn btn-muted hidden">Cancel</button>
           </div>
         </div>
-      </section>
-
-      <!-- TRAVEL POSTS LIST (sidebar) -->
-      <section id="view-travelposts" class="view space-y-5">
-        <div>
-          <h2 class="text-xl font-black">Travel Posts</h2>
-          <p class="mt-1 text-sm text-slate-400">Post စာရင်း · Edit / Delete — Post အသစ်ရေးရန် Latest Travel သို့သွားပါ</p>
-        </div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
-          <div class="mb-4 flex items-center justify-between">
-            <h3 class="font-bold">Saved Posts</h3>
-            <span id="post-count" class="tiny">0 posts</span>
-          </div>
+          <div class="mb-4 flex items-center justify-between"><h3 class="font-bold">Saved Posts</h3><span id="post-count" class="tiny">0 posts</span></div>
           <div id="posts-list" class="space-y-3"></div>
-          <button type="button" class="btn btn-green mt-4" onclick="showView('posts')"><i class="fa-solid fa-plus mr-1"></i>New Post (Latest Travel)</button>
         </div>
       </section>
 
@@ -1849,7 +1795,6 @@ function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 const titles = {
   overview: 'Overview', pagepreview: 'Page Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
   proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Latest Travel',
-  travelposts: 'Travel Posts',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
 
@@ -1885,9 +1830,7 @@ function showView(name, button) {
   $('page-title').textContent = titles[name] || 'Overview';
   $('mobile-nav').classList.add('hidden');
   if (name === 'sections') renderHomeSectionsList();
-  if (name === 'posts') { if (typeof updatePostPreview === 'function') updatePostPreview(); }
-  if (name === 'travelposts') { renderPostsList(); }
-  if (name === 'overview') { renderOverview(); }
+  if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
   if (name === 'menu') renderMenuList();
   if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
   if (name === 'hero' && typeof updateHeroPreview === 'function') updateHeroPreview();
@@ -2906,11 +2849,16 @@ function setTextKeepHandle(el, text, resizeKey) {
 function updatePhoneSponsorPreview() {
   const phone = $('sponsor-phone-preview');
   if (!phone) return;
+  phone.style.display = 'block';
   const bgUrl = imageFieldValue('admin-sponsor-bg');
   const ix = parseInt($('sp-img-x')?.value || '50', 10);
   const iy = parseInt($('sp-img-y')?.value || '50', 10);
-  applyLiveBg(phone, bgUrl, ix, iy);
-  if (!bgUrl) phone.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
+  if (typeof applyLiveBg === 'function') applyLiveBg(phone, bgUrl, ix, iy);
+  if (!bgUrl) {
+    phone.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
+    phone.style.backgroundSize = 'cover';
+    phone.style.backgroundPosition = 'center';
+  }
 
   const badge = $('sp-phone-badge');
   const title = $('sp-phone-title');
@@ -2919,18 +2867,40 @@ function updatePhoneSponsorPreview() {
     badge.textContent = ($('admin-sponsor-badge')?.value.trim() || 'Official Sponsor').slice(0, 22);
     badge.style.background = $('admin-sponsor-badge-bg')?.value || '#f5c518';
     badge.style.color = $('admin-sponsor-badge-color')?.value || '#000';
+    badge.style.fontSize = Math.max(7, Math.round((parseInt($('admin-sponsor-badge-fs')?.value || '12', 10) || 12) * 0.65)) + 'px';
+    badge.style.fontWeight = $('admin-sponsor-badge-weight')?.value || '900';
+    badge.style.fontStyle = $('admin-sponsor-badge-style')?.value || 'normal';
+    badge.style.left = (parseInt($('sp-badge-x')?.value || '4', 10)) + '%';
+    badge.style.top = (parseInt($('sp-badge-y')?.value || '12', 10)) + '%';
   }
   if (title) {
     title.textContent = $('admin-sponsor-title')?.value.trim() || 'Sponsor Title';
     title.style.color = $('admin-sponsor-title-color')?.value || '#fff';
+    title.style.fontSize = Math.max(9, Math.round((parseInt($('admin-sponsor-title-fs')?.value || '22', 10) || 22) * 0.45)) + 'px';
+    title.style.fontWeight = $('admin-sponsor-title-weight')?.value || '900';
+    title.style.left = (parseInt($('sp-title-x')?.value || '4', 10)) + '%';
+    title.style.top = (parseInt($('sp-title-y')?.value || '38', 10)) + '%';
   }
   if (desc) {
     desc.textContent = $('admin-sponsor-desc')?.value.trim() || 'Description…';
     desc.style.color = $('admin-sponsor-desc-color')?.value || '#ccc';
+    desc.style.fontSize = Math.max(7, Math.round((parseInt($('admin-sponsor-desc-fs')?.value || '12', 10) || 12) * 0.6)) + 'px';
+    desc.style.left = (parseInt($('sp-desc-x')?.value || '4', 10)) + '%';
+    desc.style.top = (parseInt($('sp-desc-y')?.value || '62', 10)) + '%';
   }
   const logo = $('sp-phone-logo');
   const logoIcon = $('sp-phone-logo-icon');
-  applyLiveLogo(logo, logoIcon, imageFieldValue('admin-sponsor-img'));
+  const logoWrap = $('sp-phone-logo-wrap');
+  if (typeof applyLiveLogo === 'function') applyLiveLogo(logo, logoIcon, imageFieldValue('admin-sponsor-img'));
+  if (logoWrap) {
+    const ls = Math.max(28, Math.round((parseInt($('sp-logo-size')?.value || '80', 10) || 80) * 0.4));
+    logoWrap.style.width = ls + 'px';
+    logoWrap.style.height = ls + 'px';
+    logoWrap.style.left = (parseInt($('sp-logo-x')?.value || '88', 10)) + '%';
+    logoWrap.style.top = (parseInt($('sp-logo-y')?.value || '40', 10)) + '%';
+    logoWrap.style.right = 'auto';
+    logoWrap.style.transform = 'none';
+  }
 }
 
 function updateSponsorPreview() {
@@ -2954,6 +2924,7 @@ function updateSponsorPreview() {
   badge.style.fontSize = fs + 'px';
   badge.style.borderRadius = (parseInt(rad,10) >= 24 ? '999px' : rad + 'px');
   badge.style.fontWeight = wt;
+  badge.style.fontStyle = ($('admin-sponsor-badge-style')?.value || 'normal');
   const bx = parseInt($('sp-badge-x')?.value || '0', 10);
   const by = parseInt($('sp-badge-y')?.value || '8', 10);
   badge.style.left = bx + '%';
@@ -3032,8 +3003,10 @@ function updateSponsorPreview() {
     box.style.height = Math.max(60, Math.round(h * 0.85)) + 'px';
     box.style.minHeight = box.style.height;
     box.style.width = wPct + '%';
+    box.style.maxWidth = '100%';
     box.style.marginLeft = 'auto';
     box.style.marginRight = 'auto';
+    box.style.display = 'block';
     const radiusMap = { square: '0px', soft: '16px', rounded: '16px', pill: '9999px', circle: '9999px' };
     box.style.borderRadius = radiusMap[shape] || '16px';
   }
@@ -3746,16 +3719,12 @@ function updateProudPreview() {
   if (!bar) return;
   const items = getProud().filter(p => p.active !== false);
   if (!items.length) {
-    bar.innerHTML = '<span class="text-xs text-slate-500">Product Sponsor မရှိသေး — အောက်က Form ကနေ Add လုပ်ပါ</span>';
+    bar.innerHTML = '<span class="text-xs text-slate-500">Sponsor မရှိသေး</span>';
     return;
   }
   bar.innerHTML = items.map(p => {
-    const nameStyle = 'color:' + safe(p.nameColor || '#fff') + ';font-size:' + (p.nameFs || 14) + 'px;font-weight:' + (p.nameWeight || '700') + ';font-style:' + (p.nameStyle || 'normal');
-    const remarkStyle = 'color:' + safe(p.remarkColor || '#94a3b8') + ';font-size:' + (p.remarkFs || 12) + 'px;font-weight:' + (p.remarkWeight || '400') + ';font-style:' + (p.remarkStyle || 'normal');
-    const logo = p.logo ? '<img src="' + safe(p.logo) + '" class="h-10 w-10 object-contain rounded bg-white/10 p-0.5" alt="" onerror="this.style.display=\'none\'">' : '';
-    const remark = p.remark ? '<div style="' + remarkStyle + '">' + safe(p.remark) + '</div>' : '';
-    return '<div class="flex items-center gap-2.5 rounded-lg border border-white/10 bg-black/20 px-3 py-2">' + logo +
-      '<div class="min-w-0"><div style="' + nameStyle + '">' + safe(p.name) + '</div>' + remark + '</div></div>';
+    if (p.logo) return '<img src="'+safe(p.logo)+'" class="h-8 object-contain opacity-90" alt="'+safe(p.name)+'" onerror="this.style.display=\'none\'">';
+    return '<span class="text-white/90 font-bold text-sm">'+safe(p.name)+'</span>';
   }).join('');
 }
 function saveSocial() {
@@ -3828,12 +3797,8 @@ function renderProudList() {
   }
   list.innerHTML = items.map((p, i) => `
     <div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-      ${p.logo ? `<img src="${safe(p.logo)}" class="h-10 w-10 object-contain rounded bg-white/10" onerror="this.style.display='none'">` : ''}
-      <div class="flex-1 min-w-0">
-        <p class="font-bold" style="color:${safe(p.nameColor||'#fff')};font-size:${p.nameFs||14}px;font-weight:${p.nameWeight||700};font-style:${p.nameStyle||'normal'}">${safe(p.name)}</p>
-        ${p.remark ? `<p class="tiny mt-0.5" style="color:${safe(p.remarkColor||'#94a3b8')};font-size:${p.remarkFs||12}px;font-style:${p.remarkStyle||'normal'}">${safe(p.remark)}</p>` : ''}
-        <p class="tiny">${p.active === false ? 'Hidden' : 'Visible'}</p>
-      </div>
+      ${p.logo ? `<img src="${safe(p.logo)}" class="h-8 w-12 object-contain rounded bg-white/10" onerror="this.style.display='none'">` : ''}
+      <div class="flex-1 min-w-0"><p class="font-bold">${safe(p.name)}</p><p class="tiny">${p.active === false ? 'Hidden' : 'Visible'}</p></div>
       <button class="btn btn-muted" onclick="toggleProud(${i})">${p.active === false ? 'Show' : 'Hide'}</button>
       <button class="btn btn-muted" onclick="moveProud(${i},-1)" ${i===0?'disabled':''}>↑</button>
       <button class="btn btn-muted" onclick="moveProud(${i},1)" ${i===items.length-1?'disabled':''}>↓</button>
@@ -3841,33 +3806,12 @@ function renderProudList() {
     </div>`).join('');
 }
 function addProud() {
-  const name = ($('proud-name') && $('proud-name').value || '').trim();
+  const name = $('proud-name').value.trim();
   if (!name) return alert('Name ထည့်ပါ။');
-  const logo = (typeof imageFieldValue === 'function') ? imageFieldValue('proud-logo') : (($('proud-logo') && $('proud-logo').value) || '').trim();
   const items = getProud();
-  items.push({
-    id: Date.now(),
-    name,
-    nameColor: ($('proud-name-color') && $('proud-name-color').value) || '#ffffff',
-    nameFs: parseInt(($('proud-name-fs') && $('proud-name-fs').value) || '14', 10),
-    nameWeight: ($('proud-name-weight') && $('proud-name-weight').value) || '700',
-    nameStyle: ($('proud-name-style') && $('proud-name-style').value) || 'normal',
-    remark: ($('proud-remark') && $('proud-remark').value || '').trim(),
-    remarkColor: ($('proud-remark-color') && $('proud-remark-color').value) || '#94a3b8',
-    remarkFs: parseInt(($('proud-remark-fs') && $('proud-remark-fs').value) || '12', 10),
-    remarkWeight: ($('proud-remark-weight') && $('proud-remark-weight').value) || '400',
-    remarkStyle: ($('proud-remark-style') && $('proud-remark-style').value) || 'normal',
-    logo: logo || '',
-    link: ($('proud-link') && $('proud-link').value || '').trim(),
-    active: true
-  });
+  items.push({ id: Date.now(), name, logo: $('proud-logo').value.trim(), link: $('proud-link').value.trim(), active: true });
   write('hh_proud_sponsors', items);
-  if ($('proud-name')) $('proud-name').value = '';
-  if ($('proud-remark')) $('proud-remark').value = '';
-  if ($('proud-link')) $('proud-link').value = '';
-  if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
-  else if ($('proud-logo')) $('proud-logo').value = '';
-  if ($('proud-logo-preview')) $('proud-logo-preview').innerHTML = '';
+  $('proud-name').value = ''; $('proud-logo').value = ''; $('proud-link').value = '';
   renderProudList(); renderOverview(); toast('Proud Sponsor ထည့်ပြီးပါပြီ။');
 }
 function toggleProud(i) {
@@ -4067,20 +4011,12 @@ function deleteHomeSection(i) {
 }
 
 function renderOverview() {
-  try {
-    const posts = (typeof getPosts === 'function') ? getPosts() : [];
-    const sections = (typeof getHomeSections === 'function') ? getHomeSections() : [];
-    const proud = (typeof getProud === 'function') ? getProud() : [];
-    if ($('stat-posts')) $('stat-posts').textContent = String(posts.length || 0);
-    if ($('stat-sections')) $('stat-sections').textContent = String(sections.length || 0);
-    if ($('stat-proud')) $('stat-proud').textContent = String(proud.length || 0);
-    const _spl = (typeof getSponsorList === 'function') ? getSponsorList() : [];
-    if ($('stat-sponsor')) {
-      $('stat-sponsor').textContent = _spl.length
-        ? (_spl.filter(function(s){ return s.active !== false; }).length + '/' + _spl.length)
-        : '0';
-    }
-  } catch (e) { console.error('renderOverview', e); }
+  const posts = getPosts(), sections = getHomeSections(), proud = getProud(), sp = {};
+  $('stat-posts').textContent = posts.length;
+  $('stat-sections').textContent = sections.length;
+  $('stat-proud').textContent = proud.length;
+  const _spl = (typeof getSponsorList==='function') ? getSponsorList() : [];
+  $('stat-sponsor').textContent = _spl.length ? (_spl.filter(s=>s.active!==false).length + '/' + _spl.length) : '0';
 }
 
 /* ---- Theme Presets (full layout snapshot) ---- */
