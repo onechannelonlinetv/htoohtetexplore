@@ -534,15 +534,30 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 
           <!-- Live Preview -->
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Sponsor</span>
-              <div class="flex items-center gap-3 flex-1 justify-end min-w-[200px]">
-                <label class="flex items-center gap-2 text-[11px] text-emerald-200/80 shrink-0">
-                  <span>Height</span>
-                  <input type="range" id="admin-sponsor-height-local" min="120" max="360" step="10" value="180" class="w-28 accent-emerald-500" oninput="updateSponsorPreview()">
-                  <span id="val-sp-h-local" class="tabular-nums w-10 text-right">180px</span>
+            <div class="flex flex-wrap items-center gap-3 mb-2">
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider shrink-0">Live Preview · Sponsor</span>
+              <div class="flex flex-wrap items-center gap-3 flex-1 justify-end">
+                <label class="flex items-center gap-1.5 text-[11px] text-emerald-200/80">
+                  <span>W%</span>
+                  <input type="range" id="admin-sponsor-width" min="40" max="100" step="5" value="100" class="w-20 accent-emerald-500" oninput="updateSponsorPreview()">
+                  <span id="val-sp-w" class="tabular-nums w-8 text-right">100%</span>
                 </label>
-                <span class="tiny" id="sponsor-preview-dims">180px</span>
+                <label class="flex items-center gap-1.5 text-[11px] text-emerald-200/80">
+                  <span>H</span>
+                  <input type="range" id="admin-sponsor-height-local" min="80" max="800" step="10" value="180" class="w-24 accent-emerald-500" oninput="updateSponsorPreview()">
+                  <span id="val-sp-h-local" class="tabular-nums w-12 text-right">180px</span>
+                </label>
+                <label class="flex items-center gap-1.5 text-[11px] text-emerald-200/80">
+                  <span>Shape</span>
+                  <select id="admin-sponsor-shape" class="field py-1 px-2 text-[11px] min-w-0 w-auto" onchange="updateSponsorPreview()">
+                    <option value="rounded">Rounded</option>
+                    <option value="square">Square (0°)</option>
+                    <option value="soft">Soft 16px</option>
+                    <option value="pill">Pill</option>
+                    <option value="circle">Circle ends</option>
+                  </select>
+                </label>
+                <span class="tiny" id="sponsor-preview-dims">100% × 180px</span>
               </div>
             </div>
             <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="min-height:140px;height:160px;background:linear-gradient(90deg,#111,#333);cursor:grab;">
@@ -553,9 +568,10 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
                   <div id="sp-prev-title" class="absolute text-base font-black text-white truncate cursor-move max-w-[90%]" style="left:0;top:32%;">Sponsor Title<span class="sp-resize-handle" data-resize="title" title="ဆိုဒ်"></span></div>
                   <div id="sp-prev-desc" class="absolute text-[11px] text-white/60 line-clamp-2 cursor-move max-w-[90%]" style="left:0;top:58%;">Description…<span class="sp-resize-handle" data-resize="desc" title="ဆိုဒ်"></span></div>
                 </div>
-                <div id="sp-prev-logo-wrap" class="w-16 h-16 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden relative z-10">
+                <div id="sp-prev-logo-wrap" class="absolute rounded-lg bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden z-10 cursor-move" style="right:4%;top:50%;transform:translateY(-50%);width:64px;height:64px;">
                   <img id="sp-prev-logo" src="" class="w-full h-full object-contain hidden" alt="">
                   <i class="fa-solid fa-image text-white/30 text-lg" id="sp-prev-logo-icon"></i>
+                  <span class="sp-resize-handle" data-resize="logo" title="Logo ဆိုဒ်"></span>
                 </div>
               </div>
               <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ပုံဖိဆွဲ · စာဖိဆွဲရွှေ့ · ထောင့်စတုရန်း = ဆိုဒ်</p>
@@ -567,7 +583,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <label class="label">Background Image</label>
               <div class="flex gap-2">
                 <input id="admin-sponsor-bg" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'admin-sponsor-bg'); setTimeout(updateSponsorPreview,800)"></label>
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this,'admin-sponsor-bg'); setTimeout(updateSponsorPreview,800)"></label>
               </div>
               <div id="admin-sponsor-bg-preview" class="mt-2"></div>
               <div class="mt-2 grid grid-cols-2 gap-2 text-[11px]">
@@ -579,9 +595,15 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               <label class="label">Logo</label>
               <div class="flex gap-2">
                 <input id="admin-sponsor-img" class="field flex-1" placeholder="URL / Upload" oninput="updateSponsorPreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'admin-sponsor-img'); setTimeout(updateSponsorPreview,800)"></label>
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this,'admin-sponsor-img'); setTimeout(updateSponsorPreview,800)"></label>
               </div>
               <div id="admin-sponsor-img-preview" class="mt-2"></div>
+              <p class="tiny mt-1">GIF looping ပုံလည်း တင်နိုင်ပါတယ် · Preview မှာ Logo ဖိဆွဲ / ထောင့်စတုရန်း = ဆိုဒ်</p>
+              <div class="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+                <div>Logo Size <input type="range" id="sp-logo-size" min="40" max="280" value="80" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-spls">80</span>px</div>
+                <div>Logo X <input type="range" id="sp-logo-x" min="0" max="95" value="88" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-splx">88</span>%</div>
+                <div>Logo Y <input type="range" id="sp-logo-y" min="0" max="95" value="40" class="w-full accent-emerald-500" oninput="updateSponsorPreview()"><span id="val-sply">40</span>%</div>
+              </div>
             </div>
             <div>
               <label class="label">Link</label>
@@ -625,7 +647,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               </div>
               <div>
                 <label class="label flex justify-between">Title Size <span id="val-sp-title-fs">22px</span></label>
-                <input type="range" id="admin-sponsor-title-fs" min="12" max="40" value="22" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+                <input type="range" id="admin-sponsor-title-fs" min="12" max="120" value="28" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
               </div>
             </div>
             <div class="md:col-span-2">
@@ -639,7 +661,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               </div>
               <div>
                 <label class="label flex justify-between">Desc Size <span id="val-sp-desc-fs">12px</span></label>
-                <input type="range" id="admin-sponsor-desc-fs" min="10" max="22" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+                <input type="range" id="admin-sponsor-desc-fs" min="10" max="64" value="14" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
               </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
@@ -649,7 +671,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
               </div>
               <div>
                 <label class="label flex justify-between">Badge Font <span id="val-badge-fs">10px</span></label>
-                <input type="range" id="admin-sponsor-badge-fs" min="8" max="16" value="10" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
+                <input type="range" id="admin-sponsor-badge-fs" min="8" max="48" value="12" class="w-full accent-emerald-500" oninput="updateSponsorPreview()">
               </div>
               <div>
                 <label class="label flex justify-between">Badge Radius <span id="val-badge-radius">24</span></label>
@@ -2135,6 +2157,11 @@ function resetSponsorForm() {
   setImageFieldValue('admin-sponsor-bg', '');
   if ($('sp-img-x')) $('sp-img-x').value = 50;
   if ($('sp-img-y')) $('sp-img-y').value = 50;
+  if ($('sp-logo-size')) $('sp-logo-size').value = 80;
+  if ($('sp-logo-x')) $('sp-logo-x').value = 88;
+  if ($('sp-logo-y')) $('sp-logo-y').value = 40;
+  if ($('admin-sponsor-width')) $('admin-sponsor-width').value = 100;
+  if ($('admin-sponsor-shape')) $('admin-sponsor-shape').value = 'rounded';
   if ($('sp-badge-x')) $('sp-badge-x').value = 0;
   if ($('sp-badge-y')) $('sp-badge-y').value = 8;
   if ($('sp-title-x')) $('sp-title-x').value = 0;
@@ -2180,6 +2207,11 @@ function editSponsor(index) {
   showPreviewIfUrl('admin-sponsor-bg');
   if ($('sp-img-x')) $('sp-img-x').value = s.imgPosX != null ? s.imgPosX : 50;
   if ($('sp-img-y')) $('sp-img-y').value = s.imgPosY != null ? s.imgPosY : 50;
+  if ($('sp-logo-size')) $('sp-logo-size').value = s.logoSize != null ? s.logoSize : 80;
+  if ($('sp-logo-x')) $('sp-logo-x').value = s.logoX != null ? s.logoX : 88;
+  if ($('sp-logo-y')) $('sp-logo-y').value = s.logoY != null ? s.logoY : 40;
+  if ($('admin-sponsor-width')) $('admin-sponsor-width').value = s.widthPct != null ? s.widthPct : 100;
+  if ($('admin-sponsor-shape')) $('admin-sponsor-shape').value = s.shape || 'rounded';
   if ($('sp-badge-x')) $('sp-badge-x').value = s.badgeX != null ? s.badgeX : 0;
   if ($('sp-badge-y')) $('sp-badge-y').value = s.badgeY != null ? s.badgeY : 8;
   if ($('sp-title-x')) $('sp-title-x').value = s.titleX != null ? s.titleX : 0;
@@ -2235,7 +2267,12 @@ function collectSponsorForm() {
     bgImage: imageFieldValue('admin-sponsor-bg'),
     imgPosX: parseInt($('sp-img-x')?.value || '50', 10),
     imgPosY: parseInt($('sp-img-y')?.value || '50', 10),
-    height: parseInt($('admin-sponsor-height-local')?.value || '180', 10)
+    logoSize: parseInt($('sp-logo-size')?.value || '80', 10),
+    logoX: parseInt($('sp-logo-x')?.value || '88', 10),
+    logoY: parseInt($('sp-logo-y')?.value || '40', 10),
+    height: parseInt($('admin-sponsor-height-local')?.value || '180', 10),
+    widthPct: parseInt($('admin-sponsor-width')?.value || '100', 10),
+    shape: $('admin-sponsor-shape')?.value || 'rounded'
   };
 }
 function saveCurrentSponsor() {
@@ -2315,7 +2352,7 @@ function updateSponsorPreview() {
     setTextKeepHandle(title, $('admin-sponsor-title')?.value.trim() || 'Sponsor Title', 'title');
     title.style.color = $('admin-sponsor-title-color')?.value || '#ffffff';
     const tfs = $('admin-sponsor-title-fs')?.value || 22;
-    title.style.fontSize = Math.max(11, Math.round(tfs * 0.65)) + 'px';
+    title.style.fontSize = Math.max(11, Math.round(tfs * 0.9)) + 'px';
     title.style.fontWeight = $('admin-sponsor-title-weight')?.value || '900';
     const tx = parseInt($('sp-title-x')?.value || '0', 10);
     const ty = parseInt($('sp-title-y')?.value || '32', 10);
@@ -2329,7 +2366,7 @@ function updateSponsorPreview() {
     setTextKeepHandle(desc, $('admin-sponsor-desc')?.value.trim() || 'Description…', 'desc');
     desc.style.color = $('admin-sponsor-desc-color')?.value || '#cccccc';
     const dfs = $('admin-sponsor-desc-fs')?.value || 12;
-    desc.style.fontSize = Math.max(9, Math.round(dfs * 0.85)) + 'px';
+    desc.style.fontSize = Math.max(9, Math.round(dfs * 0.9)) + 'px';
     const dx = parseInt($('sp-desc-x')?.value || '0', 10);
     const dy = parseInt($('sp-desc-y')?.value || '58', 10);
     desc.style.left = dx + '%';
@@ -2340,6 +2377,28 @@ function updateSponsorPreview() {
   }
   const imgUrl = imageFieldValue('admin-sponsor-img');
   applyLiveLogo(logo, logoIcon, imgUrl);
+  const logoWrap = $('sp-prev-logo-wrap');
+  const ls = parseInt($('sp-logo-size')?.value || '80', 10);
+  const lx = parseInt($('sp-logo-x')?.value || '88', 10);
+  const ly = parseInt($('sp-logo-y')?.value || '40', 10);
+  if ($('val-spls')) $('val-spls').textContent = ls;
+  if ($('val-splx')) $('val-splx').textContent = lx;
+  if ($('val-sply')) $('val-sply').textContent = ly;
+  if (logoWrap) {
+    logoWrap.style.width = ls + 'px';
+    logoWrap.style.height = ls + 'px';
+    logoWrap.style.left = lx + '%';
+    logoWrap.style.top = ly + '%';
+    logoWrap.style.right = 'auto';
+    logoWrap.style.transform = 'none';
+    if (!logoWrap.querySelector('.sp-resize-handle')) {
+      const h = document.createElement('span');
+      h.className = 'sp-resize-handle';
+      h.setAttribute('data-resize', 'logo');
+      h.title = 'Logo ဆိုဒ်';
+      logoWrap.appendChild(h);
+    }
+  }
   const bgUrl = imageFieldValue('admin-sponsor-bg');
   const ix = parseInt($('sp-img-x')?.value || '50', 10);
   const iy = parseInt($('sp-img-y')?.value || '50', 10);
@@ -2349,14 +2408,21 @@ function updateSponsorPreview() {
     applyLiveBg(box, bgUrl, ix, iy);
     if (!bgUrl) box.style.backgroundImage = 'linear-gradient(90deg,#111,#333)';
   }
-  const h = $('admin-sponsor-height-local')?.value || 180;
+  const h = parseInt($('admin-sponsor-height-local')?.value || '180', 10);
+  const wPct = parseInt($('admin-sponsor-width')?.value || '100', 10);
+  const shape = $('admin-sponsor-shape')?.value || 'rounded';
   if ($('val-sp-h-local')) $('val-sp-h-local').textContent = h + 'px';
+  if ($('val-sp-w')) $('val-sp-w').textContent = wPct + '%';
   if (box) {
-    const ph = Math.max(100, Math.round(parseInt(h,10) / 1.2));
-    box.style.height = ph + 'px';
-    box.style.minHeight = ph + 'px';
+    box.style.height = Math.max(60, Math.round(h * 0.85)) + 'px';
+    box.style.minHeight = box.style.height;
+    box.style.width = wPct + '%';
+    box.style.marginLeft = 'auto';
+    box.style.marginRight = 'auto';
+    const radiusMap = { square: '0px', soft: '16px', rounded: '16px', pill: '9999px', circle: '9999px' };
+    box.style.borderRadius = radiusMap[shape] || '16px';
   }
-  if ($('sponsor-preview-dims')) $('sponsor-preview-dims').textContent = h + 'px';
+  if ($('sponsor-preview-dims')) $('sponsor-preview-dims').textContent = wPct + '% × ' + h + 'px';
   initSponsorDrag();
 }
 
@@ -2369,9 +2435,10 @@ function initSponsorDrag() {
   function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
   const textIds = { 'sp-prev-badge': ['sp-badge-x','sp-badge-y'], 'sp-prev-title': ['sp-title-x','sp-title-y'], 'sp-prev-desc': ['sp-desc-x','sp-desc-y'] };
   const sizeMap = {
-    badge: { input: 'admin-sponsor-badge-fs', min: 8, max: 20 },
-    title: { input: 'admin-sponsor-title-fs', min: 12, max: 48 },
-    desc: { input: 'admin-sponsor-desc-fs', min: 10, max: 28 }
+    badge: { input: 'admin-sponsor-badge-fs', min: 8, max: 48 },
+    title: { input: 'admin-sponsor-title-fs', min: 12, max: 120 },
+    desc: { input: 'admin-sponsor-desc-fs', min: 10, max: 64 },
+    logo: { input: 'sp-logo-size', min: 40, max: 280 }
   };
   function onStart(e) {
     const t = e.target;
@@ -2402,7 +2469,12 @@ function initSponsorDrag() {
       e.preventDefault();
       return;
     }
-    if (t && t.closest && t.closest('#sp-prev-logo-wrap')) return;
+    const logoEl = t && t.closest && t.closest('#sp-prev-logo-wrap');
+    if (logoEl && !(t.classList && t.classList.contains('sp-resize-handle'))) {
+      _spDrag = { type: 'logo', sx: p.clientX, sy: p.clientY, ox: parseInt($('sp-logo-x')?.value||'88',10), oy: parseInt($('sp-logo-y')?.value||'40',10), rw: r.width, rh: r.height };
+      e.preventDefault();
+      return;
+    }
     _spDrag = { type: 'img', sx: p.clientX, sy: p.clientY, ox: parseInt($('sp-img-x')?.value||'50',10), oy: parseInt($('sp-img-y')?.value||'50',10), rw: r.width, rh: r.height };
     box.style.cursor = 'grabbing';
     e.preventDefault();
@@ -2425,6 +2497,12 @@ function initSponsorDrag() {
         const ny = Math.max(0, Math.min(90, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
         if ($(_spDrag.keys[0])) $(_spDrag.keys[0]).value = nx;
         if ($(_spDrag.keys[1])) $(_spDrag.keys[1]).value = ny;
+        updateSponsorPreview();
+      } else if (_spDrag.type === 'logo') {
+        const nx = Math.max(0, Math.min(95, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
+        const ny = Math.max(0, Math.min(95, Math.round(_spDrag.oy + ((p.clientY - _spDrag.sy) / _spDrag.rh) * 100)));
+        if ($('sp-logo-x')) $('sp-logo-x').value = nx;
+        if ($('sp-logo-y')) $('sp-logo-y').value = ny;
         updateSponsorPreview();
       } else {
         const nx = Math.max(0, Math.min(100, Math.round(_spDrag.ox - ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
