@@ -1671,12 +1671,13 @@ async function uploadImage(inputEl, targetInputId) {
   }
   const target = $(targetInputId);
   const previewBox = $(targetInputId + '-preview');
-  const isLogo = (targetInputId === 'set-logo-url' || targetInputId === 'proud-logo' || targetInputId === 'admin-sponsor-img');
   toast('ပုံ ပြင်ဆင်နေသည်…');
 
   try {
+    // Quick visual only (do NOT save blob: into input — it breaks after refresh)
     const localUrl = URL.createObjectURL(file);
     setImagePreview(previewBox, localUrl, 'ပြင်ဆင်နေသည်…');
+    // Show in live preview boxes immediately without writing blob to input
     if (targetInputId === 'hero-image' && typeof applyLiveBg === 'function') applyLiveBg($('hero-live-preview'), localUrl);
     if (targetInputId === 'admin-sponsor-bg' && typeof applyLiveBg === 'function') applyLiveBg($('sponsor-live-preview'), localUrl);
     if (targetInputId === 'admin-sponsor-img' && typeof applyLiveLogo === 'function') applyLiveLogo($('sp-prev-logo'), $('sp-prev-logo-icon'), localUrl);
@@ -1685,47 +1686,36 @@ async function uploadImage(inputEl, targetInputId) {
       applyLiveLogo($('post-prev-img'), $('post-prev-img-icon'), localUrl);
     }
 
-    // Logo: smaller so Storage/RTDB stay reliable
-    const maxW = isLogo ? 400 : 1200;
-    const quality = isLogo ? 0.85 : 0.78;
+    // Compress then make permanent data URL (or Firebase)
     let blob = file;
-    try { blob = await compressImageFile(file, maxW, quality); } catch (e) { console.warn(e); }
+    try { blob = await compressImageFile(file, 1200, 0.78); } catch (e) { console.warn(e); }
 
     let finalUrl = await fileToDataURL(blob);
-    setImagePreview(previewBox, finalUrl, '✓ Preview');
+    setImagePreview(previewBox, finalUrl, '✓ Preview အဆင်သင့်');
     if (target) {
       setImageFieldValue(targetInputId, finalUrl);
       try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
       try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
     }
     refreshLivePreviewFor(targetInputId);
+    toast('ပုံ Preview မှာ ပေါ်ပါပြီ — Save နှိပ်ပါ');
 
-    // Prefer Firebase Storage HTTPS URL (logo especially) — avoid huge Base64 in RTDB
     if (adminUser && adminStorage) {
-      toast('Firebase Storage သို့ တင်နေသည်…');
-      try {
-        const httpsUrl = await withTimeout(
-          adminStorage.ref('uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg')
-            .put(blob, { contentType: 'image/jpeg' })
-            .then(function(s) { return s.ref.getDownloadURL(); }),
-          20000
-        );
-        if (httpsUrl && target) {
-          setImageFieldValue(targetInputId, httpsUrl);
-          setImagePreview(previewBox, httpsUrl, 'Firebase ✓');
-          try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
-          try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
-          refreshLivePreviewFor(targetInputId);
-          toast('ပုံ တင်ပြီးပါပြီ — Save Brand နှိပ်ပါ');
-        } else {
-          toast('ပုံ Preview အဆင်သင့် — Save Brand နှိပ်ပါ');
-        }
-      } catch (storageErr) {
-        console.warn('Storage upload failed', storageErr);
-        toast('Storage မရပါ (Rules စစ်ပါ)။ Preview သိမ်းပြီး — Save Brand နှိပ်ပါ');
-      }
-    } else {
-      toast('ပုံ Preview မှာ ပေါ်ပါပြီ — Save Brand နှိပ်ပါ');
+      const dataUrl = finalUrl;
+      withTimeout(
+        adminStorage.ref('uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
+        15000
+      ).then(function(httpsUrl) {
+        if (!httpsUrl || !target) return;
+        // Only replace if still the same Base64 we uploaded
+        const current = imageFieldValue(targetInputId);
+        if (current !== dataUrl && current !== httpsUrl) return;
+        setImageFieldValue(targetInputId, httpsUrl);
+        setImagePreview(previewBox, httpsUrl, 'Firebase ✓');
+        try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+        refreshLivePreviewFor(targetInputId);
+        toast('Firebase Storage သိမ်းပြီး ✓');
+      }).catch(function() {});
     }
 
     try { URL.revokeObjectURL(localUrl); } catch (e) {}
@@ -2098,36 +2088,11 @@ $('set-accent-color')?.addEventListener('input', () => {
   $('set-accent-hex').value = $('set-accent-color').value;
 });
 
-async function saveSettings() {
+function saveSettings() {
   const theme = $('set-theme').value || 'forest';
   const preset = THEME_PRESETS[theme] || THEME_PRESETS.forest;
   const customAccent = $('set-accent-hex').value.trim() || $('set-accent-color').value;
   const heroMaxW = parseInt($('set-hero-maxw')?.value || '1400', 10);
-  let logoUrl = imageFieldValue('set-logo-url');
-
-  // If logo is still Base64, try Storage one more time so RTDB stays small
-  if (logoUrl && logoUrl.indexOf('data:image/') === 0 && adminUser && adminStorage) {
-    try {
-      toast('Logo ကို Storage သို့ တင်နေသည်…');
-      const res = await fetch(logoUrl);
-      const blob = await res.blob();
-      logoUrl = await withTimeout(
-        adminStorage.ref('uploads/logo_' + Date.now() + '.jpg')
-          .put(blob, { contentType: blob.type || 'image/jpeg' })
-          .then(function(s) { return s.ref.getDownloadURL(); }),
-        20000
-      );
-      setImageFieldValue('set-logo-url', logoUrl);
-      showPreviewIfUrl('set-logo-url');
-    } catch (e) {
-      console.warn('Logo storage on save failed', e);
-      if (logoUrl.length > 400000) {
-        toast('Logo ကြီးလွန်းသည် — Storage Rules ဖွင့်ပြီး ပြန် Upload လုပ်ပါ');
-        return;
-      }
-    }
-  }
-
   write('hh_settings', {
     theme,
     mode: $('set-mode')?.value || 'dark',
@@ -2142,7 +2107,7 @@ async function saveSettings() {
     brandTaglineWeight: $('set-brand-tagline-weight')?.value || '400',
     brandTaglineStyle: $('set-brand-tagline-style')?.value || 'normal',
     showBrandTagline: $('set-show-tagline').checked,
-    logoUrl: logoUrl || '',
+    logoUrl: imageFieldValue('set-logo-url'),
     accentColor: customAccent || preset.accentColor,
     bgColor: preset.bgColor,
     surfaceColor: preset.surfaceColor,
@@ -2171,7 +2136,7 @@ async function saveSettings() {
     storiesHeading: $('set-stories-heading').value.trim(),
     storiesSub: $('set-stories-sub').value.trim()
   });
-  toast('Brand & Layout သိမ်းပြီးပါပြီ။' + (logoUrl ? ' Logo ✓' : ''));
+  toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
 }
 
 function setHeroFrameAlign(align) {
