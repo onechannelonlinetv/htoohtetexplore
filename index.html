@@ -861,16 +861,34 @@ function applyColors(s) {
 }
 
 function setLogo(url) {
-  const ok = url && String(url).length > 4 && String(url).indexOf('Preview') === -1;
+  const u = String(url || '').trim();
+  // Accept https/http or data:image — reject placeholders & blob
+  const ok = u.length > 8
+    && u.indexOf('Preview') === -1
+    && u.indexOf('blob:') !== 0
+    && (u.indexOf('http://') === 0 || u.indexOf('https://') === 0 || u.indexOf('data:image/') === 0);
   ['brand-logo-img', 'footer-logo-img'].forEach(id => {
     const img = $(id);
     const icon = $(id.replace('-img', '-icon'));
     if (!img) return;
     if (ok) {
-      img.src = url;
-      img.classList.remove('hidden');
-      img.style.display = 'block';
-      if (icon) { icon.classList.add('hidden'); icon.style.display = 'none'; }
+      img.onload = function() {
+        img.classList.remove('hidden');
+        img.style.display = 'block';
+        if (icon) { icon.classList.add('hidden'); icon.style.display = 'none'; }
+      };
+      img.onerror = function() {
+        img.classList.add('hidden');
+        img.style.display = 'none';
+        if (icon) { icon.classList.remove('hidden'); icon.style.display = ''; }
+      };
+      img.src = u;
+      // if already cached, onload may not fire
+      if (img.complete && img.naturalWidth > 0) {
+        img.classList.remove('hidden');
+        img.style.display = 'block';
+        if (icon) { icon.classList.add('hidden'); icon.style.display = 'none'; }
+      }
     } else {
       img.removeAttribute('src');
       img.classList.add('hidden');
