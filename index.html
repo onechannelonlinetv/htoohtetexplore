@@ -378,8 +378,8 @@
   <!-- HERO -->
   <section id="hero-section" class="relative overflow-hidden" style="min-height: var(--hero-min-h); max-width: 100%; width: 100%;">
     <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
-    <div class="hero-overlay absolute inset-0"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15"></div>
+    <div id="hero-overlay-main" class="hero-overlay absolute inset-0"></div>
+    <div id="hero-overlay-top" class="absolute inset-0"></div>
     <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
       <div id="hero-text-box" class="absolute inset-0 pointer-events-none" style="z-index:5;">
         <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%;">Travel Journal</span>
@@ -861,16 +861,21 @@ function applyColors(s) {
 }
 
 function setLogo(url) {
+  const ok = url && String(url).length > 4 && String(url).indexOf('Preview') === -1;
   ['brand-logo-img', 'footer-logo-img'].forEach(id => {
     const img = $(id);
     const icon = $(id.replace('-img', '-icon'));
     if (!img) return;
-    if (url) {
-      img.src = url; img.classList.remove('hidden');
-      if (icon) icon.classList.add('hidden');
+    if (ok) {
+      img.src = url;
+      img.classList.remove('hidden');
+      img.style.display = 'block';
+      if (icon) { icon.classList.add('hidden'); icon.style.display = 'none'; }
     } else {
+      img.removeAttribute('src');
       img.classList.add('hidden');
-      if (icon) icon.classList.remove('hidden');
+      img.style.display = 'none';
+      if (icon) { icon.classList.remove('hidden'); icon.style.display = ''; }
     }
   });
 }
@@ -1035,6 +1040,21 @@ function loadBlogData() {
     bg.style.transform = 'scale(' + (zoom / 100) + ')';
     bg.style.width = '100%';
     bg.style.height = '100%';
+  })();
+
+  // Overlay opacity (user-controlled darkness)
+  (function applyHeroOverlay() {
+    const ov = (hero.overlayOpacity != null) ? hero.overlayOpacity : 45;
+    const a = (ov / 100);
+    const main = $('hero-overlay-main');
+    const top = $('hero-overlay-top');
+    if (main) {
+      main.style.background = 'linear-gradient(to right, rgba(0,0,0,' + a.toFixed(2) + '), rgba(0,0,0,' + (a * 0.45).toFixed(2) + '), transparent)';
+      main.style.opacity = '1';
+    }
+    if (top) {
+      top.style.background = 'linear-gradient(to top, rgba(0,0,0,' + (a * 0.55).toFixed(2) + '), transparent 55%, rgba(0,0,0,' + (a * 0.2).toFixed(2) + '))';
+    }
   })();
 
   siteMenu = read('hh_menu', []);
