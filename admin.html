@@ -140,6 +140,7 @@ main > div {
     </a>
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
     <nav class="space-y-0.5 flex-1">
+      <button class="navbtn" data-view="pagepreview" onclick="showView('pagepreview',this)"><i class="fa-solid fa-eye w-4"></i> Preview</button>
       <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
       <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Hero</button>
       <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
@@ -206,40 +207,143 @@ main > div {
 
       <!-- BRAND & SETTINGS -->
       
-      <section id="view-pagepreview" class="view space-y-4">
+            <section id="view-pagepreview" class="view space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-xl font-black">Page Preview</h2>
-            <p class="mt-1 text-sm text-slate-400">Website UI တစ်ခုလုံး · ဒီမှာကြည့်ပြီး အောက်က ခလုတ်နဲ့ သက်ဆိုင်ရာနေရာကို ပြင်နိုင်ပါတယ်</p>
+            <h2 class="text-xl font-black flex items-center gap-2"><i class="fa-solid fa-eye text-emerald-400"></i> Website Preview</h2>
+            <p class="mt-0.5 text-sm text-slate-400">သင့် website အစစ် · Desktop / Tablet / Mobile · Overall adjust</p>
           </div>
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex rounded-xl border border-slate-700 overflow-hidden text-xs font-bold">
+              <button type="button" id="pv-btn-desktop" onclick="setPagePreviewWidth('desktop')" class="px-3 py-2 bg-emerald-600 text-white"><i class="fa-solid fa-desktop mr-1"></i>Desktop</button>
+              <button type="button" id="pv-btn-tablet" onclick="setPagePreviewWidth('tablet')" class="px-3 py-2 bg-slate-900 text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
+              <button type="button" id="pv-btn-mobile" onclick="setPagePreviewWidth('mobile')" class="px-3 py-2 bg-slate-900 text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-mobile-screen mr-1"></i>Mobile</button>
+            </div>
             <button type="button" class="btn btn-muted text-xs" onclick="refreshPagePreviewIframe()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
-            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
-            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
-            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
-            <a href="index.html" target="_blank" class="btn btn-green text-xs"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Tab</a>
+            <button type="button" class="btn btn-green text-xs" onclick="applyPreviewAdjustments()"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Changes</button>
           </div>
         </div>
-        <div class="flex flex-wrap gap-2 text-xs">
-          <button type="button" class="btn btn-muted" onclick="showView('settings'); setTimeout(function(){var a=document.getElementById('hero-editor-anchor');if(a)a.scrollIntoView({behavior:'smooth'});},80)">✏️ Edit Hero</button>
-          <button type="button" class="btn btn-muted" onclick="showView('sponsor')">✏️ Edit Sponsor</button>
-          <button type="button" class="btn btn-muted" onclick="showView('upcoming')">✏️ Edit Upcoming</button>
-          <button type="button" class="btn btn-muted" onclick="showView('posts')">✏️ Edit Latest Travel</button>
-          <button type="button" class="btn btn-muted" onclick="showView('menu')">✏️ Edit Menu</button>
-          <button type="button" class="btn btn-muted" onclick="showView('youtube')">✏️ Edit YouTube</button>
-        </div>
-        <div class="panel editor-shell p-2 sm:p-4 bg-[#050a12]">
-          <div id="page-preview-frame-wrap" class="mx-auto transition-all" style="width:100%;max-width:100%;">
-            <div class="rounded-xl border border-slate-700 overflow-hidden bg-black shadow-2xl">
-              <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-900 border-b border-slate-800">
-                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                <span class="ml-2 text-[10px] text-slate-500 truncate">index.html · live preview</span>
+
+        <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4 items-start">
+          <div class="panel editor-shell p-2 sm:p-3 bg-[#050a12] min-w-0">
+            <div id="page-preview-frame-wrap" class="mx-auto transition-all" style="width:100%;max-width:100%;">
+              <div class="rounded-xl border border-slate-700 overflow-hidden bg-black shadow-2xl">
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-900 border-b border-slate-800">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span class="ml-2 text-[10px] text-slate-500 truncate">htoohtet · live preview</span>
+                </div>
+                <iframe id="page-preview-iframe" src="index.html" title="Site Preview" class="w-full bg-[#061510]" style="height:min(78vh,860px);border:0;"></iframe>
               </div>
-              <iframe id="page-preview-iframe" src="index.html" title="Site Preview" class="w-full bg-white" style="height:min(78vh,820px);border:0;"></iframe>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3 text-[11px]">
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('settings')">✏️ Brand & Hero</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('sponsor')">✏️ Official Sponsor</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('upcoming')">✏️ Upcoming</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('posts')">✏️ Latest Travel</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('sections')">✏️ Custom Rows</button>
+              <button type="button" class="btn btn-muted py-1.5" onclick="showView('proud')">✏️ Proud Sponsors</button>
             </div>
           </div>
+
+          <aside class="panel p-4 space-y-4 sticky top-20 max-h-[min(85vh,900px)] overflow-y-auto">
+            <div>
+              <h3 class="font-black text-sm flex items-center gap-2"><i class="fa-solid fa-sliders text-emerald-400"></i> Website Preview Adjustment</h3>
+              <p class="tiny mt-1">Layout · Style · Theme အရောင်</p>
+            </div>
+            <div class="flex gap-1 rounded-lg border border-slate-700 p-0.5 text-[11px] font-bold">
+              <button type="button" class="pv-tab flex-1 py-1.5 rounded-md bg-emerald-600 text-white" data-pvtab="general" onclick="switchPvTab('general')">General</button>
+              <button type="button" class="pv-tab flex-1 py-1.5 rounded-md text-slate-400" data-pvtab="sections" onclick="switchPvTab('sections')">Sections</button>
+              <button type="button" class="pv-tab flex-1 py-1.5 rounded-md text-slate-400" data-pvtab="style" onclick="switchPvTab('style')">Style</button>
+            </div>
+
+            <div id="pv-panel-general" class="pv-panel space-y-3">
+              <div>
+                <label class="label">Theme</label>
+                <select id="pv-theme" class="field" onchange="pvQuickTheme(this.value)">
+                  <option value="forest">Forest Dark</option>
+                  <option value="ocean">Ocean</option>
+                  <option value="sunset">Sunset</option>
+                  <option value="navy">Navy Light</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Mode</label>
+                <select id="pv-mode" class="field">
+                  <option value="dark">Dark</option>
+                  <option value="light">Light</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Brand Name</label>
+                <input id="pv-brand-name" class="field" placeholder="HTOO HTET">
+              </div>
+              <div>
+                <label class="label flex justify-between">Content Max Width <span id="pv-val-maxw" class="text-emerald-400">1200px</span></label>
+                <input type="range" id="pv-content-maxw" min="900" max="1400" step="20" value="1200" class="w-full accent-emerald-500" oninput="document.getElementById('pv-val-maxw').textContent=this.value+'px'">
+              </div>
+              <div>
+                <label class="label flex justify-between">Hero Height <span id="pv-val-hero-h" class="text-emerald-400">480px</span></label>
+                <input type="range" id="pv-hero-h" min="200" max="800" step="10" value="480" class="w-full accent-emerald-500" oninput="document.getElementById('pv-val-hero-h').textContent=this.value+'px'">
+              </div>
+              <div>
+                <label class="label flex justify-between">Card Image H <span id="pv-val-card-h" class="text-emerald-400">11rem</span></label>
+                <input type="range" id="pv-card-h" min="6" max="20" step="0.5" value="11" class="w-full accent-emerald-500" oninput="document.getElementById('pv-val-card-h').textContent=this.value+'rem'">
+              </div>
+            </div>
+
+            <div id="pv-panel-sections" class="pv-panel space-y-3 hidden">
+              <p class="text-xs text-slate-400">Website section အစဉ်</p>
+              <ol class="text-sm space-y-2 text-slate-200">
+                <li class="flex gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black">1</span> Hero</li>
+                <li class="flex gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black">2</span> Proud Sponsors</li>
+                <li class="flex gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black">3</span> Official Sponsor</li>
+                <li class="flex gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black">4</span> Upcoming</li>
+                <li class="flex gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black">5</span> Travel Stories</li>
+                <li class="flex gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black">6</span> Custom Rows</li>
+                <li class="flex gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2"><span class="text-emerald-400 font-black">7</span> YouTube · About</li>
+              </ol>
+              <button type="button" class="btn btn-muted w-full text-xs" onclick="showView('sponsor')">Official Sponsor ပြင်ရန်</button>
+              <button type="button" class="btn btn-muted w-full text-xs" onclick="showView('upcoming')">Upcoming ပြင်ရန်</button>
+              <button type="button" class="btn btn-muted w-full text-xs" onclick="showView('sections')">Custom Rows ပြင်ရန်</button>
+            </div>
+
+            <div id="pv-panel-style" class="pv-panel space-y-3 hidden">
+              <div>
+                <label class="label">Accent Color</label>
+                <input id="pv-accent" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent">
+              </div>
+              <div>
+                <label class="label">Body Font</label>
+                <select id="pv-font" class="field">
+                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
+                  <option value="'Poppins', 'Noto Sans Myanmar', system-ui, sans-serif">Poppins</option>
+                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
+                  <option value="'Space Grotesk', 'Noto Sans Myanmar', system-ui, sans-serif">Space Grotesk</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Heading Font</label>
+                <select id="pv-heading-font" class="field">
+                  <option value="'Inter', 'Noto Sans Myanmar', system-ui, sans-serif">Inter</option>
+                  <option value="'Playfair Display', 'Noto Sans Myanmar', serif">Playfair</option>
+                  <option value="'Outfit', 'Noto Sans Myanmar', system-ui, sans-serif">Outfit</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Stories Heading</label>
+                <input id="pv-stories-heading" class="field" placeholder="Travel Stories">
+              </div>
+              <div>
+                <label class="label">Stories Subtitle</label>
+                <input id="pv-stories-sub" class="field" placeholder="မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ">
+              </div>
+            </div>
+
+            <button type="button" onclick="applyPreviewAdjustments()" class="btn btn-green w-full"><i class="fa-solid fa-check mr-1"></i>Apply Changes</button>
+            <a href="index.html" target="_blank" class="btn btn-muted w-full text-center text-xs block"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Live Website</a>
+          </aside>
         </div>
       </section>
 
@@ -1785,7 +1889,7 @@ adminAuth?.onAuthStateChanged(user => { if (!user) { adminUser = null; remoteSyn
 function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 
 const titles = {
-  overview: 'Overview', pagepreview: 'Page Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
+  overview: 'Overview', pagepreview: 'Website Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
   proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Latest Travel',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
@@ -1801,6 +1905,87 @@ function setPagePreviewWidth(mode) {
   if (mode === 'mobile') { w.style.maxWidth = '390px'; }
   else if (mode === 'tablet') { w.style.maxWidth = '768px'; }
   else { w.style.maxWidth = '100%'; }
+  ['desktop','tablet','mobile'].forEach(function(m) {
+    var b = $('pv-btn-' + m);
+    if (!b) return;
+    b.className = (m === mode) ? 'px-3 py-2 bg-emerald-600 text-white' : 'px-3 py-2 bg-slate-900 text-slate-300 hover:bg-slate-800';
+  });
+}
+
+
+function switchPvTab(tab) {
+  document.querySelectorAll('.pv-panel').forEach(function(p) { p.classList.add('hidden'); });
+  document.querySelectorAll('.pv-tab').forEach(function(b) {
+    var on = b.getAttribute('data-pvtab') === tab;
+    b.className = 'pv-tab flex-1 py-1.5 rounded-md ' + (on ? 'bg-emerald-600 text-white' : 'text-slate-400');
+  });
+  var panel = document.getElementById('pv-panel-' + tab);
+  if (panel) panel.classList.remove('hidden');
+}
+function loadPreviewPanel() {
+  var s = {};
+  try { s = JSON.parse(localStorage.getItem('hh_settings') || '{}') || {}; } catch(e) {}
+  if ($('pv-theme')) $('pv-theme').value = s.theme || 'forest';
+  if ($('pv-mode')) $('pv-mode').value = s.mode || 'dark';
+  if ($('pv-brand-name')) $('pv-brand-name').value = s.brandName || 'HTOO HTET';
+  if ($('pv-hero-h')) { $('pv-hero-h').value = s.heroHeight || 480; if ($('pv-val-hero-h')) $('pv-val-hero-h').textContent = (s.heroHeight || 480) + 'px'; }
+  if ($('pv-card-h')) { $('pv-card-h').value = s.cardImgHeight || 11; if ($('pv-val-card-h')) $('pv-val-card-h').textContent = (s.cardImgHeight || 11) + 'rem'; }
+  if ($('pv-content-maxw')) { var mw = s.contentMaxWidth || 1200; $('pv-content-maxw').value = mw; if ($('pv-val-maxw')) $('pv-val-maxw').textContent = mw + 'px'; }
+  if ($('pv-accent')) $('pv-accent').value = s.accentColor || '#f5c518';
+  if ($('pv-font') && s.fontFamily) $('pv-font').value = s.fontFamily;
+  if ($('pv-heading-font') && s.headingFont) $('pv-heading-font').value = s.headingFont;
+  if ($('pv-stories-heading')) $('pv-stories-heading').value = s.storiesHeading || '';
+  if ($('pv-stories-sub')) $('pv-stories-sub').value = s.storiesSub || '';
+}
+function pvQuickTheme(name) {
+  var presets = {
+    forest: { accentColor: '#f5c518', bgColor: '#061510', surfaceColor: '#0a1f18', cardColor: '#0f2e24' },
+    ocean:  { accentColor: '#22d3ee', bgColor: '#0a1628', surfaceColor: '#0c1e36', cardColor: '#132f4c' },
+    sunset: { accentColor: '#f97316', bgColor: '#1a120b', surfaceColor: '#241810', cardColor: '#2d2015' },
+    navy:   { accentColor: '#1e3a5f', bgColor: '#f8fafc', surfaceColor: '#ffffff', cardColor: '#ffffff' }
+  };
+  var p = presets[name] || presets.forest;
+  if ($('pv-accent')) $('pv-accent').value = p.accentColor;
+  if ($('pv-mode')) $('pv-mode').value = (name === 'navy') ? 'light' : 'dark';
+  if (typeof selectTheme === 'function') selectTheme(name);
+}
+function applyPreviewAdjustments() {
+  try {
+    var s = read('hh_settings', {});
+    var theme = ($('pv-theme') && $('pv-theme').value) || s.theme || 'forest';
+    var presets = {
+      forest: { accentColor: '#f5c518', bgColor: '#061510', surfaceColor: '#0a1f18', cardColor: '#0f2e24' },
+      ocean:  { accentColor: '#22d3ee', bgColor: '#0a1628', surfaceColor: '#0c1e36', cardColor: '#132f4c' },
+      sunset: { accentColor: '#f97316', bgColor: '#1a120b', surfaceColor: '#241810', cardColor: '#2d2015' },
+      navy:   { accentColor: '#1e3a5f', bgColor: '#f8fafc', surfaceColor: '#ffffff', cardColor: '#ffffff' }
+    };
+    var preset = presets[theme] || presets.forest;
+    s.theme = theme;
+    s.mode = ($('pv-mode') && $('pv-mode').value) || (theme === 'navy' ? 'light' : 'dark');
+    s.brandName = ($('pv-brand-name') && $('pv-brand-name').value.trim()) || s.brandName || 'HTOO HTET';
+    s.heroHeight = parseInt(($('pv-hero-h') && $('pv-hero-h').value) || s.heroHeight || 480, 10);
+    s.cardImgHeight = parseFloat(($('pv-card-h') && $('pv-card-h').value) || s.cardImgHeight || 11);
+    s.contentMaxWidth = parseInt(($('pv-content-maxw') && $('pv-content-maxw').value) || 1200, 10);
+    s.accentColor = ($('pv-accent') && $('pv-accent').value) || preset.accentColor;
+    s.bgColor = preset.bgColor;
+    s.surfaceColor = preset.surfaceColor;
+    s.cardColor = preset.cardColor;
+    if ($('pv-font')) s.fontFamily = $('pv-font').value;
+    if ($('pv-heading-font')) s.headingFont = $('pv-heading-font').value;
+    if ($('pv-stories-heading')) s.storiesHeading = $('pv-stories-heading').value.trim();
+    if ($('pv-stories-sub')) s.storiesSub = $('pv-stories-sub').value.trim();
+    if ($('set-theme')) $('set-theme').value = s.theme;
+    if ($('set-mode')) $('set-mode').value = s.mode;
+    if ($('set-brand-name')) $('set-brand-name').value = s.brandName;
+    if ($('set-hero-height')) $('set-hero-height').value = s.heroHeight;
+    if ($('set-card-img-h')) $('set-card-img-h').value = s.cardImgHeight;
+    write('hh_settings', s);
+    toast('Preview settings သိမ်းပြီး · refresh…');
+    setTimeout(refreshPagePreviewIframe, 400);
+  } catch (e) {
+    console.error(e);
+    toast('Save မရပါ');
+  }
 }
 
 function showView(name, button) {
@@ -1812,7 +1997,7 @@ function showView(name, button) {
     }, 50);
   }
   if (name === 'pagepreview') {
-    setTimeout(function() { try { refreshPagePreviewIframe(); } catch (e) {} }, 100);
+    setTimeout(function() { try { loadPreviewPanel(); refreshPagePreviewIframe(); } catch (e) {} }, 80);
   }
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -2010,42 +2195,16 @@ const THEME_PRESETS = {
   navy:   { accentColor: '#1e3a5f', bgColor: '#f8fafc', surfaceColor: '#ffffff', cardColor: '#ffffff' }
 };
 function selectTheme(name) {
-  if ($('set-theme')) $('set-theme').value = name;
+  $('set-theme').value = name;
   document.querySelectorAll('.theme-card').forEach(c => {
-    const on = c.dataset.theme === name;
-    c.classList.toggle('border-emerald-500', on);
-    c.classList.toggle('border-transparent', !on);
+    c.classList.toggle('border-emerald-500', c.dataset.theme === name);
+    c.classList.toggle('border-transparent', c.dataset.theme !== name);
   });
   const preset = THEME_PRESETS[name];
   if (preset) {
-    if ($('set-accent-color')) $('set-accent-color').value = preset.accentColor;
-    if ($('set-accent-hex')) $('set-accent-hex').value = preset.accentColor;
-    // auto mode: navy → light, others → dark
-    if (name === 'navy') {
-      if ($('set-mode')) $('set-mode').value = 'light';
-      if (typeof selectMode === 'function') selectMode('light');
-    } else {
-      if ($('set-mode')) $('set-mode').value = 'dark';
-      if (typeof selectMode === 'function') selectMode('dark');
-    }
+    $('set-accent-color').value = preset.accentColor;
+    $('set-accent-hex').value = preset.accentColor;
   }
-  // immediately persist theme colors so live site / preview update
-  try {
-    const s = read('hh_settings', {});
-    s.theme = name;
-    if (preset) {
-      s.accentColor = preset.accentColor;
-      s.bgColor = preset.bgColor;
-      s.surfaceColor = preset.surfaceColor;
-      s.cardColor = preset.cardColor;
-    }
-    s.mode = name === 'navy' ? 'light' : (s.mode === 'light' && name !== 'navy' ? 'dark' : (s.mode || 'dark'));
-    if (name !== 'navy') s.mode = 'dark';
-    if (name === 'navy') s.mode = 'light';
-    write('hh_settings', s);
-    toast('Theme: ' + name + ' · အရောင် သိမ်းပြီး · Preview refresh လုပ်ပါ');
-    if (typeof refreshPagePreviewIframe === 'function') setTimeout(refreshPagePreviewIframe, 350);
-  } catch (e) { console.error(e); }
 }
 function selectMode(mode) {
   $('set-mode').value = mode;
