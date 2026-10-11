@@ -372,7 +372,7 @@ main > div {
               <div class="min-w-0 w-full">
                 <p class="text-[10px] font-bold text-slate-400 mb-1.5"><i class="fa-solid fa-desktop mr-1"></i>PC / Tablet</p>
                 <div id="hero-live-preview" class="relative overflow-hidden border border-slate-700 select-none" style="width:100%;max-width:100%;height:360px;background:linear-gradient(135deg,#0a1f18,#061510);cursor:grab;border-radius:12px;">
-                  <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none z-[1]"></div>
+                  <div id="hero-prev-overlay" class="absolute inset-0 pointer-events-none z-[1]" style="background:linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.25), transparent)"></div>
                   <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ဖိဆွဲရွှေ့ · ထောင့် = ဆိုဒ်</p>
                   <div id="hero-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%;top:18%;color:#f5c518;font-size:10px;touch-action:none;">Travel Journal<span class="sp-resize-handle" data-resize="hero-label" title="ဆိုဒ်"></span></div>
                   <div id="hero-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%;top:32%;font-size:16px;touch-action:none;">New Places.<span class="sp-resize-handle" data-resize="hero-title" title="ဆိုဒ်"></span></div>
@@ -393,7 +393,7 @@ main > div {
                     <span class="text-[7px] text-white/50"><i class="fa-solid fa-signal"></i> <i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></span>
                   </div>
                   <div id="hero-phone-preview" class="relative overflow-hidden" style="width:100%;height:220px;border-radius:4px;background:linear-gradient(135deg,#0a1f18,#061510);">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent z-[1] pointer-events-none"></div>
+                    <div class="phone-overlay absolute inset-0 z-[1] pointer-events-none" style="background:linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.2), transparent)"></div>
                     <div id="hero-phone-label" class="absolute z-10 text-[7px] font-bold uppercase tracking-widest text-yellow-400" style="left:6%;top:16%;">Travel Journal</div>
                     <div id="hero-phone-title" class="absolute z-10 text-[11px] font-black text-white leading-tight" style="left:6%;top:26%;max-width:88%;">New Places.</div>
                     <div id="hero-phone-desc" class="absolute z-10 text-[8px] text-white/70 line-clamp-3" style="left:6%;top:48%;max-width:85%;">Description…</div>
@@ -446,9 +446,23 @@ main > div {
               <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this,'hero-image'); setTimeout(updateHeroPreview,800)"></label>
             </div>
             <div id="hero-image-preview" class="mt-2"></div>
-            <div class="mt-2 grid grid-cols-2 gap-2 text-[11px]">
-              <div>Image X <input type="range" id="hero-img-x" min="0" max="100" value="50" class="w-full accent-emerald-500" oninput="updateHeroPreview()"><span id="val-hix">50</span>%</div>
-              <div>Image Y <input type="range" id="hero-img-y" min="0" max="100" value="50" class="w-full accent-emerald-500" oninput="updateHeroPreview()"><span id="val-hiy">50</span>%</div>
+            <div class="mt-3 rounded-xl border border-sky-700/40 bg-sky-950/20 p-3 space-y-2">
+              <p class="text-[11px] font-bold text-sky-300 uppercase tracking-wider">Background Image · Position / Zoom / Overlay</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-[11px]">
+                <div>Image X <span id="val-hix" class="text-emerald-400">50</span>%
+                  <input type="range" id="hero-img-x" min="0" max="100" value="50" class="w-full accent-sky-500" oninput="updateHeroPreview()">
+                </div>
+                <div>Image Y <span id="val-hiy" class="text-emerald-400">50</span>%
+                  <input type="range" id="hero-img-y" min="0" max="100" value="50" class="w-full accent-sky-500" oninput="updateHeroPreview()">
+                </div>
+                <div>Zoom <span id="val-hero-zoom" class="text-emerald-400">100</span>%
+                  <input type="range" id="hero-img-zoom" min="50" max="250" step="5" value="100" class="w-full accent-sky-500" oninput="updateHeroPreview()">
+                </div>
+                <div>Overlay မှောင် <span id="val-hero-overlay" class="text-emerald-400">45</span>%
+                  <input type="range" id="hero-overlay" min="0" max="90" step="5" value="45" class="w-full accent-amber-500" oninput="updateHeroPreview()">
+                </div>
+              </div>
+              <p class="tiny">Overlay ၀ = ပုံအလင်း · ၉၀ = အမှောင်ဆုံး (စာဖတ်ရလွယ်အောင်)</p>
             </div>
           </div>
 
@@ -1657,13 +1671,12 @@ async function uploadImage(inputEl, targetInputId) {
   }
   const target = $(targetInputId);
   const previewBox = $(targetInputId + '-preview');
+  const isLogo = (targetInputId === 'set-logo-url' || targetInputId === 'proud-logo' || targetInputId === 'admin-sponsor-img');
   toast('ပုံ ပြင်ဆင်နေသည်…');
 
   try {
-    // Quick visual only (do NOT save blob: into input — it breaks after refresh)
     const localUrl = URL.createObjectURL(file);
     setImagePreview(previewBox, localUrl, 'ပြင်ဆင်နေသည်…');
-    // Show in live preview boxes immediately without writing blob to input
     if (targetInputId === 'hero-image' && typeof applyLiveBg === 'function') applyLiveBg($('hero-live-preview'), localUrl);
     if (targetInputId === 'admin-sponsor-bg' && typeof applyLiveBg === 'function') applyLiveBg($('sponsor-live-preview'), localUrl);
     if (targetInputId === 'admin-sponsor-img' && typeof applyLiveLogo === 'function') applyLiveLogo($('sp-prev-logo'), $('sp-prev-logo-icon'), localUrl);
@@ -1672,36 +1685,47 @@ async function uploadImage(inputEl, targetInputId) {
       applyLiveLogo($('post-prev-img'), $('post-prev-img-icon'), localUrl);
     }
 
-    // Compress then make permanent data URL (or Firebase)
+    // Logo: smaller so Storage/RTDB stay reliable
+    const maxW = isLogo ? 400 : 1200;
+    const quality = isLogo ? 0.85 : 0.78;
     let blob = file;
-    try { blob = await compressImageFile(file, 1200, 0.78); } catch (e) { console.warn(e); }
+    try { blob = await compressImageFile(file, maxW, quality); } catch (e) { console.warn(e); }
 
     let finalUrl = await fileToDataURL(blob);
-    setImagePreview(previewBox, finalUrl, '✓ Preview အဆင်သင့်');
+    setImagePreview(previewBox, finalUrl, '✓ Preview');
     if (target) {
       setImageFieldValue(targetInputId, finalUrl);
       try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
       try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
     }
     refreshLivePreviewFor(targetInputId);
-    toast('ပုံ Preview မှာ ပေါ်ပါပြီ — Save နှိပ်ပါ');
 
+    // Prefer Firebase Storage HTTPS URL (logo especially) — avoid huge Base64 in RTDB
     if (adminUser && adminStorage) {
-      const dataUrl = finalUrl;
-      withTimeout(
-        adminStorage.ref('uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
-        15000
-      ).then(function(httpsUrl) {
-        if (!httpsUrl || !target) return;
-        // Only replace if still the same Base64 we uploaded
-        const current = imageFieldValue(targetInputId);
-        if (current !== dataUrl && current !== httpsUrl) return;
-        setImageFieldValue(targetInputId, httpsUrl);
-        setImagePreview(previewBox, httpsUrl, 'Firebase ✓');
-        try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
-        refreshLivePreviewFor(targetInputId);
-        toast('Firebase Storage သိမ်းပြီး ✓');
-      }).catch(function() {});
+      toast('Firebase Storage သို့ တင်နေသည်…');
+      try {
+        const httpsUrl = await withTimeout(
+          adminStorage.ref('uploads/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg')
+            .put(blob, { contentType: 'image/jpeg' })
+            .then(function(s) { return s.ref.getDownloadURL(); }),
+          20000
+        );
+        if (httpsUrl && target) {
+          setImageFieldValue(targetInputId, httpsUrl);
+          setImagePreview(previewBox, httpsUrl, 'Firebase ✓');
+          try { target.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+          try { target.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+          refreshLivePreviewFor(targetInputId);
+          toast('ပုံ တင်ပြီးပါပြီ — Save Brand နှိပ်ပါ');
+        } else {
+          toast('ပုံ Preview အဆင်သင့် — Save Brand နှိပ်ပါ');
+        }
+      } catch (storageErr) {
+        console.warn('Storage upload failed', storageErr);
+        toast('Storage မရပါ (Rules စစ်ပါ)။ Preview သိမ်းပြီး — Save Brand နှိပ်ပါ');
+      }
+    } else {
+      toast('ပုံ Preview မှာ ပေါ်ပါပြီ — Save Brand နှိပ်ပါ');
     }
 
     try { URL.revokeObjectURL(localUrl); } catch (e) {}
@@ -1877,6 +1901,7 @@ function loadAll() {
   if ($('hero-frame-h')) $('hero-frame-h').value = h.frameH != null ? h.frameH : 360;
   if ($('hero-frame-align')) $('hero-frame-align').value = h.frameAlign || 'center';
   if ($('hero-img-zoom')) $('hero-img-zoom').value = h.imgZoom != null ? h.imgZoom : 100;
+  if ($('hero-overlay')) $('hero-overlay').value = h.overlayOpacity != null ? h.overlayOpacity : 45;
   $('hero-label').value = h.label || '';
   if ($('hero-label-color')) $('hero-label-color').value = h.labelColor || '#f5c518';
   if ($('hero-label-fs')) $('hero-label-fs').value = h.labelFs || 12;
@@ -2073,11 +2098,36 @@ $('set-accent-color')?.addEventListener('input', () => {
   $('set-accent-hex').value = $('set-accent-color').value;
 });
 
-function saveSettings() {
+async function saveSettings() {
   const theme = $('set-theme').value || 'forest';
   const preset = THEME_PRESETS[theme] || THEME_PRESETS.forest;
   const customAccent = $('set-accent-hex').value.trim() || $('set-accent-color').value;
   const heroMaxW = parseInt($('set-hero-maxw')?.value || '1400', 10);
+  let logoUrl = imageFieldValue('set-logo-url');
+
+  // If logo is still Base64, try Storage one more time so RTDB stays small
+  if (logoUrl && logoUrl.indexOf('data:image/') === 0 && adminUser && adminStorage) {
+    try {
+      toast('Logo ကို Storage သို့ တင်နေသည်…');
+      const res = await fetch(logoUrl);
+      const blob = await res.blob();
+      logoUrl = await withTimeout(
+        adminStorage.ref('uploads/logo_' + Date.now() + '.jpg')
+          .put(blob, { contentType: blob.type || 'image/jpeg' })
+          .then(function(s) { return s.ref.getDownloadURL(); }),
+        20000
+      );
+      setImageFieldValue('set-logo-url', logoUrl);
+      showPreviewIfUrl('set-logo-url');
+    } catch (e) {
+      console.warn('Logo storage on save failed', e);
+      if (logoUrl.length > 400000) {
+        toast('Logo ကြီးလွန်းသည် — Storage Rules ဖွင့်ပြီး ပြန် Upload လုပ်ပါ');
+        return;
+      }
+    }
+  }
+
   write('hh_settings', {
     theme,
     mode: $('set-mode')?.value || 'dark',
@@ -2092,7 +2142,7 @@ function saveSettings() {
     brandTaglineWeight: $('set-brand-tagline-weight')?.value || '400',
     brandTaglineStyle: $('set-brand-tagline-style')?.value || 'normal',
     showBrandTagline: $('set-show-tagline').checked,
-    logoUrl: imageFieldValue('set-logo-url'),
+    logoUrl: logoUrl || '',
     accentColor: customAccent || preset.accentColor,
     bgColor: preset.bgColor,
     surfaceColor: preset.surfaceColor,
@@ -2121,7 +2171,7 @@ function saveSettings() {
     storiesHeading: $('set-stories-heading').value.trim(),
     storiesSub: $('set-stories-sub').value.trim()
   });
-  toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
+  toast('Brand & Layout သိမ်းပြီးပါပြီ။' + (logoUrl ? ' Logo ✓' : ''));
 }
 
 function setHeroFrameAlign(align) {
@@ -2209,9 +2259,22 @@ function updateHeroPreview() {
   if ($('val-hix')) $('val-hix').textContent = ix;
   if ($('val-hiy')) $('val-hiy').textContent = iy;
   if ($('val-hero-zoom')) $('val-hero-zoom').textContent = zoom;
+  const ov = parseInt($('hero-overlay')?.value || '45', 10);
+  if ($('val-hero-overlay')) $('val-hero-overlay').textContent = ov;
   if (box) {
     applyLiveBg(box, img, ix, iy, zoom);
     if (!img) box.style.backgroundImage = 'linear-gradient(135deg,#0a1f18,#061510)';
+  }
+  const ovEl = $('hero-prev-overlay');
+  if (ovEl) {
+    const a = (ov / 100).toFixed(2);
+    const a2 = (ov / 100 * 0.5).toFixed(2);
+    ovEl.style.background = 'linear-gradient(to right, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '), transparent)';
+  }
+  const phoneOv = document.querySelector('#hero-phone-preview .phone-overlay');
+  if (phoneOv) {
+    const a = (ov / 100).toFixed(2);
+    phoneOv.style.background = 'linear-gradient(to top, rgba(0,0,0,' + a + '), rgba(0,0,0,' + (ov/100*0.4).toFixed(2) + '), transparent)';
   }
   const fh = parseInt($('hero-frame-h')?.value || '360', 10);
   let fw = parseInt($('hero-frame-w')?.value || '100', 10);
@@ -2548,6 +2611,7 @@ function saveHero() {
     frameH: parseInt($('hero-frame-h')?.value || '360', 10),
     frameAlign: $('hero-frame-align')?.value || 'center',
     imgZoom: parseInt($('hero-img-zoom')?.value || '100', 10),
+    overlayOpacity: parseInt($('hero-overlay')?.value || '45', 10),
     label: $('hero-label').value.trim(),
     labelColor: $('hero-label-color')?.value || '#f5c518',
     labelFs: parseInt($('hero-label-fs')?.value || '12', 10),
