@@ -2089,54 +2089,72 @@ $('set-accent-color')?.addEventListener('input', () => {
 });
 
 function saveSettings() {
-  const theme = $('set-theme').value || 'forest';
-  const preset = THEME_PRESETS[theme] || THEME_PRESETS.forest;
-  const customAccent = $('set-accent-hex').value.trim() || $('set-accent-color').value;
-  const heroMaxW = parseInt($('set-hero-maxw')?.value || '1400', 10);
-  write('hh_settings', {
-    theme,
-    mode: $('set-mode')?.value || 'dark',
-    brandName: $('set-brand-name').value.trim() || 'HTOO HTET',
-    brandNameColor: $('set-brand-name-color')?.value || '#e5edf7',
-    brandNameFs: parseInt($('set-brand-name-fs')?.value || '18', 10),
-    brandNameWeight: $('set-brand-name-weight')?.value || '700',
-    brandNameStyle: $('set-brand-name-style')?.value || 'normal',
-    brandTagline: $('set-brand-tagline').value.trim(),
-    brandTaglineColor: $('set-brand-tagline-color')?.value || '#94a3b8',
-    brandTaglineFs: parseInt($('set-brand-tagline-fs')?.value || '12', 10),
-    brandTaglineWeight: $('set-brand-tagline-weight')?.value || '400',
-    brandTaglineStyle: $('set-brand-tagline-style')?.value || 'normal',
-    showBrandTagline: $('set-show-tagline').checked,
-    logoUrl: imageFieldValue('set-logo-url'),
-    accentColor: customAccent || preset.accentColor,
-    bgColor: preset.bgColor,
-    surfaceColor: preset.surfaceColor,
-    cardColor: preset.cardColor,
-    fontFamily: $('set-font').value,
-    headingFont: $('set-heading-font').value,
-    headingWeight: $('set-heading-weight')?.value || '700',
-    headingStyle: $('set-heading-style')?.value || 'normal',
-    bodyColor: $('set-body-color')?.value || '',
-    headingColor: $('set-heading-color')?.value || '',
-    heroHeight: parseInt($('set-hero-height').value, 10) || 480,
-    heroMaxWidth: heroMaxW >= 1350 ? 100 : heroMaxW,
-    heroTextAlign: $('set-hero-text-align')?.value || 'left',
-    heroVAlign: $('set-hero-v-align')?.value || 'center',
-    heroTextMaxW: parseInt($('set-hero-text-maxw')?.value || '36', 10),
-    sponsorHeight: parseInt($('set-sponsor-height')?.value || '180', 10),
-    upcomingHeight: parseInt($('set-upcoming-height')?.value || '200', 10),
-    cardImgHeight: parseFloat($('set-card-img-h').value) || 11,
-    contactEmail: $('set-email').value.trim(),
-    contactLocation: $('set-location').value.trim(),
-    footerTagline: $('set-footer-tagline').value.trim(),
-    footerTaglineColor: $('set-footer-tagline-color')?.value || '#94a3b8',
-    footerTaglineFs: parseInt($('set-footer-tagline-fs')?.value || '13', 10),
-    footerTaglineWeight: $('set-footer-tagline-weight')?.value || '400',
-    footerTaglineStyle: $('set-footer-tagline-style')?.value || 'normal',
-    storiesHeading: $('set-stories-heading').value.trim(),
-    storiesSub: $('set-stories-sub').value.trim()
-  });
-  toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
+  try {
+    const val = (id, fallback) => {
+      const el = $(id);
+      if (!el) return fallback;
+      if (el.type === 'checkbox') return el.checked;
+      const v = (el.value != null ? String(el.value) : '').trim();
+      return v !== '' ? v : fallback;
+    };
+    const num = (id, fallback) => {
+      const n = parseFloat(val(id, String(fallback)));
+      return isNaN(n) ? fallback : n;
+    };
+    const theme = val('set-theme', 'forest');
+    const preset = (typeof THEME_PRESETS !== 'undefined' && THEME_PRESETS[theme]) ? THEME_PRESETS[theme] : { accentColor: '#f5c518', bgColor: '#061510', surfaceColor: '#0a1f18', cardColor: '#0f2e24' };
+    const customAccent = val('set-accent-hex', '') || val('set-accent-color', '') || preset.accentColor;
+    const heroMaxW = num('set-hero-maxw', 1400);
+    const logoUrl = (typeof imageFieldValue === 'function') ? imageFieldValue('set-logo-url') : val('set-logo-url', '');
+
+    write('hh_settings', {
+      theme,
+      mode: val('set-mode', 'dark'),
+      brandName: val('set-brand-name', 'HTOO HTET'),
+      brandNameColor: val('set-brand-name-color', '#e5edf7'),
+      brandNameFs: num('set-brand-name-fs', 18),
+      brandNameWeight: val('set-brand-name-weight', '700'),
+      brandNameStyle: val('set-brand-name-style', 'normal'),
+      brandTagline: val('set-brand-tagline', ''),
+      brandTaglineColor: val('set-brand-tagline-color', '#94a3b8'),
+      brandTaglineFs: num('set-brand-tagline-fs', 12),
+      brandTaglineWeight: val('set-brand-tagline-weight', '400'),
+      brandTaglineStyle: val('set-brand-tagline-style', 'normal'),
+      showBrandTagline: !!($('set-show-tagline') && $('set-show-tagline').checked),
+      logoUrl: logoUrl || '',
+      accentColor: customAccent,
+      bgColor: preset.bgColor,
+      surfaceColor: preset.surfaceColor,
+      cardColor: preset.cardColor,
+      fontFamily: val('set-font', "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif"),
+      headingFont: val('set-heading-font', "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif"),
+      headingWeight: val('set-heading-weight', '700'),
+      headingStyle: val('set-heading-style', 'normal'),
+      bodyColor: val('set-body-color', ''),
+      headingColor: val('set-heading-color', ''),
+      heroHeight: num('set-hero-height', 480),
+      heroMaxWidth: heroMaxW >= 1350 ? 100 : heroMaxW,
+      heroTextAlign: val('set-hero-text-align', 'left'),
+      heroVAlign: val('set-hero-v-align', 'center'),
+      heroTextMaxW: num('set-hero-text-maxw', 36),
+      sponsorHeight: num('set-sponsor-height', 180),
+      upcomingHeight: num('set-upcoming-height', 200),
+      cardImgHeight: num('set-card-img-h', 11),
+      contactEmail: val('set-email', ''),
+      contactLocation: val('set-location', ''),
+      footerTagline: val('set-footer-tagline', ''),
+      footerTaglineColor: val('set-footer-tagline-color', '#94a3b8'),
+      footerTaglineFs: num('set-footer-tagline-fs', 13),
+      footerTaglineWeight: val('set-footer-tagline-weight', '400'),
+      footerTaglineStyle: val('set-footer-tagline-style', 'normal'),
+      storiesHeading: val('set-stories-heading', ''),
+      storiesSub: val('set-stories-sub', '')
+    });
+    toast('Brand & Layout သိမ်းပြီးပါပြီ။' + (logoUrl ? ' Logo ✓' : ''));
+  } catch (err) {
+    console.error('saveSettings error', err);
+    toast('Save မရပါ: ' + (err && err.message ? err.message : 'error'));
+  }
 }
 
 function setHeroFrameAlign(align) {
