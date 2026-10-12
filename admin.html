@@ -141,6 +141,7 @@ main > div {
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
     <nav class="space-y-0.5 flex-1">
       <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
+      <button class="navbtn" data-view="pagepreview" onclick="showView('pagepreview',this);setTimeout(function(){if(typeof refreshPagePreviewIframe==='function')refreshPagePreviewIframe();},120);"><i class="fa-solid fa-eye w-4"></i> Preview</button>
       <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Hero</button>
       <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
       <button class="navbtn" data-view="proud" onclick="showView('proud',this)"><i class="fa-solid fa-handshake w-4"></i> Proud Sponsors</button>
@@ -974,7 +975,17 @@ main > div {
             </div>
             <div class="md:col-span-2"><label class="label">Description</label><textarea id="up-desc" class="field min-h-14" oninput="updateUpcomingPreview()"></textarea></div>
           </div>
-          <button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
+          
+        <div class="panel p-4 mt-3 space-y-3">
+          <p class="text-xs font-bold text-emerald-300">Banner ပုံ နေရာ / Zoom (slider နဲ့ adjust)</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div><label class="label">ဘယ် ⟷ ညာ</label><input id="up-img-x" type="range" min="0" max="100" value="50" class="w-full" oninput="if($('val-up-img-x'))$('val-up-img-x').textContent=this.value+'%';updateUpcomingPreview()"><span id="val-up-img-x" class="range-val">50%</span></div>
+            <div><label class="label">အပေါ် ⟷ အောက်</label><input id="up-img-y" type="range" min="0" max="100" value="50" class="w-full" oninput="if($('val-up-img-y'))$('val-up-img-y').textContent=this.value+'%';updateUpcomingPreview()"><span id="val-up-img-y" class="range-val">50%</span></div>
+            <div><label class="label">Zoom</label><input id="up-img-zoom" type="range" min="100" max="200" value="100" class="w-full" oninput="if($('val-up-img-zoom'))$('val-up-img-zoom').textContent=this.value+'%';updateUpcomingPreview()"><span id="val-up-img-zoom" class="range-val">100%</span></div>
+          </div>
+        </div>
+
+<button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
         </div>
       </section>
 
@@ -1773,6 +1784,7 @@ async function signInAdmin() {
     $('login-modal').classList.add('hidden');
     $('app').classList.remove('hidden');
     loadAll();
+    try { renderOverview(); } catch (e2) {}
   } catch (e) {
     $('login-error').textContent = e.message || 'Login မအောင်မြင်ပါ။';
   } finally {
@@ -2017,7 +2029,7 @@ function loadAll() {
   if ($('set-brand-tagline-fs')) { $('set-brand-tagline-fs').value = s.brandTaglineFs || 12; if ($('val-brand-tagline-fs')) $('val-brand-tagline-fs').textContent = (s.brandTaglineFs || 12) + 'px'; }
   if ($('set-brand-tagline-weight')) $('set-brand-tagline-weight').value = s.brandTaglineWeight || '400';
   if ($('set-brand-tagline-style')) $('set-brand-tagline-style').value = s.brandTaglineStyle || 'normal';
-  if ($('set-show-tagline')) $('set-show-tagline').checked = s.showBrandTagline === true;
+  if ($('set-show-tagline')) $('set-show-tagline') ? $('set-show-tagline').checked : true = s.showBrandTagline === true;
   setImageFieldValue('set-logo-url', s.logoUrl || '');
   $('set-email').value = s.contactEmail || '';
   $('set-location').value = s.contactLocation || '';
@@ -2028,8 +2040,8 @@ function loadAll() {
   if ($('set-footer-tagline-style')) $('set-footer-tagline-style').value = s.footerTaglineStyle || 'normal';
   $('set-stories-heading').value = s.storiesHeading || '';
   $('set-stories-sub').value = s.storiesSub || '';
-  $('set-font').value = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
-  $('set-heading-font').value = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
+  ($('set-font') && $('set-font').value) || 'Inter' = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
+  ($('set-heading-font') && $('set-heading-font').value) || 'Inter' = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
   if ($('set-heading-weight')) $('set-heading-weight').value = s.headingWeight || '700';
   if ($('set-heading-style')) $('set-heading-style').value = s.headingStyle || 'normal';
   if ($('set-body-color')) $('set-body-color').value = s.bodyColor || '#ffffff';
@@ -2259,19 +2271,20 @@ $('set-accent-color')?.addEventListener('input', () => {
 });
 
 function saveSettings() {
-  const theme = $('set-theme').value || 'forest';
+  const theme = ($('set-theme') && $('set-theme').value) || 'forest';
   const preset = THEME_PRESETS[theme] || THEME_PRESETS.forest;
-  const customAccent = $('set-accent-hex').value.trim() || $('set-accent-color').value;
+  const _accentEl = $('set-accent-hex') || $('set-accent-color');
+  const customAccent = _accentEl ? String(_accentEl.value || '').trim() : '';
   const heroMaxW = parseInt($('set-hero-maxw')?.value || '1400', 10);
   write('hh_settings', {
     theme,
     mode: $('set-mode')?.value || 'dark',
-    brandName: $('set-brand-name').value.trim() || 'HTOO HTET',
+    brandName: (($('set-brand-name') && $('set-brand-name').value) || '').trim() || 'HTOO HTET',
     brandNameColor: $('set-brand-name-color')?.value || '#e5edf7',
     brandNameFs: parseInt($('set-brand-name-fs')?.value || '18', 10),
     brandNameWeight: $('set-brand-name-weight')?.value || '700',
     brandNameStyle: $('set-brand-name-style')?.value || 'normal',
-    brandTagline: $('set-brand-tagline').value.trim(),
+    brandTagline: (($('set-brand-tagline') && $('set-brand-tagline').value) || '').trim(),
     brandTaglineColor: $('set-brand-tagline-color')?.value || '#94a3b8',
     brandTaglineFs: parseInt($('set-brand-tagline-fs')?.value || '12', 10),
     brandTaglineWeight: $('set-brand-tagline-weight')?.value || '400',
@@ -2288,25 +2301,27 @@ function saveSettings() {
     headingStyle: $('set-heading-style')?.value || 'normal',
     bodyColor: $('set-body-color')?.value || '',
     headingColor: $('set-heading-color')?.value || '',
-    heroHeight: parseInt($('set-hero-height').value, 10) || 480,
+    heroHeight: parseInt(($('set-hero-height') && $('set-hero-height').value) || '480', 10) || 480,
     heroMaxWidth: heroMaxW >= 1350 ? 100 : heroMaxW,
     heroTextAlign: $('set-hero-text-align')?.value || 'left',
     heroVAlign: $('set-hero-v-align')?.value || 'center',
     heroTextMaxW: parseInt($('set-hero-text-maxw')?.value || '36', 10),
     sponsorHeight: parseInt($('set-sponsor-height')?.value || '180', 10),
     upcomingHeight: parseInt($('set-upcoming-height')?.value || '200', 10),
-    cardImgHeight: parseFloat($('set-card-img-h').value) || 11,
-    contactEmail: $('set-email').value.trim(),
-    contactLocation: $('set-location').value.trim(),
-    footerTagline: $('set-footer-tagline').value.trim(),
+    cardImgHeight: parseFloat(($('set-card-img-h') && $('set-card-img-h').value) || '11') || 11,
+    contactEmail: (($('set-email') && $('set-email').value) || '').trim(),
+    contactLocation: (($('set-location') && $('set-location').value) || '').trim(),
+    footerTagline: (($('set-footer-tagline') && $('set-footer-tagline').value) || '').trim(),
     footerTaglineColor: $('set-footer-tagline-color')?.value || '#94a3b8',
     footerTaglineFs: parseInt($('set-footer-tagline-fs')?.value || '13', 10),
     footerTaglineWeight: $('set-footer-tagline-weight')?.value || '400',
     footerTaglineStyle: $('set-footer-tagline-style')?.value || 'normal',
-    storiesHeading: $('set-stories-heading').value.trim(),
-    storiesSub: $('set-stories-sub').value.trim()
+    storiesHeading: (($('set-stories-heading') && $('set-stories-heading').value) || '').trim(),
+    storiesSub: (($('set-stories-sub') && $('set-stories-sub').value) || '').trim()
   });
-  toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
+  toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme);
+  try { if (typeof saveHero === 'function') saveHero(); } catch (e) { console.warn(e); }
+  try { if (typeof renderOverview === 'function') renderOverview(); } catch (e) {}
 }
 
 function setHeroFrameAlign(align) {
@@ -3328,7 +3343,24 @@ function updateUpcomingPreview() {
   }
   initUpcomingDrag();
 }
-let _upDrag = null;
+let _upDrag = nul
+  try {
+    var ix = parseInt((($('up-img-x')&&$('up-img-x').value)||'50'),10);
+    var iy = parseInt((($('up-img-y')&&$('up-img-y').value)||'50'),10);
+    var iz = parseInt((($('up-img-zoom')&&$('up-img-zoom').value)||'100'),10);
+    if ($('val-up-img-x')) $('val-up-img-x').textContent = ix + '%';
+    if ($('val-up-img-y')) $('val-up-img-y').textContent = iy + '%';
+    if ($('val-up-img-zoom')) $('val-up-img-zoom').textContent = iz + '%';
+    var ubox = $('up-live-preview');
+    var uimg = ubox && (ubox.querySelector('.live-bg-img') || ubox.querySelector('img'));
+    if (uimg) {
+      uimg.style.objectPosition = ix + '% ' + iy + '%';
+      uimg.style.transform = iz > 100 ? ('scale(' + (iz/100).toFixed(2) + ')') : '';
+      uimg.style.transformOrigin = ix + '% ' + iy + '%';
+    }
+  } catch (e) {}
+}
+
 function initUpcomingDrag() {
   const box = $('up-live-preview');
   if (!box || box._upDragReady) return;
@@ -3389,31 +3421,52 @@ function initUpcomingDrag() {
 }
 
 function saveUpcoming() {
-  write('hh_upcoming', {
-    active: $('up-active').checked,
-    heading: $('up-heading').value.trim(),
-    sectionTitle: $('up-section-title')?.value.trim() || '',
-    label: $('up-label').value.trim(),
-    labelColor: $('up-label-color')?.value || '#f5c518',
-    labelFs: parseInt($('up-label-fs')?.value || '11', 10),
-    labelX: parseInt($('up-label-x')?.value || '6', 10),
-    labelY: parseInt($('up-label-y')?.value || '40', 10),
-    title: $('up-title').value.trim(),
-    titleColor: $('up-title-color')?.value || '#ffffff',
-    titleFs: parseInt($('up-title-fs')?.value || '22', 10),
-    titleWeight: $('up-title-weight')?.value || '900',
-    titleX: parseInt($('up-title-x')?.value || '6', 10),
-    titleY: parseInt($('up-title-y')?.value || '55', 10),
-    desc: $('up-desc').value.trim(),
-    descColor: $('up-desc-color')?.value || '#cccccc',
-    descFs: parseInt($('up-desc-fs')?.value || '13', 10),
-    descX: parseInt($('up-desc-x')?.value || '6', 10),
-    descY: parseInt($('up-desc-y')?.value || '72', 10),
-    frameH: parseInt($('up-frame-h')?.value || '160', 10),
-    image: imageFieldValue('up-image')
-  });
-  updateUpcomingPreview();
-  toast('Upcoming သိမ်းပြီးပါပြီ။');
+  function gv(id, def) {
+    var el = $(id);
+    if (!el) return def == null ? '' : def;
+    return String(el.value == null ? '' : el.value).trim() || (def == null ? '' : def);
+  }
+  function gi(id, def) {
+    var n = parseInt(gv(id, String(def)), 10);
+    return isNaN(n) ? def : n;
+  }
+  try {
+    var _upImg = (typeof imageFieldValue === 'function' ? imageFieldValue('up-image') : gv('up-image', ''));
+    var _upTitle = gv('up-title', '');
+    var _upActive = $('up-active') ? !!$('up-active').checked : true;
+    if (_upImg || _upTitle || gv('up-desc', '')) _upActive = true;
+    write('hh_upcoming', {
+      active: _upActive,
+      heading: gv('up-heading', 'Upcoming'),
+      sectionTitle: gv('up-section-title', ''),
+      label: gv('up-label', ''),
+      labelColor: gv('up-label-color', '#f5c518'),
+      labelFs: gi('up-label-fs', 11),
+      labelX: gi('up-label-x', 6),
+      labelY: gi('up-label-y', 40),
+      title: _upTitle || gv('up-heading', 'Upcoming') || 'Upcoming',
+      titleColor: gv('up-title-color', '#ffffff'),
+      titleFs: gi('up-title-fs', 22),
+      titleWeight: gv('up-title-weight', '900'),
+      titleX: gi('up-title-x', 6),
+      titleY: gi('up-title-y', 55),
+      desc: gv('up-desc', ''),
+      descColor: gv('up-desc-color', '#cccccc'),
+      descFs: gi('up-desc-fs', 13),
+      descX: gi('up-desc-x', 6),
+      descY: gi('up-desc-y', 72),
+      frameH: gi('up-frame-h', 160),
+      image: _upImg,
+      imgPosX: gi('up-img-x', 50),
+      imgPosY: gi('up-img-y', 50),
+      imgZoom: gi('up-img-zoom', 100)
+    });
+    if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
+    toast(_upImg ? 'Upcoming သိမ်းပြီး (ပုံပါ)' : 'Upcoming သိမ်းပြီးပါပြီ');
+  } catch (err) {
+    console.error(err);
+    toast('Upcoming save မရ: ' + (err.message || err));
+  }
 }
 function updateYoutubePreview() {
   if ($('yt-prev-label')) $('yt-prev-label').textContent = $('yt-label')?.value || 'Watch My YouTube';
@@ -4143,12 +4196,20 @@ function deleteHomeSection(i) {
 }
 
 function renderOverview() {
-  const posts = getPosts(), sections = getHomeSections(), proud = getProud(), sp = {};
-  $('stat-posts').textContent = posts.length;
-  $('stat-sections').textContent = sections.length;
-  $('stat-proud').textContent = proud.length;
-  const _spl = (typeof getSponsorList==='function') ? getSponsorList() : [];
-  $('stat-sponsor').textContent = _spl.length ? (_spl.filter(s=>s.active!==false).length + '/' + _spl.length) : '0';
+  try {
+    var posts = typeof getPosts==='function' ? getPosts() : [];
+    var sections = typeof getHomeSections==='function' ? getHomeSections() : [];
+    var proud = typeof getProud==='function' ? getProud() : [];
+    if ($('stat-posts')) $('stat-posts').textContent = posts.length;
+    if ($('stat-sections')) $('stat-sections').textContent = sections.length;
+    if ($('stat-proud')) $('stat-proud').textContent = proud.length;
+    var spText = '0';
+    if (typeof getSponsorList==='function') {
+      var _spl = getSponsorList() || [];
+      spText = _spl.length ? (_spl.filter(function(s){return s.active!==false}).length + '/' + _spl.length) : '0';
+    }
+    if ($('stat-sponsor')) $('stat-sponsor').textContent = spText;
+  } catch (e) { console.warn(e); }
 }
 
 /* ---- Theme Presets (full layout snapshot) ---- */
