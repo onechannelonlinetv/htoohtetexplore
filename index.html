@@ -422,13 +422,16 @@
       </h2>
       <p id="upcoming-section-title" class="text-sm text-emerald-400/70 mt-1 ml-3 hidden"></p>
     </div>
-    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40" style="min-height: var(--upcoming-min-h);">
+    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40 mx-auto" style="min-height: var(--upcoming-min-h); width: 100%;">
       <img id="upcoming-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200" alt="" class="absolute inset-0 w-full h-full object-cover">
       <div id="upcoming-overlay" class="absolute inset-0" style="background:linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.15))"></div>
       <div class="absolute inset-0 z-10" style="min-height: var(--upcoming-min-h);">
         <span id="upcoming-label" class="absolute font-bold uppercase tracking-widest accent-text" style="left:6%; top:40%; font-size:10px;">Featured Journey</span>
         <h3 id="upcoming-title" class="absolute text-white font-black" style="left:6%; top:55%; font-size:clamp(1rem,3.5vw,1.35rem); max-width:90%;"></h3>
         <p id="upcoming-desc" class="absolute text-white/80" style="left:6%; top:72%; font-size:13px; max-width:min(90%,28rem);"></p>
+        <div id="upcoming-logo-wrap" class="absolute z-20 hidden overflow-hidden rounded-lg bg-black/20" style="left:88%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%);">
+          <img id="upcoming-logo" src="" alt="" class="w-full h-full object-contain">
+        </div>
       </div>
     </div>
   </section>
@@ -1200,10 +1203,8 @@ function loadBlogData() {
       var iy = up.imgPosY != null ? up.imgPosY : 50;
       var iz = up.imgZoom != null ? up.imgZoom : 100;
       setStyle($('upcoming-img'), 'object-position', ix + '% ' + iy + '%');
-      if (iz > 100) {
-        setStyle($('upcoming-img'), 'transform', 'scale(' + (iz/100) + ')');
-        setStyle($('upcoming-img'), 'transform-origin', ix + '% ' + iy + '%');
-      }
+      setStyle($('upcoming-img'), 'transform', 'scale(' + (iz/100) + ')');
+      setStyle($('upcoming-img'), 'transform-origin', ix + '% ' + iy + '%');
     }
     (function(){
       var ov = (up.overlayOpacity != null) ? up.overlayOpacity : 55;
@@ -1213,6 +1214,31 @@ function loadBlogData() {
       var a2 = (ov/100*0.25).toFixed(2);
       el.style.background = 'linear-gradient(to top, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '))';
     })();
+    // Frame width
+    if (up.frameW != null && $('upcoming-banner')) {
+      setStyle($('upcoming-banner'), 'width', up.frameW + '%');
+      setStyle($('upcoming-banner'), 'max-width', '100%');
+    }
+    // Text styles
+    if (up.labelWeight) setStyle($('upcoming-label'), 'font-weight', up.labelWeight);
+    if (up.labelStyle) setStyle($('upcoming-label'), 'font-style', up.labelStyle);
+    if (up.titleStyle) setStyle($('upcoming-title'), 'font-style', up.titleStyle);
+    if (up.descWeight) setStyle($('upcoming-desc'), 'font-weight', up.descWeight);
+    if (up.descStyle) setStyle($('upcoming-desc'), 'font-style', up.descStyle);
+    // Logo
+    var logoWrap = $('upcoming-logo-wrap');
+    var logoImg = $('upcoming-logo');
+    if (logoWrap && logoImg && up.logo) {
+      logoWrap.classList.remove('hidden');
+      logoImg.src = up.logo;
+      setStyle(logoWrap, 'left', (up.logoX != null ? up.logoX : 88) + '%');
+      setStyle(logoWrap, 'top', (up.logoY != null ? up.logoY : 50) + '%');
+      setStyle(logoWrap, 'width', (up.logoW != null ? up.logoW : 72) + 'px');
+      setStyle(logoWrap, 'height', (up.logoH != null ? up.logoH : 72) + 'px');
+      setStyle(logoWrap, 'transform', 'translate(-50%,-50%)');
+    } else if (logoWrap) {
+      logoWrap.classList.add('hidden');
+    }
   }
 
   const yt = read('hh_youtube', {});
