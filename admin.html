@@ -1133,19 +1133,102 @@ main > div {
 
 <!-- CUSTOM ROWS -->
       <section id="view-sections" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Custom Rows / Sections</h2><p class="mt-1 text-sm text-slate-400">Homepage မှာ extra row တွေ ထည့်နိုင်တယ်</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+        <div><h2 class="text-xl font-black">Custom Rows / Sections</h2><p class="mt-1 text-sm text-slate-400">Grid · Wide · Banner (Cover + စာ) · နှိပ်ရင် စာမျက်နှာသို့</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+          <input type="hidden" id="section-edit-id" value="">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Row ခေါင်းစဉ် *</label><input id="section-title" class="field" placeholder="Featured Destinations"></div>
-            <div><label class="label">Subtitle</label><input id="section-subtitle" class="field" placeholder="Explore more"></div>
-            <div><label class="label">Layout</label>
-              <select id="section-layout" class="field">
+            <div><label class="label">Row ခေါင်းစဉ် *</label><input id="section-title" class="field" placeholder="Featured Destinations" oninput="updateSectionPreview()"></div>
+            <div><label class="label">Subtitle</label><input id="section-subtitle" class="field" placeholder="Explore more" oninput="updateSectionPreview()"></div>
+            <div>
+              <label class="label">Layout</label>
+              <select id="section-layout" class="field" onchange="toggleSectionBannerFields();updateSectionPreview()">
                 <option value="grid">Card Grid (4 columns)</option>
                 <option value="wide">Wide Row</option>
+                <option value="banner">Banner / Cover (ပုံ + စာ)</option>
               </select>
             </div>
+            <div>
+              <label class="label">နှိပ်ရင် သွားမယ့် Link</label>
+              <input id="section-link" class="field" placeholder="#stories သို့မဟုတ် https://... သို့မဟုတ် post slug" oninput="updateSectionPreview()">
+              <p class="tiny mt-1">ဥပမာ: #stories · #about-section · / သို့မဟုတ် full URL</p>
+            </div>
           </div>
-          <button onclick="addHomeSection()" class="btn btn-purple mt-4"><i class="fa-solid fa-plus mr-2"></i>Add Row</button>
+
+          <!-- Banner fields -->
+          <div id="section-banner-fields" class="hidden space-y-4 rounded-xl border border-violet-700/40 bg-violet-950/20 p-3">
+            <p class="text-[11px] font-bold text-violet-300 uppercase tracking-wider">Banner / Cover</p>
+            <div>
+              <label class="label">Cover Image</label>
+              <div class="flex gap-2">
+                <input id="section-banner-img" class="field flex-1" placeholder="URL / Upload" oninput="updateSectionPreview()">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this,'section-banner-img'); setTimeout(updateSectionPreview,800)"></label>
+              </div>
+              <div id="section-banner-img-preview" class="mt-2"></div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
+              <div>Frame Height <span id="val-sec-frame-h" class="text-emerald-400">220px</span>
+                <input type="range" id="section-frame-h" min="120" max="600" step="10" value="220" class="w-full accent-violet-500" oninput="updateSectionPreview()">
+              </div>
+              <div>Overlay မှောင် <span id="val-sec-overlay" class="text-emerald-400">50</span>%
+                <input type="range" id="section-overlay" min="0" max="90" step="5" value="50" class="w-full accent-amber-500" oninput="updateSectionPreview()">
+              </div>
+            </div>
+
+            <!-- Label typography -->
+            <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
+              <p class="text-[11px] font-bold text-emerald-400 uppercase">Label (cover ပေါ်)</p>
+              <div class="form-row form-row-typo w-full">
+                <div><label class="label">စာသား</label><input id="section-banner-label" class="field" placeholder="FEATURED" oninput="updateSectionPreview()"></div>
+                <div><label class="label">Color</label><input id="section-banner-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSectionPreview()"></div>
+                <div><label class="label flex justify-between">Size <span id="val-sec-label-fs" class="range-val">12px</span></label>
+                  <input type="range" id="section-banner-label-fs" min="10" max="28" value="12" class="w-full accent-emerald-500" oninput="updateSectionPreview()"></div>
+                <div><label class="label">Weight</label><select id="section-banner-label-weight" class="field" onchange="updateSectionPreview()"><option value="400">Regular</option><option value="600">Semi</option><option value="700" selected>Bold</option><option value="900">Black</option></select></div>
+                <div><label class="label">Style</label><select id="section-banner-label-style" class="field" onchange="updateSectionPreview()"><option value="normal">Normal</option><option value="italic">Italic</option></select></div>
+              </div>
+            </div>
+
+            <!-- Title typography -->
+            <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
+              <p class="text-[11px] font-bold text-emerald-400 uppercase">Title (cover ပေါ်)</p>
+              <div class="form-row form-row-typo w-full">
+                <div><label class="label">စာသား</label><input id="section-banner-title" class="field" placeholder="Cover Title" oninput="updateSectionPreview()"></div>
+                <div><label class="label">Color</label><input id="section-banner-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSectionPreview()"></div>
+                <div><label class="label flex justify-between">Size <span id="val-sec-title-fs" class="range-val">24px</span></label>
+                  <input type="range" id="section-banner-title-fs" min="14" max="64" value="24" class="w-full accent-emerald-500" oninput="updateSectionPreview()"></div>
+                <div><label class="label">Weight</label><select id="section-banner-title-weight" class="field" onchange="updateSectionPreview()"><option value="400">Regular</option><option value="600">Semi</option><option value="700">Bold</option><option value="900" selected>Black</option></select></div>
+                <div><label class="label">Style</label><select id="section-banner-title-style" class="field" onchange="updateSectionPreview()"><option value="normal">Normal</option><option value="italic">Italic</option></select></div>
+              </div>
+            </div>
+
+            <!-- Desc typography -->
+            <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
+              <p class="text-[11px] font-bold text-emerald-400 uppercase">Description (cover ပေါ်)</p>
+              <div class="form-row form-row-typo w-full">
+                <div><label class="label">စာသား</label><textarea id="section-banner-desc" class="field min-h-14" placeholder="Short description…" oninput="updateSectionPreview()"></textarea></div>
+                <div><label class="label">Color</label><input id="section-banner-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSectionPreview()"></div>
+                <div><label class="label flex justify-between">Size <span id="val-sec-desc-fs" class="range-val">14px</span></label>
+                  <input type="range" id="section-banner-desc-fs" min="11" max="28" value="14" class="w-full accent-emerald-500" oninput="updateSectionPreview()"></div>
+                <div><label class="label">Weight</label><select id="section-banner-desc-weight" class="field" onchange="updateSectionPreview()"><option value="400" selected>Regular</option><option value="600">Semi</option><option value="700">Bold</option><option value="900">Black</option></select></div>
+                <div><label class="label">Style</label><select id="section-banner-desc-style" class="field" onchange="updateSectionPreview()"><option value="normal">Normal</option><option value="italic">Italic</option></select></div>
+              </div>
+            </div>
+
+            <!-- Live preview -->
+            <div class="rounded-xl border-2 border-dashed border-violet-700/40 bg-[#050a12] p-2">
+              <span class="text-[11px] font-bold text-violet-300 uppercase">Live Preview · Banner</span>
+              <div id="section-live-preview" class="relative mt-2 overflow-hidden rounded-xl border border-slate-700" style="height:220px;background:#111;">
+                <div id="sec-prev-overlay" class="absolute inset-0 z-[1] pointer-events-none" style="background:linear-gradient(to top,rgba(0,0,0,.55),rgba(0,0,0,.15))"></div>
+                <div id="sec-prev-label" class="absolute z-10 font-bold uppercase tracking-widest" style="left:6%;top:28%;color:#f5c518;font-size:12px;">FEATURED</div>
+                <div id="sec-prev-title" class="absolute z-10 font-black text-white" style="left:6%;top:42%;font-size:22px;">Cover Title</div>
+                <div id="sec-prev-desc" class="absolute z-10 text-white/70" style="left:6%;top:62%;font-size:13px;max-width:80%;">Description…</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="addHomeSection()" class="btn btn-purple" id="section-save-btn"><i class="fa-solid fa-plus mr-2"></i>Add Row</button>
+            <button type="button" onclick="resetSectionForm()" class="btn btn-muted">Clear</button>
+          </div>
         </div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="mb-4 flex items-center justify-between"><h3 class="font-bold">Created Rows</h3><span id="section-count" class="tiny">0 rows</span></div>
@@ -2212,7 +2295,7 @@ function loadAll() {
   if (_sh && $('admin-sponsor-height-local')) $('admin-sponsor-height-local').value = _sh;
 
   // Enable friendly Base64 display for image URL fields
-  ['set-logo-url','hero-image','admin-sponsor-img','admin-sponsor-bg','up-image','admin-post-img','yt-thumb','yt-bg','proud-logo','stories-banner-img'].forEach(enableImageFieldEditing);
+  ['set-logo-url','hero-image','admin-sponsor-img','admin-sponsor-bg','up-image','admin-post-img','yt-thumb','yt-bg','proud-logo','stories-banner-img','section-banner-img'].forEach(enableImageFieldEditing);
 }
 
 const THEME_PRESETS = {
@@ -4228,38 +4311,179 @@ function renderPostsList() {
 }
 
 /* ---- Home Sections ---- */
+function collectSectionForm() {
+  const layout = $('section-layout')?.value || 'grid';
+  const data = {
+    id: ($('section-edit-id')?.value || '').trim() || String(Date.now()),
+    title: ($('section-title')?.value || '').trim(),
+    subtitle: ($('section-subtitle')?.value || '').trim(),
+    layout: layout,
+    link: ($('section-link')?.value || '').trim()
+  };
+  if (layout === 'banner') {
+    data.bannerImg = (typeof imageFieldValue === 'function') ? imageFieldValue('section-banner-img') : ($('section-banner-img')?.value || '');
+    data.frameH = parseInt($('section-frame-h')?.value || '220', 10);
+    data.overlayOpacity = parseInt($('section-overlay')?.value || '50', 10);
+    data.bannerLabel = ($('section-banner-label')?.value || '').trim();
+    data.bannerLabelColor = $('section-banner-label-color')?.value || '#f5c518';
+    data.bannerLabelFs = parseInt($('section-banner-label-fs')?.value || '12', 10);
+    data.bannerLabelWeight = $('section-banner-label-weight')?.value || '700';
+    data.bannerLabelStyle = $('section-banner-label-style')?.value || 'normal';
+    data.bannerTitle = ($('section-banner-title')?.value || '').trim() || data.title;
+    data.bannerTitleColor = $('section-banner-title-color')?.value || '#ffffff';
+    data.bannerTitleFs = parseInt($('section-banner-title-fs')?.value || '24', 10);
+    data.bannerTitleWeight = $('section-banner-title-weight')?.value || '900';
+    data.bannerTitleStyle = $('section-banner-title-style')?.value || 'normal';
+    data.bannerDesc = ($('section-banner-desc')?.value || '').trim();
+    data.bannerDescColor = $('section-banner-desc-color')?.value || '#cccccc';
+    data.bannerDescFs = parseInt($('section-banner-desc-fs')?.value || '14', 10);
+    data.bannerDescWeight = $('section-banner-desc-weight')?.value || '400';
+    data.bannerDescStyle = $('section-banner-desc-style')?.value || 'normal';
+  }
+  return data;
+}
+function toggleSectionBannerFields() {
+  const box = $('section-banner-fields');
+  if (!box) return;
+  box.classList.toggle('hidden', ($('section-layout')?.value || '') !== 'banner');
+}
+function updateSectionPreview() {
+  if ($('val-sec-frame-h')) $('val-sec-frame-h').textContent = ($('section-frame-h')?.value || 220) + 'px';
+  if ($('val-sec-overlay')) $('val-sec-overlay').textContent = $('section-overlay')?.value || 50;
+  if ($('val-sec-label-fs')) $('val-sec-label-fs').textContent = ($('section-banner-label-fs')?.value || 12) + 'px';
+  if ($('val-sec-title-fs')) $('val-sec-title-fs').textContent = ($('section-banner-title-fs')?.value || 24) + 'px';
+  if ($('val-sec-desc-fs')) $('val-sec-desc-fs').textContent = ($('section-banner-desc-fs')?.value || 14) + 'px';
+  const box = $('section-live-preview');
+  if (!box) return;
+  const fh = parseInt($('section-frame-h')?.value || '220', 10);
+  box.style.height = fh + 'px';
+  const img = (typeof imageFieldValue === 'function') ? imageFieldValue('section-banner-img') : ($('section-banner-img')?.value || '');
+  if (typeof applyLiveBg === 'function') applyLiveBg(box, img);
+  else if (img) { box.style.backgroundImage = 'url(' + img + ')'; box.style.backgroundSize = 'cover'; box.style.backgroundPosition = 'center'; }
+  const ov = parseInt($('section-overlay')?.value || '50', 10);
+  const ovEl = $('sec-prev-overlay');
+  if (ovEl) {
+    const a = (ov/100).toFixed(2);
+    ovEl.style.background = 'linear-gradient(to top, rgba(0,0,0,' + a + '), rgba(0,0,0,' + (ov/100*0.25).toFixed(2) + '))';
+  }
+  function put(id, text, color, fs, weight, style) {
+    const el = $(id); if (!el) return;
+    el.textContent = text || '';
+    if (color) el.style.color = color;
+    if (fs) el.style.fontSize = fs + 'px';
+    if (weight) el.style.fontWeight = weight;
+    if (style) el.style.fontStyle = style;
+  }
+  put('sec-prev-label', $('section-banner-label')?.value || 'FEATURED', $('section-banner-label-color')?.value, $('section-banner-label-fs')?.value, $('section-banner-label-weight')?.value, $('section-banner-label-style')?.value);
+  put('sec-prev-title', $('section-banner-title')?.value || $('section-title')?.value || 'Cover Title', $('section-banner-title-color')?.value, Math.max(12, Math.round(($('section-banner-title-fs')?.value||24)*0.85)), $('section-banner-title-weight')?.value, $('section-banner-title-style')?.value);
+  put('sec-prev-desc', $('section-banner-desc')?.value || 'Description…', $('section-banner-desc-color')?.value, $('section-banner-desc-fs')?.value, $('section-banner-desc-weight')?.value, $('section-banner-desc-style')?.value);
+}
+function resetSectionForm() {
+  if ($('section-edit-id')) $('section-edit-id').value = '';
+  ['section-title','section-subtitle','section-link','section-banner-label','section-banner-title','section-banner-desc'].forEach(function(id){ if ($(id)) $(id).value = ''; });
+  if ($('section-layout')) $('section-layout').value = 'grid';
+  if ($('section-frame-h')) $('section-frame-h').value = 220;
+  if ($('section-overlay')) $('section-overlay').value = 50;
+  if (typeof setImageFieldValue === 'function') setImageFieldValue('section-banner-img', '');
+  else if ($('section-banner-img')) $('section-banner-img').value = '';
+  const prev = $('section-banner-img-preview'); if (prev) prev.innerHTML = '';
+  if ($('section-save-btn')) $('section-save-btn').innerHTML = '<i class="fa-solid fa-plus mr-2"></i>Add Row';
+  toggleSectionBannerFields();
+  updateSectionPreview();
+}
 function addHomeSection() {
-  const title = $('section-title').value.trim();
-  if (!title) return alert('Row ခေါင်းစဉ် ထည့်ပါ။');
+  const data = collectSectionForm();
+  if (!data.title) return alert('Row ခေါင်းစဉ် ထည့်ပါ။');
+  if (data.layout === 'banner' && !data.bannerImg && !data.bannerTitle) {
+    /* allow title-only */
+  }
   const sections = getHomeSections();
-  sections.push({ id: String(Date.now()), title, subtitle: $('section-subtitle').value.trim(), layout: $('section-layout').value });
+  const editId = ($('section-edit-id')?.value || '').trim();
+  if (editId) {
+    const i = sections.findIndex(function(s){ return String(s.id) === String(editId); });
+    if (i >= 0) {
+      data.id = sections[i].id;
+      sections[i] = Object.assign({}, sections[i], data);
+    } else {
+      sections.push(data);
+    }
+  } else {
+    data.id = String(Date.now());
+    sections.push(data);
+  }
   write('hh_home_sections', sections);
-  $('section-title').value = ''; $('section-subtitle').value = '';
-  renderHomeSectionsList(); renderOverview(); toast('Row ထည့်ပြီးပါပြီ။');
+  resetSectionForm();
+  renderHomeSectionsList();
+  renderOverview();
+  toast(editId ? 'Row ပြင်ပြီးပါပြီ။' : 'Row ထည့်ပြီးပါပြီ။');
+}
+function editHomeSection(i) {
+  const sections = getHomeSections();
+  const s = sections[i];
+  if (!s) return;
+  if ($('section-edit-id')) $('section-edit-id').value = s.id;
+  if ($('section-title')) $('section-title').value = s.title || '';
+  if ($('section-subtitle')) $('section-subtitle').value = s.subtitle || '';
+  if ($('section-layout')) $('section-layout').value = s.layout || 'grid';
+  if ($('section-link')) $('section-link').value = s.link || '';
+  if ($('section-frame-h')) $('section-frame-h').value = s.frameH || 220;
+  if ($('section-overlay')) $('section-overlay').value = s.overlayOpacity != null ? s.overlayOpacity : 50;
+  if (typeof setImageFieldValue === 'function') setImageFieldValue('section-banner-img', s.bannerImg || '');
+  else if ($('section-banner-img')) $('section-banner-img').value = s.bannerImg || '';
+  if ($('section-banner-label')) $('section-banner-label').value = s.bannerLabel || '';
+  if ($('section-banner-label-color')) $('section-banner-label-color').value = s.bannerLabelColor || '#f5c518';
+  if ($('section-banner-label-fs')) $('section-banner-label-fs').value = s.bannerLabelFs || 12;
+  if ($('section-banner-label-weight')) $('section-banner-label-weight').value = s.bannerLabelWeight || '700';
+  if ($('section-banner-label-style')) $('section-banner-label-style').value = s.bannerLabelStyle || 'normal';
+  if ($('section-banner-title')) $('section-banner-title').value = s.bannerTitle || s.title || '';
+  if ($('section-banner-title-color')) $('section-banner-title-color').value = s.bannerTitleColor || '#ffffff';
+  if ($('section-banner-title-fs')) $('section-banner-title-fs').value = s.bannerTitleFs || 24;
+  if ($('section-banner-title-weight')) $('section-banner-title-weight').value = s.bannerTitleWeight || '900';
+  if ($('section-banner-title-style')) $('section-banner-title-style').value = s.bannerTitleStyle || 'normal';
+  if ($('section-banner-desc')) $('section-banner-desc').value = s.bannerDesc || '';
+  if ($('section-banner-desc-color')) $('section-banner-desc-color').value = s.bannerDescColor || '#cccccc';
+  if ($('section-banner-desc-fs')) $('section-banner-desc-fs').value = s.bannerDescFs || 14;
+  if ($('section-banner-desc-weight')) $('section-banner-desc-weight').value = s.bannerDescWeight || '400';
+  if ($('section-banner-desc-style')) $('section-banner-desc-style').value = s.bannerDescStyle || 'normal';
+  if ($('section-save-btn')) $('section-save-btn').innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Save Row';
+  toggleSectionBannerFields();
+  if (typeof showPreviewIfUrl === 'function') showPreviewIfUrl('section-banner-img');
+  updateSectionPreview();
+  showView('sections');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function renderHomeSectionsList() {
   const list = $('home-sections-list'), sections = getHomeSections();
-  $('section-count').textContent = sections.length + ' rows';
-  refreshPostSectionOptions();
+  if ($('section-count')) $('section-count').textContent = sections.length + ' rows';
+  if (typeof refreshPostSectionOptions === 'function') refreshPostSectionOptions();
+  if (!list) return;
   if (!sections.length) {
     list.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Row မရှိသေးပါ။</div>';
     return;
   }
-  list.innerHTML = sections.map((s, i) => `
-    <div class="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex min-w-0 items-start gap-3">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-400/10 font-black text-violet-200">${String(i+1).padStart(2,'0')}</div>
-        <div class="min-w-0">
-          <p class="font-bold">${safe(s.title)}</p>
-          <p class="mt-1 text-xs text-slate-400">${s.layout === 'wide' ? 'Wide' : 'Grid'} · ${getPosts().filter(p => String(p.sectionId) === String(s.id)).length} posts</p>
-        </div>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button class="btn btn-muted" onclick="moveHomeSection(${i},-1)" ${i===0?'disabled':''}>↑</button>
-        <button class="btn btn-muted" onclick="moveHomeSection(${i},1)" ${i===sections.length-1?'disabled':''}>↓</button>
-        <button class="btn btn-red" onclick="deleteHomeSection(${i})"><i class="fa-regular fa-trash-can mr-1"></i>Delete</button>
-      </div>
-    </div>`).join('');
+  const layoutLabel = function(l) {
+    if (l === 'wide') return 'Wide';
+    if (l === 'banner') return 'Banner';
+    return 'Grid';
+  };
+  list.innerHTML = sections.map(function(s, i) {
+    const postN = getPosts().filter(function(p){ return String(p.sectionId) === String(s.id); }).length;
+    return '<div class="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-4 sm:flex-row sm:items-center sm:justify-between">' +
+      '<div class="flex min-w-0 items-start gap-3">' +
+        '<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-400/10 font-black text-violet-200">' + String(i+1).padStart(2,'0') + '</div>' +
+        '<div class="min-w-0">' +
+          '<p class="font-bold">' + safe(s.title) + '</p>' +
+          '<p class="mt-1 text-xs text-slate-400">' + layoutLabel(s.layout) + (s.layout === 'banner' ? '' : (' · ' + postN + ' posts')) + (s.link ? (' · 🔗 ' + safe(s.link).slice(0,40)) : '') + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="flex flex-wrap gap-2">' +
+        '<button class="btn btn-muted" onclick="editHomeSection(' + i + ')"><i class="fa-solid fa-pen mr-1"></i>Edit</button>' +
+        '<button class="btn btn-muted" onclick="moveHomeSection(' + i + ',-1)" ' + (i===0?'disabled':'') + '>↑</button>' +
+        '<button class="btn btn-muted" onclick="moveHomeSection(' + i + ',1)" ' + (i===sections.length-1?'disabled':'') + '>↓</button>' +
+        '<button class="btn btn-red" onclick="deleteHomeSection(' + i + ')"><i class="fa-regular fa-trash-can mr-1"></i>Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 function moveHomeSection(i, d) {
   const a = getHomeSections(), n = i + d;
