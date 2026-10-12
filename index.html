@@ -424,7 +424,7 @@
     </div>
     <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40" style="min-height: var(--upcoming-min-h);">
       <img id="upcoming-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200" alt="" class="absolute inset-0 w-full h-full object-cover">
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
+      <div id="upcoming-overlay" class="absolute inset-0" style="background:linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.15))"></div>
       <div class="absolute inset-0 z-10" style="min-height: var(--upcoming-min-h);">
         <span id="upcoming-label" class="absolute font-bold uppercase tracking-widest accent-text" style="left:6%; top:40%; font-size:10px;">Featured Journey</span>
         <h3 id="upcoming-title" class="absolute text-white font-black" style="left:6%; top:55%; font-size:clamp(1rem,3.5vw,1.35rem); max-width:90%;"></h3>
@@ -474,14 +474,17 @@
             Visit Channel <i class="fa-solid fa-arrow-right text-xs"></i>
           </a>
         </div>
-        <div class="shrink-0">
-          <div class="w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative">
-            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70">
-            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-              <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl mb-2">
-                <i class="fa-solid fa-play text-white text-base ml-0.5"></i>
+        <div class="shrink-0 w-full max-w-md lg:w-80 xl:w-96">
+          <div id="youtube-embed-wrap" class="w-full aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative bg-black">
+            <iframe id="youtube-embed" class="absolute inset-0 w-full h-full hidden" src="" title="YouTube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            <div id="youtube-thumb-wrap" class="absolute inset-0">
+              <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80">
+              <div class="relative z-10 flex flex-col items-center justify-center h-full pointer-events-none">
+                <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl mb-2">
+                  <i class="fa-solid fa-play text-white text-base ml-0.5"></i>
+                </div>
+                <span class="text-xs font-bold text-white/90">HTOO HTET</span>
               </div>
-              <span class="text-xs font-bold text-white/90">HTOO HTET</span>
             </div>
           </div>
         </div>
@@ -1140,7 +1143,12 @@ function loadBlogData() {
           : '';
         return '<div class="sp-banner" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;border-radius:' + radiusDesktop + '">' +
           '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
-          '<div class="sp-grad"></div>' +
+          (function(){
+            var ov = (sponsor.overlayOpacity != null) ? sponsor.overlayOpacity : 55;
+            var a = (ov/100).toFixed(2);
+            var a2 = (ov/100*0.45).toFixed(2);
+            return '<div class="sp-grad" style="background:linear-gradient(to right, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '), transparent)"></div>';
+          })() +
           '<span class="sp-badge inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge || 'Official Sponsor') + '</span>' +
           '<h2 class="sp-title font-black text-white tracking-tight" style="' + titleStyle + '">' + safe(sponsor.title || '') + '</h2>' +
           (sponsor.desc ? '<p class="sp-desc text-sm text-emerald-100/80 leading-relaxed" style="' + descStyle + '">' + safe(sponsor.desc) + '</p>' : '') +
@@ -1200,6 +1208,14 @@ function loadBlogData() {
         setStyle($('upcoming-img'), 'transform-origin', ix + '% ' + iy + '%');
       }
     }
+    (function(){
+      var ov = (up.overlayOpacity != null) ? up.overlayOpacity : 55;
+      var el = $('upcoming-overlay');
+      if (!el) return;
+      var a = (ov/100).toFixed(2);
+      var a2 = (ov/100*0.25).toFixed(2);
+      el.style.background = 'linear-gradient(to top, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '))';
+    })();
   }
 
   const yt = read('hh_youtube', {});
@@ -1215,8 +1231,45 @@ function loadBlogData() {
     if (yt.desc) $('youtube-desc').textContent = yt.desc;
     if (yt.link) $('youtube-link').href = yt.link;
     else if (social.yt) $('youtube-link').href = social.yt;
-    if (yt.thumb) $('youtube-thumb').src = yt.thumb;
     if (yt.bgImage) $('youtube-bg').src = yt.bgImage;
+    (function applyYtEmbed() {
+      function parseYoutubeUrl(url) {
+        url = String(url || '').trim();
+        if (!url) return null;
+        var pl = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+        var v = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{6,})/);
+        if (!v) v = url.match(/[?&]v=([a-zA-Z0-9_-]{6,})/);
+        if (pl && !v) return { type: 'playlist', id: pl[1] };
+        if (v && pl) return { type: 'video', id: v[1], list: pl[1] };
+        if (v) return { type: 'video', id: v[1] };
+        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return { type: 'video', id: url };
+        return null;
+      }
+      function embedSrc(p) {
+        if (!p) return '';
+        if (p.type === 'playlist') return 'https://www.youtube.com/embed/videoseries?list=' + encodeURIComponent(p.id);
+        var s = 'https://www.youtube.com/embed/' + encodeURIComponent(p.id);
+        if (p.list) s += '?list=' + encodeURIComponent(p.list);
+        return s;
+      }
+      var parsed = parseYoutubeUrl(yt.videoUrl || '');
+      var src = embedSrc(parsed);
+      var iframe = $('youtube-embed');
+      var thumbWrap = $('youtube-thumb-wrap');
+      var thumb = $('youtube-thumb');
+      if (src && iframe) {
+        iframe.src = src;
+        iframe.classList.remove('hidden');
+        if (thumbWrap) thumbWrap.classList.add('hidden');
+      } else {
+        if (iframe) { iframe.removeAttribute('src'); iframe.classList.add('hidden'); }
+        if (thumbWrap) thumbWrap.classList.remove('hidden');
+        if (thumb) {
+          if (yt.thumb) thumb.src = yt.thumb;
+          else if (parsed && parsed.type === 'video') thumb.src = 'https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg';
+        }
+      }
+    })();
   }
 
   const about = read('hh_about', {});
