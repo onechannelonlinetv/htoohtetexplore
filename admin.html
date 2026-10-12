@@ -1176,7 +1176,7 @@ main > div {
             <div><label class="label">Channel Link (Visit ခလုတ်)</label><input id="yt-link" class="field" placeholder="https://youtube.com/@channel"></div>
             <div class="md:col-span-2 rounded-xl border border-red-700/40 bg-red-950/20 p-3 space-y-2">
               <label class="label text-red-300 font-bold">YouTube Video / Playlist Link</label>
-              <p class="tiny">Video သို့မဟုတ် Playlist link ကူးထည့်ပါ · Website မှာ embed ပြမယ် · Thumbnail ဗလာထားရင် YouTube cover အလိုအလျောက်</p>
+              <p class="tiny">Video သို့မဟုတ် Playlist link ကူးထည့်ပါ · Website မှာ YouTube cover ပေါ်မယ် · Play နှိပ်ရင် YouTube ကို ဖွင့်မယ် · Thumbnail ဗလာ = YouTube cover အလိုအလျောက်</p>
               <input id="yt-video-url" class="field" placeholder="https://www.youtube.com/watch?v=... သို့မဟုတ် playlist?list=..." oninput="updateYoutubePreview()">
               <div id="yt-embed-preview" class="mt-2 hidden rounded-lg overflow-hidden border border-slate-700 aspect-video bg-black"></div>
             </div>
@@ -3549,10 +3549,14 @@ function updateYoutubePreview() {
   const ep = $('yt-embed-preview');
   if (ep) {
     const parsed = parseYoutubeUrl($('yt-video-url')?.value || '');
-    const src = youtubeEmbedSrc(parsed);
-    if (src) {
+    if (parsed) {
       ep.classList.remove('hidden');
-      ep.innerHTML = '<iframe src="' + src + '" class="w-full h-full min-h-[180px]" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+      var thumbSrc = (parsed.type === 'video') ? ('https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg') : '';
+      var custom = (typeof imageFieldValue === 'function' ? imageFieldValue('yt-thumb') : '') || '';
+      var img = custom || thumbSrc || '';
+      ep.innerHTML = '<div class="relative w-full min-h-[160px] bg-black flex items-center justify-center">' +
+        (img ? '<img src="' + img + '" class="absolute inset-0 w-full h-full object-cover opacity-80" alt="">' : '') +
+        '<div class="relative z-10 text-center"><div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-play text-white"></i></div><p class="text-[11px] text-white/90 font-bold">Play → YouTube မှာ ဖွင့်မယ်</p></div></div>';
     } else {
       ep.classList.add('hidden');
       ep.innerHTML = '';
