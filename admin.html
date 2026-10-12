@@ -907,102 +907,134 @@ main > div {
       </section>
 
 <section id="view-upcoming" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Upcoming Section</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန် · စာအရောင်</p></div>
+        <div><h2 class="text-xl font-black">Upcoming Section</h2><p class="mt-1 text-sm text-slate-400">Preview မှာ ဖိဆွဲ · ထောင့် = ဆိုဒ် · ပုံ drag</p></div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="up-active" checked onchange="updateUpcomingPreview()"><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
 
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Upcoming</span>
-            <div class="mt-2 mb-1 text-xs font-bold text-white" id="up-prev-heading">Upcoming</div>
-            <div class="text-[10px] text-emerald-400/70 mb-2" id="up-prev-section-title"></div>
-            <label class="tiny flex items-center gap-2 mb-2">Frame အမြင့်
-              <input type="range" id="up-frame-h" min="80" max="800" value="160" class="w-32 accent-emerald-500" oninput="updateUpcomingPreview()">
-              <span id="val-up-frame-h">160px</span>
-            </label>
-            <label class="tiny flex items-center gap-2 mb-2">Overlay မှောင်
-              <input type="range" id="up-overlay" min="0" max="90" step="5" value="55" class="w-32 accent-amber-500" oninput="updateUpcomingPreview()">
-              <span id="val-up-overlay">55%</span>
-            </label>
-            <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="height:160px;background:#1a1a1a;">
+          <!-- Live Preview -->
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 space-y-2">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Upcoming</span>
+              <span class="tiny ml-auto" id="up-preview-dims">100% × 160px</span>
+            </div>
+            <div class="mt-1 text-xs font-bold text-white" id="up-prev-heading">Upcoming</div>
+            <div class="text-[10px] text-emerald-400/70 mb-1" id="up-prev-section-title"></div>
+
+            <div class="flex flex-wrap gap-3 items-center text-[11px]">
+              <label class="flex items-center gap-2">Frame H
+                <input type="range" id="up-frame-h" min="80" max="800" value="160" class="w-28 accent-emerald-500" oninput="updateUpcomingPreview()">
+                <span id="val-up-frame-h" class="text-emerald-400 font-bold">160px</span>
+              </label>
+              <label class="flex items-center gap-2">Frame W
+                <input type="range" id="up-frame-w" min="40" max="100" step="5" value="100" class="w-28 accent-emerald-500" oninput="updateUpcomingPreview()">
+                <span id="val-up-frame-w" class="text-emerald-400 font-bold">100%</span>
+              </label>
+              <label class="flex items-center gap-2">Overlay
+                <input type="range" id="up-overlay" min="0" max="90" step="5" value="55" class="w-28 accent-amber-500" oninput="updateUpcomingPreview()">
+                <span id="val-up-overlay" class="text-emerald-400 font-bold">55%</span>
+              </label>
+            </div>
+
+            <!-- hidden position inputs (drag updates these) -->
+            <input type="hidden" id="up-label-x" value="6">
+            <input type="hidden" id="up-label-y" value="40">
+            <input type="hidden" id="up-title-x" value="6">
+            <input type="hidden" id="up-title-y" value="55">
+            <input type="hidden" id="up-desc-x" value="6">
+            <input type="hidden" id="up-desc-y" value="72">
+            <input type="hidden" id="up-img-x" value="50">
+            <input type="hidden" id="up-img-y" value="50">
+            <input type="hidden" id="up-img-zoom" value="100">
+            <input type="hidden" id="up-logo-x" value="88">
+            <input type="hidden" id="up-logo-y" value="50">
+            <input type="hidden" id="up-logo-w" value="72">
+            <input type="hidden" id="up-logo-h" value="72">
+
+            <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none mx-auto" style="width:100%;height:160px;background:#1a1a1a;cursor:grab;">
               <div id="up-prev-overlay" class="absolute inset-0 pointer-events-none" style="z-index:1;background:linear-gradient(to top,rgba(0,0,0,.55),rgba(0,0,0,.15));"></div>
-              <span id="up-prev-label" class="absolute z-10 cursor-grab border border-dashed border-yellow-400/40 rounded px-1 font-bold uppercase" style="left:6%;top:40%;color:#f5c518;font-size:10px;touch-action:none;">Featured</span>
-              <div id="up-prev-title" class="absolute z-10 cursor-grab border border-dashed border-white/30 rounded px-1 font-black text-white" style="left:6%;top:55%;font-size:14px;touch-action:none;max-width:85%;">Title</div>
-              <div id="up-prev-desc" class="absolute z-10 cursor-grab border border-dashed border-white/20 rounded px-1 text-white/70" style="left:6%;top:72%;font-size:11px;touch-action:none;max-width:80%;">Desc</div>
+              <div id="up-prev-logo-wrap" class="absolute z-20 border border-dashed border-sky-400/50 rounded-lg overflow-hidden bg-black/30 cursor-move hidden" style="left:88%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%);touch-action:none;">
+                <img id="up-prev-logo" src="" alt="" class="w-full h-full object-contain">
+                <span class="sp-resize-handle" data-resize="up-logo" title="ဆိုဒ်"></span>
+              </div>
+              <div id="up-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1 font-bold uppercase" style="left:6%;top:40%;color:#f5c518;font-size:11px;touch-action:none;">Featured<span class="sp-resize-handle" data-resize="up-label" title="ဆိုဒ်"></span></div>
+              <div id="up-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1 font-black text-white" style="left:6%;top:55%;font-size:14px;touch-action:none;max-width:85%;">Title<span class="sp-resize-handle" data-resize="up-title" title="ဆိုဒ်"></span></div>
+              <div id="up-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1 text-white/70" style="left:6%;top:72%;font-size:11px;touch-action:none;max-width:80%;">Desc<span class="sp-resize-handle" data-resize="up-desc" title="ဆိုဒ်"></span></div>
             </div>
-            <p class="tiny mt-1">စာတစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
-            <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
-              <div>Label X <input type="range" id="up-label-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-ulx">6</span>%</div>
-              <div>Label Y <input type="range" id="up-label-y" min="0" max="100" value="40" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uly">40</span>%</div>
-              <div>Title X <input type="range" id="up-title-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-utx">6</span>%</div>
-              <div>Title Y <input type="range" id="up-title-y" min="0" max="100" value="55" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uty">55</span>%</div>
-              <div>Desc X <input type="range" id="up-desc-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udx">6</span>%</div>
-              <div>Desc Y <input type="range" id="up-desc-y" min="0" max="100" value="72" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udy">72</span>%</div>
-            </div>
+            <p class="tiny">စာ / Logo = ဖိဆွဲရွှေ့ · ထောင့်စတုရန်း = အကြီးအသေး · နောက်ခံပုံ = ဖိဆွဲ ချိန်</p>
           </div>
 
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <!-- Section heading -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label class="label">Section Heading</label><input id="up-heading" class="field" placeholder="Upcoming" oninput="updateUpcomingPreview()"></div>
             <div><label class="label">Section Subtitle</label><input id="up-section-title" class="field" placeholder="Next adventure…" oninput="updateUpcomingPreview()"></div>
-            <div><label class="label">On-image Label</label><input id="up-label" class="field" placeholder="Featured Journey" oninput="updateUpcomingPreview()"></div>
-            <div>
-              <label class="label">Label အရောင်</label>
-              <input id="up-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
-            </div>
-            <div><label class="label">On-image Title *</label><input id="up-title" class="field" placeholder="Roads of Ayeyarwaddy" oninput="updateUpcomingPreview()"></div>
-            <div>
-              <label class="label">Title အရောင်</label>
-              <input id="up-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label flex justify-between">Title Size <span class="range-val" id="val-up-title-fs">22px</span></label>
-              <input type="range" id="up-title-fs" min="12" max="120" value="22" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label">Title Weight</label>
-              <select id="up-title-weight" class="field" onchange="updateUpcomingPreview()">
-                <option value="400">Regular</option>
-                <option value="600">Semi Bold</option>
-                <option value="700">Bold</option>
-                <option value="900" selected>Black</option>
-              </select>
-            </div>
-            <div>
-              <label class="label">Label Size</label>
-              <input type="range" id="up-label-fs" min="8" max="72" value="11" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label">Desc Size</label>
-              <input type="range" id="up-desc-fs" min="10" max="64" value="13" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label">Desc အရောင်</label>
-              <input id="up-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()">
-            </div>
-            <div>
-              <label class="label">Image</label>
-              <div class="flex gap-2">
-                <input id="up-image" class="field flex-1" oninput="updateUpcomingPreview()">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'up-image'); setTimeout(updateUpcomingPreview,800)"></label>
-              </div>
-              <div id="up-image-preview" class="mt-2"></div>
-            </div>
-            <div class="md:col-span-2"><label class="label">Description</label><textarea id="up-desc" class="field min-h-14" oninput="updateUpcomingPreview()"></textarea></div>
           </div>
-          
-        <div class="panel p-4 mt-3 space-y-3">
-          <p class="text-xs font-bold text-emerald-300">Banner ပုံ နေရာ / Zoom (slider နဲ့ adjust)</p>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div><label class="label">ဘယ် ⟷ ညာ</label><input id="up-img-x" type="range" min="0" max="100" value="50" class="w-full" oninput="if($('val-up-img-x'))$('val-up-img-x').textContent=this.value+'%';updateUpcomingPreview()"><span id="val-up-img-x" class="range-val">50%</span></div>
-            <div><label class="label">အပေါ် ⟷ အောက်</label><input id="up-img-y" type="range" min="0" max="100" value="50" class="w-full" oninput="if($('val-up-img-y'))$('val-up-img-y').textContent=this.value+'%';updateUpcomingPreview()"><span id="val-up-img-y" class="range-val">50%</span></div>
-            <div><label class="label">Zoom</label><input id="up-img-zoom" type="range" min="100" max="200" value="100" class="w-full" oninput="if($('val-up-img-zoom'))$('val-up-img-zoom').textContent=this.value+'%';updateUpcomingPreview()"><span id="val-up-img-zoom" class="range-val">100%</span></div>
-          </div>
-        </div>
 
-<button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
+          <!-- Background image -->
+          <div class="rounded-xl border border-sky-700/40 bg-sky-950/15 p-3 space-y-2">
+            <p class="text-[11px] font-bold text-sky-300 uppercase">Banner Cover Image</p>
+            <div class="flex gap-2">
+              <input id="up-image" class="field flex-1" placeholder="URL / Upload" oninput="updateUpcomingPreview()">
+              <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this,'up-image'); setTimeout(updateUpcomingPreview,800)"></label>
+            </div>
+            <div id="up-image-preview" class="mt-2"></div>
+            <p class="tiny">Preview မှာ ပုံကို ဖိဆွဲပြီး နေရာချိန်နိုင်ပါတယ်</p>
+          </div>
+
+          <!-- Small logo / overlay image on cover -->
+          <div class="rounded-xl border border-sky-700/40 bg-sky-950/15 p-3 space-y-2">
+            <p class="text-[11px] font-bold text-sky-300 uppercase">Cover ပေါ် ပုံအသေး (Logo / Badge)</p>
+            <div class="flex gap-2">
+              <input id="up-logo" class="field flex-1" placeholder="URL / Upload — ဗလာထားရင် မပြ" oninput="updateUpcomingPreview()">
+              <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this,'up-logo'); setTimeout(updateUpcomingPreview,800)"></label>
+            </div>
+            <div id="up-logo-preview" class="mt-2"></div>
+            <p class="tiny">Preview မှာ ဖိဆွဲရွှေ့ · ထောင့် = အကြီးအသေး</p>
+          </div>
+
+          <!-- Label typography -->
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
+            <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Label</p>
+            <div class="form-row form-row-typo w-full">
+              <div><label class="label">စာသား</label><input id="up-label" class="field" placeholder="Featured Journey" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label">Color</label><input id="up-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label flex justify-between">Size <span id="val-up-label-fs" class="range-val">11px</span></label>
+                <input type="range" id="up-label-fs" min="8" max="40" value="11" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label">Weight</label><select id="up-label-weight" class="field" onchange="updateUpcomingPreview()"><option value="400">Regular</option><option value="600">Semi</option><option value="700" selected>Bold</option><option value="900">Black</option></select></div>
+              <div><label class="label">Style</label><select id="up-label-style" class="field" onchange="updateUpcomingPreview()"><option value="normal">Normal</option><option value="italic">Italic</option></select></div>
+            </div>
+          </div>
+
+          <!-- Title typography -->
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
+            <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Title</p>
+            <div class="form-row form-row-typo w-full">
+              <div><label class="label">စာသား *</label><input id="up-title" class="field" placeholder="Roads of Ayeyarwaddy" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label">Color</label><input id="up-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label flex justify-between">Size <span id="val-up-title-fs" class="range-val">22px</span></label>
+                <input type="range" id="up-title-fs" min="12" max="80" value="22" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label">Weight</label><select id="up-title-weight" class="field" onchange="updateUpcomingPreview()"><option value="400">Regular</option><option value="600">Semi</option><option value="700">Bold</option><option value="900" selected>Black</option></select></div>
+              <div><label class="label">Style</label><select id="up-title-style" class="field" onchange="updateUpcomingPreview()"><option value="normal">Normal</option><option value="italic">Italic</option></select></div>
+            </div>
+          </div>
+
+          <!-- Desc typography -->
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
+            <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Description</p>
+            <div class="form-row form-row-typo w-full">
+              <div><label class="label">စာသား</label><textarea id="up-desc" class="field min-h-14" oninput="updateUpcomingPreview()"></textarea></div>
+              <div><label class="label">Color</label><input id="up-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label flex justify-between">Size <span id="val-up-desc-fs" class="range-val">13px</span></label>
+                <input type="range" id="up-desc-fs" min="10" max="40" value="13" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label">Weight</label><select id="up-desc-weight" class="field" onchange="updateUpcomingPreview()"><option value="400" selected>Regular</option><option value="600">Semi</option><option value="700">Bold</option><option value="900">Black</option></select></div>
+              <div><label class="label">Style</label><select id="up-desc-style" class="field" onchange="updateUpcomingPreview()"><option value="normal">Normal</option><option value="italic">Italic</option></select></div>
+            </div>
+          </div>
+
+          <button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
         </div>
       </section>
 
-      <section id="view-posts" class="view space-y-5">
+<section id="view-posts" class="view space-y-5">
         <div><h2 class="text-xl font-black">Latest Travel</h2><p class="mt-1 text-sm text-slate-400">Post များ · Section ခေါင်းစဉ် · Banner — Hero/Sponsor လို ချိန်နိုင်</p></div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-3">
           <h3 class="font-bold text-white text-sm">Section ခေါင်းစဉ် (Live site · Travel Stories အပေါ်)</h3>
@@ -2245,7 +2277,22 @@ function loadAll() {
   if ($('up-desc-x')) $('up-desc-x').value = up.descX != null ? up.descX : 6;
   if ($('up-desc-y')) $('up-desc-y').value = up.descY != null ? up.descY : 72;
   if ($('up-frame-h')) $('up-frame-h').value = up.frameH || 160;
+  if ($('up-frame-w')) $('up-frame-w').value = up.frameW || 100;
   if ($('up-overlay')) $('up-overlay').value = up.overlayOpacity != null ? up.overlayOpacity : 55;
+  if ($('up-label-weight')) $('up-label-weight').value = up.labelWeight || '700';
+  if ($('up-label-style')) $('up-label-style').value = up.labelStyle || 'normal';
+  if ($('up-title-style')) $('up-title-style').value = up.titleStyle || 'normal';
+  if ($('up-desc-weight')) $('up-desc-weight').value = up.descWeight || '400';
+  if ($('up-desc-style')) $('up-desc-style').value = up.descStyle || 'normal';
+  if ($('up-img-x')) $('up-img-x').value = up.imgPosX != null ? up.imgPosX : 50;
+  if ($('up-img-y')) $('up-img-y').value = up.imgPosY != null ? up.imgPosY : 50;
+  if ($('up-img-zoom')) $('up-img-zoom').value = up.imgZoom != null ? up.imgZoom : 100;
+  if ($('up-logo-x')) $('up-logo-x').value = up.logoX != null ? up.logoX : 88;
+  if ($('up-logo-y')) $('up-logo-y').value = up.logoY != null ? up.logoY : 50;
+  if ($('up-logo-w')) $('up-logo-w').value = up.logoW != null ? up.logoW : 72;
+  if ($('up-logo-h')) $('up-logo-h').value = up.logoH != null ? up.logoH : 72;
+  if (typeof setImageFieldValue === 'function') setImageFieldValue('up-logo', up.logo || '');
+  else if ($('up-logo')) $('up-logo').value = up.logo || '';
   showPreviewIfUrl('up-image');
   if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
 
@@ -2295,7 +2342,7 @@ function loadAll() {
   if (_sh && $('admin-sponsor-height-local')) $('admin-sponsor-height-local').value = _sh;
 
   // Enable friendly Base64 display for image URL fields
-  ['set-logo-url','hero-image','admin-sponsor-img','admin-sponsor-bg','up-image','admin-post-img','yt-thumb','yt-bg','proud-logo','stories-banner-img','section-banner-img'].forEach(enableImageFieldEditing);
+  ['set-logo-url','hero-image','admin-sponsor-img','admin-sponsor-bg','up-image','up-logo','admin-post-img','yt-thumb','yt-bg','proud-logo','stories-banner-img','section-banner-img'].forEach(enableImageFieldEditing);
 }
 
 const THEME_PRESETS = {
@@ -3412,11 +3459,33 @@ function loadStoriesSectionForm() {
   try { showPreviewIfUrl('stories-banner-img'); } catch(e) {}
 }
 
+function setUpPrevText(el, text, resizeKey) {
+  if (!el) return;
+  var handle = el.querySelector('.sp-resize-handle');
+  el.textContent = text || '';
+  if (handle) el.appendChild(handle);
+  else if (resizeKey) {
+    var h = document.createElement('span');
+    h.className = 'sp-resize-handle';
+    h.setAttribute('data-resize', resizeKey);
+    h.title = 'ဆိုဒ်';
+    el.appendChild(h);
+  }
+}
 function updateUpcomingPreview() {
   const box = $('up-live-preview');
   const fh = parseInt($('up-frame-h')?.value || '160', 10);
+  const fw = parseInt($('up-frame-w')?.value || '100', 10);
   if ($('val-up-frame-h')) $('val-up-frame-h').textContent = fh + 'px';
-  if (box) box.style.height = fh + 'px';
+  if ($('val-up-frame-w')) $('val-up-frame-w').textContent = fw + '%';
+  if ($('up-preview-dims')) $('up-preview-dims').textContent = fw + '% × ' + fh + 'px';
+  if (box) {
+    box.style.height = fh + 'px';
+    box.style.width = fw + '%';
+    box.style.maxWidth = '100%';
+    box.style.marginLeft = 'auto';
+    box.style.marginRight = 'auto';
+  }
   const ovUp = parseInt($('up-overlay')?.value || '55', 10);
   if ($('val-up-overlay')) $('val-up-overlay').textContent = ovUp + '%';
   const ovUpEl = $('up-prev-overlay');
@@ -3437,56 +3506,75 @@ function updateUpcomingPreview() {
   const lx = pos('up-label-x', 6), ly = pos('up-label-y', 40);
   const tx = pos('up-title-x', 6), ty = pos('up-title-y', 55);
   const dx = pos('up-desc-x', 6), dy = pos('up-desc-y', 72);
-  [['val-ulx',lx],['val-uly',ly],['val-utx',tx],['val-uty',ty],['val-udx',dx],['val-udy',dy]].forEach(function(p){
-    if ($(p[0])) $(p[0]).textContent = p[1];
-  });
 
   const label = $('up-prev-label');
   const title = $('up-prev-title');
   const desc = $('up-prev-desc');
   if (label) {
-    label.textContent = $('up-label')?.value || 'Featured';
+    setUpPrevText(label, $('up-label')?.value || 'Featured', 'up-label');
     label.style.color = $('up-label-color')?.value || '#f5c518';
-    label.style.fontSize = (pos('up-label-fs', 11)) + 'px';
+    label.style.fontSize = pos('up-label-fs', 11) + 'px';
+    label.style.fontWeight = $('up-label-weight')?.value || '700';
+    label.style.fontStyle = $('up-label-style')?.value || 'normal';
     label.style.left = lx + '%'; label.style.top = ly + '%';
   }
+  if ($('val-up-label-fs')) $('val-up-label-fs').textContent = pos('up-label-fs', 11) + 'px';
   if (title) {
-    title.textContent = $('up-title')?.value || 'Title';
+    setUpPrevText(title, $('up-title')?.value || 'Title', 'up-title');
     title.style.color = $('up-title-color')?.value || '#ffffff';
     title.style.fontWeight = $('up-title-weight')?.value || '900';
+    title.style.fontStyle = $('up-title-style')?.value || 'normal';
     const tfs = pos('up-title-fs', 22);
     title.style.fontSize = Math.max(12, Math.round(tfs * 0.65)) + 'px';
     if ($('val-up-title-fs')) $('val-up-title-fs').textContent = tfs + 'px';
     title.style.left = tx + '%'; title.style.top = ty + '%';
   }
   if (desc) {
-    desc.textContent = $('up-desc')?.value || 'Desc';
+    setUpPrevText(desc, $('up-desc')?.value || 'Desc', 'up-desc');
     desc.style.color = $('up-desc-color')?.value || '#cccccc';
+    desc.style.fontWeight = $('up-desc-weight')?.value || '400';
+    desc.style.fontStyle = $('up-desc-style')?.value || 'normal';
     const dfs = pos('up-desc-fs', 13);
     desc.style.fontSize = Math.max(10, Math.round(dfs * 0.85)) + 'px';
+    if ($('val-up-desc-fs')) $('val-up-desc-fs').textContent = dfs + 'px';
     desc.style.left = dx + '%'; desc.style.top = dy + '%';
   }
 
   const img = imageFieldValue('up-image');
+  const ix = pos('up-img-x', 50), iy = pos('up-img-y', 50), iz = pos('up-img-zoom', 100);
   if (box && typeof applyLiveBg === 'function') {
-    applyLiveBg(box, img);
+    applyLiveBg(box, img, ix, iy, iz);
     if (!img) box.style.background = '#1a1a1a';
   }
   try {
-    var ix = parseInt((($('up-img-x')&&$('up-img-x').value)||'50'),10);
-    var iy = parseInt((($('up-img-y')&&$('up-img-y').value)||'50'),10);
-    var iz = parseInt((($('up-img-zoom')&&$('up-img-zoom').value)||'100'),10);
-    if ($('val-up-img-x')) $('val-up-img-x').textContent = ix + '%';
-    if ($('val-up-img-y')) $('val-up-img-y').textContent = iy + '%';
-    if ($('val-up-img-zoom')) $('val-up-img-zoom').textContent = iz + '%';
-    var ubox = $('up-live-preview');
-    var uimg = ubox && (ubox.querySelector('.live-bg-img') || ubox.querySelector('img'));
+    var uimg = box && (box.querySelector('.live-bg-img') || box.querySelector('img:not(#up-prev-logo)'));
     if (uimg) {
       uimg.style.objectPosition = ix + '% ' + iy + '%';
-      uimg.style.transform = iz > 100 ? ('scale(' + (iz/100).toFixed(2) + ')') : '';
+      uimg.style.transform = 'scale(' + (iz / 100) + ')';
       uimg.style.transformOrigin = ix + '% ' + iy + '%';
     }
   } catch (e) {}
+
+  // Logo overlay
+  const logoUrl = (typeof imageFieldValue === 'function') ? imageFieldValue('up-logo') : ($('up-logo')?.value || '');
+  const logoWrap = $('up-prev-logo-wrap');
+  const logoImg = $('up-prev-logo');
+  if (logoWrap) {
+    if (logoUrl) {
+      logoWrap.classList.remove('hidden');
+      if (logoImg) logoImg.src = logoUrl;
+      const lw = pos('up-logo-w', 72), lh = pos('up-logo-h', 72);
+      const lox = pos('up-logo-x', 88), loy = pos('up-logo-y', 50);
+      logoWrap.style.width = lw + 'px';
+      logoWrap.style.height = lh + 'px';
+      logoWrap.style.left = lox + '%';
+      logoWrap.style.top = loy + '%';
+      logoWrap.style.transform = 'translate(-50%,-50%)';
+    } else {
+      logoWrap.classList.add('hidden');
+    }
+  }
+
   initUpcomingDrag();
 }
 let _upDrag = null;
@@ -3495,61 +3583,111 @@ function initUpcomingDrag() {
   const box = $('up-live-preview');
   if (!box || box._upDragReady) return;
   box._upDragReady = true;
-  const map = {
-    'up-prev-label': { xi:'up-label-x', yi:'up-label-y', vx:'val-ulx', vy:'val-uly' },
-    'up-prev-title': { xi:'up-title-x', yi:'up-title-y', vx:'val-utx', vy:'val-uty' },
-    'up-prev-desc':  { xi:'up-desc-x', yi:'up-desc-y', vx:'val-udx', vy:'val-udy' }
-  };
   function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
-  Object.keys(map).forEach(function(id){
-    const el = $(id);
-    if (!el || el._bound) return;
-    el._bound = true;
-    el.style.cursor = 'grab';
-    el.addEventListener('mousedown', function(e){
-      const c = map[id];
+
+  box.addEventListener('mousedown', function(e) {
+    const t = e.target;
+    if (t.closest && t.closest('.sp-resize-handle')) {
+      const key = t.getAttribute('data-resize') || t.closest('.sp-resize-handle').getAttribute('data-resize');
+      const p = pt(e);
+      _upDrag = { type: 'resize', key: key, sx: p.clientX, sy: p.clientY };
+      if (key === 'up-label') _upDrag.ofs = parseInt($('up-label-fs')?.value || '11', 10);
+      if (key === 'up-title') _upDrag.ofs = parseInt($('up-title-fs')?.value || '22', 10);
+      if (key === 'up-desc') _upDrag.ofs = parseInt($('up-desc-fs')?.value || '13', 10);
+      if (key === 'up-logo') {
+        _upDrag.ow = parseInt($('up-logo-w')?.value || '72', 10);
+        _upDrag.oh = parseInt($('up-logo-h')?.value || '72', 10);
+      }
+      e.preventDefault(); e.stopPropagation();
+      return;
+    }
+    const textEl = t.closest && t.closest('#up-prev-label, #up-prev-title, #up-prev-desc');
+    if (textEl) {
+      const map = {
+        'up-prev-label': { xi:'up-label-x', yi:'up-label-y' },
+        'up-prev-title': { xi:'up-title-x', yi:'up-title-y' },
+        'up-prev-desc':  { xi:'up-desc-x', yi:'up-desc-y' }
+      };
+      const c = map[textEl.id];
+      if (!c) return;
       const p = pt(e);
       const r = box.getBoundingClientRect();
-      _upDrag = { el:el, c:c, sx:p.clientX, sy:p.clientY, ol:parseFloat(el.style.left)||0, ot:parseFloat(el.style.top)||0, rw:r.width, rh:r.height };
-      el.style.cursor = 'grabbing';
-      e.preventDefault();
-    });
-    el.addEventListener('touchstart', function(e){
-      const c = map[id];
+      _upDrag = { type: 'text', el: textEl, c: c, sx: p.clientX, sy: p.clientY, ol: parseFloat(textEl.style.left)||0, ot: parseFloat(textEl.style.top)||0, rw: r.width, rh: r.height };
+      e.preventDefault(); e.stopPropagation();
+      return;
+    }
+    const logoWrap = t.closest && t.closest('#up-prev-logo-wrap');
+    if (logoWrap) {
       const p = pt(e);
       const r = box.getBoundingClientRect();
-      _upDrag = { el:el, c:c, sx:p.clientX, sy:p.clientY, ol:parseFloat(el.style.left)||0, ot:parseFloat(el.style.top)||0, rw:r.width, rh:r.height };
+      _upDrag = { type: 'logo', sx: p.clientX, sy: p.clientY, ol: parseFloat($('up-logo-x')?.value||'88'), ot: parseFloat($('up-logo-y')?.value||'50'), rw: r.width, rh: r.height };
+      e.preventDefault(); e.stopPropagation();
+      return;
+    }
+    // background image drag
+    if (t === box || t.classList.contains('live-bg-img') || t.id === 'up-prev-overlay') {
+      const p = pt(e);
+      _upDrag = { type: 'img', sx: p.clientX, sy: p.clientY, ox: parseInt($('up-img-x')?.value||'50',10), oy: parseInt($('up-img-y')?.value||'50',10) };
+      box.style.cursor = 'grabbing';
       e.preventDefault();
-    }, { passive:false });
+    }
   });
+
   if (!window._upDragWin) {
     window._upDragWin = true;
     window.addEventListener('mousemove', function(e){
       if (!_upDrag) return;
       const p = pt(e);
-      const nx = Math.max(0, Math.min(100, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
-      const ny = Math.max(0, Math.min(100, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
-      _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
-      if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
-      if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
-      if ($(_upDrag.c.vx)) $(_upDrag.c.vx).textContent = Math.round(nx);
-      if ($(_upDrag.c.vy)) $(_upDrag.c.vy).textContent = Math.round(ny);
+      const dx = p.clientX - _upDrag.sx;
+      const dy = p.clientY - _upDrag.sy;
+      if (_upDrag.type === 'text') {
+        const nl = Math.max(0, Math.min(95, _upDrag.ol + (dx / _upDrag.rw) * 100));
+        const nt = Math.max(0, Math.min(95, _upDrag.ot + (dy / _upDrag.rh) * 100));
+        _upDrag.el.style.left = nl + '%';
+        _upDrag.el.style.top = nt + '%';
+        if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nl);
+        if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(nt);
+      } else if (_upDrag.type === 'logo') {
+        const nl = Math.max(5, Math.min(95, _upDrag.ol + (dx / _upDrag.rw) * 100));
+        const nt = Math.max(5, Math.min(95, _upDrag.ot + (dy / _upDrag.rh) * 100));
+        if ($('up-logo-x')) $('up-logo-x').value = Math.round(nl);
+        if ($('up-logo-y')) $('up-logo-y').value = Math.round(nt);
+        const lw = $('up-prev-logo-wrap');
+        if (lw) { lw.style.left = Math.round(nl) + '%'; lw.style.top = Math.round(nt) + '%'; }
+      } else if (_upDrag.type === 'img') {
+        const nx = Math.max(0, Math.min(100, _upDrag.ox - dx * 0.15));
+        const ny = Math.max(0, Math.min(100, _upDrag.oy - dy * 0.15));
+        if ($('up-img-x')) $('up-img-x').value = Math.round(nx);
+        if ($('up-img-y')) $('up-img-y').value = Math.round(ny);
+        const box = $('up-live-preview');
+        const uimg = box && box.querySelector('.live-bg-img');
+        if (uimg) uimg.style.objectPosition = Math.round(nx) + '% ' + Math.round(ny) + '%';
+      } else if (_upDrag.type === 'resize') {
+        if (_upDrag.key === 'up-logo') {
+          const nw = Math.max(32, Math.min(240, _upDrag.ow + dx));
+          const nh = Math.max(32, Math.min(240, _upDrag.oh + dy));
+          if ($('up-logo-w')) $('up-logo-w').value = Math.round(nw);
+          if ($('up-logo-h')) $('up-logo-h').value = Math.round(nh);
+          const lw = $('up-prev-logo-wrap');
+          if (lw) { lw.style.width = Math.round(nw) + 'px'; lw.style.height = Math.round(nh) + 'px'; }
+        } else {
+          const nfs = Math.max(8, Math.min(80, _upDrag.ofs + dy * 0.15));
+          const idMap = { 'up-label': 'up-label-fs', 'up-title': 'up-title-fs', 'up-desc': 'up-desc-fs' };
+          const fid = idMap[_upDrag.key];
+          if (fid && $(fid)) $(fid).value = Math.round(nfs);
+          updateUpcomingPreview();
+        }
+      }
     });
-    window.addEventListener('touchmove', function(e){
-      if (!_upDrag) return;
-      const p = pt(e);
-      const nx = Math.max(0, Math.min(100, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
-      const ny = Math.max(0, Math.min(100, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
-      _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
-      if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
-      if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
-      e.preventDefault();
-    }, { passive:false });
-    window.addEventListener('mouseup', function(){ if (_upDrag){ _upDrag.el.style.cursor='grab'; _upDrag=null; } });
-    window.addEventListener('touchend', function(){ _upDrag=null; });
+    window.addEventListener('mouseup', function(){
+      if (_upDrag) {
+        const box = $('up-live-preview');
+        if (box) box.style.cursor = 'grab';
+        _upDrag = null;
+      }
+    });
   }
 }
-
 function saveUpcoming() {
   function gv(id, def) {
     var el = $(id);
@@ -3562,6 +3700,7 @@ function saveUpcoming() {
   }
   try {
     var _upImg = (typeof imageFieldValue === 'function' ? imageFieldValue('up-image') : gv('up-image', ''));
+    var _upLogo = (typeof imageFieldValue === 'function' ? imageFieldValue('up-logo') : gv('up-logo', ''));
     var _upTitle = gv('up-title', '');
     var _upActive = $('up-active') ? !!$('up-active').checked : true;
     if (_upImg || _upTitle || gv('up-desc', '')) _upActive = true;
@@ -3572,25 +3711,36 @@ function saveUpcoming() {
       label: gv('up-label', ''),
       labelColor: gv('up-label-color', '#f5c518'),
       labelFs: gi('up-label-fs', 11),
+      labelWeight: gv('up-label-weight', '700'),
+      labelStyle: gv('up-label-style', 'normal'),
       labelX: gi('up-label-x', 6),
       labelY: gi('up-label-y', 40),
       title: _upTitle || gv('up-heading', 'Upcoming') || 'Upcoming',
       titleColor: gv('up-title-color', '#ffffff'),
       titleFs: gi('up-title-fs', 22),
       titleWeight: gv('up-title-weight', '900'),
+      titleStyle: gv('up-title-style', 'normal'),
       titleX: gi('up-title-x', 6),
       titleY: gi('up-title-y', 55),
       desc: gv('up-desc', ''),
       descColor: gv('up-desc-color', '#cccccc'),
       descFs: gi('up-desc-fs', 13),
+      descWeight: gv('up-desc-weight', '400'),
+      descStyle: gv('up-desc-style', 'normal'),
       descX: gi('up-desc-x', 6),
       descY: gi('up-desc-y', 72),
       frameH: gi('up-frame-h', 160),
+      frameW: gi('up-frame-w', 100),
       overlayOpacity: gi('up-overlay', 55),
       image: _upImg,
       imgPosX: gi('up-img-x', 50),
       imgPosY: gi('up-img-y', 50),
-      imgZoom: gi('up-img-zoom', 100)
+      imgZoom: gi('up-img-zoom', 100),
+      logo: _upLogo,
+      logoX: gi('up-logo-x', 88),
+      logoY: gi('up-logo-y', 50),
+      logoW: gi('up-logo-w', 72),
+      logoH: gi('up-logo-h', 72)
     });
     if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
     toast(_upImg ? 'Upcoming သိမ်းပြီး (ပုံပါ)' : 'Upcoming သိမ်းပြီးပါပြီ');
