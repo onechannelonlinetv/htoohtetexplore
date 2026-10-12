@@ -475,18 +475,15 @@
           </a>
         </div>
         <div class="shrink-0 w-full max-w-md lg:w-80 xl:w-96">
-          <div id="youtube-embed-wrap" class="w-full aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative bg-black">
-            <iframe id="youtube-embed" class="absolute inset-0 w-full h-full hidden" src="" title="YouTube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-            <div id="youtube-thumb-wrap" class="absolute inset-0">
-              <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80">
-              <div class="relative z-10 flex flex-col items-center justify-center h-full pointer-events-none">
-                <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl mb-2">
-                  <i class="fa-solid fa-play text-white text-base ml-0.5"></i>
-                </div>
-                <span class="text-xs font-bold text-white/90">HTOO HTET</span>
+          <a id="youtube-play-link" href="#" target="_blank" rel="noopener noreferrer" class="block w-full aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative bg-black group">
+            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-90 transition">
+            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+              <div class="w-14 h-14 rounded-full bg-red-600 group-hover:bg-red-500 flex items-center justify-center shadow-xl mb-2 transition scale-100 group-hover:scale-110">
+                <i class="fa-solid fa-play text-white text-lg ml-0.5"></i>
               </div>
+              <span class="text-xs font-bold text-white/90">YouTube မှာ ကြည့်မယ်</span>
             </div>
-          </div>
+          </a>
         </div>
       </div>
     </div>
@@ -1232,41 +1229,38 @@ function loadBlogData() {
     if (yt.link) $('youtube-link').href = yt.link;
     else if (social.yt) $('youtube-link').href = social.yt;
     if (yt.bgImage) $('youtube-bg').src = yt.bgImage;
-    (function applyYtEmbed() {
+    (function applyYtThumbLink() {
       function parseYoutubeUrl(url) {
         url = String(url || '').trim();
         if (!url) return null;
         var pl = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
         var v = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{6,})/);
         if (!v) v = url.match(/[?&]v=([a-zA-Z0-9_-]{6,})/);
-        if (pl && !v) return { type: 'playlist', id: pl[1] };
-        if (v && pl) return { type: 'video', id: v[1], list: pl[1] };
-        if (v) return { type: 'video', id: v[1] };
-        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return { type: 'video', id: url };
+        if (pl && !v) return { type: 'playlist', id: pl[1], url: url };
+        if (v && pl) return { type: 'video', id: v[1], list: pl[1], url: url };
+        if (v) return { type: 'video', id: v[1], url: url };
+        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return { type: 'video', id: url, url: 'https://www.youtube.com/watch?v=' + url };
         return null;
       }
-      function embedSrc(p) {
-        if (!p) return '';
-        if (p.type === 'playlist') return 'https://www.youtube.com/embed/videoseries?list=' + encodeURIComponent(p.id);
-        var s = 'https://www.youtube.com/embed/' + encodeURIComponent(p.id);
-        if (p.list) s += '?list=' + encodeURIComponent(p.list);
-        return s;
+      function openUrl(p, fallback) {
+        if (p && p.type === 'playlist') return 'https://www.youtube.com/playlist?list=' + encodeURIComponent(p.id);
+        if (p && p.type === 'video') {
+          var u = 'https://www.youtube.com/watch?v=' + encodeURIComponent(p.id);
+          if (p.list) u += '&list=' + encodeURIComponent(p.list);
+          return u;
+        }
+        return fallback || '#';
       }
       var parsed = parseYoutubeUrl(yt.videoUrl || '');
-      var src = embedSrc(parsed);
-      var iframe = $('youtube-embed');
-      var thumbWrap = $('youtube-thumb-wrap');
       var thumb = $('youtube-thumb');
-      if (src && iframe) {
-        iframe.src = src;
-        iframe.classList.remove('hidden');
-        if (thumbWrap) thumbWrap.classList.add('hidden');
-      } else {
-        if (iframe) { iframe.removeAttribute('src'); iframe.classList.add('hidden'); }
-        if (thumbWrap) thumbWrap.classList.remove('hidden');
-        if (thumb) {
-          if (yt.thumb) thumb.src = yt.thumb;
-          else if (parsed && parsed.type === 'video') thumb.src = 'https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg';
+      var playLink = $('youtube-play-link');
+      var watchUrl = openUrl(parsed, yt.videoUrl || yt.link || (social && social.yt) || '#');
+      if (playLink) playLink.href = watchUrl;
+      if (thumb) {
+        if (yt.thumb) thumb.src = yt.thumb;
+        else if (parsed && parsed.type === 'video') thumb.src = 'https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg';
+        else if (parsed && parsed.type === 'playlist') {
+          /* playlist has no single official still via i.ytimg without video id — keep custom or default */
         }
       }
     })();
