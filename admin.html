@@ -141,14 +141,12 @@ main > div {
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
     <nav class="space-y-0.5 flex-1">
       <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
-      <button class="navbtn" data-view="pagepreview" onclick="showView('pagepreview',this);setTimeout(function(){if(typeof refreshPagePreviewIframe==='function')refreshPagePreviewIframe();},120);"><i class="fa-solid fa-eye w-4"></i> Preview</button>
       <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Hero</button>
       <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
       <button class="navbtn" data-view="proud" onclick="showView('proud',this)"><i class="fa-solid fa-handshake w-4"></i> Proud Sponsors</button>
       <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
       <button class="navbtn" data-view="upcoming" onclick="showView('upcoming',this)"><i class="fa-solid fa-map-location-dot w-4"></i> Upcoming</button>
       <button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Latest Travel</button>
-      <button class="navbtn" data-view="addpost" onclick="showView('addpost',this)"><i class="fa-solid fa-pen-to-square w-4"></i> Add Post</button>
       <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
       <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
       <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
@@ -181,8 +179,7 @@ main > div {
         <button class="navbtn" onclick="showView('proud')">Proud Sponsors</button>
         <button class="navbtn" onclick="showView('sponsor')">Official Sponsor</button>
         <button class="navbtn" onclick="showView('upcoming')">Upcoming</button>
-        <button class="navbtn" onclick="showView('posts')">Latest Travel</button>
-        <button class="navbtn" onclick="showView('addpost')">Add Post</button>
+        <button class="navbtn" onclick="showView('posts')">Posts</button>
         <button class="navbtn" onclick="showView('sections')">Custom Rows</button>
         <button class="navbtn" onclick="showView('youtube')">YouTube</button>
         <button class="navbtn" onclick="showView('about')">About</button>
@@ -240,7 +237,7 @@ main > div {
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                 <span class="ml-2 text-[10px] text-slate-500 truncate">index.html · live preview</span>
               </div>
-              <iframe id="page-preview-iframe" src="./index.html" title="Public Website Preview" class="w-full bg-[#061510]" style="height:min(78vh,860px);border:0;"></iframe></iframe>
+              <iframe id="page-preview-iframe" src="index.html" title="Site Preview" class="w-full bg-white" style="height:min(78vh,820px);border:0;"></iframe>
             </div>
           </div>
         </div>
@@ -977,17 +974,7 @@ main > div {
             </div>
             <div class="md:col-span-2"><label class="label">Description</label><textarea id="up-desc" class="field min-h-14" oninput="updateUpcomingPreview()"></textarea></div>
           </div>
-          
-        <div class="panel p-4 mt-3 space-y-3">
-          <p class="text-xs font-bold text-emerald-300">Banner ပုံ နေရာ / Zoom (slider နဲ့ adjust)</p>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div><label class="label">ဘယ် ⟷ ညာ</label><input id="up-img-x" type="range" min="0" max="100" value="50" class="w-full" oninput="if($('val-up-img-x'))$('val-up-img-x').textContent=this.value+'%';updateUpcomingPreview()"><span id="val-up-img-x" class="range-val">50%</span></div>
-            <div><label class="label">အပေါ် ⟷ အောက်</label><input id="up-img-y" type="range" min="0" max="100" value="50" class="w-full" oninput="if($('val-up-img-y'))$('val-up-img-y').textContent=this.value+'%';updateUpcomingPreview()"><span id="val-up-img-y" class="range-val">50%</span></div>
-            <div><label class="label">Zoom</label><input id="up-img-zoom" type="range" min="100" max="200" value="100" class="w-full" oninput="if($('val-up-img-zoom'))$('val-up-img-zoom').textContent=this.value+'%';updateUpcomingPreview()"><span id="val-up-img-zoom" class="range-val">100%</span></div>
-          </div>
-        </div>
-
-<button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
+          <button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
         </div>
       </section>
 
@@ -1020,15 +1007,7 @@ main > div {
           </div>
           <button type="button" onclick="saveStoriesSection()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Latest Travel Section</button>
         </div>
-      </section>
-
-      <!-- ADD POST -->
-      <section id="view-addpost" class="view space-y-5">
-        <div>
-          <h2 class="text-xl font-black">Add Post</h2>
-          <p class="mt-1 text-sm text-slate-400">Post အသစ်တင်မယ် · ပြင်မယ် · ဖျက်မယ် — Cover ပုံ Upload · Article Content</p>
-        </div>
-<div><h3 class="font-bold text-white">Posts စာရင်း</h3><p class="text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload</p></div>
+        <div><h3 class="font-bold text-white">Posts စာရင်း</h3><p class="text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload</p></div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
@@ -1079,10 +1058,10 @@ main > div {
                   <option value="full">ပုံ အပြည့်</option>
                 </select>
               </div>
-              <textarea id="admin-post-content" class="field min-h-[320px] sm:min-h-[420px] w-full text-base leading-relaxed" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="# ခေါင်းစဉ် ဒီလို ရေးပါ&#10;&#10;စာသား ဒီမှာ...&#10;&#10;ပုံထည့်ရန် အပေါ်က ခလုတ် သုံးပါ" oninput="updateContentPreview()"></textarea>
+              <textarea id="admin-post-content" class="field min-h-40" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="# ခေါင်းစဉ် ဒီလို ရေးပါ&#10;&#10;စာသား ဒီမှာ...&#10;&#10;ပုံထည့်ရန် အပေါ်က ခလုတ် သုံးပါ" oninput="updateContentPreview()"></textarea>
               <div class="mt-3 rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3">
                 <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Article Content (ပုံ: ဖျက် / အပေါ်-အောက် / အရွယ် / drag)</span>
-                <div id="content-live-preview" class="mt-2 text-sm text-slate-200 rounded-xl border border-slate-700 bg-slate-950/50" style="min-height:180px;max-height:520px;overflow-y:auto;padding:12px;"></div>
+                <div id="content-live-preview" class="mt-2 text-sm text-slate-200" style="min-height:100px;max-height:360px;overflow-y:auto;padding:8px;"></div>
               </div>
             </div>
             <div><label class="label">Location *</label><input id="admin-post-location" class="field" oninput="updatePostPreview()" placeholder="Bagan, Inle Lake..."></div>
@@ -1117,10 +1096,9 @@ main > div {
           <div class="mb-4 flex items-center justify-between"><h3 class="font-bold">Saved Posts</h3><span id="post-count" class="tiny">0 posts</span></div>
           <div id="posts-list" class="space-y-3"></div>
         </div>
-      
       </section>
 
-<!-- CUSTOM ROWS -->
+      <!-- CUSTOM ROWS -->
       <section id="view-sections" class="view space-y-5">
         <div><h2 class="text-xl font-black">Custom Rows / Sections</h2><p class="mt-1 text-sm text-slate-400">Homepage မှာ extra row တွေ ထည့်နိုင်တယ်</p></div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
@@ -1795,7 +1773,6 @@ async function signInAdmin() {
     $('login-modal').classList.add('hidden');
     $('app').classList.remove('hidden');
     loadAll();
-    try { renderOverview(); } catch (e2) {}
   } catch (e) {
     $('login-error').textContent = e.message || 'Login မအောင်မြင်ပါ။';
   } finally {
@@ -1809,185 +1786,15 @@ function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 
 const titles = {
   overview: 'Overview', pagepreview: 'Page Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
-  proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Latest Travel', addpost: 'Add Post',
+  proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Latest Travel',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
 
-function getPublicSiteUrl() {
-  // Always load the PUBLIC website (index.html), never admin.html
-  try {
-    var path = location.pathname || '';
-    // .../admin.html → .../index.html
-    if (/admin\.html$/i.test(path)) {
-      path = path.replace(/admin\.html$/i, 'index.html');
-    } else if (path.endsWith('/')) {
-      path = path + 'index.html';
-    } else if (!/index\.html$/i.test(path)) {
-      path = path.replace(/\/?[^\/]*$/, '/index.html');
-    }
-    return path + '?preview=1&t=' + Date.now();
-  } catch (e) {
-    return './index.html?preview=1&t=' + Date.now();
-  }
-}
 function refreshPagePreviewIframe() {
   const f = $('page-preview-iframe');
   if (!f) return;
-  var url = getPublicSiteUrl();
-  try { f.src = url; } catch (e) { f.src = './index.html'; }
-  f.onload = function() {
-    try {
-      var doc = f.contentDocument || f.contentWindow.document;
-      var title = (doc && doc.title) ? String(doc.title) : '';
-      // If public index was overwritten with admin, warn clearly
-      if (/Admin Studio/i.test(title) || (doc && doc.getElementById('login-modal') && doc.getElementById('view-overview'))) {
-        toast('⚠️ Preview မှာ Admin ပွင့်နေသည် — GitHub မှာ index.html က public website ဖိုင်ဖြစ်ရမယ် (admin.html မဟုတ်)');
-        return;
-      }
-      if (typeof enablePreviewDrag === 'function') enablePreviewDrag(f);
-    } catch (err) {
-      console.warn('preview onload', err);
-    }
-  };
+  try { f.src = 'index.html?t=' + Date.now(); } catch (e) { f.src = 'index.html'; }
 }
-
-function enablePreviewDrag(iframe) {
-  var doc, win;
-  try {
-    doc = iframe.contentDocument || iframe.contentWindow.document;
-    win = iframe.contentWindow;
-  } catch (e) { return; }
-  if (!doc || !doc.body) return;
-  if (!doc.getElementById('pv-edit-style')) {
-    var st = doc.createElement('style');
-    st.id = 'pv-edit-style';
-    st.textContent = '.pv-drag{outline:2px dashed rgba(16,185,129,.85)!important;cursor:move!important;pointer-events:auto!important;z-index:40!important;}'
-      + '.pv-drag:hover{outline-color:#34d399!important;background:rgba(16,185,129,.08)!important;}'
-      + '.pv-resize{position:absolute;right:-4px;bottom:-4px;width:12px;height:12px;background:#10b981;border:2px solid #fff;border-radius:3px;cursor:nwse-resize;z-index:50;}'
-      + '#pv-edit-hint{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(6,21,16,.92);color:#6ee7b7;font-size:11px;font-weight:700;padding:8px 14px;border-radius:999px;border:1px solid #10b98155;z-index:9999;pointer-events:none;}';
-    doc.head.appendChild(st);
-  }
-  if (!doc.getElementById('pv-edit-hint')) {
-    var hint = doc.createElement('div');
-    hint.id = 'pv-edit-hint';
-    hint.textContent = '✏️ ဖိဆွဲ = ရွှေ့ · ထောင့်အစိမ်း = အရွယ်';
-    doc.body.appendChild(hint);
-  }
-  function makeDrag(el, parentSel, onDone) {
-    if (!el || el._pvDrag) return;
-    el._pvDrag = true;
-    el.classList.add('pv-drag');
-    var cs = win.getComputedStyle(el);
-    if (cs.position === 'static') el.style.position = 'absolute';
-    if (!el.querySelector('.pv-resize')) {
-      var h = doc.createElement('span');
-      h.className = 'pv-resize';
-      el.appendChild(h);
-    }
-    var state = null;
-    function down(e) {
-      var t = e.target;
-      var parent = parentSel ? doc.querySelector(parentSel) : (el.offsetParent || doc.body);
-      if (!parent) parent = doc.body;
-      var p = e.touches ? e.touches[0] : e;
-      if (t && t.classList && t.classList.contains('pv-resize')) {
-        state = { type: 'resize', el: el, sy: p.clientY, fs: parseFloat(win.getComputedStyle(el).fontSize) || 14 };
-        e.preventDefault(); e.stopPropagation(); return;
-      }
-      state = { type: 'move', el: el, parent: parent, sx: p.clientX, sy: p.clientY,
-        ox: parseFloat(el.style.left) || 0, oy: parseFloat(el.style.top) || 0 };
-      if (String(el.style.left).indexOf('%') >= 0) state.ox = parseFloat(el.style.left);
-      if (String(el.style.top).indexOf('%') >= 0) state.oy = parseFloat(el.style.top);
-      e.preventDefault(); e.stopPropagation();
-    }
-    function move(e) {
-      if (!state) return;
-      var p = e.touches ? e.touches[0] : e;
-      if (state.type === 'resize') {
-        var dy = p.clientY - state.sy;
-        state.el.style.fontSize = Math.max(8, Math.min(96, state.fs + dy * 0.25)) + 'px';
-        e.preventDefault(); return;
-      }
-      var pr = state.parent.getBoundingClientRect();
-      var nx = Math.max(0, Math.min(92, state.ox + ((p.clientX - state.sx) / pr.width) * 100));
-      var ny = Math.max(0, Math.min(92, state.oy + ((p.clientY - state.sy) / pr.height) * 100));
-      state.el.style.left = nx + '%';
-      state.el.style.top = ny + '%';
-      e.preventDefault();
-    }
-    function up() {
-      if (!state) return;
-      var el2 = state.el; state = null;
-      if (typeof onDone === 'function') onDone(el2);
-    }
-    el.addEventListener('mousedown', down);
-    el.addEventListener('touchstart', down, { passive: false });
-    doc.addEventListener('mousemove', move);
-    doc.addEventListener('touchmove', move, { passive: false });
-    doc.addEventListener('mouseup', up);
-    doc.addEventListener('touchend', up);
-  }
-  function saveHeroFromDom() {
-    var hero = {};
-    try { hero = JSON.parse(localStorage.getItem('hh_hero') || '{}') || {}; } catch (e) {}
-    function readPos(id, xk, yk, fsk) {
-      var el = doc.getElementById(id); if (!el) return;
-      if (el.style.left) hero[xk] = Math.round(parseFloat(el.style.left));
-      if (el.style.top) hero[yk] = Math.round(parseFloat(el.style.top));
-      if (fsk && el.style.fontSize) hero[fsk] = Math.round(parseFloat(el.style.fontSize));
-    }
-    readPos('hero-label', 'labelX', 'labelY', 'labelFs');
-    readPos('hero-title', 'titleX', 'titleY', 'titleFs');
-    readPos('hero-desc', 'descX', 'descY', 'descFs');
-    readPos('hero-sign', 'signX', 'signY', null);
-    localStorage.setItem('hh_hero', JSON.stringify(hero));
-    if (typeof write === 'function') write('hh_hero', hero);
-  }
-  function saveSponsorFromDom() {
-    var list = [];
-    try { list = JSON.parse(localStorage.getItem('hh_sponsor') || '[]') || []; } catch (e) {}
-    if (!Array.isArray(list)) list = list && list.title ? [list] : [];
-    if (!list.length) return;
-    var s = list.find(function(x){ return x && x.active !== false; }) || list[0];
-    function grab(el, xk, yk, fsk) {
-      if (!el || !el.style) return;
-      if (el.style.left) s[xk] = Math.round(parseFloat(el.style.left));
-      if (el.style.top) s[yk] = Math.round(parseFloat(el.style.top));
-      if (fsk && el.style.fontSize) s[fsk] = Math.round(parseFloat(el.style.fontSize));
-    }
-    grab(doc.querySelector('.sp-badge'), 'badgeX', 'badgeY', 'badgeFs');
-    grab(doc.querySelector('.sp-title'), 'titleX', 'titleY', 'titleFs');
-    grab(doc.querySelector('.sp-desc'), 'descX', 'descY', 'descFs');
-    localStorage.setItem('hh_sponsor', JSON.stringify(list));
-    if (typeof write === 'function') write('hh_sponsor', list);
-  }
-  function saveUpcomingFromDom() {
-    var up = {};
-    try { up = JSON.parse(localStorage.getItem('hh_upcoming') || '{}') || {}; } catch (e) {}
-    function grab(id, xk, yk, fsk) {
-      var el = doc.getElementById(id); if (!el) return;
-      if (el.style.left) up[xk] = Math.round(parseFloat(el.style.left));
-      if (el.style.top) up[yk] = Math.round(parseFloat(el.style.top));
-      if (fsk && el.style.fontSize) up[fsk] = Math.round(parseFloat(el.style.fontSize));
-    }
-    grab('upcoming-label', 'labelX', 'labelY', 'labelFs');
-    grab('upcoming-title', 'titleX', 'titleY', 'titleFs');
-    grab('upcoming-desc', 'descX', 'descY', 'descFs');
-    localStorage.setItem('hh_upcoming', JSON.stringify(up));
-    if (typeof write === 'function') write('hh_upcoming', up);
-  }
-  ['hero-label','hero-title','hero-desc','hero-sign'].forEach(function(id) {
-    makeDrag(doc.getElementById(id), '#hero-section', saveHeroFromDom);
-  });
-  doc.querySelectorAll('.sp-badge, .sp-title, .sp-desc, .sp-logo').forEach(function(el) {
-    makeDrag(el, '.sp-banner', saveSponsorFromDom);
-  });
-  ['upcoming-label','upcoming-title','upcoming-desc'].forEach(function(id) {
-    makeDrag(doc.getElementById(id), '#upcoming-banner', saveUpcomingFromDom);
-  });
-}
-
-
 function setPagePreviewWidth(mode) {
   const w = $('page-preview-frame-wrap');
   if (!w) return;
@@ -2040,7 +1847,7 @@ function loadAll() {
   if ($('set-brand-tagline-fs')) { $('set-brand-tagline-fs').value = s.brandTaglineFs || 12; if ($('val-brand-tagline-fs')) $('val-brand-tagline-fs').textContent = (s.brandTaglineFs || 12) + 'px'; }
   if ($('set-brand-tagline-weight')) $('set-brand-tagline-weight').value = s.brandTaglineWeight || '400';
   if ($('set-brand-tagline-style')) $('set-brand-tagline-style').value = s.brandTaglineStyle || 'normal';
-  if ($('set-show-tagline')) $('set-show-tagline').checked = s.showBrandTagline !== false;
+  if ($('set-show-tagline')) $('set-show-tagline').checked = s.showBrandTagline === true;
   setImageFieldValue('set-logo-url', s.logoUrl || '');
   $('set-email').value = s.contactEmail || '';
   $('set-location').value = s.contactLocation || '';
@@ -2051,8 +1858,8 @@ function loadAll() {
   if ($('set-footer-tagline-style')) $('set-footer-tagline-style').value = s.footerTaglineStyle || 'normal';
   $('set-stories-heading').value = s.storiesHeading || '';
   $('set-stories-sub').value = s.storiesSub || '';
-  if ($('set-font')) $('set-font').value = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
-  if ($('set-heading-font')) $('set-heading-font').value = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
+  $('set-font').value = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
+  $('set-heading-font').value = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
   if ($('set-heading-weight')) $('set-heading-weight').value = s.headingWeight || '700';
   if ($('set-heading-style')) $('set-heading-style').value = s.headingStyle || 'normal';
   if ($('set-body-color')) $('set-body-color').value = s.bodyColor || '#ffffff';
@@ -2145,6 +1952,7 @@ function loadAll() {
   if ($('up-desc-x')) $('up-desc-x').value = up.descX != null ? up.descX : 6;
   if ($('up-desc-y')) $('up-desc-y').value = up.descY != null ? up.descY : 72;
   if ($('up-frame-h')) $('up-frame-h').value = up.frameH || 160;
+  if ($('up-overlay')) $('up-overlay').value = up.overlayOpacity != null ? up.overlayOpacity : 55;
   showPreviewIfUrl('up-image');
   if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
 
@@ -2282,20 +2090,19 @@ $('set-accent-color')?.addEventListener('input', () => {
 });
 
 function saveSettings() {
-  const theme = ($('set-theme') && $('set-theme').value) || 'forest';
+  const theme = $('set-theme').value || 'forest';
   const preset = THEME_PRESETS[theme] || THEME_PRESETS.forest;
-  const _accentEl = $('set-accent-hex') || $('set-accent-color');
-  const customAccent = _accentEl ? String(_accentEl.value || '').trim() : '';
+  const customAccent = $('set-accent-hex').value.trim() || $('set-accent-color').value;
   const heroMaxW = parseInt($('set-hero-maxw')?.value || '1400', 10);
   write('hh_settings', {
     theme,
     mode: $('set-mode')?.value || 'dark',
-    brandName: (($('set-brand-name') && $('set-brand-name').value) || '').trim() || 'HTOO HTET',
+    brandName: $('set-brand-name').value.trim() || 'HTOO HTET',
     brandNameColor: $('set-brand-name-color')?.value || '#e5edf7',
     brandNameFs: parseInt($('set-brand-name-fs')?.value || '18', 10),
     brandNameWeight: $('set-brand-name-weight')?.value || '700',
     brandNameStyle: $('set-brand-name-style')?.value || 'normal',
-    brandTagline: (($('set-brand-tagline') && $('set-brand-tagline').value) || '').trim(),
+    brandTagline: $('set-brand-tagline').value.trim(),
     brandTaglineColor: $('set-brand-tagline-color')?.value || '#94a3b8',
     brandTaglineFs: parseInt($('set-brand-tagline-fs')?.value || '12', 10),
     brandTaglineWeight: $('set-brand-tagline-weight')?.value || '400',
@@ -2312,27 +2119,25 @@ function saveSettings() {
     headingStyle: $('set-heading-style')?.value || 'normal',
     bodyColor: $('set-body-color')?.value || '',
     headingColor: $('set-heading-color')?.value || '',
-    heroHeight: parseInt(($('set-hero-height') && $('set-hero-height').value) || '480', 10) || 480,
+    heroHeight: parseInt($('set-hero-height').value, 10) || 480,
     heroMaxWidth: heroMaxW >= 1350 ? 100 : heroMaxW,
     heroTextAlign: $('set-hero-text-align')?.value || 'left',
     heroVAlign: $('set-hero-v-align')?.value || 'center',
     heroTextMaxW: parseInt($('set-hero-text-maxw')?.value || '36', 10),
     sponsorHeight: parseInt($('set-sponsor-height')?.value || '180', 10),
     upcomingHeight: parseInt($('set-upcoming-height')?.value || '200', 10),
-    cardImgHeight: parseFloat(($('set-card-img-h') && $('set-card-img-h').value) || '11') || 11,
-    contactEmail: (($('set-email') && $('set-email').value) || '').trim(),
-    contactLocation: (($('set-location') && $('set-location').value) || '').trim(),
-    footerTagline: (($('set-footer-tagline') && $('set-footer-tagline').value) || '').trim(),
+    cardImgHeight: parseFloat($('set-card-img-h').value) || 11,
+    contactEmail: $('set-email').value.trim(),
+    contactLocation: $('set-location').value.trim(),
+    footerTagline: $('set-footer-tagline').value.trim(),
     footerTaglineColor: $('set-footer-tagline-color')?.value || '#94a3b8',
     footerTaglineFs: parseInt($('set-footer-tagline-fs')?.value || '13', 10),
     footerTaglineWeight: $('set-footer-tagline-weight')?.value || '400',
     footerTaglineStyle: $('set-footer-tagline-style')?.value || 'normal',
-    storiesHeading: (($('set-stories-heading') && $('set-stories-heading').value) || '').trim(),
-    storiesSub: (($('set-stories-sub') && $('set-stories-sub').value) || '').trim()
+    storiesHeading: $('set-stories-heading').value.trim(),
+    storiesSub: $('set-stories-sub').value.trim()
   });
-  toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme);
-  try { if (typeof saveHero === 'function') saveHero(); } catch (e) { console.warn(e); }
-  try { if (typeof renderOverview === 'function') renderOverview(); } catch (e) {}
+  toast('Brand & Layout သိမ်းပြီးပါပြီ။ Theme: ' + theme + ' (ဒီဇိုင်းကွဲ)');
 }
 
 function setHeroFrameAlign(align) {
@@ -3305,6 +3110,14 @@ function updateUpcomingPreview() {
   const fh = parseInt($('up-frame-h')?.value || '160', 10);
   if ($('val-up-frame-h')) $('val-up-frame-h').textContent = fh + 'px';
   if (box) box.style.height = fh + 'px';
+  const ov = parseInt($('up-overlay')?.value || '55', 10);
+  if ($('val-up-overlay')) $('val-up-overlay').textContent = ov + '%';
+  const ovEl = $('up-prev-overlay');
+  if (ovEl) {
+    const a = (ov / 100).toFixed(2);
+    const a2 = (ov / 100 * 0.25).toFixed(2);
+    ovEl.style.background = 'linear-gradient(to top, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '))';
+  }
 
   if ($('up-prev-heading')) $('up-prev-heading').textContent = $('up-heading')?.value || 'Upcoming';
   const st = $('up-section-title')?.value || '';
@@ -3352,25 +3165,9 @@ function updateUpcomingPreview() {
     applyLiveBg(box, img);
     if (!img) box.style.background = '#1a1a1a';
   }
-  try {
-    var ix = parseInt((($('up-img-x')&&$('up-img-x').value)||'50'),10);
-    var iy = parseInt((($('up-img-y')&&$('up-img-y').value)||'50'),10);
-    var iz = parseInt((($('up-img-zoom')&&$('up-img-zoom').value)||'100'),10);
-    if ($('val-up-img-x')) $('val-up-img-x').textContent = ix + '%';
-    if ($('val-up-img-y')) $('val-up-img-y').textContent = iy + '%';
-    if ($('val-up-img-zoom')) $('val-up-img-zoom').textContent = iz + '%';
-    var ubox = $('up-live-preview');
-    var uimg = ubox && (ubox.querySelector('.live-bg-img') || ubox.querySelector('img'));
-    if (uimg) {
-      uimg.style.objectPosition = ix + '% ' + iy + '%';
-      uimg.style.transform = iz > 100 ? ('scale(' + (iz/100).toFixed(2) + ')') : '';
-      uimg.style.transformOrigin = ix + '% ' + iy + '%';
-    }
-  } catch (e) {}
   initUpcomingDrag();
 }
 let _upDrag = null;
-
 function initUpcomingDrag() {
   const box = $('up-live-preview');
   if (!box || box._upDragReady) return;
@@ -3431,52 +3228,32 @@ function initUpcomingDrag() {
 }
 
 function saveUpcoming() {
-  function gv(id, def) {
-    var el = $(id);
-    if (!el) return def == null ? '' : def;
-    return String(el.value == null ? '' : el.value).trim() || (def == null ? '' : def);
-  }
-  function gi(id, def) {
-    var n = parseInt(gv(id, String(def)), 10);
-    return isNaN(n) ? def : n;
-  }
-  try {
-    var _upImg = (typeof imageFieldValue === 'function' ? imageFieldValue('up-image') : gv('up-image', ''));
-    var _upTitle = gv('up-title', '');
-    var _upActive = $('up-active') ? !!$('up-active').checked : true;
-    if (_upImg || _upTitle || gv('up-desc', '')) _upActive = true;
-    write('hh_upcoming', {
-      active: _upActive,
-      heading: gv('up-heading', 'Upcoming'),
-      sectionTitle: gv('up-section-title', ''),
-      label: gv('up-label', ''),
-      labelColor: gv('up-label-color', '#f5c518'),
-      labelFs: gi('up-label-fs', 11),
-      labelX: gi('up-label-x', 6),
-      labelY: gi('up-label-y', 40),
-      title: _upTitle || gv('up-heading', 'Upcoming') || 'Upcoming',
-      titleColor: gv('up-title-color', '#ffffff'),
-      titleFs: gi('up-title-fs', 22),
-      titleWeight: gv('up-title-weight', '900'),
-      titleX: gi('up-title-x', 6),
-      titleY: gi('up-title-y', 55),
-      desc: gv('up-desc', ''),
-      descColor: gv('up-desc-color', '#cccccc'),
-      descFs: gi('up-desc-fs', 13),
-      descX: gi('up-desc-x', 6),
-      descY: gi('up-desc-y', 72),
-      frameH: gi('up-frame-h', 160),
-      image: _upImg,
-      imgPosX: gi('up-img-x', 50),
-      imgPosY: gi('up-img-y', 50),
-      imgZoom: gi('up-img-zoom', 100)
-    });
-    if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
-    toast(_upImg ? 'Upcoming သိမ်းပြီး (ပုံပါ)' : 'Upcoming သိမ်းပြီးပါပြီ');
-  } catch (err) {
-    console.error(err);
-    toast('Upcoming save မရ: ' + (err.message || err));
-  }
+  write('hh_upcoming', {
+    active: $('up-active').checked,
+    heading: $('up-heading').value.trim(),
+    sectionTitle: $('up-section-title')?.value.trim() || '',
+    label: $('up-label').value.trim(),
+    labelColor: $('up-label-color')?.value || '#f5c518',
+    labelFs: parseInt($('up-label-fs')?.value || '11', 10),
+    labelX: parseInt($('up-label-x')?.value || '6', 10),
+    labelY: parseInt($('up-label-y')?.value || '40', 10),
+    title: $('up-title').value.trim(),
+    titleColor: $('up-title-color')?.value || '#ffffff',
+    titleFs: parseInt($('up-title-fs')?.value || '22', 10),
+    titleWeight: $('up-title-weight')?.value || '900',
+    titleX: parseInt($('up-title-x')?.value || '6', 10),
+    titleY: parseInt($('up-title-y')?.value || '55', 10),
+    desc: $('up-desc').value.trim(),
+    descColor: $('up-desc-color')?.value || '#cccccc',
+    descFs: parseInt($('up-desc-fs')?.value || '13', 10),
+    descX: parseInt($('up-desc-x')?.value || '6', 10),
+    descY: parseInt($('up-desc-y')?.value || '72', 10),
+    frameH: parseInt($('up-frame-h')?.value || '160', 10),
+    overlayOpacity: parseInt($('up-overlay')?.value || '55', 10),
+    image: imageFieldValue('up-image')
+  });
+  updateUpcomingPreview();
+  toast('Upcoming သိမ်းပြီးပါပြီ။');
 }
 function updateYoutubePreview() {
   if ($('yt-prev-label')) $('yt-prev-label').textContent = $('yt-label')?.value || 'Watch My YouTube';
@@ -4088,7 +3865,7 @@ function savePost() {
 function editPost(id) {
   const p = getPosts().find(x => String(x.id) === String(id));
   if (!p) return;
-  showView('addpost');
+  showView('posts');
   refreshPostSectionOptions();
   $('editing-post-id').value = p.id;
   $('admin-post-title').value = p.title || '';
@@ -4206,20 +3983,12 @@ function deleteHomeSection(i) {
 }
 
 function renderOverview() {
-  try {
-    var posts = typeof getPosts==='function' ? getPosts() : [];
-    var sections = typeof getHomeSections==='function' ? getHomeSections() : [];
-    var proud = typeof getProud==='function' ? getProud() : [];
-    if ($('stat-posts')) $('stat-posts').textContent = posts.length;
-    if ($('stat-sections')) $('stat-sections').textContent = sections.length;
-    if ($('stat-proud')) $('stat-proud').textContent = proud.length;
-    var spText = '0';
-    if (typeof getSponsorList==='function') {
-      var _spl = getSponsorList() || [];
-      spText = _spl.length ? (_spl.filter(function(s){return s.active!==false}).length + '/' + _spl.length) : '0';
-    }
-    if ($('stat-sponsor')) $('stat-sponsor').textContent = spText;
-  } catch (e) { console.warn(e); }
+  const posts = getPosts(), sections = getHomeSections(), proud = getProud(), sp = {};
+  $('stat-posts').textContent = posts.length;
+  $('stat-sections').textContent = sections.length;
+  $('stat-proud').textContent = proud.length;
+  const _spl = (typeof getSponsorList==='function') ? getSponsorList() : [];
+  $('stat-sponsor').textContent = _spl.length ? (_spl.filter(s=>s.active!==false).length + '/' + _spl.length) : '0';
 }
 
 /* ---- Theme Presets (full layout snapshot) ---- */
