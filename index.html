@@ -305,7 +305,43 @@
     }
   }
 
-  </style>
+  
+  #gallery-section:not(.hidden), #upcoming-section:not(.hidden), #sponsor-container:not(.hidden),
+  #youtube-section:not(.hidden), #about-section:not(.hidden), #stories:not(.hidden) { display: block; }
+  .gallery-chip {
+    font-size: 11px; font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 999px;
+    border: 1px solid rgba(16,185,129,0.35); color: rgba(167,243,208,0.85); background: rgba(6,21,16,0.6);
+    transition: all .2s;
+  }
+  .gallery-chip:hover { border-color: rgba(52,211,153,0.6); color: #fff; }
+  .gallery-chip.active { background: rgba(16,185,129,0.25); border-color: #34d399; color: #fff; }
+  .gallery-thumb {
+    position: relative; aspect-ratio: 1; border-radius: 0.9rem; overflow: hidden;
+    border: 1px solid rgba(6,95,70,0.45); cursor: pointer; background: #0a1f18;
+  }
+  .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+  .gallery-thumb:hover img { transform: scale(1.06); }
+  .gallery-thumb .g-cap {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 0.4rem 0.55rem;
+    background: linear-gradient(to top, rgba(0,0,0,.75), transparent);
+    font-size: 10px; font-weight: 700; color: rgba(255,255,255,.92);
+  }
+  /* Soft elegant tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px);
+    background: rgba(15, 40, 32, 0.95); color: #ecfdf5; font-size: 11px; font-weight: 600;
+    padding: 0.35rem 0.65rem; border-radius: 0.5rem; white-space: nowrap;
+    border: 1px solid rgba(52,211,153,0.25); box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease; z-index: 60;
+  }
+  [data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (max-width: 640px) {
+    [data-tip]::after { display: none; }
+  }
+
+</style>
 </head>
 <body class="min-h-screen antialiased theme-forest mode-dark">
 
@@ -437,6 +473,32 @@
   </section>
 
   <!-- TRAVEL STORIES -->
+  <!-- PHOTO GALLERY -->
+  <section id="gallery-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+    <div class="flex items-end justify-between gap-3 mb-4">
+      <div>
+        <h2 id="gallery-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+          <span class="w-1 h-6 rounded-full accent-bg"></span><span id="gallery-heading-text">Photo Gallery</span>
+        </h2>
+        <p id="gallery-sub" class="text-xs sm:text-sm text-emerald-400/70 mt-1 ml-3">ခရီးလမ်းမှ အလှပုံများ</p>
+      </div>
+      <button type="button" id="gallery-view-all-btn" onclick="openFullGallery()" class="text-xs sm:text-sm font-bold text-emerald-400 hover:text-emerald-300 transition shrink-0" data-tip="Gallery အပြည့်ကြည့်မယ်">View all gallery →</button>
+    </div>
+    <div id="gallery-preview-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4"></div>
+  </section>
+
+  <!-- Full gallery overlay -->
+  <div id="gallery-full-page" class="fixed inset-0 z-[70] hidden flex-col bg-[#061510]/98 backdrop-blur-sm">
+    <div class="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-emerald-900/50">
+      <h3 class="text-lg font-black text-white">Photo Gallery</h3>
+      <button type="button" onclick="closeFullGallery()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center" data-tip="ပိတ်မယ်"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="px-4 sm:px-6 py-3 flex flex-wrap gap-2" id="gallery-filter-chips">
+      <button type="button" class="gallery-chip active" data-cat="all" onclick="filterGallery('all',this)">All</button>
+    </div>
+    <div id="gallery-full-grid" class="flex-1 overflow-y-auto px-4 sm:px-6 pb-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 content-start"></div>
+  </div>
+
   <section id="stories" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9">
     <div id="stories-banner-wrap" class="hidden mb-5 overflow-hidden border border-emerald-800/40 shadow-xl">
       <img id="stories-banner-img-public" src="" alt="" class="w-full object-cover">
@@ -445,7 +507,7 @@
       <div>
         <div class="flex items-center gap-2 mb-1">
           <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
-          <h2 id="stories-heading" class="text-xl sm:text-2xl font-black text-white">Travel Stories</h2>
+          <h2 id="stories-heading" class="text-xl sm:text-2xl font-black text-white">Recent Travel</h2>
         </div>
         <p id="stories-sub" class="text-xs sm:text-sm text-emerald-400/70">မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ</p>
       </div>
@@ -904,6 +966,7 @@ function renderMenu() {
   const menu = siteMenu.length ? siteMenu : [
     { label: 'Home', href: '#home' },
     { label: 'Travel Stories', href: '#stories' },
+    { label: 'Gallery', href: '#gallery-section' },
     { label: 'YouTube', href: '#youtube-section' },
     { label: 'About', href: '#about-section' },
     { label: 'Contact', href: '#contact' }
@@ -1325,6 +1388,7 @@ function loadBlogData() {
   if (cats.includes(cur)) sel.value = cur;
 
   renderStoryCards();
+  renderGallerySection();
   renderExtraHomeSections();
   tryOpenArticleFromHash();
 }
@@ -1606,6 +1670,123 @@ function goSectionLink(link) {
   } catch (e) {}
   location.hash = href;
 }
+
+function getGalleryPhotos() {
+  var g = read('hh_gallery', {});
+  if (Array.isArray(g)) return g; // legacy
+  var photos = g.photos || [];
+  return photos.filter(function(p){ return p && p.active !== false && p.img; });
+}
+function getGalleryMeta() {
+  var g = read('hh_gallery', {});
+  if (Array.isArray(g)) return { active: true, heading: 'Photo Gallery', subtitle: 'ခရီးလမ်းမှ အလှပုံများ', previewCount: 4 };
+  return {
+    active: g.active !== false,
+    heading: g.heading || 'Photo Gallery',
+    subtitle: g.subtitle || 'ခရီးလမ်းမှ အလှပုံများ',
+    previewCount: g.previewCount || 4,
+    categories: g.categories || ['Road Trip','Mountain','River','Sunset']
+  };
+}
+var _galleryFilter = 'all';
+function renderGallerySection() {
+  var sec = $('gallery-section');
+  if (!sec) return;
+  var meta = getGalleryMeta();
+  var photos = getGalleryPhotos();
+  if (!meta.active || !photos.length) {
+    sec.classList.add('hidden');
+    return;
+  }
+  sec.classList.remove('hidden');
+  if ($('gallery-heading-text')) $('gallery-heading-text').textContent = meta.heading;
+  if ($('gallery-sub')) {
+    $('gallery-sub').textContent = meta.subtitle || '';
+    $('gallery-sub').style.display = meta.subtitle ? '' : 'none';
+  }
+  var n = Math.min(meta.previewCount || 4, photos.length);
+  var grid = $('gallery-preview-grid');
+  if (!grid) return;
+  // sort by order then date
+  var sorted = photos.slice().sort(function(a,b){ return (a.order||0) - (b.order||0) || (b.id||0) - (a.id||0); });
+  grid.innerHTML = sorted.slice(0, n).map(function(p, i){
+    var tip = (p.caption || p.category || 'Photo').replace(/"/g, '&quot;');
+    return '<button type="button" class="gallery-thumb group" data-tip="' + tip + '" onclick="openGalleryLightbox(' + i + ')">' +
+      '<img loading="lazy" src="' + safe(p.img) + '" alt="' + safe(p.caption || '') + '">' +
+      (p.category || p.caption ? '<span class="g-cap">' + safe(p.category || p.caption || '') + '</span>' : '') +
+    '</button>';
+  }).join('');
+  // store full sorted for lightbox from preview
+  window._galleryPreviewList = sorted;
+}
+function openFullGallery() {
+  var page = $('gallery-full-page');
+  if (!page) return;
+  page.classList.remove('hidden');
+  page.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  var meta = getGalleryMeta();
+  var cats = meta.categories || [];
+  var chips = $('gallery-filter-chips');
+  if (chips) {
+    chips.innerHTML = '<button type="button" class="gallery-chip active" data-cat="all" onclick="filterGallery(\'all\',this)">All</button>' +
+      cats.map(function(c){
+        return '<button type="button" class="gallery-chip" data-cat="' + safe(c) + '" onclick="filterGallery(\'' + String(c).replace(/'/g, "\\'") + '\',this)">' + safe(c) + '</button>';
+      }).join('');
+  }
+  _galleryFilter = 'all';
+  renderFullGalleryGrid();
+}
+function closeFullGallery() {
+  var page = $('gallery-full-page');
+  if (!page) return;
+  page.classList.add('hidden');
+  page.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function filterGallery(cat, btn) {
+  _galleryFilter = cat || 'all';
+  document.querySelectorAll('.gallery-chip').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderFullGalleryGrid();
+}
+function renderFullGalleryGrid() {
+  var grid = $('gallery-full-grid');
+  if (!grid) return;
+  var photos = getGalleryPhotos().slice().sort(function(a,b){ return (a.order||0)-(b.order||0)||(b.id||0)-(a.id||0); });
+  if (_galleryFilter && _galleryFilter !== 'all') {
+    photos = photos.filter(function(p){ return String(p.category||'') === String(_galleryFilter); });
+  }
+  window._galleryFullList = photos;
+  if (!photos.length) {
+    grid.innerHTML = '<div class="col-span-full text-center text-emerald-500/60 py-12 text-sm">ဒီအမျိုးအစားမှာ ပုံမရှိသေးပါ</div>';
+    return;
+  }
+  grid.innerHTML = photos.map(function(p, i){
+    var tip = (p.caption || p.category || '').replace(/"/g, '&quot;');
+    return '<button type="button" class="gallery-thumb" data-tip="' + tip + '" onclick="openGalleryLightbox(' + i + ', true)">' +
+      '<img loading="lazy" src="' + safe(p.img) + '" alt="">' +
+      (p.category || p.caption ? '<span class="g-cap">' + safe(p.category || p.caption || '') + '</span>' : '') +
+    '</button>';
+  }).join('');
+}
+function openGalleryLightbox(index, fromFull) {
+  var list = fromFull ? (window._galleryFullList || []) : (window._galleryPreviewList || getGalleryPhotos());
+  if (!list.length) return;
+  // reuse existing img lightbox if present
+  var lb = $('img-lightbox');
+  if (lb && typeof showImgLightbox === 'function') {
+    showImgLightbox(list[index].img, list[index].caption || list[index].category || '');
+    return;
+  }
+  if (lb) {
+    var img = lb.querySelector('img');
+    if (img) img.src = list[index].img;
+    lb.classList.remove('hidden');
+    lb.style.display = 'flex';
+  }
+}
+
 function renderExtraHomeSections() {
   const container = $('extra-home-sections');
   if (!container) return;
@@ -1676,7 +1857,7 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_gallery','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 let publicFirebaseReady = false;
 let publicDb = null;
 try {
