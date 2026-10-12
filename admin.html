@@ -107,6 +107,41 @@ main > div {
   width: 100%;
   max-width: none !important;
 }
+
+.gal-slot {
+  position: relative; aspect-ratio: 1; border-radius: 0.85rem; overflow: hidden;
+  border: 2px dashed rgba(100,116,139,0.55); background: rgba(15,23,42,0.65);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.gal-slot:hover { border-color: rgba(52,211,153,0.55); background: rgba(6,78,59,0.2); }
+.gal-slot.has-img { border-style: solid; border-color: rgba(52,211,153,0.35); }
+.gal-slot img { width:100%; height:100%; object-fit:cover; display:block; }
+.gal-slot .gal-plus { font-size: 1.6rem; color: rgba(148,163,184,0.7); pointer-events:none; }
+.gal-slot .gal-del {
+  position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 999px;
+  background: rgba(0,0,0,0.72); color: #fecaca; border: 1px solid rgba(248,113,113,0.5);
+  display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s;
+  font-size: 12px; z-index: 2;
+}
+.gal-slot:hover .gal-del, .gal-list-card:hover .gal-del { opacity: 1; }
+.gal-slot-cap { margin-top: 0.35rem; }
+.gal-list-card {
+  position: relative; border-radius: 0.85rem; overflow: hidden; border: 1px solid rgba(51,65,85,0.8);
+  background: rgba(15,23,42,0.7); aspect-ratio: 1;
+}
+.gal-list-card img { width:100%; height:100%; object-fit:cover; }
+.gal-list-card .gal-del {
+  position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 999px;
+  background: rgba(0,0,0,0.72); color: #fecaca; border: 1px solid rgba(248,113,113,0.5);
+  display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s;
+  font-size: 12px; z-index: 2; cursor: pointer;
+}
+.gal-list-meta {
+  position: absolute; left:0; right:0; bottom:0; padding: 0.35rem 0.45rem;
+  background: linear-gradient(to top, rgba(0,0,0,.8), transparent);
+  font-size: 10px; font-weight: 700; color: #fff;
+}
 </style>
 </head>
 <body class="min-h-screen">
@@ -1056,28 +1091,23 @@ main > div {
           <button type="button" onclick="saveGalleryMeta()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Gallery Settings</button>
         </div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
-          <h3 class="font-bold">ပုံ အသစ်ထည့်</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-              <label class="label">Image *</label>
-              <div class="flex gap-2">
-                <input id="gal-img" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'gal-img')"></label>
-              </div>
-              <div id="gal-img-preview" class="mt-2"></div>
-            </div>
-            <div><label class="label">Caption</label><input id="gal-caption" class="field" placeholder="Inle sunset"></div>
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <label class="label">Category</label>
-              <input id="gal-cat" class="field" list="gal-cat-list" placeholder="Road Trip">
+              <h3 class="font-bold">ပုံ အသစ်ထည့်</h3>
+              <p class="tiny mt-0.5">၄ ခု တန်း · အလွတ်ကွက် နှိပ် Upload · + နှိပ်ရင် နောက် ၄ ကွက်</p>
+            </div>
+            <div class="flex flex-wrap gap-2 items-center">
+              <input id="gal-default-cat" class="field w-36" list="gal-cat-list" placeholder="Category" title="အသစ်ထည့်မယ့်ပုံတွေအတွက် default category">
               <datalist id="gal-cat-list"></datalist>
+              <button type="button" onclick="addGallerySlotRow()" class="btn btn-purple" data-tip="နောက်ထပ် ၄ ကွက်"><i class="fa-solid fa-plus mr-1"></i>၄ ကွက်</button>
             </div>
           </div>
-          <button type="button" onclick="addGalleryPhoto()" class="btn btn-purple"><i class="fa-solid fa-plus mr-1"></i>Add Photo</button>
+          <div id="gal-slot-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+          <p class="tiny">ပုံပေါ် mouse ရောက်ရင် Delete ခလုတ် ပေါ်မယ် · Caption ကိုကွက်အောက်မှာ ရေးနိုင်</p>
         </div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
-          <div class="flex items-center justify-between mb-3"><h3 class="font-bold">Gallery Photos</h3><span id="gal-count" class="tiny">0</span></div>
-          <div id="gal-list" class="space-y-3"></div>
+          <div class="flex items-center justify-between mb-3"><h3 class="font-bold">Gallery Photos (သိမ်းပြီးသား)</h3><span id="gal-count" class="tiny">0</span></div>
+          <div id="gal-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
         </div>
       </section>
 
@@ -2195,7 +2225,7 @@ function showView(name, button) {
   $('page-title').textContent = titles[name] || 'Overview';
   $('mobile-nav').classList.add('hidden');
   if (name === 'sections') renderHomeSectionsList();
-  if (name === 'gallery') { loadGalleryForm(); renderGalleryList(); }
+  if (name === 'gallery') { loadGalleryForm(); renderGallerySlots(); renderGalleryList(); }
   if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
   if (name === 'menu') renderMenuList();
   if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
@@ -4411,29 +4441,99 @@ function saveGalleryMeta() {
   loadGalleryForm();
   toast('Gallery settings သိမ်းပြီး');
 }
-function addGalleryPhoto() {
-  var img = (typeof imageFieldValue === 'function') ? imageFieldValue('gal-img') : ($('gal-img')?.value || '');
-  if (!img) return alert('ပုံ ထည့်ပါ');
+var _galSlotCount = 4;
+function addGallerySlotRow() {
+  _galSlotCount += 4;
+  renderGallerySlots();
+}
+function renderGallerySlots() {
+  var grid = $('gal-slot-grid');
+  if (!grid) return;
+  var html = '';
+  for (var i = 0; i < _galSlotCount; i++) {
+    html += '<div class="space-y-1">' +
+      '<div class="gal-slot" id="gal-slot-' + i + '" onclick="triggerGalSlotUpload(' + i + ')" data-tip="နှိပ်ပြီး ပုံတင်">' +
+        '<span class="gal-plus"><i class="fa-solid fa-plus"></i></span>' +
+        '<button type="button" class="gal-del" onclick="event.stopPropagation();clearGalSlot(' + i + ')" title="Delete"><i class="fa-solid fa-trash"></i></button>' +
+        '<input type="file" accept="image/*" class="hidden" id="gal-slot-file-' + i + '" onchange="onGalSlotFile(' + i + ', this)">' +
+      '</div>' +
+      '<input class="field text-xs gal-slot-cap" id="gal-slot-cap-' + i + '" placeholder="Caption (optional)" onkeydown="if(event.key===\'Enter\')commitGalSlot(' + i + ')">' +
+      '<button type="button" class="btn btn-muted w-full text-[11px] py-1.5" id="gal-slot-save-' + i + '" style="display:none" onclick="commitGalSlot(' + i + ')">Gallery ထဲ ထည့်</button>' +
+    '</div>';
+  }
+  grid.innerHTML = html;
+}
+function triggerGalSlotUpload(i) {
+  var slot = $('gal-slot-' + i);
+  if (slot && slot.dataset.img) return; // already has image — use delete first
+  var f = $('gal-slot-file-' + i);
+  if (f) f.click();
+}
+function onGalSlotFile(i, input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var url = e.target.result;
+    var slot = $('gal-slot-' + i);
+    if (!slot) return;
+    slot.dataset.img = url;
+    slot.classList.add('has-img');
+    var plus = slot.querySelector('.gal-plus');
+    if (plus) plus.style.display = 'none';
+    var oldImg = slot.querySelector('img.gal-slot-img');
+    if (oldImg) oldImg.remove();
+    var img = document.createElement('img');
+    img.className = 'gal-slot-img';
+    img.src = url;
+    slot.insertBefore(img, slot.firstChild);
+    var btn = $('gal-slot-save-' + i);
+    if (btn) btn.style.display = '';
+  };
+  reader.readAsDataURL(file);
+}
+function clearGalSlot(i) {
+  var slot = $('gal-slot-' + i);
+  if (!slot) return;
+  delete slot.dataset.img;
+  slot.classList.remove('has-img');
+  var img = slot.querySelector('img.gal-slot-img');
+  if (img) img.remove();
+  var plus = slot.querySelector('.gal-plus');
+  if (plus) plus.style.display = '';
+  var f = $('gal-slot-file-' + i);
+  if (f) f.value = '';
+  var btn = $('gal-slot-save-' + i);
+  if (btn) btn.style.display = 'none';
+  var cap = $('gal-slot-cap-' + i);
+  if (cap) cap.value = '';
+}
+function commitGalSlot(i) {
+  var slot = $('gal-slot-' + i);
+  if (!slot || !slot.dataset.img) return;
   var g = getGalleryData();
   g.photos = g.photos || [];
   g.photos.unshift({
-    id: String(Date.now()),
-    img: img,
-    caption: ($('gal-caption')?.value || '').trim(),
-    category: ($('gal-cat')?.value || '').trim(),
+    id: String(Date.now()) + '-' + i,
+    img: slot.dataset.img,
+    caption: ($('gal-slot-cap-' + i)?.value || '').trim(),
+    category: ($('gal-default-cat')?.value || '').trim(),
     active: true,
     order: 0
   });
-  g.photos.forEach(function(p, i){ p.order = i; });
+  g.photos.forEach(function(p, idx){ p.order = idx; });
   write('hh_gallery', g);
-  if (typeof setImageFieldValue === 'function') setImageFieldValue('gal-img', '');
-  else if ($('gal-img')) $('gal-img').value = '';
-  if ($('gal-caption')) $('gal-caption').value = '';
-  if ($('gal-cat')) $('gal-cat').value = '';
-  var prev = $('gal-img-preview'); if (prev) prev.innerHTML = '';
+  clearGalSlot(i);
   renderGalleryList();
   toast('ပုံ ထည့်ပြီး');
 }
+function commitAllGalSlots() {
+  for (var i = 0; i < _galSlotCount; i++) {
+    var slot = $('gal-slot-' + i);
+    if (slot && slot.dataset.img) commitGalSlot(i);
+  }
+}
+function addGalleryPhoto() { /* legacy no-op — slots UI */ }
 function renderGalleryList() {
   var list = $('gal-list');
   if (!list) return;
@@ -4441,22 +4541,15 @@ function renderGalleryList() {
   var photos = g.photos || [];
   if ($('gal-count')) $('gal-count').textContent = photos.length + ' photos';
   if (!photos.length) {
-    list.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">ပုံမရှိသေးပါ</div>';
+    list.innerHTML = '<div class="col-span-full rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">ပုံမရှိသေးပါ</div>';
     return;
   }
   list.innerHTML = photos.map(function(p, i){
-    return '<div class="flex gap-3 items-center rounded-xl border border-slate-700 bg-slate-900/70 p-3">' +
-      '<img src="' + safe(p.img) + '" class="w-16 h-16 rounded-lg object-cover shrink-0" alt="">' +
-      '<div class="min-w-0 flex-1">' +
-        '<p class="font-bold text-sm truncate">' + safe(p.caption || 'Untitled') + '</p>' +
-        '<p class="text-xs text-slate-400">' + safe(p.category || '—') + (p.active === false ? ' · hidden' : '') + '</p>' +
-      '</div>' +
-      '<div class="flex flex-wrap gap-1">' +
-        '<button class="btn btn-muted" onclick="moveGalleryPhoto(' + i + ',-1)" ' + (i===0?'disabled':'') + '>↑</button>' +
-        '<button class="btn btn-muted" onclick="moveGalleryPhoto(' + i + ',1)" ' + (i===photos.length-1?'disabled':'') + '>↓</button>' +
-        '<button class="btn btn-muted" onclick="toggleGalleryPhoto(' + i + ')">' + (p.active === false ? 'Show' : 'Hide') + '</button>' +
-        '<button class="btn btn-red" onclick="deleteGalleryPhoto(' + i + ')"><i class="fa-regular fa-trash-can"></i></button>' +
-      '</div></div>';
+    return '<div class="gal-list-card group" data-tip="' + safe(p.caption || p.category || 'Photo') + '">' +
+      '<img src="' + safe(p.img) + '" alt="">' +
+      '<button type="button" class="gal-del" onclick="deleteGalleryPhoto(' + i + ')" title="Delete"><i class="fa-solid fa-trash"></i></button>' +
+      '<div class="gal-list-meta">' + safe(p.caption || p.category || 'Untitled') + '</div>' +
+    '</div>';
   }).join('');
 }
 function moveGalleryPhoto(i, d) {
