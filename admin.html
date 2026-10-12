@@ -2029,7 +2029,7 @@ function loadAll() {
   if ($('set-brand-tagline-fs')) { $('set-brand-tagline-fs').value = s.brandTaglineFs || 12; if ($('val-brand-tagline-fs')) $('val-brand-tagline-fs').textContent = (s.brandTaglineFs || 12) + 'px'; }
   if ($('set-brand-tagline-weight')) $('set-brand-tagline-weight').value = s.brandTaglineWeight || '400';
   if ($('set-brand-tagline-style')) $('set-brand-tagline-style').value = s.brandTaglineStyle || 'normal';
-  if ($('set-show-tagline')) $('set-show-tagline') ? $('set-show-tagline').checked : true = s.showBrandTagline === true;
+  if ($('set-show-tagline')) $('set-show-tagline').checked = s.showBrandTagline !== false;
   setImageFieldValue('set-logo-url', s.logoUrl || '');
   $('set-email').value = s.contactEmail || '';
   $('set-location').value = s.contactLocation || '';
@@ -2040,8 +2040,8 @@ function loadAll() {
   if ($('set-footer-tagline-style')) $('set-footer-tagline-style').value = s.footerTaglineStyle || 'normal';
   $('set-stories-heading').value = s.storiesHeading || '';
   $('set-stories-sub').value = s.storiesSub || '';
-  ($('set-font') && $('set-font').value) || 'Inter' = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
-  ($('set-heading-font') && $('set-heading-font').value) || 'Inter' = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
+  if ($('set-font')) $('set-font').value = s.fontFamily || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
+  if ($('set-heading-font')) $('set-heading-font').value = s.headingFont || "'Inter', 'Noto Sans Myanmar', system-ui, sans-serif";
   if ($('set-heading-weight')) $('set-heading-weight').value = s.headingWeight || '700';
   if ($('set-heading-style')) $('set-heading-style').value = s.headingStyle || 'normal';
   if ($('set-body-color')) $('set-body-color').value = s.bodyColor || '#ffffff';
@@ -3341,9 +3341,6 @@ function updateUpcomingPreview() {
     applyLiveBg(box, img);
     if (!img) box.style.background = '#1a1a1a';
   }
-  initUpcomingDrag();
-}
-let _upDrag = nul
   try {
     var ix = parseInt((($('up-img-x')&&$('up-img-x').value)||'50'),10);
     var iy = parseInt((($('up-img-y')&&$('up-img-y').value)||'50'),10);
@@ -3359,7 +3356,9 @@ let _upDrag = nul
       uimg.style.transformOrigin = ix + '% ' + iy + '%';
     }
   } catch (e) {}
+  initUpcomingDrag();
 }
+let _upDrag = null;
 
 function initUpcomingDrag() {
   const box = $('up-live-preview');
