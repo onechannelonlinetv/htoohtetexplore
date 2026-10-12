@@ -147,6 +147,7 @@ main > div {
       <button class="navbtn" data-view="proud" onclick="showView('proud',this)"><i class="fa-solid fa-handshake w-4"></i> Proud Sponsors</button>
       <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
       <button class="navbtn" data-view="upcoming" onclick="showView('upcoming',this)"><i class="fa-solid fa-map-location-dot w-4"></i> Upcoming</button>
+      <button class="navbtn" data-view="gallery" onclick="showView('gallery',this)"><i class="fa-solid fa-images w-4"></i> Photo Gallery</button>
       <button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Latest Travel</button>
       <button class="navbtn" data-view="addpost" onclick="showView('addpost',this)"><i class="fa-solid fa-pen-to-square w-4"></i> Add Post</button>
       <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
@@ -181,6 +182,7 @@ main > div {
         <button class="navbtn" onclick="showView('proud')">Proud Sponsors</button>
         <button class="navbtn" onclick="showView('sponsor')">Official Sponsor</button>
         <button class="navbtn" onclick="showView('upcoming')">Upcoming</button>
+        <button class="navbtn" onclick="showView('gallery')">Photo Gallery</button>
         <button class="navbtn" onclick="showView('posts')">Latest Travel</button>
         <button class="navbtn" onclick="showView('addpost')">Add Post</button>
         <button class="navbtn" onclick="showView('sections')">Custom Rows</button>
@@ -1034,6 +1036,51 @@ main > div {
         </div>
       </section>
 
+
+      <section id="view-gallery" class="view space-y-5">
+        <div><h2 class="text-xl font-black">Photo Gallery</h2><p class="mt-1 text-sm text-slate-400">Homepage ၄ ပုံ · View all · Category filter</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+          <label class="toggle-row"><input type="checkbox" id="gal-active" checked onchange=""><span class="text-sm font-semibold">Photo Gallery ပြမယ်</span></label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="label">Section Heading</label><input id="gal-heading" class="field" value="Photo Gallery" placeholder="Photo Gallery"></div>
+            <div><label class="label">Subtitle</label><input id="gal-subtitle" class="field" value="ခရီးလမ်းမှ အလှပုံများ" placeholder="ခရီးလမ်းမှ အလှပုံများ"></div>
+            <div>
+              <label class="label">Homepage မှာ ပြမယ့် ပုံအရေအတွက်</label>
+              <input type="number" id="gal-preview-count" class="field" min="2" max="12" value="4">
+            </div>
+            <div>
+              <label class="label">Categories (ကော်မာ ခြား)</label>
+              <input id="gal-categories" class="field" value="Road Trip, Mountain, River, Sunset" placeholder="Road Trip, Mountain, River, Sunset">
+            </div>
+          </div>
+          <button type="button" onclick="saveGalleryMeta()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Gallery Settings</button>
+        </div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+          <h3 class="font-bold">ပုံ အသစ်ထည့်</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+              <label class="label">Image *</label>
+              <div class="flex gap-2">
+                <input id="gal-img" class="field flex-1" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer shrink-0"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload<input type="file" accept="image/*" class="hidden" onchange="uploadImage(this,'gal-img')"></label>
+              </div>
+              <div id="gal-img-preview" class="mt-2"></div>
+            </div>
+            <div><label class="label">Caption</label><input id="gal-caption" class="field" placeholder="Inle sunset"></div>
+            <div>
+              <label class="label">Category</label>
+              <input id="gal-cat" class="field" list="gal-cat-list" placeholder="Road Trip">
+              <datalist id="gal-cat-list"></datalist>
+            </div>
+          </div>
+          <button type="button" onclick="addGalleryPhoto()" class="btn btn-purple"><i class="fa-solid fa-plus mr-1"></i>Add Photo</button>
+        </div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+          <div class="flex items-center justify-between mb-3"><h3 class="font-bold">Gallery Photos</h3><span id="gal-count" class="tiny">0</span></div>
+          <div id="gal-list" class="space-y-3"></div>
+        </div>
+      </section>
+
 <section id="view-posts" class="view space-y-5">
         <div><h2 class="text-xl font-black">Latest Travel</h2><p class="mt-1 text-sm text-slate-400">Post များ · Section ခေါင်းစဉ် · Banner — Hero/Sponsor လို ချိန်နိုင်</p></div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-3">
@@ -1406,7 +1453,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1917,6 +1964,7 @@ async function signInAdmin() {
       if (!seed.hh_sponsor) seed.hh_sponsor = [{ id: 1, active: true, title: 'Veezoom Myanmar', badge: 'Official Sponsor', desc: '', link: '', img: '' }];
       if (!seed.hh_posts) seed.hh_posts = [];
       if (!seed.hh_home_sections) seed.hh_home_sections = [];
+      if (!seed.hh_gallery) seed.hh_gallery = { active: true, heading: 'Photo Gallery', subtitle: 'ခရီးလမ်းမှ အလှပုံများ', previewCount: 4, categories: ['Road Trip','Mountain','River','Sunset'], photos: [] };
       if (!seed.hh_settings) seed.hh_settings = { brandName: 'HTOO HTET', brandTagline: 'Travel Journal & Beyond' };
       if (!seed.hh_proud_sponsors) seed.hh_proud_sponsors = [];
       if (!seed.hh_menu) seed.hh_menu = [];
@@ -1941,7 +1989,7 @@ function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 
 const titles = {
   overview: 'Overview', pagepreview: 'Page Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
-  proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', posts: 'Latest Travel', addpost: 'Add Post',
+  proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', gallery: 'Photo Gallery', posts: 'Latest Travel', addpost: 'Add Post',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
 
@@ -2147,6 +2195,7 @@ function showView(name, button) {
   $('page-title').textContent = titles[name] || 'Overview';
   $('mobile-nav').classList.add('hidden');
   if (name === 'sections') renderHomeSectionsList();
+  if (name === 'gallery') { loadGalleryForm(); renderGalleryList(); }
   if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
   if (name === 'menu') renderMenuList();
   if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
@@ -2342,7 +2391,7 @@ function loadAll() {
   if (_sh && $('admin-sponsor-height-local')) $('admin-sponsor-height-local').value = _sh;
 
   // Enable friendly Base64 display for image URL fields
-  ['set-logo-url','hero-image','admin-sponsor-img','admin-sponsor-bg','up-image','up-logo','admin-post-img','yt-thumb','yt-bg','proud-logo','stories-banner-img','section-banner-img'].forEach(enableImageFieldEditing);
+  ['set-logo-url','hero-image','admin-sponsor-img','admin-sponsor-bg','up-image','up-logo','admin-post-img','yt-thumb','yt-bg','proud-logo','stories-banner-img','section-banner-img','gal-img'].forEach(enableImageFieldEditing);
 }
 
 const THEME_PRESETS = {
@@ -4331,6 +4380,106 @@ function deleteProud(i) {
 
 /* ---- Posts ---- */
 function getPosts() { return read('hh_posts', []); }
+
+function getGalleryData() {
+  var g = read('hh_gallery', null);
+  if (!g || Array.isArray(g)) {
+    return { active: true, heading: 'Photo Gallery', subtitle: 'ခရီးလမ်းမှ အလှပုံများ', previewCount: 4, categories: ['Road Trip','Mountain','River','Sunset'], photos: Array.isArray(g) ? g : [] };
+  }
+  if (!g.photos) g.photos = [];
+  if (!g.categories) g.categories = ['Road Trip','Mountain','River','Sunset'];
+  return g;
+}
+function loadGalleryForm() {
+  var g = getGalleryData();
+  if ($('gal-active')) $('gal-active').checked = g.active !== false;
+  if ($('gal-heading')) $('gal-heading').value = g.heading || 'Photo Gallery';
+  if ($('gal-subtitle')) $('gal-subtitle').value = g.subtitle || '';
+  if ($('gal-preview-count')) $('gal-preview-count').value = g.previewCount || 4;
+  if ($('gal-categories')) $('gal-categories').value = (g.categories || []).join(', ');
+  var dl = $('gal-cat-list');
+  if (dl) dl.innerHTML = (g.categories || []).map(function(c){ return '<option value="' + safe(c) + '">'; }).join('');
+}
+function saveGalleryMeta() {
+  var g = getGalleryData();
+  g.active = $('gal-active') ? !!$('gal-active').checked : true;
+  g.heading = ($('gal-heading')?.value || 'Photo Gallery').trim();
+  g.subtitle = ($('gal-subtitle')?.value || '').trim();
+  g.previewCount = parseInt($('gal-preview-count')?.value || '4', 10) || 4;
+  g.categories = ($('gal-categories')?.value || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  write('hh_gallery', g);
+  loadGalleryForm();
+  toast('Gallery settings သိမ်းပြီး');
+}
+function addGalleryPhoto() {
+  var img = (typeof imageFieldValue === 'function') ? imageFieldValue('gal-img') : ($('gal-img')?.value || '');
+  if (!img) return alert('ပုံ ထည့်ပါ');
+  var g = getGalleryData();
+  g.photos = g.photos || [];
+  g.photos.unshift({
+    id: String(Date.now()),
+    img: img,
+    caption: ($('gal-caption')?.value || '').trim(),
+    category: ($('gal-cat')?.value || '').trim(),
+    active: true,
+    order: 0
+  });
+  g.photos.forEach(function(p, i){ p.order = i; });
+  write('hh_gallery', g);
+  if (typeof setImageFieldValue === 'function') setImageFieldValue('gal-img', '');
+  else if ($('gal-img')) $('gal-img').value = '';
+  if ($('gal-caption')) $('gal-caption').value = '';
+  if ($('gal-cat')) $('gal-cat').value = '';
+  var prev = $('gal-img-preview'); if (prev) prev.innerHTML = '';
+  renderGalleryList();
+  toast('ပုံ ထည့်ပြီး');
+}
+function renderGalleryList() {
+  var list = $('gal-list');
+  if (!list) return;
+  var g = getGalleryData();
+  var photos = g.photos || [];
+  if ($('gal-count')) $('gal-count').textContent = photos.length + ' photos';
+  if (!photos.length) {
+    list.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">ပုံမရှိသေးပါ</div>';
+    return;
+  }
+  list.innerHTML = photos.map(function(p, i){
+    return '<div class="flex gap-3 items-center rounded-xl border border-slate-700 bg-slate-900/70 p-3">' +
+      '<img src="' + safe(p.img) + '" class="w-16 h-16 rounded-lg object-cover shrink-0" alt="">' +
+      '<div class="min-w-0 flex-1">' +
+        '<p class="font-bold text-sm truncate">' + safe(p.caption || 'Untitled') + '</p>' +
+        '<p class="text-xs text-slate-400">' + safe(p.category || '—') + (p.active === false ? ' · hidden' : '') + '</p>' +
+      '</div>' +
+      '<div class="flex flex-wrap gap-1">' +
+        '<button class="btn btn-muted" onclick="moveGalleryPhoto(' + i + ',-1)" ' + (i===0?'disabled':'') + '>↑</button>' +
+        '<button class="btn btn-muted" onclick="moveGalleryPhoto(' + i + ',1)" ' + (i===photos.length-1?'disabled':'') + '>↓</button>' +
+        '<button class="btn btn-muted" onclick="toggleGalleryPhoto(' + i + ')">' + (p.active === false ? 'Show' : 'Hide') + '</button>' +
+        '<button class="btn btn-red" onclick="deleteGalleryPhoto(' + i + ')"><i class="fa-regular fa-trash-can"></i></button>' +
+      '</div></div>';
+  }).join('');
+}
+function moveGalleryPhoto(i, d) {
+  var g = getGalleryData();
+  var n = i + d;
+  if (n < 0 || n >= g.photos.length) return;
+  var t = g.photos[i]; g.photos[i] = g.photos[n]; g.photos[n] = t;
+  g.photos.forEach(function(p, idx){ p.order = idx; });
+  write('hh_gallery', g); renderGalleryList();
+}
+function toggleGalleryPhoto(i) {
+  var g = getGalleryData();
+  if (!g.photos[i]) return;
+  g.photos[i].active = g.photos[i].active === false ? true : false;
+  write('hh_gallery', g); renderGalleryList();
+}
+function deleteGalleryPhoto(i) {
+  if (!confirm('ဒီပုံ ဖျက်မလား?')) return;
+  var g = getGalleryData();
+  g.photos.splice(i, 1);
+  write('hh_gallery', g); renderGalleryList(); toast('ဖျက်ပြီး');
+}
+
 function getHomeSections() { return read('hh_home_sections', []); }
 function refreshPostSectionOptions() {
   const sel = $('admin-post-section'), current = sel.value || 'latest';
