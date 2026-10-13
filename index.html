@@ -331,12 +331,23 @@
   [data-tip]::after {
     content: attr(data-tip);
     position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px);
-    background: rgba(15, 40, 32, 0.95); color: #ecfdf5; font-size: 11px; font-weight: 600;
-    padding: 0.35rem 0.65rem; border-radius: 0.5rem; white-space: nowrap;
-    border: 1px solid rgba(52,211,153,0.25); box-shadow: 0 8px 24px rgba(0,0,0,.35);
-    opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease; z-index: 60;
+    background: rgba(15, 40, 32, 0.96); color: #ecfdf5; font-size: 11px; font-weight: 600;
+    padding: 0.4rem 0.7rem; border-radius: 0.5rem; white-space: nowrap;
+    border: 1px solid rgba(52,211,153,0.28); box-shadow: 0 10px 28px rgba(0,0,0,.4);
+    opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease; z-index: 90;
   }
   [data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* banners: tip near top center so not clipped */
+  .sp-banner[data-tip]::after,
+  #upcoming-banner[data-tip]::after,
+  #hero-tip-host [data-tip]::after {
+    bottom: auto; top: 12px; left: 50%; transform: translateX(-50%) translateY(-4px);
+  }
+  .sp-banner[data-tip]:hover::after,
+  #upcoming-banner[data-tip]:hover::after,
+  #hero-tip-host [data-tip]:hover::after {
+    transform: translateX(-50%) translateY(0);
+  }
   @media (max-width: 640px) {
     [data-tip]::after { display: none; }
   }
@@ -416,6 +427,7 @@
     <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
     <div id="hero-overlay-main" class="hero-overlay absolute inset-0"></div>
     <div id="hero-overlay-top" class="absolute inset-0"></div>
+    <div id="hero-tip-host" class="absolute top-3 right-3 z-20 hidden sm:flex items-center gap-2"><span class="text-[10px] font-bold uppercase tracking-wider text-white/50 bg-black/30 px-2 py-1 rounded-lg border border-white/10" data-tip="Hero Banner · ခရီးအစ">Hero</span></div>
     <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
       <div id="hero-text-box" class="absolute inset-0 pointer-events-none" style="z-index:5;">
         <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%;">Travel Journal</span>
@@ -488,10 +500,15 @@
   </section>
 
   <!-- Full gallery overlay -->
-  <div id="gallery-full-page" class="fixed inset-0 z-[70] hidden flex-col bg-[#061510]/98 backdrop-blur-sm">
-    <div class="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-emerald-900/50">
-      <h3 class="text-lg font-black text-white">Photo Gallery</h3>
-      <button type="button" onclick="closeFullGallery()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center" data-tip="ပိတ်မယ်"><i class="fa-solid fa-xmark"></i></button>
+  <div id="gallery-full-page" class="fixed inset-0 z-[70] hidden flex-col bg-[#061510]" style="display:none">
+    <div class="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-emerald-900/50 bg-[#061510]/95 sticky top-0 z-10">
+      <div class="flex items-center gap-3 min-w-0">
+        <button type="button" onclick="closeFullGallery()" class="inline-flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl bg-emerald-900/60 hover:bg-emerald-800 text-white text-sm font-bold border border-emerald-700/50 shrink-0" data-tip="Homepage ပြန်သွားမယ်">
+          <i class="fa-solid fa-arrow-left"></i><span class="hidden sm:inline">Back</span>
+        </button>
+        <h3 class="text-lg font-black text-white truncate">Photo Gallery</h3>
+      </div>
+      <button type="button" onclick="closeFullGallery()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0" data-tip="ပိတ်မယ်"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="px-4 sm:px-6 py-3 flex flex-wrap gap-2" id="gallery-filter-chips">
       <button type="button" class="gallery-chip active" data-cat="all" onclick="filterGallery('all',this)">All</button>
@@ -1204,7 +1221,7 @@ function loadBlogData() {
         const linkHtml = sponsor.link
           ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:4%;bottom:12%">' + t('visitSponsor') + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
           : '';
-        return '<div class="sp-banner" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;border-radius:' + radiusDesktop + '">' +
+        return '<div class="sp-banner" data-tip="' + safe(sponsor.badge || sponsor.title || 'Official Sponsor') + '" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;border-radius:' + radiusDesktop + '">' +
           '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
           (function(){
             var ov = (sponsor.overlayOpacity != null) ? sponsor.overlayOpacity : 55;
@@ -1725,6 +1742,7 @@ function openFullGallery() {
   page.classList.remove('hidden');
   page.style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  try { history.pushState({ gallery: 1 }, '', '#gallery'); } catch(e) {}
   var meta = getGalleryMeta();
   var cats = meta.categories || [];
   var chips = $('gallery-filter-chips');
@@ -1743,6 +1761,9 @@ function closeFullGallery() {
   page.classList.add('hidden');
   page.style.display = 'none';
   document.body.style.overflow = '';
+  try {
+    if (location.hash === '#gallery') history.pushState('', '', location.pathname + location.search);
+  } catch(e) {}
 }
 function filterGallery(cat, btn) {
   _galleryFilter = cat || 'all';
