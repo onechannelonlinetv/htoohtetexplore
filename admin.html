@@ -127,21 +127,45 @@ main > div {
 .gal-slot:hover .gal-del, .gal-list-card:hover .gal-del { opacity: 1; }
 .gal-slot-cap { margin-top: 0.35rem; }
 .gal-list-card {
-  position: relative; border-radius: 0.85rem; overflow: hidden; border: 1px solid rgba(51,65,85,0.8);
-  background: rgba(15,23,42,0.7); aspect-ratio: 1;
+  position: relative; border-radius: 0.55rem; overflow: hidden; border: 1px solid rgba(51,65,85,0.8);
+  background: rgba(15,23,42,0.7); aspect-ratio: 1; width: 100%;
 }
 .gal-list-card img { width:100%; height:100%; object-fit:cover; }
 .gal-list-card .gal-del {
-  position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 999px;
+  position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 999px;
   background: rgba(0,0,0,0.72); color: #fecaca; border: 1px solid rgba(248,113,113,0.5);
   display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s;
-  font-size: 12px; z-index: 2; cursor: pointer;
+  font-size: 10px; z-index: 2; cursor: pointer;
 }
 .gal-list-meta {
-  position: absolute; left:0; right:0; bottom:0; padding: 0.35rem 0.45rem;
+  position: absolute; left:0; right:0; bottom:0; padding: 0.2rem 0.3rem;
   background: linear-gradient(to top, rgba(0,0,0,.8), transparent);
-  font-size: 10px; font-weight: 700; color: #fff;
+  font-size: 9px; font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+#gal-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+@media (min-width: 640px) {
+  #gal-list { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  #gal-list { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+}
+#gal-list.gal-list-collapsed {
+  max-height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+#gal-list.gal-list-collapsed::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: 0; height: 48px;
+  background: linear-gradient(to top, rgba(15,23,42,0.95), transparent);
+  pointer-events: none;
+}
+
 </style>
 </head>
 <body class="min-h-screen">
@@ -1110,8 +1134,14 @@ main > div {
           </div>
         </div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
-          <div class="flex items-center justify-between mb-3"><h3 class="font-bold">Gallery Photos (သိမ်းပြီးသား)</h3><span id="gal-count" class="tiny">0</span></div>
-          <div id="gal-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h3 class="font-bold">Gallery Photos (သိမ်းပြီးသား)</h3>
+            <div class="flex items-center gap-2">
+              <span id="gal-count" class="tiny">0</span>
+              <button type="button" id="gal-view-all-btn" onclick="toggleGalListExpand()" class="btn btn-muted text-[11px] py-1 px-2.5 hidden">View all</button>
+            </div>
+          </div>
+          <div id="gal-list" class="gal-list-collapsed"></div>
         </div>
       </section>
 
@@ -4705,21 +4735,41 @@ async function commitAllGalSlots() {
 }
 window.commitAllGalSlots = commitAllGalSlots;
 function addGalleryPhoto() { /* legacy no-op — slots UI */ }
+var _galListExpanded = false;
+function toggleGalListExpand() {
+  _galListExpanded = !_galListExpanded;
+  var list = $('gal-list');
+  var btn = $('gal-view-all-btn');
+  if (list) list.classList.toggle('gal-list-collapsed', !_galListExpanded);
+  if (btn) btn.textContent = _galListExpanded ? 'Show less' : 'View all';
+}
 function renderGalleryList() {
   var list = $('gal-list');
   if (!list) return;
   var g = getGalleryData();
   var photos = g.photos || [];
   if ($('gal-count')) $('gal-count').textContent = photos.length + ' photos';
+  var btn = $('gal-view-all-btn');
+  if (btn) {
+    if (photos.length > 8) {
+      btn.classList.remove('hidden');
+      btn.textContent = _galListExpanded ? 'Show less' : 'View all';
+    } else {
+      btn.classList.add('hidden');
+      _galListExpanded = false;
+    }
+  }
+  list.classList.toggle('gal-list-collapsed', !_galListExpanded && photos.length > 8);
   if (!photos.length) {
-    list.innerHTML = '<div class="col-span-full rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">ပုံမရှိသေးပါ</div>';
+    list.innerHTML = '<div class="col-span-full rounded-xl border border-dashed border-slate-700 p-4 text-center text-sm text-slate-400">ပုံမရှိသေးပါ</div>';
+    list.classList.remove('gal-list-collapsed');
     return;
   }
   list.innerHTML = photos.map(function(p, i){
-    return '<div class="gal-list-card group" data-tip="' + safe(p.caption || p.category || 'Photo') + '">' +
-      '<img src="' + safe(p.img) + '" alt="">' +
+    return '<div class="gal-list-card group" title="' + safe(p.caption || p.category || 'Photo') + '">' +
+      '<img src="' + safe(p.img) + '" alt="" loading="lazy">' +
       '<button type="button" class="gal-del" onclick="deleteGalleryPhoto(' + i + ')" title="Delete"><i class="fa-solid fa-trash"></i></button>' +
-      '<div class="gal-list-meta">' + safe(p.caption || p.category || 'Untitled') + '</div>' +
+      '<div class="gal-list-meta">' + safe(p.caption || p.category || '') + '</div>' +
     '</div>';
   }).join('');
 }
