@@ -332,11 +332,16 @@
     background: rgba(8, 28, 22, 0.94); color: #ecfdf5; font-size: 12px; font-weight: 600;
     padding: 0.45rem 0.8rem; border-radius: 0.55rem; white-space: nowrap;
     border: 1px solid rgba(52,211,153,0.35); box-shadow: 0 12px 32px rgba(0,0,0,.45);
-    opacity: 0; transform: translate(-50%, -100%) translateY(-10px);
-    transition: opacity .16s ease, transform .16s ease;
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity .16s ease;
     letter-spacing: 0.01em;
+    max-width: min(90vw, 280px);
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
   }
-  #hh-tip.show { opacity: 1; transform: translate(-50%, -100%) translateY(-4px); }
+  #hh-tip.show { opacity: 1; }
   @media (max-width: 640px) { #hh-tip { display: none !important; } }
 
 </style>
@@ -445,7 +450,7 @@
   </section>
 
   <!-- OFFICIAL SPONSOR -->
-    <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+    <section id="sponsor-container" data-tip="Official Sponsor" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
     <div id="sponsor-list-public" class="space-y-5"></div>
   </section>
 
@@ -453,7 +458,7 @@
     <!-- Section heading ABOVE the banner (separated) -->
     <div class="mb-3 sm:mb-4">
       <h2 id="upcoming-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-        <span class="w-1 h-6 rounded-full accent-bg"></span><span id="upcoming-heading-text">Upcoming</span>
+        <span class="w-1 h-6 rounded-full accent-bg"></span><span id="upcoming-heading-text" data-tip="Upcoming · နောက်ခရီး">Upcoming</span>
       </h2>
       <p id="upcoming-section-title" class="text-sm text-emerald-400/70 mt-1 ml-3 hidden"></p>
     </div>
@@ -1803,55 +1808,70 @@ function openGalleryLightbox(index, fromFull) {
       tip = document.createElement('div');
       tip.id = 'hh-tip';
       tip.setAttribute('role', 'tooltip');
-      document.body.appendChild(tip);
+      (document.body || document.documentElement).appendChild(tip);
     }
     return tip;
   }
   var hideT = null;
-  function showTip(el) {
+  var activeEl = null;
+  function placeTip(el) {
     var text = el.getAttribute('data-tip');
     if (!text) return;
     var tip = ensureTip();
     tip.textContent = text;
     tip.classList.add('show');
+    activeEl = el;
     var rect = el.getBoundingClientRect();
+    var tw = tip.offsetWidth || 140;
+    var th = tip.offsetHeight || 32;
     var x = rect.left + rect.width / 2;
-    var y = rect.top;
-    // keep inside viewport
-    var tw = tip.offsetWidth || 120;
-    x = Math.max(tw/2 + 8, Math.min(window.innerWidth - tw/2 - 8, x));
+    x = Math.max(tw/2 + 6, Math.min(window.innerWidth - tw/2 - 6, x));
+    // Prefer above; if near top of viewport, show BELOW
+    var showBelow = rect.top < (th + 16);
+    if (showBelow) {
+      tip.style.top = Math.min(window.innerHeight - th - 8, rect.bottom + 10) + 'px';
+      tip.style.transform = 'translate(-50%, 0)';
+    } else {
+      tip.style.top = Math.max(8, rect.top - 8) + 'px';
+      tip.style.transform = 'translate(-50%, -100%)';
+    }
     tip.style.left = x + 'px';
-    tip.style.top = Math.max(8, y - 6) + 'px';
   }
   function hideTip(){
     var tip = document.getElementById('hh-tip');
     if (tip) tip.classList.remove('show');
+    activeEl = null;
   }
-  document.addEventListener('mouseover', function(e){
-    var el = e.target.closest && e.target.closest('[data-tip]');
-    if (!el) { hideTip(); return; }
+  function onMove(e){
+    var el = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+    if (!el) {
+      if (hideT) clearTimeout(hideT);
+      hideT = setTimeout(hideTip, 40);
+      return;
+    }
     if (hideT) { clearTimeout(hideT); hideT = null; }
-    showTip(el);
-  }, true);
+    placeTip(el);
+  }
+  document.addEventListener('mouseover', onMove, true);
   document.addEventListener('mousemove', function(e){
-    var el = e.target.closest && e.target.closest('[data-tip]');
-    if (!el) return;
-    var tip = document.getElementById('hh-tip');
-    if (!tip || !tip.classList.contains('show')) return;
-    var rect = el.getBoundingClientRect();
-    var x = rect.left + rect.width / 2;
-    var tw = tip.offsetWidth || 120;
-    x = Math.max(tw/2 + 8, Math.min(window.innerWidth - tw/2 - 8, x));
-    tip.style.left = x + 'px';
-    tip.style.top = Math.max(8, rect.top - 6) + 'px';
+    if (!activeEl) return;
+    var el = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+    if (el) placeTip(el);
   }, true);
   document.addEventListener('mouseout', function(e){
-    var el = e.target.closest && e.target.closest('[data-tip]');
-    if (!el) return;
+    var from = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+    if (!from) return;
     var to = e.relatedTarget;
-    if (to && el.contains(to)) return;
-    hideT = setTimeout(hideTip, 60);
+    if (to && from.contains(to)) return;
+    if (to && to.closest && to.closest('[data-tip]') === from) return;
+    hideT = setTimeout(hideTip, 50);
   }, true);
+  // also re-init after DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ ensureTip(); });
+  } else {
+    ensureTip();
+  }
 })();
 
 function renderExtraHomeSections() {
