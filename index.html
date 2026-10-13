@@ -329,20 +329,31 @@
   /* Soft tooltip — JS positions #hh-tip (overflow-safe for banners) */
   #hh-tip {
     position: fixed; z-index: 99999; pointer-events: none;
-    background: rgba(8, 28, 22, 0.94); color: #ecfdf5; font-size: 12px; font-weight: 600;
-    padding: 0.45rem 0.8rem; border-radius: 0.55rem; white-space: nowrap;
-    border: 1px solid rgba(52,211,153,0.35); box-shadow: 0 12px 32px rgba(0,0,0,.45);
+    background: linear-gradient(145deg, rgba(16, 55, 42, 0.98), rgba(8, 28, 22, 0.98));
+    color: #f0fdf4; font-size: 13px; font-weight: 700;
+    padding: 0.55rem 0.95rem; border-radius: 0.65rem;
+    border: 1px solid rgba(52,211,153,0.55);
+    box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,0.06) inset;
     opacity: 0;
     transform: translate(-50%, -100%);
-    transition: opacity .16s ease;
-    letter-spacing: 0.01em;
-    max-width: min(90vw, 280px);
+    transition: opacity .18s ease;
+    letter-spacing: 0.02em;
+    max-width: min(90vw, 300px);
     white-space: normal;
     text-align: center;
-    line-height: 1.35;
+    line-height: 1.4;
   }
   #hh-tip.show { opacity: 1; }
-  @media (max-width: 640px) { #hh-tip { display: none !important; } }
+  #hh-tip::after {
+    content: '';
+    position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: rgba(16, 55, 42, 0.98);
+  }
+  #hh-tip.below::after {
+    bottom: auto; top: -6px;
+    border-top-color: transparent; border-bottom-color: rgba(16, 55, 42, 0.98);
+  }
+  @media (max-width: 640px) { #hh-tip { font-size: 12px; } }
 
 </style>
 </head>
@@ -1822,31 +1833,33 @@ function openGalleryLightbox(index, fromFull) {
     tip.classList.add('show');
     activeEl = el;
     var rect = el.getBoundingClientRect();
+    tip.classList.remove('below');
+    // measure after text set
     var tw = tip.offsetWidth || 140;
-    var th = tip.offsetHeight || 32;
+    var th = tip.offsetHeight || 36;
     var x = rect.left + rect.width / 2;
-    x = Math.max(tw/2 + 6, Math.min(window.innerWidth - tw/2 - 6, x));
-    // Prefer above; if near top of viewport, show BELOW
-    var showBelow = rect.top < (th + 16);
+    x = Math.max(tw/2 + 8, Math.min(window.innerWidth - tw/2 - 8, x));
+    var showBelow = rect.top < (th + 20);
     if (showBelow) {
-      tip.style.top = Math.min(window.innerHeight - th - 8, rect.bottom + 10) + 'px';
+      tip.classList.add('below');
+      tip.style.top = Math.min(window.innerHeight - th - 10, rect.bottom + 12) + 'px';
       tip.style.transform = 'translate(-50%, 0)';
     } else {
-      tip.style.top = Math.max(8, rect.top - 8) + 'px';
+      tip.style.top = Math.max(10, rect.top - 10) + 'px';
       tip.style.transform = 'translate(-50%, -100%)';
     }
     tip.style.left = x + 'px';
   }
   function hideTip(){
     var tip = document.getElementById('hh-tip');
-    if (tip) tip.classList.remove('show');
+    if (tip) { tip.classList.remove('show'); tip.classList.remove('below'); }
     activeEl = null;
   }
   function onMove(e){
     var el = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
     if (!el) {
       if (hideT) clearTimeout(hideT);
-      hideT = setTimeout(hideTip, 40);
+      hideT = setTimeout(hideTip, 50);
       return;
     }
     if (hideT) { clearTimeout(hideT); hideT = null; }
@@ -1864,9 +1877,8 @@ function openGalleryLightbox(index, fromFull) {
     var to = e.relatedTarget;
     if (to && from.contains(to)) return;
     if (to && to.closest && to.closest('[data-tip]') === from) return;
-    hideT = setTimeout(hideTip, 50);
+    hideT = setTimeout(hideTip, 60);
   }, true);
-  // also re-init after DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function(){ ensureTip(); });
   } else {
