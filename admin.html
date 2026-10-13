@@ -1094,16 +1094,20 @@ main > div {
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 class="font-bold">ပုံ အသစ်ထည့်</h3>
-              <p class="tiny mt-0.5">၄ ခု တန်း · အလွတ်ကွက် နှိပ် Upload · + နှိပ်ရင် နောက် ၄ ကွက်</p>
+              <p class="tiny mt-0.5">ကွက်ထဲ ပုံတင် → အောက်က <b>Save Photos</b> နှိပ်ရင် Gallery Photos ထဲ အကုန်ရောက်မယ်</p>
             </div>
             <div class="flex flex-wrap gap-2 items-center">
-              <input id="gal-default-cat" class="field w-36" list="gal-cat-list" placeholder="Category" title="အသစ်ထည့်မယ့်ပုံတွေအတွက် default category">
+              <input id="gal-default-cat" class="field w-36" list="gal-cat-list" placeholder="Category" title="default category">
               <datalist id="gal-cat-list"></datalist>
               <button type="button" onclick="addGallerySlotRow()" class="btn btn-purple" data-tip="နောက်ထပ် ၄ ကွက်"><i class="fa-solid fa-plus mr-1"></i>၄ ကွက်</button>
+              <button type="button" onclick="removeEmptyGalSlots()" class="btn btn-muted" data-tip="ပုံမရှိတဲ့ကွက်များ ဖျက်">အလွတ်ကွက် ဖျက်</button>
             </div>
           </div>
           <div id="gal-slot-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
-          <p class="tiny">ပုံပေါ် mouse ရောက်ရင် Delete ခလုတ် ပေါ်မယ် · Caption ကိုကွက်အောက်မှာ ရေးနိုင်</p>
+          <div class="flex flex-wrap gap-2 items-center">
+            <button type="button" onclick="commitAllGalSlots()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Photos · Gallery ထဲထည့်</button>
+            <span class="tiny">ပုံရှိတဲ့ကွက်အားလုံးကို တစ်ခါတည်း သိမ်းမယ် · ပုံပေါ် hover = Delete</span>
+          </div>
         </div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="flex items-center justify-between mb-3"><h3 class="font-bold">Gallery Photos (သိမ်းပြီးသား)</h3><span id="gal-count" class="tiny">0</span></div>
@@ -4451,17 +4455,41 @@ function renderGallerySlots() {
   if (!grid) return;
   var html = '';
   for (var i = 0; i < _galSlotCount; i++) {
-    html += '<div class="space-y-1">' +
+    html += '<div class="space-y-1" id="gal-slot-wrap-' + i + '">' +
       '<div class="gal-slot" id="gal-slot-' + i + '" onclick="triggerGalSlotUpload(' + i + ')" data-tip="နှိပ်ပြီး ပုံတင်">' +
         '<span class="gal-plus"><i class="fa-solid fa-plus"></i></span>' +
         '<button type="button" class="gal-del" onclick="event.stopPropagation();clearGalSlot(' + i + ')" title="Delete"><i class="fa-solid fa-trash"></i></button>' +
         '<input type="file" accept="image/*" class="hidden" id="gal-slot-file-' + i + '" onchange="onGalSlotFile(' + i + ', this)">' +
       '</div>' +
-      '<input class="field text-xs gal-slot-cap" id="gal-slot-cap-' + i + '" placeholder="Caption (optional)" onkeydown="if(event.key===\'Enter\')commitGalSlot(' + i + ')">' +
-      '<button type="button" class="btn btn-muted w-full text-[11px] py-1.5" id="gal-slot-save-' + i + '" style="display:none" onclick="commitGalSlot(' + i + ')">Gallery ထဲ ထည့်</button>' +
+      '<input class="field text-xs gal-slot-cap" id="gal-slot-cap-' + i + '" placeholder="Caption (optional)">' +
     '</div>';
   }
   grid.innerHTML = html;
+}
+function removeEmptyGalSlots() {
+  var filled = [];
+  for (var i = 0; i < _galSlotCount; i++) {
+    var s = $('gal-slot-' + i);
+    if (s && s.dataset && s.dataset.img) {
+      filled.push({ img: s.dataset.img, cap: ($('gal-slot-cap-' + i) && $('gal-slot-cap-' + i).value) || '' });
+    }
+  }
+  _galSlotCount = filled.length === 0 ? 4 : Math.max(4, Math.ceil(filled.length / 4) * 4);
+  renderGallerySlots();
+  for (var i = 0; i < filled.length; i++) {
+    var slot = $('gal-slot-' + i);
+    if (!slot) continue;
+    slot.dataset.img = filled[i].img;
+    slot.classList.add('has-img');
+    var plus = slot.querySelector('.gal-plus');
+    if (plus) plus.style.display = 'none';
+    var img = document.createElement('img');
+    img.className = 'gal-slot-img';
+    img.src = filled[i].img;
+    slot.insertBefore(img, slot.firstChild);
+    if ($('gal-slot-cap-' + i)) $('gal-slot-cap-' + i).value = filled[i].cap;
+  }
+  toast(filled.length ? 'အလွတ်ကွက် ရှင်းပြီး' : '၄ ကွက် ပြန်ထားပြီး');
 }
 function triggerGalSlotUpload(i) {
   var slot = $('gal-slot-' + i);
@@ -4487,8 +4515,6 @@ function onGalSlotFile(i, input) {
     img.className = 'gal-slot-img';
     img.src = url;
     slot.insertBefore(img, slot.firstChild);
-    var btn = $('gal-slot-save-' + i);
-    if (btn) btn.style.display = '';
   };
   reader.readAsDataURL(file);
 }
@@ -4503,8 +4529,6 @@ function clearGalSlot(i) {
   if (plus) plus.style.display = '';
   var f = $('gal-slot-file-' + i);
   if (f) f.value = '';
-  var btn = $('gal-slot-save-' + i);
-  if (btn) btn.style.display = 'none';
   var cap = $('gal-slot-cap-' + i);
   if (cap) cap.value = '';
 }
@@ -4528,10 +4552,31 @@ function commitGalSlot(i) {
   toast('ပုံ ထည့်ပြီး');
 }
 function commitAllGalSlots() {
+  var g = getGalleryData();
+  g.photos = g.photos || [];
+  var added = 0;
+  var cat = ($('gal-default-cat')?.value || '').trim();
   for (var i = 0; i < _galSlotCount; i++) {
     var slot = $('gal-slot-' + i);
-    if (slot && slot.dataset.img) commitGalSlot(i);
+    if (!slot || !slot.dataset || !slot.dataset.img) continue;
+    g.photos.unshift({
+      id: String(Date.now()) + '-' + i + '-' + Math.random().toString(36).slice(2,6),
+      img: slot.dataset.img,
+      caption: ($('gal-slot-cap-' + i)?.value || '').trim(),
+      category: cat,
+      active: true,
+      order: 0
+    });
+    added++;
   }
+  if (!added) { toast('ပုံတင်ထားတဲ့ ကွက် မရှိသေးပါ'); return; }
+  g.photos.forEach(function(p, idx){ p.order = idx; });
+  write('hh_gallery', g);
+  // clear all slots back to 4 empty
+  _galSlotCount = 4;
+  renderGallerySlots();
+  renderGalleryList();
+  toast(added + ' ပုံ Gallery ထဲ သိမ်းပြီး');
 }
 function addGalleryPhoto() { /* legacy no-op — slots UI */ }
 function renderGalleryList() {
