@@ -4570,46 +4570,107 @@ function commitGalSlot(i) {
 }
 async function commitAllGalSlots() {
   try {
+    // 1) From memory map
     var keys = Object.keys(_galSlotImages).map(Number).filter(function(n){ return !isNaN(n) && _galSlotImages[n]; }).sort(function(a,b){ return a-b; });
+    // 2) Fallback: scan DOM slots that already show an image
+    if (!keys.length) {
+      for (var i = 0; i < _galSlotCount; i++) {
+        var slot = $('gal-slot-' + i);
+        if (!slot) continue;
+        var im = slot.querySelector('img.gal-slot-img') || slot.querySelector('img');
+        if (im && im.src) {
+          _galSlotImages[i] = im.src;
+          keys.push(i);
+        }
+      }
+      keys.sort(function(a,b){ return a-b; });
+    }
     if (!keys.length) {
       toast('ပုံတင်ထားတဲ့ ကွက် မရှိသေးပါ — ကွက်ကို နှိပ်ပြီး ပုံရွေးပါ');
       return;
     }
     toast(keys.length + ' ပုံ သိမ်းနေသည်…');
     var g = getGalleryData();
-    g.photos = g.photos || [];
-    var cat = ($('gal-default-cat')?.value || '').trim();
+    if (!g || typeof g !== 'object') g = { active: true, heading: 'Photo Gallery', subtitle: '', previewCount: 4, categories: [], photos: [] };
+    g.photos = Array.isArray(g.photos) ? g.photos : [];
+    var cat = ($('gal-default-cat') && $('gal-default-cat').value || '').trim();
     var added = 0;
+    var usedDataUrl = false;
+
+    function withTimeout(promise, ms) {
+      return Promise.race([
+        promise,
+        new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout')); }, ms); })
+      ]);
+    }
+
     for (var k = 0; k < keys.length; k++) {
       var i = keys[k];
       var imgUrl = _galSlotImages[i];
-      // If still data URL and storage available, try upload
-      if (imgUrl && imgUrl.indexOf('data:') === 0 && adminUser && adminStorage) {
+      if (!imgUrl) continue;
+
+      // Prefer Firebase Storage HTTPS URL (max 12s each)
+      if (String(imgUrl).indexOf('data:') === 0 && adminUser && adminStorage) {
         try {
-          var res = await fetch(imgUrl);
+          var res = await withTimeout(fetch(imgUrl), 8000);
           var blob = await res.blob();
-          var snap = await adminStorage.ref('uploads/gallery_' + Date.now() + '_' + i + '.jpg').put(blob, { contentType: 'image/jpeg' });
+          var snap = await withTimeout(
+            adminStorage.ref('uploads/gallery_' + Date.now() + '_' + i + '.jpg').put(blob, { contentType: 'image/jpeg' }),
+            12000
+          );
           var httpsUrl = await snap.ref.getDownloadURL();
           if (httpsUrl) imgUrl = httpsUrl;
-        } catch (e) { console.warn(e); }
+        } catch (e) {
+          console.warn('gallery storage upload', e);
+          usedDataUrl = true;
+        }
       }
+      if (String(imgUrl).indexOf('data:') === 0) usedDataUrl = true;
+
       g.photos.unshift({
         id: String(Date.now()) + '-' + i + '-' + Math.random().toString(36).slice(2, 6),
         img: imgUrl,
-        caption: ($('gal-slot-cap-' + i)?.value || '').trim(),
+        caption: (($('gal-slot-cap-' + i) && $('gal-slot-cap-' + i).value) || '').trim(),
         category: cat,
         active: true,
         order: 0
       });
       added++;
     }
+
+    if (!added) {
+      toast('သိမ်းရန် ပုံ မတွေ့ပါ');
+      return;
+    }
+
     g.photos.forEach(function(p, idx){ p.order = idx; });
-    write('hh_gallery', g);
+
+    // Write localStorage (catch quota)
+    try {
+      write('hh_gallery', g);
+    } catch (e) {
+      console.error(e);
+      toast('localStorage မဆန့်ပါ — ပုံကို Storage URL နဲ့ သိမ်းမရခဲ့ (login / Storage rules စစ်ပါ)');
+      return;
+    }
+
+    // Force Firebase push for hh_gallery
+    try {
+      if (remoteSyncReady && adminUser && adminDb) {
+        await withTimeout(adminDb.ref('siteData/hh_gallery').set(g), 15000);
+      }
+    } catch (e) {
+      console.warn('firebase gallery set', e);
+      toast('Local သိမ်းပြီး · Firebase sync မရနိုင်: ' + ((e && e.message) || e));
+    }
+
     _galSlotImages = {};
     _galSlotCount = 4;
     renderGallerySlots();
     renderGalleryList();
-    toast('✓ ' + added + ' ပုံ Gallery Photos ထဲ သိမ်းပြီး');
+    var msg = '✓ ' + added + ' ပုံ Gallery Photos ထဲ သိမ်းပြီး';
+    if (usedDataUrl) msg += ' (အချို့ data URL — Storage login စစ်ပါ)';
+    toast(msg);
   } catch (err) {
     console.error(err);
     toast('Save မရ: ' + (err.message || err));
