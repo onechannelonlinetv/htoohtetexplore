@@ -4446,6 +4446,8 @@ function saveGalleryMeta() {
   toast('Gallery settings သိမ်းပြီး');
 }
 var _galSlotCount = 4;
+var _galSlotImages = {}; // index -> image URL (avoid dataset size limits)
+
 function addGallerySlotRow() {
   _galSlotCount += 4;
   renderGallerySlots();
@@ -4465,63 +4467,79 @@ function renderGallerySlots() {
     '</div>';
   }
   grid.innerHTML = html;
+  // restore images from memory
+  Object.keys(_galSlotImages).forEach(function(k) {
+    var i = parseInt(k, 10);
+    if (isNaN(i) || i >= _galSlotCount) return;
+    applyGalSlotImg(i, _galSlotImages[k]);
+  });
+}
+function applyGalSlotImg(i, url) {
+  var slot = $('gal-slot-' + i);
+  if (!slot || !url) return;
+  _galSlotImages[i] = url;
+  slot.classList.add('has-img');
+  var plus = slot.querySelector('.gal-plus');
+  if (plus) plus.style.display = 'none';
+  var oldImg = slot.querySelector('img.gal-slot-img');
+  if (oldImg) oldImg.remove();
+  var img = document.createElement('img');
+  img.className = 'gal-slot-img';
+  img.src = url;
+  slot.insertBefore(img, slot.firstChild);
 }
 function removeEmptyGalSlots() {
   var filled = [];
   for (var i = 0; i < _galSlotCount; i++) {
-    var s = $('gal-slot-' + i);
-    if (s && s.dataset && s.dataset.img) {
-      filled.push({ img: s.dataset.img, cap: ($('gal-slot-cap-' + i) && $('gal-slot-cap-' + i).value) || '' });
+    if (_galSlotImages[i]) {
+      filled.push({ img: _galSlotImages[i], cap: ($('gal-slot-cap-' + i) && $('gal-slot-cap-' + i).value) || '' });
     }
   }
+  _galSlotImages = {};
   _galSlotCount = filled.length === 0 ? 4 : Math.max(4, Math.ceil(filled.length / 4) * 4);
   renderGallerySlots();
   for (var i = 0; i < filled.length; i++) {
-    var slot = $('gal-slot-' + i);
-    if (!slot) continue;
-    slot.dataset.img = filled[i].img;
-    slot.classList.add('has-img');
-    var plus = slot.querySelector('.gal-plus');
-    if (plus) plus.style.display = 'none';
-    var img = document.createElement('img');
-    img.className = 'gal-slot-img';
-    img.src = filled[i].img;
-    slot.insertBefore(img, slot.firstChild);
+    applyGalSlotImg(i, filled[i].img);
     if ($('gal-slot-cap-' + i)) $('gal-slot-cap-' + i).value = filled[i].cap;
   }
   toast(filled.length ? 'အလွတ်ကွက် ရှင်းပြီး' : '၄ ကွက် ပြန်ထားပြီး');
 }
 function triggerGalSlotUpload(i) {
-  var slot = $('gal-slot-' + i);
-  if (slot && slot.dataset.img) return; // already has image — use delete first
+  if (_galSlotImages[i]) return; // has image — delete first
   var f = $('gal-slot-file-' + i);
   if (f) f.click();
 }
 function onGalSlotFile(i, input) {
   var file = input.files && input.files[0];
   if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var url = e.target.result;
-    var slot = $('gal-slot-' + i);
-    if (!slot) return;
-    slot.dataset.img = url;
-    slot.classList.add('has-img');
-    var plus = slot.querySelector('.gal-plus');
-    if (plus) plus.style.display = 'none';
-    var oldImg = slot.querySelector('img.gal-slot-img');
-    if (oldImg) oldImg.remove();
-    var img = document.createElement('img');
-    img.className = 'gal-slot-img';
-    img.src = url;
-    slot.insertBefore(img, slot.firstChild);
-  };
-  reader.readAsDataURL(file);
+  if (!file.type.startsWith('image/')) { toast('Image ဖိုင်သာ'); input.value = ''; return; }
+  toast('ပုံ ပြင်ဆင်နေသည်…');
+  (async function() {
+    try {
+      var blob = file;
+      try { if (typeof compressImageFile === 'function') blob = await compressImageFile(file, 1200, 0.78); } catch (e) {}
+      var dataUrl = await fileToDataURL(blob);
+      applyGalSlotImg(i, dataUrl);
+      toast('ကွက် ' + (i + 1) + ' ပုံရောက်ပါပြီ — Save Photos နှိပ်ပါ');
+      // Upgrade to Firebase Storage URL in background
+      if (adminUser && adminStorage) {
+        try {
+          var snap = await adminStorage.ref('uploads/gallery_' + Date.now() + '_' + i + '.jpg').put(blob, { contentType: 'image/jpeg' });
+          var httpsUrl = await snap.ref.getDownloadURL();
+          if (httpsUrl) applyGalSlotImg(i, httpsUrl);
+        } catch (e) { console.warn('storage', e); }
+      }
+    } catch (err) {
+      console.error(err);
+      toast('Upload မရ: ' + (err.message || err));
+    }
+    input.value = '';
+  })();
 }
 function clearGalSlot(i) {
+  delete _galSlotImages[i];
   var slot = $('gal-slot-' + i);
   if (!slot) return;
-  delete slot.dataset.img;
   slot.classList.remove('has-img');
   var img = slot.querySelector('img.gal-slot-img');
   if (img) img.remove();
@@ -4533,13 +4551,12 @@ function clearGalSlot(i) {
   if (cap) cap.value = '';
 }
 function commitGalSlot(i) {
-  var slot = $('gal-slot-' + i);
-  if (!slot || !slot.dataset.img) return;
+  if (!_galSlotImages[i]) return;
   var g = getGalleryData();
   g.photos = g.photos || [];
   g.photos.unshift({
     id: String(Date.now()) + '-' + i,
-    img: slot.dataset.img,
+    img: _galSlotImages[i],
     caption: ($('gal-slot-cap-' + i)?.value || '').trim(),
     category: ($('gal-default-cat')?.value || '').trim(),
     active: true,
@@ -4551,32 +4568,52 @@ function commitGalSlot(i) {
   renderGalleryList();
   toast('ပုံ ထည့်ပြီး');
 }
-function commitAllGalSlots() {
-  var g = getGalleryData();
-  g.photos = g.photos || [];
-  var added = 0;
-  var cat = ($('gal-default-cat')?.value || '').trim();
-  for (var i = 0; i < _galSlotCount; i++) {
-    var slot = $('gal-slot-' + i);
-    if (!slot || !slot.dataset || !slot.dataset.img) continue;
-    g.photos.unshift({
-      id: String(Date.now()) + '-' + i + '-' + Math.random().toString(36).slice(2,6),
-      img: slot.dataset.img,
-      caption: ($('gal-slot-cap-' + i)?.value || '').trim(),
-      category: cat,
-      active: true,
-      order: 0
-    });
-    added++;
+async function commitAllGalSlots() {
+  try {
+    var keys = Object.keys(_galSlotImages).map(Number).filter(function(n){ return !isNaN(n) && _galSlotImages[n]; }).sort(function(a,b){ return a-b; });
+    if (!keys.length) {
+      toast('ပုံတင်ထားတဲ့ ကွက် မရှိသေးပါ — ကွက်ကို နှိပ်ပြီး ပုံရွေးပါ');
+      return;
+    }
+    toast(keys.length + ' ပုံ သိမ်းနေသည်…');
+    var g = getGalleryData();
+    g.photos = g.photos || [];
+    var cat = ($('gal-default-cat')?.value || '').trim();
+    var added = 0;
+    for (var k = 0; k < keys.length; k++) {
+      var i = keys[k];
+      var imgUrl = _galSlotImages[i];
+      // If still data URL and storage available, try upload
+      if (imgUrl && imgUrl.indexOf('data:') === 0 && adminUser && adminStorage) {
+        try {
+          var res = await fetch(imgUrl);
+          var blob = await res.blob();
+          var snap = await adminStorage.ref('uploads/gallery_' + Date.now() + '_' + i + '.jpg').put(blob, { contentType: 'image/jpeg' });
+          var httpsUrl = await snap.ref.getDownloadURL();
+          if (httpsUrl) imgUrl = httpsUrl;
+        } catch (e) { console.warn(e); }
+      }
+      g.photos.unshift({
+        id: String(Date.now()) + '-' + i + '-' + Math.random().toString(36).slice(2, 6),
+        img: imgUrl,
+        caption: ($('gal-slot-cap-' + i)?.value || '').trim(),
+        category: cat,
+        active: true,
+        order: 0
+      });
+      added++;
+    }
+    g.photos.forEach(function(p, idx){ p.order = idx; });
+    write('hh_gallery', g);
+    _galSlotImages = {};
+    _galSlotCount = 4;
+    renderGallerySlots();
+    renderGalleryList();
+    toast('✓ ' + added + ' ပုံ Gallery Photos ထဲ သိမ်းပြီး');
+  } catch (err) {
+    console.error(err);
+    toast('Save မရ: ' + (err.message || err));
   }
-  if (!added) { toast('ပုံတင်ထားတဲ့ ကွက် မရှိသေးပါ'); return; }
-  g.photos.forEach(function(p, idx){ p.order = idx; });
-  write('hh_gallery', g);
-  // clear all slots back to 4 empty
-  _galSlotCount = 4;
-  renderGallerySlots();
-  renderGalleryList();
-  toast(added + ' ပုံ Gallery ထဲ သိမ်းပြီး');
 }
 function addGalleryPhoto() { /* legacy no-op — slots UI */ }
 function renderGalleryList() {
