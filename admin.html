@@ -240,6 +240,28 @@ main > div {
   background: #059669; border-color: #34d399; color: #fff;
 }
 
+
+/* Collapsible panels */
+.fold-panel { overflow: hidden; }
+.fold-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  cursor: pointer; user-select: none; margin: -4px -4px 0; padding: 4px;
+  border-radius: 10px;
+}
+.fold-head:hover { background: rgba(16,185,129,.06); }
+.fold-head .fold-title { font-weight: 800; font-size: 14px; color: #e2e8f0; }
+.fold-head .fold-hint { font-size: 11px; color: #64748b; }
+.fold-head .fold-arrow {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: #1a2940; border: 1px solid #2b3c55; color: #94a3b8;
+  transition: transform .2s ease, background .15s;
+  flex-shrink: 0;
+}
+.fold-panel.open .fold-arrow { transform: rotate(180deg); background: #12352f; color: #6ee7b7; border-color: #10b98155; }
+.fold-body { display: none; padding-top: 14px; }
+.fold-panel.open .fold-body { display: block; }
+
 </style>
 </head>
 <body class="min-h-screen">
@@ -301,7 +323,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod6</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod7</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -893,19 +915,27 @@ main > div {
           <button type="button" onclick="addNewSponsor()" class="btn btn-green"><i class="fa-solid fa-plus mr-2"></i>Add Sponsor</button>
         </div>
 
-        <div class="panel editor-shell p-4 sm:p-5 space-y-3">
-          <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Section Heading · Homepage အပေါ်ခေါင်းစဉ်</p>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="panel editor-shell p-4 sm:p-5 fold-panel">
+          <div class="fold-head" onclick="toggleFold(this)">
             <div>
-              <label class="label">Section Heading</label>
-              <input id="sp-section-heading" class="field" placeholder="Official Sponsors" oninput="">
+              <div class="fold-title">Section Heading · Homepage ခေါင်းစဉ်</div>
+              <div class="fold-hint">နှိပ်ပြီး ဖြန့် / ပြန်သိမ်း</div>
             </div>
-            <div>
-              <label class="label">Section Subtitle</label>
-              <input id="sp-section-subtitle" class="field" placeholder="ကျွန်ုပ်တို့၏ မိတ်ဖက်များ" oninput="">
-            </div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
           </div>
-          <button type="button" onclick="saveSponsorSectionMeta()" class="btn btn-green text-xs"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Section Heading</button>
+          <div class="fold-body space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="label">Section Heading</label>
+                <input id="sp-section-heading" class="field" placeholder="Official Sponsors" oninput="">
+              </div>
+              <div>
+                <label class="label">Section Subtitle</label>
+                <input id="sp-section-subtitle" class="field" placeholder="ကျွန်ုပ်တို့၏ မိတ်ဖက်များ" oninput="">
+              </div>
+            </div>
+            <button type="button" onclick="saveSponsorSectionMeta()" class="btn btn-green text-xs"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Section Heading</button>
+          </div>
         </div>
 
         <div id="sponsor-list" class="space-y-2"></div>
@@ -1251,31 +1281,40 @@ main > div {
 
       <section id="view-gallery" class="view space-y-5">
         <div><p class="mt-1 text-sm text-slate-400">Homepage ၄ ပုံ · View all · Category filter</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
-          <label class="toggle-row"><input type="checkbox" id="gal-active" checked onchange=""><span class="text-sm font-semibold">Photo Gallery ပြမယ်</span></label>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label class="label">Section Heading</label><input id="gal-heading" class="field" value="Photo Gallery" placeholder="Photo Gallery"></div>
-            <div><label class="label">Subtitle</label><input id="gal-subtitle" class="field" value="ခရီးလမ်းမှ အလှပုံများ" placeholder="ခရီးလမ်းမှ အလှပုံများ"></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+          <div class="fold-head" onclick="toggleFold(this)">
             <div>
-              <label class="label">Homepage မှာ ပြမယ့် ပုံအရေအတွက်</label>
-              <input type="number" id="gal-preview-count" class="field" min="2" max="12" value="4">
+              <div class="fold-title">Gallery Settings · ခေါင်းစဉ် / Category</div>
+              <div class="fold-hint">နှိပ်ပြီး ဖြန့် / ပြန်သိမ်း</div>
             </div>
-            <div class="md:col-span-2">
-              <label class="label">Categories စီမံ · Add / Edit / Delete</label>
-              <input type="hidden" id="gal-categories" value="Road Trip, Mountain, River, Sunset">
-              <div class="rounded-xl border border-slate-700 bg-slate-950/50 p-3 mt-1">
-                <div class="flex flex-wrap gap-2 mb-2">
-                  <input id="gal-category-new" class="field flex-1 min-w-[140px]" placeholder="Category အသစ် သို့မဟုတ် ပြင်မည့် နာမည်">
-                  <button type="button" class="btn btn-green" onclick="addGalCategory()"><i class="fa-solid fa-plus mr-1"></i>Add</button>
-                  <button type="button" class="btn btn-muted" onclick="renameGalCategory()"><i class="fa-solid fa-pen mr-1"></i>Rename</button>
-                  <button type="button" class="btn btn-red" onclick="deleteGalCategory()"><i class="fa-regular fa-trash-can mr-1"></i>Delete</button>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-4">
+            <label class="toggle-row"><input type="checkbox" id="gal-active" checked onchange=""><span class="text-sm font-semibold">Photo Gallery ပြမယ်</span></label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><label class="label">Section Heading</label><input id="gal-heading" class="field" value="Photo Gallery" placeholder="Photo Gallery"></div>
+              <div><label class="label">Subtitle</label><input id="gal-subtitle" class="field" value="ခရီးလမ်းမှ အလှပုံများ" placeholder="ခရီးလမ်းမှ အလှပုံများ"></div>
+              <div>
+                <label class="label">Homepage မှာ ပြမယ့် ပုံအရေအတွက်</label>
+                <input type="number" id="gal-preview-count" class="field" min="2" max="12" value="4">
+              </div>
+              <div class="md:col-span-2">
+                <label class="label">Categories စီမံ · Add / Edit / Delete</label>
+                <input type="hidden" id="gal-categories" value="Road Trip, Mountain, River, Sunset">
+                <div class="rounded-xl border border-slate-700 bg-slate-950/50 p-3 mt-1">
+                  <div class="flex flex-wrap gap-2 mb-2">
+                    <input id="gal-category-new" class="field flex-1 min-w-[140px]" placeholder="Category အသစ် သို့မဟုတ် ပြင်မည့် နာမည်">
+                    <button type="button" class="btn btn-green" onclick="addGalCategory()"><i class="fa-solid fa-plus mr-1"></i>Add</button>
+                    <button type="button" class="btn btn-muted" onclick="renameGalCategory()"><i class="fa-solid fa-pen mr-1"></i>Rename</button>
+                    <button type="button" class="btn btn-red" onclick="deleteGalCategory()"><i class="fa-regular fa-trash-can mr-1"></i>Delete</button>
+                  </div>
+                  <div id="gal-category-chips" class="flex flex-wrap gap-1.5"></div>
+                  <p class="tiny mt-2 text-slate-500">Chip နှိပ် → ရွေးမယ် · Rename = ရွေးထားတာကို input စာနဲ့ ပြင် · Delete = ရွေးထားတာ ဖျက်</p>
                 </div>
-                <div id="gal-category-chips" class="flex flex-wrap gap-1.5"></div>
-                <p class="tiny mt-2 text-slate-500">Chip နှိပ် → ရွေးမယ် · Rename = ရွေးထားတာကို input စာနဲ့ ပြင် · Delete = ရွေးထားတာ ဖျက်</p>
               </div>
             </div>
+            <button type="button" onclick="saveGalleryMeta()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Gallery Settings</button>
           </div>
-          <button type="button" onclick="saveGalleryMeta()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Gallery Settings</button>
         </div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2">
@@ -1315,8 +1354,16 @@ main > div {
 
 <section id="view-posts" class="view space-y-5">
         <div><p class="mt-1 text-sm text-slate-400">Post များ · Section ခေါင်းစဉ် · Banner — Hero/Sponsor လို ချိန်နိုင်</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-3">
-          <h3 class="font-bold text-white text-sm">Section ခေါင်းစဉ် (Live site · Travel Stories အပေါ်)</h3>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div>
+              <div class="fold-title">Section ခေါင်းစဉ် · Travel Stories</div>
+              <div class="fold-hint">နှိပ်ပြီး ဖြန့် / ပြန်သိမ်း</div>
+            </div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+          <!--h3 removed-->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div><label class="label">Heading</label><input id="stories-heading-input" class="field" placeholder="Travel Stories"></div>
             <div><label class="label">Subtitle</label><input id="stories-sub-input" class="field" placeholder="မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ"></div>
@@ -1341,6 +1388,7 @@ main > div {
             </div>
           </div>
           <button type="button" onclick="saveStoriesSection()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Latest Travel Section</button>
+          </div>
         </div>
       </section>
 
@@ -6595,6 +6643,14 @@ window.alert = function(message) {
     else console.warn(message);
   } catch (e) { console.warn(message); }
 };
+
+
+function toggleFold(headEl) {
+  var panel = headEl && headEl.closest ? headEl.closest('.fold-panel') : null;
+  if (!panel) return;
+  panel.classList.toggle('open');
+}
+window.toggleFold = toggleFold;
 
 function toast(message, isError) {
   let t = $('toast');
