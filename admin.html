@@ -1247,14 +1247,19 @@ main > div {
               <textarea id="admin-post-content-en" class="field min-h-[180px] w-full text-base leading-relaxed" placeholder="English article body (optional)..."></textarea>
             </div>
             <div><label class="label">Location *</label><input id="admin-post-location" class="field" oninput="updatePostPreview()" placeholder="Bagan, Inle Lake..."></div>
-            <div>
+            <div class="md:col-span-2">
               <label class="label">Category *</label>
-              <select id="admin-post-category" class="field" onchange="updatePostPreview()"></select>
-              <div class="mt-2 flex gap-2">
-                <input id="admin-post-category-new" class="field flex-1" placeholder="Category အသစ် ရေးပါ...">
-                <button type="button" class="btn btn-muted shrink-0" onclick="addPostCategory()"><i class="fa-solid fa-plus mr-1"></i>Add</button>
+              <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-end">
+                <div>
+                  <p class="tiny mb-1 text-slate-500">ရှိပြီးသား ရွေးပါ</p>
+                  <select id="admin-post-category" class="field" onchange="updatePostPreview()"></select>
+                </div>
+                <div>
+                  <p class="tiny mb-1 text-slate-500">အသစ် ရေးမယ်</p>
+                  <input id="admin-post-category-new" class="field" placeholder="ဥပမာ · Road Trip, Temple...">
+                </div>
+                <button type="button" class="btn btn-green h-[42px] shrink-0" onclick="addPostCategory()"><i class="fa-solid fa-plus mr-1"></i>Add Category</button>
               </div>
-              <p class="tiny mt-1">ရှိပြီးသား ရွေးပါ · သို့မဟုတ် အသစ်ရေးပြီး Add</p>
             </div>
             <div><label class="label">Travel Date</label><input id="admin-post-travel-date" type="date" class="field"></div>
             <div><label class="label">Author</label><input id="admin-post-author" class="field" placeholder="Htoo Htet" value="Htoo Htet"></div>
