@@ -1813,6 +1813,9 @@ function showPreviewIfUrl(inputId) {
   if (v && (v.startsWith('http') || v.startsWith('data:image'))) {
     setImagePreview(box, v, '');
   }
+  if (inputId === 'proud-logo' && typeof updateProudStaging === 'function') {
+    setTimeout(updateProudStaging, 100);
+  }
 }
 
 async function signInAdmin() {
@@ -2064,6 +2067,12 @@ function showView(name, button) {
   }
   if (name === 'pagepreview') {
     setTimeout(function() { try { refreshPagePreviewIframe(); } catch (e) {} }, 100);
+  }
+  if (name === 'proud') {
+    setTimeout(function() { try { if (typeof loadProudMeta==='function') loadProudMeta(); if (typeof updateProudPreview==='function') updateProudPreview(); } catch (e) {} }, 80);
+  }
+  if (name === 'upcoming') {
+    setTimeout(function() { try { if (typeof updateUpcomingPreview==='function') updateUpcomingPreview(); if (typeof initUpcomingDrag==='function') initUpcomingDrag(); } catch (e) {} }, 80);
   }
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -3431,8 +3440,7 @@ let _upDrag = null;
 
 function initUpcomingDrag() {
   const box = $('up-live-preview');
-  if (!box || box._upDragReady) return;
-  box._upDragReady = true;
+  if (!box) return;
   const map = {
     'up-prev-label': { xi:'up-label-x', yi:'up-label-y', vx:'val-ulx', vy:'val-uly' },
     'up-prev-title': { xi:'up-title-x', yi:'up-title-y', vx:'val-utx', vy:'val-uty' },
@@ -3441,52 +3449,41 @@ function initUpcomingDrag() {
   function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
   Object.keys(map).forEach(function(id){
     const el = $(id);
-    if (!el || el._bound) return;
-    el._bound = true;
+    if (!el) return;
     el.style.cursor = 'grab';
-    el.addEventListener('mousedown', function(e){
+    el.style.touchAction = 'none';
+    el.onmousedown = function(e){
+      e.preventDefault();
+      e.stopPropagation();
       const c = map[id];
-      const p = pt(e);
       const r = box.getBoundingClientRect();
-      _upDrag = { el:el, c:c, sx:p.clientX, sy:p.clientY, ol:parseFloat(el.style.left)||0, ot:parseFloat(el.style.top)||0, rw:r.width, rh:r.height };
       el.style.cursor = 'grabbing';
-      e.preventDefault();
-    });
-    el.addEventListener('touchstart', function(e){
-      const c = map[id];
-      const p = pt(e);
-      const r = box.getBoundingClientRect();
-      _upDrag = { el:el, c:c, sx:p.clientX, sy:p.clientY, ol:parseFloat(el.style.left)||0, ot:parseFloat(el.style.top)||0, rw:r.width, rh:r.height };
-      e.preventDefault();
-    }, { passive:false });
+      function move(ev){
+        const p = pt(ev);
+        let x = Math.max(0, Math.min(95, ((p.clientX - r.left) / r.width) * 100));
+        let y = Math.max(0, Math.min(90, ((p.clientY - r.top) / r.height) * 100));
+        el.style.left = x + '%';
+        el.style.top = y + '%';
+        el.style.position = 'absolute';
+        if ($(c.xi)) $(c.xi).value = Math.round(x);
+        if ($(c.yi)) $(c.yi).value = Math.round(y);
+        if ($(c.vx)) $(c.vx).textContent = Math.round(x) + '%';
+        if ($(c.vy)) $(c.vy).textContent = Math.round(y) + '%';
+      }
+      function up(){
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+        el.style.cursor = 'grab';
+        if (typeof saveUpcoming === 'function') {
+          try { /* keep fields; user can save */ } catch (err) {}
+        }
+      }
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    };
   });
-  if (!window._upDragWin) {
-    window._upDragWin = true;
-    window.addEventListener('mousemove', function(e){
-      if (!_upDrag) return;
-      const p = pt(e);
-      const nx = Math.max(0, Math.min(100, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
-      const ny = Math.max(0, Math.min(100, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
-      _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
-      if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
-      if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
-      if ($(_upDrag.c.vx)) $(_upDrag.c.vx).textContent = Math.round(nx);
-      if ($(_upDrag.c.vy)) $(_upDrag.c.vy).textContent = Math.round(ny);
-    });
-    window.addEventListener('touchmove', function(e){
-      if (!_upDrag) return;
-      const p = pt(e);
-      const nx = Math.max(0, Math.min(100, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
-      const ny = Math.max(0, Math.min(100, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
-      _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
-      if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
-      if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
-      e.preventDefault();
-    }, { passive:false });
-    window.addEventListener('mouseup', function(){ if (_upDrag){ _upDrag.el.style.cursor='grab'; _upDrag=null; } });
-    window.addEventListener('touchend', function(){ _upDrag=null; });
-  }
 }
+
 
 function saveUpcoming() {
   function gv(id, def) {
