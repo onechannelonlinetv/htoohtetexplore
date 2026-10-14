@@ -86,6 +86,62 @@
   body.theme-ocean .accent-bg { border-radius: 999px; }
   body.theme-ocean section h2 span.w-1 { background: linear-gradient(to bottom, #22d3ee, #0891b2) !important; }
 
+  /* Header icons follow theme accent */
+  body.theme-forest #search-toggle,
+  body.theme-forest #mode-toggle,
+  body.theme-forest #lang-en,
+  body.theme-forest #lang-mm { color: #a7f3d0; }
+  body.theme-forest #menu-toggle {
+    background: rgba(6, 78, 59, 0.55);
+    color: #ecfdf5;
+  }
+  body.theme-forest #search-toggle:hover,
+  body.theme-forest #mode-toggle:hover { background: rgba(6, 78, 59, 0.45); }
+
+  body.theme-ocean #search-toggle,
+  body.theme-ocean #mode-toggle,
+  body.theme-ocean #lang-en,
+  body.theme-ocean #lang-mm { color: #a5f3fc; }
+  body.theme-ocean #menu-toggle {
+    background: rgba(8, 47, 73, 0.7);
+    color: #ecfeff;
+    border: 1px solid rgba(34, 211, 238, 0.25);
+  }
+  body.theme-ocean #search-toggle:hover,
+  body.theme-ocean #mode-toggle:hover { background: rgba(8, 145, 178, 0.25); }
+  body.theme-ocean header { border-bottom-color: rgba(34, 211, 238, 0.25); }
+
+  body.theme-sunset #search-toggle,
+  body.theme-sunset #mode-toggle,
+  body.theme-sunset #lang-en,
+  body.theme-sunset #lang-mm { color: #fed7aa; }
+  body.theme-sunset #menu-toggle {
+    background: rgba(124, 45, 18, 0.55);
+    color: #fff7ed;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+  }
+  body.theme-sunset #search-toggle:hover,
+  body.theme-sunset #mode-toggle:hover { background: rgba(194, 65, 12, 0.3); }
+
+  body.theme-navy #search-toggle,
+  body.theme-navy #mode-toggle,
+  body.theme-navy #lang-en,
+  body.theme-navy #lang-mm { color: #bfdbfe; }
+  body.theme-navy #menu-toggle {
+    background: rgba(30, 58, 138, 0.55);
+    color: #eff6ff;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+  }
+  body.theme-navy #search-toggle:hover,
+  body.theme-navy #mode-toggle:hover { background: rgba(37, 99, 235, 0.25); }
+
+  /* Social icons in header also tint */
+  body.theme-ocean #social-links-header a { color: #67e8f9 !important; }
+  body.theme-sunset #social-links-header a { color: #fdba74 !important; }
+  body.theme-navy #social-links-header a { color: #93c5fd !important; }
+  body.theme-forest #social-links-header a { color: #6ee7b7 !important; }
+
+
   /* ========== THEME: SUNSET — warm, sharp corners, serif, editorial ========== */
   body.theme-sunset {
     --radius: 0.25rem;
