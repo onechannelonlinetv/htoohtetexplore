@@ -289,21 +289,16 @@ main > div {
 <!-- APP -->
 <div id="app" class="hidden min-h-screen">
   <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-800 bg-[#091220] p-5 lg:flex lg:flex-col overflow-y-auto">
-    <div class="mb-5 rounded-xl border border-slate-700/80 bg-slate-900/50 p-3 space-y-2">
-      <div class="flex items-center gap-3">
-        <button type="button" id="admin-studio-logo-wrap" class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 text-xl overflow-hidden border border-emerald-500/40" title="ပုံပြောင်းရန် နှိပ်ပါ" onclick="document.getElementById('admin-studio-logo-file').click()">
-          <img id="admin-studio-logo-img" src="" alt="" class="w-full h-full object-cover hidden">
-          <i id="admin-studio-logo-icon" class="fa-solid fa-mountain-sun"></i>
-          <span class="absolute bottom-0 right-0 w-5 h-5 rounded-md bg-slate-900 text-[10px] text-emerald-300 flex items-center justify-center border border-slate-600"><i class="fa-solid fa-camera"></i></span>
-        </button>
-        <input type="file" id="admin-studio-logo-file" accept="image/*" class="hidden" onchange="onAdminStudioLogo(this)">
-        <div class="min-w-0 flex-1">
-          <label class="label mb-1" for="admin-studio-name">Admin နာမည်</label>
-          <input id="admin-studio-name" type="text" class="field py-1.5 px-2 text-sm font-black" value="HTOO HTET" placeholder="Admin နာမည်">
-        </div>
+    <div class="mb-6 flex items-center gap-3">
+      <button type="button" id="admin-studio-logo-wrap" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 text-lg overflow-hidden" title="ပုံပြောင်း" onclick="document.getElementById('admin-studio-logo-file').click()">
+        <img id="admin-studio-logo-img" alt="" class="w-full h-full object-cover hidden">
+        <i id="admin-studio-logo-icon" class="fa-solid fa-mountain-sun"></i>
+      </button>
+      <input type="file" id="admin-studio-logo-file" accept="image/*" class="hidden" onchange="onAdminStudioLogo(this)">
+      <div class="min-w-0 flex-1">
+        <input id="admin-studio-name" type="text" class="bg-transparent border-0 outline-none text-white font-black text-[15px] w-full leading-tight p-0" value="HTOO HTET" placeholder="နာမည်" onchange="saveAdminStudio()" onblur="saveAdminStudio()">
+        <div class="text-sm font-bold text-emerald-300 leading-tight">Admin Studio</div>
       </div>
-      <button type="button" class="btn btn-green text-xs w-full py-2" onclick="saveAdminStudio()"><i class="fa-solid fa-floppy-disk mr-1"></i>နာမည် / ပုံ သိမ်း</button>
-      <div class="text-[11px] text-emerald-400/90 font-semibold text-center">Admin Studio</div>
     </div>
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
     <nav class="space-y-0.5 flex-1">
@@ -335,7 +330,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod11</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod12</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -6673,11 +6668,19 @@ function applyAdminStudio() {
   var img = document.getElementById('admin-studio-logo-img');
   var icon = document.getElementById('admin-studio-logo-icon');
   if (s.logo) {
-    if (img) { img.src = s.logo; img.classList.remove('hidden'); }
-    if (icon) icon.classList.add('hidden');
+    if (img) {
+      img.src = s.logo;
+      img.classList.remove('hidden');
+      img.style.display = 'block';
+    }
+    if (icon) { icon.classList.add('hidden'); icon.style.display = 'none'; }
   } else {
-    if (img) { img.removeAttribute('src'); img.classList.add('hidden'); }
-    if (icon) icon.classList.remove('hidden');
+    if (img) {
+      img.removeAttribute('src');
+      img.classList.add('hidden');
+      img.style.display = 'none';
+    }
+    if (icon) { icon.classList.remove('hidden'); icon.style.display = ''; }
   }
   var loginH = document.querySelector('#login-modal h1');
   if (loginH) loginH.textContent = name;
