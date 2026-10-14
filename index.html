@@ -326,34 +326,6 @@
     background: linear-gradient(to top, rgba(0,0,0,.75), transparent);
     font-size: 10px; font-weight: 700; color: rgba(255,255,255,.92);
   }
-  /* Soft tooltip — JS positions #hh-tip (overflow-safe for banners) */
-  #hh-tip {
-    position: fixed; z-index: 99999; pointer-events: none;
-    background: linear-gradient(145deg, rgba(16, 55, 42, 0.98), rgba(8, 28, 22, 0.98));
-    color: #f0fdf4; font-size: 13px; font-weight: 700;
-    padding: 0.55rem 0.95rem; border-radius: 0.65rem;
-    border: 1px solid rgba(52,211,153,0.55);
-    box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,0.06) inset;
-    opacity: 0;
-    transform: translate(-50%, -100%);
-    transition: opacity .18s ease;
-    letter-spacing: 0.02em;
-    max-width: min(90vw, 300px);
-    white-space: normal;
-    text-align: center;
-    line-height: 1.4;
-  }
-  #hh-tip.show { opacity: 1; }
-  #hh-tip::after {
-    content: '';
-    position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
-    border: 6px solid transparent; border-top-color: rgba(16, 55, 42, 0.98);
-  }
-  #hh-tip.below::after {
-    bottom: auto; top: -6px;
-    border-top-color: transparent; border-bottom-color: rgba(16, 55, 42, 0.98);
-  }
-  @media (max-width: 640px) { #hh-tip { font-size: 12px; } }
 
 </style>
 </head>
@@ -426,11 +398,10 @@
 <main id="home">
 
   <!-- HERO -->
-  <section id="hero-section" class="relative overflow-hidden" data-tip="Hero Banner" style="min-height: var(--hero-min-h); max-width: 100%; width: 100%;">
+  <section id="hero-section" class="relative overflow-hidden" style="min-height: var(--hero-min-h); max-width: 100%; width: 100%;">
     <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
     <div id="hero-overlay-main" class="hero-overlay absolute inset-0"></div>
     <div id="hero-overlay-top" class="absolute inset-0"></div>
-    <div id="hero-tip-host" class="absolute top-3 right-3 z-20 hidden sm:flex items-center gap-2"><span class="text-[10px] font-bold uppercase tracking-wider text-white/50 bg-black/30 px-2 py-1 rounded-lg border border-white/10" data-tip="Hero Banner · ခရီးအစ">Hero</span></div>
     <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
       <div id="hero-text-box" class="absolute inset-0 pointer-events-none" style="z-index:5;">
         <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%;">Travel Journal</span>
@@ -461,7 +432,7 @@
   </section>
 
   <!-- OFFICIAL SPONSOR -->
-    <section id="sponsor-container" data-tip="Official Sponsor" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+    <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
     <div id="sponsor-list-public" class="space-y-5"></div>
   </section>
 
@@ -469,11 +440,11 @@
     <!-- Section heading ABOVE the banner (separated) -->
     <div class="mb-3 sm:mb-4">
       <h2 id="upcoming-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-        <span class="w-1 h-6 rounded-full accent-bg"></span><span id="upcoming-heading-text" data-tip="Upcoming · နောက်ခရီး">Upcoming</span>
+        <span class="w-1 h-6 rounded-full accent-bg"></span><span id="upcoming-heading-text">Upcoming</span>
       </h2>
       <p id="upcoming-section-title" class="text-sm text-emerald-400/70 mt-1 ml-3 hidden"></p>
     </div>
-    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40 mx-auto" data-tip="Upcoming · နောက်ခရီး" style="min-height: var(--upcoming-min-h); width: 100%;">
+    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40 mx-auto" style="min-height: var(--upcoming-min-h); width: 100%;">
       <img id="upcoming-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200" alt="" class="absolute inset-0 w-full h-full object-cover">
       <div id="upcoming-overlay" class="absolute inset-0" style="background:linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.15))"></div>
       <div class="absolute inset-0 z-10" style="min-height: var(--upcoming-min-h);">
@@ -493,11 +464,11 @@
     <div class="flex items-end justify-between gap-3 mb-4">
       <div>
         <h2 id="gallery-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-          <span class="w-1 h-6 rounded-full accent-bg"></span><span id="gallery-heading-text" data-tip="ခရီးလမ်းမှ အလှပုံများ">Photo Gallery</span>
+          <span class="w-1 h-6 rounded-full accent-bg"></span><span id="gallery-heading-text">Photo Gallery</span>
         </h2>
         <p id="gallery-sub" class="text-xs sm:text-sm text-emerald-400/70 mt-1 ml-3">ခရီးလမ်းမှ အလှပုံများ</p>
       </div>
-      <button type="button" id="gallery-view-all-btn" onclick="openFullGallery()" class="text-xs sm:text-sm font-bold text-emerald-400 hover:text-emerald-300 transition shrink-0" data-tip="Gallery အပြည့်ကြည့်မယ်">View all gallery →</button>
+      <button type="button" id="gallery-view-all-btn" onclick="openFullGallery()" class="text-xs sm:text-sm font-bold text-emerald-400 hover:text-emerald-300 transition shrink-0">View all gallery →</button>
     </div>
     <div id="gallery-preview-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4"></div>
   </section>
@@ -506,12 +477,12 @@
   <div id="gallery-full-page" class="fixed inset-0 z-[70] hidden flex-col bg-[#061510]" style="display:none">
     <div class="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-emerald-900/50 bg-[#061510]/95 sticky top-0 z-10">
       <div class="flex items-center gap-3 min-w-0">
-        <button type="button" onclick="closeFullGallery()" class="inline-flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl bg-emerald-900/60 hover:bg-emerald-800 text-white text-sm font-bold border border-emerald-700/50 shrink-0" data-tip="Homepage ပြန်သွားမယ်">
+        <button type="button" onclick="closeFullGallery()" class="inline-flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl bg-emerald-900/60 hover:bg-emerald-800 text-white text-sm font-bold border border-emerald-700/50 shrink-0">
           <i class="fa-solid fa-arrow-left"></i><span class="hidden sm:inline">Back</span>
         </button>
         <h3 class="text-lg font-black text-white truncate">Photo Gallery</h3>
       </div>
-      <button type="button" onclick="closeFullGallery()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0" data-tip="ပိတ်မယ်"><i class="fa-solid fa-xmark"></i></button>
+      <button type="button" onclick="closeFullGallery()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="px-4 sm:px-6 py-3 flex flex-wrap gap-2" id="gallery-filter-chips">
       <button type="button" class="gallery-chip active" data-cat="all" onclick="filterGallery('all',this)">All</button>
@@ -527,7 +498,7 @@
       <div>
         <div class="flex items-center gap-2 mb-1">
           <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
-          <h2 id="stories-heading" class="text-xl sm:text-2xl font-black text-white" data-tip="ခရီးအတွေ့အကြုံ စာများ">Recent Travel</h2>
+          <h2 id="stories-heading" class="text-xl sm:text-2xl font-black text-white">Recent Travel</h2>
         </div>
         <p id="stories-sub" class="text-xs sm:text-sm text-emerald-400/70">မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ</p>
       </div>
@@ -560,7 +531,7 @@
           </a>
         </div>
         <div class="shrink-0 w-full max-w-md lg:w-80 xl:w-96">
-          <a id="youtube-play-link" href="#" target="_blank" rel="noopener noreferrer" class="block w-full aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative bg-black group" data-tip="YouTube မှာ ကြည့်မယ်">
+          <a id="youtube-play-link" href="#" target="_blank" rel="noopener noreferrer" class="block w-full aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative bg-black group">
             <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-90 transition">
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
               <div class="w-14 h-14 rounded-full bg-red-600 group-hover:bg-red-500 flex items-center justify-center shadow-xl mb-2 transition scale-100 group-hover:scale-110">
@@ -577,7 +548,7 @@
   <!-- ABOUT -->
   <section id="about-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
     <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
-      <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3" data-tip="ကျွန်တော့်အကြောင်း">About Htoo Htet</h2>
+      <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3">About Htoo Htet</h2>
       <p id="about-desc" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl">
         မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
       </p>
@@ -1224,7 +1195,7 @@ function loadBlogData() {
         const linkHtml = sponsor.link
           ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:4%;bottom:12%">' + t('visitSponsor') + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
           : '';
-        return '<div class="sp-banner" data-tip="' + safe(sponsor.badge || sponsor.title || 'Official Sponsor') + '" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;border-radius:' + radiusDesktop + '">' +
+        return '<div class="sp-banner" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;border-radius:' + radiusDesktop + '">' +
           '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
           (function(){
             var ov = (sponsor.overlayOpacity != null) ? sponsor.overlayOpacity : 55;
@@ -1731,7 +1702,7 @@ function renderGallerySection() {
   var sorted = photos.slice().sort(function(a,b){ return (a.order||0) - (b.order||0) || (b.id||0) - (a.id||0); });
   grid.innerHTML = sorted.slice(0, n).map(function(p, i){
     var tip = (p.caption || p.category || 'Photo').replace(/"/g, '&quot;');
-    return '<button type="button" class="gallery-thumb group" data-tip="' + tip + '" onclick="openGalleryLightbox(' + i + ')">' +
+    return '<button type="button" class="gallery-thumb group" onclick="openGalleryLightbox(' + i + ')">' +
       '<img loading="lazy" src="' + safe(p.img) + '" alt="' + safe(p.caption || '') + '">' +
       (p.category || p.caption ? '<span class="g-cap">' + safe(p.category || p.caption || '') + '</span>' : '') +
     '</button>';
@@ -1788,7 +1759,7 @@ function renderFullGalleryGrid() {
   }
   grid.innerHTML = photos.map(function(p, i){
     var tip = (p.caption || p.category || '').replace(/"/g, '&quot;');
-    return '<button type="button" class="gallery-thumb" data-tip="' + tip + '" onclick="openGalleryLightbox(' + i + ', true)">' +
+    return '<button type="button" class="gallery-thumb" onclick="openGalleryLightbox(' + i + ', true)">' +
       '<img loading="lazy" src="' + safe(p.img) + '" alt="">' +
       (p.category || p.caption ? '<span class="g-cap">' + safe(p.category || p.caption || '') + '</span>' : '') +
     '</button>';
@@ -1811,80 +1782,6 @@ function openGalleryLightbox(index, fromFull) {
   }
 }
 
-
-(function initHhTips(){
-  function ensureTip() {
-    var tip = document.getElementById('hh-tip');
-    if (!tip) {
-      tip = document.createElement('div');
-      tip.id = 'hh-tip';
-      tip.setAttribute('role', 'tooltip');
-      (document.body || document.documentElement).appendChild(tip);
-    }
-    return tip;
-  }
-  var hideT = null;
-  var activeEl = null;
-  function placeTip(el) {
-    var text = el.getAttribute('data-tip');
-    if (!text) return;
-    var tip = ensureTip();
-    tip.textContent = text;
-    tip.classList.add('show');
-    activeEl = el;
-    var rect = el.getBoundingClientRect();
-    tip.classList.remove('below');
-    // measure after text set
-    var tw = tip.offsetWidth || 140;
-    var th = tip.offsetHeight || 36;
-    var x = rect.left + rect.width / 2;
-    x = Math.max(tw/2 + 8, Math.min(window.innerWidth - tw/2 - 8, x));
-    var showBelow = rect.top < (th + 20);
-    if (showBelow) {
-      tip.classList.add('below');
-      tip.style.top = Math.min(window.innerHeight - th - 10, rect.bottom + 12) + 'px';
-      tip.style.transform = 'translate(-50%, 0)';
-    } else {
-      tip.style.top = Math.max(10, rect.top - 10) + 'px';
-      tip.style.transform = 'translate(-50%, -100%)';
-    }
-    tip.style.left = x + 'px';
-  }
-  function hideTip(){
-    var tip = document.getElementById('hh-tip');
-    if (tip) { tip.classList.remove('show'); tip.classList.remove('below'); }
-    activeEl = null;
-  }
-  function onMove(e){
-    var el = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
-    if (!el) {
-      if (hideT) clearTimeout(hideT);
-      hideT = setTimeout(hideTip, 50);
-      return;
-    }
-    if (hideT) { clearTimeout(hideT); hideT = null; }
-    placeTip(el);
-  }
-  document.addEventListener('mouseover', onMove, true);
-  document.addEventListener('mousemove', function(e){
-    if (!activeEl) return;
-    var el = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
-    if (el) placeTip(el);
-  }, true);
-  document.addEventListener('mouseout', function(e){
-    var from = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
-    if (!from) return;
-    var to = e.relatedTarget;
-    if (to && from.contains(to)) return;
-    if (to && to.closest && to.closest('[data-tip]') === from) return;
-    hideT = setTimeout(hideTip, 60);
-  }, true);
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ ensureTip(); });
-  } else {
-    ensureTip();
-  }
-})();
 
 function renderExtraHomeSections() {
   const container = $('extra-home-sections');
@@ -2187,6 +2084,5 @@ document.addEventListener('keydown', e => {
   <p id="lightbox-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm"></p>
 </div>
 
-<div id="hh-tip" role="tooltip"></div>
 </body>
 </html>
