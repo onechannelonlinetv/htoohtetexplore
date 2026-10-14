@@ -495,6 +495,63 @@
 
   #article-body img:hover { opacity: 0.95; }
 
+  /* Compact sticky header on scroll */
+  .site-header {
+    transition: background .25s ease, box-shadow .25s ease, border-color .25s ease, backdrop-filter .25s ease;
+  }
+  .site-header .header-inner-row {
+    transition: height .25s ease, padding .25s ease;
+  }
+  .site-header #brand-logo-wrap {
+    transition: width .25s ease, height .25s ease;
+  }
+  .site-header #brand-name {
+    transition: font-size .25s ease;
+  }
+  .site-header.scrolled {
+    background: rgba(6, 21, 16, 0.72) !important;
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    border-bottom-color: rgba(16, 185, 129, 0.18) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+  }
+  body.theme-ocean .site-header.scrolled {
+    background: rgba(10, 22, 40, 0.72) !important;
+    border-bottom-color: rgba(34, 211, 238, 0.18) !important;
+  }
+  body.theme-sunset .site-header.scrolled {
+    background: rgba(26, 18, 11, 0.75) !important;
+    border-bottom-color: rgba(249, 115, 22, 0.2) !important;
+  }
+  body.theme-navy .site-header.scrolled,
+  body.mode-light .site-header.scrolled {
+    background: rgba(255, 255, 255, 0.78) !important;
+    border-bottom-color: rgba(226, 232, 240, 0.9) !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+  }
+  .site-header.scrolled .header-inner-row {
+    height: 3rem; /* 48px — slightly shorter */
+  }
+  .site-header.scrolled #brand-logo-wrap {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+  .site-header.scrolled #brand-name {
+    font-size: 0.9rem !important;
+  }
+  .site-header.scrolled #mode-toggle,
+  .site-header.scrolled #search-toggle,
+  .site-header.scrolled #lang-toggle {
+    width: 2.15rem;
+    height: 2.15rem;
+    min-width: 2.15rem;
+  }
+  .site-header.scrolled #menu-toggle {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+
   /* Banner / gallery soft lift hover (like Travel Stories cards) */
   #upcoming-banner,
   .sp-banner,
@@ -567,9 +624,9 @@
 <body class="min-h-screen antialiased theme-forest mode-dark">
 
 <!-- ================= HEADER ================= -->
-<header class="sticky top-0 z-50 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
+<header id="site-header" class="site-header sticky top-0 z-50 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16 gap-3">
+    <div class="header-inner-row flex items-center justify-between h-16 gap-3">
       <!-- Logo + Brand name only -->
       <a href="#home" class="flex items-center gap-2.5 shrink-0">
         <div id="brand-logo-wrap" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg overflow-hidden">
@@ -2424,7 +2481,20 @@ function tryOpenArticleFromHash() {
   if (idx >= 0 && idx < allStoryPosts.length) openArticle(idx);
 }
 
+function initCompactHeader() {
+  var header = document.getElementById('site-header');
+  if (!header) return;
+  var threshold = 24;
+  function update() {
+    if (window.scrollY > threshold) header.classList.add('scrolled');
+    else header.classList.remove('scrolled');
+  }
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  try { initCompactHeader(); } catch (e) {}
   $('story-category-filter')?.addEventListener('change', renderStoryCards);
   if ($('lang-en')) $('lang-en').addEventListener('click', function() { setLanguage('en'); });
   if ($('lang-mm')) $('lang-mm').addEventListener('click', function() { setLanguage('mm'); });
