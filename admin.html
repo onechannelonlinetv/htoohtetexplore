@@ -260,11 +260,12 @@ main > div {
           <h2 class="mt-4 text-2xl font-black sm:text-3xl">Website အားလုံးကို<br class="sm:hidden"> ဒီနေရာက စီမံပါ</h2>
           <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">Brand, Hero, Sponsors, Posts, Theme ၄ မျိုး (ဒီဇိုင်းကွဲ), ပုံ Upload, Font & အရွယ်အစား — အကုန် Admin ကနေ ထိန်းနိုင်ပါတယ်။</p>
         </div>
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <div class="stat"><div class="text-sm text-slate-400">Posts</div><div id="stat-posts" class="mt-2 text-3xl font-black">0</div></div>
           <div class="stat"><div class="text-sm text-slate-400">Custom Rows</div><div id="stat-sections" class="mt-2 text-3xl font-black">0</div></div>
           <div class="stat"><div class="text-sm text-slate-400">Proud Sponsors</div><div id="stat-proud" class="mt-2 text-3xl font-black">0</div></div>
           <div class="stat"><div class="text-sm text-slate-400">Official Sponsor</div><div id="stat-sponsor" class="mt-2 text-xl font-black">—</div></div>
+          <div class="stat"><div class="text-sm text-slate-400">Gallery Photos</div><div id="stat-gallery" class="mt-2 text-3xl font-black">0</div></div>
         </div>
       </section>
 
@@ -2321,7 +2322,9 @@ function showView(name, button) {
   if (name === 'youtube' && typeof updateYoutubePreview === 'function') updateYoutubePreview();
   if (name === 'about' && typeof updateAboutPreview === 'function') updateAboutPreview();
   if (name === 'settings' && typeof updateSizePreview === 'function') updateSizePreview();
+  if (name === 'overview' && typeof renderOverview === 'function') renderOverview();
 }
+
 
 function loadAll() {
   if ($('footer-year')) $('footer-year').textContent = new Date().getFullYear();
@@ -4616,42 +4619,44 @@ function onGalSlotFile(i, input) {
     input.value = '';
     return;
   }
-  if (!adminUser || !adminStorage || !adminDb) {
+  if (!adminUser || !adminDb) {
     toast('Login မဝင်ရသေးပါ — အရင် Login ဝင်ပါ', true);
     input.value = '';
     return;
   }
-  toast('ပုံ တင်နေသည်… စောင့်ပါ');
+  toast('ပုံ တင်နေသည်…');
   (async function() {
     try {
       var blob = file;
       try {
-        if (typeof compressImageFile === 'function') blob = await compressImageFile(file, 1200, 0.78);
-      } catch (e) {}
-      // preview
-      try {
-        var previewUrl = await fileToDataURL(blob);
-        applyGalSlotImg(i, previewUrl);
+        if (typeof compressImageFile === 'function') blob = await compressImageFile(file, 1000, 0.72);
       } catch (e) {}
 
-      // REQUIRED: Firebase Storage
-      var httpsUrl;
-      try {
-        httpsUrl = await uploadBlobToStorage(blob, i);
-      } catch (e) {
-        console.error(e);
-        toast('Storage တင်မရ: ' + (e.message || e) + ' — Firebase Storage Rules စစ်ပါ', true);
-        input.value = '';
-        return;
+      var dataUrl = await fileToDataURL(blob);
+      applyGalSlotImg(i, dataUrl);
+      _galSlotBlobs[i] = blob;
+
+      // Storage optional (Blaze). Max 8s then data URL.
+      var finalUrl = dataUrl;
+      if (adminStorage) {
+        try {
+          finalUrl = await Promise.race([
+            uploadBlobToStorage(blob, i),
+            new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Storage slow')); }, 8000); })
+          ]);
+          applyGalSlotImg(i, finalUrl);
+        } catch (e) {
+          console.warn('Storage skip', e);
+          finalUrl = dataUrl;
+        }
       }
-      applyGalSlotImg(i, httpsUrl);
 
-      var ok = await saveOneGalleryImage(httpsUrl, i);
+      var ok = await saveOneGalleryImage(finalUrl, i);
       if (ok) {
         clearGalSlot(i);
         toast('✓ ပုံ Gallery ထဲ သိမ်းပြီး');
       } else {
-        toast('Firebase သိမ်းမရ — Rules / Login စစ်ပါ', true);
+        toast('သိမ်းမရပါ — Login စစ်ပါ', true);
       }
     } catch (err) {
       console.error(err);
@@ -4690,7 +4695,7 @@ function collectGalSlotKeys() {
     var im = slot.querySelector('img.gal-slot-img') || slot.querySelector('img');
     if (im) {
       var src = im.getAttribute('src') || im.src || '';
-      if (src && src.indexOf('http') === 0) {
+      if (src) {
         _galSlotImages[i] = src;
         keys.push(i);
       }
@@ -4707,16 +4712,17 @@ async function uploadBlobToStorage(blob, idx) {
   var ref = adminStorage.ref(path);
   var snap = await Promise.race([
     ref.put(blob, { contentType: 'image/jpeg' }),
-    new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Storage timeout 25s')); }, 25000); })
+    new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Storage timeout')); }, 10000); })
   ]);
   var url = await snap.ref.getDownloadURL();
   if (!url) throw new Error('Download URL မရ');
   return url;
 }
 
+/** Local UI first, Firebase background — no 3s wait */
 async function saveOneGalleryImage(url, slotIndex) {
-  if (!url || String(url).indexOf('http') !== 0) {
-    toast('HTTPS URL မရပါ — Storage အရင်တင်ရမယ်', true);
+  if (!url) {
+    toast('ပုံ URL မရပါ', true);
     return false;
   }
   if (!adminUser || !adminDb) {
@@ -4724,18 +4730,7 @@ async function saveOneGalleryImage(url, slotIndex) {
     return false;
   }
 
-  // Read latest from Firebase first so we don't overwrite other devices
-  var g;
-  try {
-    var snap = await adminDb.ref('siteData/hh_gallery').once('value');
-    g = snap.val();
-  } catch (e) {
-    console.warn(e);
-    g = null;
-  }
-  if (!g || typeof g !== 'object') {
-    g = getGalleryData();
-  }
+  var g = getGalleryData();
   if (!g || typeof g !== 'object') {
     g = {
       active: true,
@@ -4747,11 +4742,6 @@ async function saveOneGalleryImage(url, slotIndex) {
     };
   }
   if (!Array.isArray(g.photos)) g.photos = [];
-
-  // Drop any leftover data: URLs to keep payload small
-  g.photos = g.photos.filter(function(p) {
-    return p && p.img && String(p.img).indexOf('http') === 0;
-  });
 
   var catEl = document.getElementById('gal-default-cat');
   var cat = (catEl && catEl.value || '').trim();
@@ -4767,27 +4757,28 @@ async function saveOneGalleryImage(url, slotIndex) {
   g.photos.forEach(function(p, i) { p.order = i; });
   g.active = true;
 
-  // Write Firebase FIRST (source of truth)
-  try {
-    await Promise.race([
-      adminDb.ref('siteData/hh_gallery').set(g),
-      new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Firebase timeout')); }, 20000); })
-    ]);
-  } catch (e) {
-    console.error(e);
-    toast('Firebase သိမ်းမရ: ' + (e.message || e), true);
-    return false;
-  }
-
-  // Mirror local
+  // 1) Local + UI immediately
   try {
     originalSetItem('hh_gallery', JSON.stringify(g));
   } catch (e) {
-    console.warn('local', e);
+    try { localStorage.setItem('hh_gallery', JSON.stringify(g)); } catch (e2) {
+      toast('localStorage မဆန့်ပါ', true);
+      return false;
+    }
   }
-
   renderGalleryList();
   try { if (typeof renderOverview === 'function') renderOverview(); } catch (e) {}
+
+  // 2) Firebase background
+  try {
+    await Promise.race([
+      adminDb.ref('siteData/hh_gallery').set(g),
+      new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Firebase timeout')); }, 12000); })
+    ]);
+  } catch (e) {
+    console.error(e);
+    toast('UI မှာ ပေါ်ပါပြီ · Firebase sync နှောင့်: ' + (e.message || e), true);
+  }
   return true;
 }
 
@@ -4796,7 +4787,13 @@ async function commitAllGalSlots() {
   try {
     var keys = collectGalSlotKeys();
     if (!keys.length) {
-      toast('ပုံတင်ထားတဲ့ ကွက် မရှိသေးပါ (သို့) Storage URL မရသေး', true);
+      var n = 0;
+      try {
+        var g0 = getGalleryData();
+        n = (g0 && g0.photos && g0.photos.length) || 0;
+      } catch (e) {}
+      if (n > 0) toast('ကွက်ထဲ ပုံမရှိပါ · Gallery Photos ထဲ ' + n + ' ပုံ သိမ်းပြီးသား');
+      else toast('ကွက်ထဲ ပုံအရင် ရွေးပါ');
       return false;
     }
     if (!adminUser) {
@@ -4809,22 +4806,12 @@ async function commitAllGalSlots() {
     for (var k = 0; k < keys.length; k++) {
       var idx = keys[k];
       var url = _galSlotImages[idx];
-      if (!url || String(url).indexOf('http') !== 0) {
-        // try upload from blob
-        try {
-          var blob = _galSlotBlobs[idx];
-          if (!blob) continue;
-          url = await uploadBlobToStorage(blob, idx);
-        } catch (e) {
-          toast('ကွက် ' + (idx + 1) + ' Storage မရ', true);
-          continue;
-        }
+      if (!url) continue;
+      if (String(url).indexOf('http') !== 0 && _galSlotBlobs[idx] && adminStorage) {
+        try { url = await uploadBlobToStorage(_galSlotBlobs[idx], idx); } catch (e) {}
       }
       var ok = await saveOneGalleryImage(url, idx);
-      if (ok) {
-        added++;
-        clearGalSlot(idx);
-      }
+      if (ok) { added++; clearGalSlot(idx); }
     }
     _galSlotImages = {};
     _galSlotBlobs = {};
@@ -4833,7 +4820,7 @@ async function commitAllGalSlots() {
     renderGalleryList();
     if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     if (added) toast('✓ ' + added + ' ပုံ သိမ်းပြီး');
-    else toast('မသိမ်းနိုင်ပါ — Login / Storage Rules စစ်ပါ', true);
+    else toast('သိမ်းစရာ ကွက် မကျန်တော့ပါ');
     return added > 0;
   } catch (err) {
     console.error(err);
@@ -4845,7 +4832,6 @@ async function commitAllGalSlots() {
 window.commitAllGalSlots = commitAllGalSlots;
 window.saveOneGalleryImage = saveOneGalleryImage;
 
-window.saveOneGalleryImage = saveOneGalleryImage;
 
 
 function addGalleryPhoto() { /* legacy */ }
@@ -5237,16 +5223,26 @@ function renderOverview() {
     var posts = typeof getPosts==='function' ? getPosts() : [];
     var sections = typeof getHomeSections==='function' ? getHomeSections() : [];
     var proud = typeof getProud==='function' ? getProud() : [];
-    if ($('stat-posts')) $('stat-posts').textContent = posts.length;
-    if ($('stat-sections')) $('stat-sections').textContent = sections.length;
-    if ($('stat-proud')) $('stat-proud').textContent = proud.length;
+    if (!Array.isArray(posts)) posts = [];
+    if (!Array.isArray(sections)) sections = [];
+    if (!Array.isArray(proud)) proud = [];
+    if ($('stat-posts')) $('stat-posts').textContent = String(posts.length);
+    if ($('stat-sections')) $('stat-sections').textContent = String(sections.length);
+    if ($('stat-proud')) $('stat-proud').textContent = String(proud.length);
     var spText = '0';
     if (typeof getSponsorList==='function') {
       var _spl = getSponsorList() || [];
-      spText = _spl.length ? (_spl.filter(function(s){return s.active!==false}).length + '/' + _spl.length) : '0';
+      if (!Array.isArray(_spl)) _spl = [];
+      spText = _spl.length ? (_spl.filter(function(s){return s && s.active!==false}).length + '/' + _spl.length) : '0';
     }
     if ($('stat-sponsor')) $('stat-sponsor').textContent = spText;
-  } catch (e) { console.warn(e); }
+    // optional gallery stat if element exists
+    try {
+      var g = typeof getGalleryData==='function' ? getGalleryData() : null;
+      var gn = (g && Array.isArray(g.photos)) ? g.photos.length : 0;
+      if ($('stat-gallery')) $('stat-gallery').textContent = String(gn);
+    } catch (e) {}
+  } catch (e) { console.warn('renderOverview', e); }
 }
 
 /* ---- Theme Presets (full layout snapshot) ---- */
