@@ -68,7 +68,8 @@
     backdrop-filter: blur(16px);
   }
   body.theme-ocean #hero-section {
-    clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+    /* no angled clip — straight frames */
+    border-radius: 0;
   }
   body.theme-ocean .card-bg {
     border-radius: 1.5rem;
@@ -192,6 +193,37 @@
   body.mode-light #upcoming-banner .text-white,
   body.mode-light #youtube-section .text-white,
   body.mode-light #article-page .text-white { color: #ffffff !important; }
+
+  /* Light mode — header controls must stay visible */
+  body.mode-light #mode-toggle,
+  body.mode-light #mode-toggle-icon {
+    color: #0f172a !important;
+  }
+  body.mode-light #mode-toggle:hover {
+    background: rgba(15, 23, 42, 0.08) !important;
+  }
+  body.mode-light #lang-en,
+  body.mode-light #lang-mm {
+    color: #334155 !important;
+  }
+  body.mode-light #lang-en.accent-text,
+  body.mode-light #lang-mm.accent-text {
+    color: var(--brand-accent, #0f766e) !important;
+    font-weight: 800;
+  }
+  body.mode-light header a,
+  body.mode-light header button {
+    color: #0f172a;
+  }
+  body.mode-light header .text-white\/90,
+  body.mode-light header .text-white {
+    color: #0f172a !important;
+  }
+  body.mode-light #mode-toggle {
+    border: 1px solid #cbd5e1;
+    background: #f1f5f9;
+  }
+
   #article-body img { cursor: zoom-in; border-radius: 12px; }
   /* Official Sponsor — responsive */
   .sp-banner {
@@ -801,6 +833,16 @@ const I18N = {
   }
 };
 let currentLang = localStorage.getItem('hh_lang') || 'mm';
+
+function postLocalized(post, field) {
+  if (!post) return '';
+  if (currentLang === 'en') {
+    var en = post[field + 'En'] || post[field + '_en'];
+    if (en && String(en).trim()) return en;
+  }
+  return post[field] || '';
+}
+
 
 function t(key) {
   return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en[key]) || key;
@@ -1419,12 +1461,12 @@ function renderStoryCards() {
     return `
     <button type="button" onclick="openArticle(${idx})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
       <div class="relative overflow-hidden bg-emerald-950" style="height: ${imgH}">
-        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600')}" alt="${safe(post.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600')}" alt="${safe(postLocalized(post,'title'))}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
         <span class="absolute top-3 left-3 bg-black/75 backdrop-blur-sm accent-text text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase">${safe(tag)}</span>
       </div>
       <div class="p-4 flex-1 flex flex-col">
-        <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2 group-hover:text-emerald-300 transition">${safe(post.title)}</h3>
-        <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2 leading-relaxed flex-1">${safe(post.desc || '')}</p>
+        <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2 group-hover:text-emerald-300 transition">${safe(postLocalized(post,'title'))}</h3>
+        <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2 leading-relaxed flex-1">${safe(postLocalized(post,'desc'))}</p>
         <div class="mt-3 flex items-center justify-between text-[11px] text-emerald-500/60">
           <span>${dateStr}</span>
           <span class="accent-text font-bold flex items-center gap-1">${t('read')} <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
@@ -1567,7 +1609,7 @@ function openArticle(index) {
   closeMenu();
 
   $('article-image').src = post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000';
-  $('article-title').textContent = post.title || 'Travel Story';
+  $('article-title').textContent = postLocalized(post, 'title') || 'Travel Story';
   $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ').toUpperCase();
   const meta = $('article-meta');
   if (meta) {
@@ -1577,7 +1619,7 @@ function openArticle(index) {
     if (d) parts.push(d);
     meta.textContent = parts.join(' · ');
   }
-  let body = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
+  let body = postLocalized(post, 'content') || post.content || post.body || postLocalized(post, 'desc') || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
   $('article-body').innerHTML = formatArticleBody(body);
 
   // Related: same category first, then others — up to 3
@@ -1603,7 +1645,7 @@ function openArticle(index) {
   }
 
   bindArticleImageZoom();
-  currentPostTitle = post.title || '';
+  currentPostTitle = postLocalized(post, 'title') || post.title || '';
   bindEngagement(post.id != null ? post.id : index);
 
   // Full page: hide home + footer, show only article
@@ -1825,7 +1867,7 @@ function renderExtraHomeSections() {
               '<span class="absolute top-2.5 left-2.5 bg-black/75 accent-text text-[10px] font-black px-2 py-0.5 rounded-md uppercase">' + safe(post.location || 'Myanmar') + '</span>' +
             '</div>' +
             '<div class="p-4">' +
-              '<h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2">' + safe(post.title) + '</h3>' +
+              '<h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2">' + safe(postLocalized(post,'title')) + '</h3>' +
               '<p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2">' + safe(post.desc || '') + '</p>' +
             '</div></button>';
         }).join('')
