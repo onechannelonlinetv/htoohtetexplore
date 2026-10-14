@@ -1202,8 +1202,9 @@ main > div {
           </div>
           <input id="editing-post-id" type="hidden">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label class="label">Title *</label><input id="admin-post-title" class="field" placeholder="Bagan - Ancient Temples" oninput="autoSlug();updatePostPreview()"></div>
-            <div><label class="label">Slug * <span class="tiny">(URL)</span></label><input id="admin-post-slug" class="field" placeholder="bagan-ancient-temples" oninput="this.dataset.manual='1'"><p class="tiny mt-1">Title ကနေ auto ဖန်တီး — ကိုယ်တိုင်ပြင်လို့ရ</p></div>
+            <div><label class="label">Title (မြန်မာ) *</label><input id="admin-post-title" class="field" placeholder="ပုဂံ - ရှေးဟောင်းဘုရားများ" oninput="autoSlug();updatePostPreview()"></div>
+            <div><label class="label">Title (English)</label><input id="admin-post-title-en" class="field" placeholder="Bagan - Ancient Temples" oninput="updatePostPreview()"><p class="tiny mt-1">EN ရွေးရင် ဒီစာ ပေါ်မယ် · ဗလာဆို မြန်မာစာ သုံးမယ်</p></div>
+            <div class="md:col-span-2"><label class="label">Slug * <span class="tiny">(URL)</span></label><input id="admin-post-slug" class="field" placeholder="bagan-ancient-temples" oninput="this.dataset.manual='1'"><p class="tiny mt-1">Title ကနေ auto ဖန်တီး — ကိုယ်တိုင်ပြင်လို့ရ</p></div>
             <div class="md:col-span-2">
               <label class="label">Cover Image *</label>
               <div class="flex gap-2">
@@ -1212,9 +1213,10 @@ main > div {
               </div>
               <div id="admin-post-img-preview" class="mt-2"></div>
             </div>
-            <div class="md:col-span-2"><label class="label">Short Description * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" oninput="updatePostPreview()" placeholder="အကျဉ်းချုပ်..."></textarea></div>
+            <div class="md:col-span-2"><label class="label">Short Description (မြန်မာ) * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" oninput="updatePostPreview()" placeholder="အကျဉ်းချုပ် မြန်မာလို..."></textarea></div>
+            <div class="md:col-span-2"><label class="label">Short Description (English)</label><textarea id="admin-post-desc-en" class="field min-h-20" oninput="updatePostPreview()" placeholder="Short summary in English..."></textarea></div>
             <div class="md:col-span-2">
-              <label class="label">Article Content * — ခေါင်းစဉ် / စာ / ပုံ ရောရေးနိုင်</label>
+              <label class="label">Article Content (မြန်မာ) * * — ခေါင်းစဉ် / စာ / ပုံ ရောရေးနိုင်</label>
               <div class="flex gap-2 mb-2 flex-wrap items-center">
                 <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('# ')"># ခေါင်းစဉ်ကြီး</button>
                 <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('## ')">## ခေါင်းစဉ်</button>
@@ -1234,11 +1236,15 @@ main > div {
                   <option value="full">ပုံ အပြည့်</option>
                 </select>
               </div>
-              <textarea id="admin-post-content" class="field min-h-[320px] sm:min-h-[420px] w-full text-base leading-relaxed" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="# ခေါင်းစဉ် ဒီလို ရေးပါ&#10;&#10;စာသား ဒီမှာ...&#10;&#10;ပုံထည့်ရန် အပေါ်က ခလုတ် သုံးပါ" oninput="updateContentPreview()"></textarea>
+              <textarea id="admin-post-content" class="field min-h-[320px] sm:min-h-[420px] w-full text-base leading-relaxed" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="# မြန်မာလို ခေါင်းစဉ် / စာသား&#10;&#10;စာသား ဒီမှာ...&#10;&#10;ပုံထည့်ရန် အပေါ်က ခလုတ် သုံးပါ" oninput="updateContentPreview()"></textarea>
               <div class="mt-3 rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3">
                 <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Article Content (ပုံ: ဖျက် / အပေါ်-အောက် / အရွယ် / drag)</span>
                 <div id="content-live-preview" class="mt-2 text-sm text-slate-200 rounded-xl border border-slate-700 bg-slate-950/50" style="min-height:180px;max-height:520px;overflow-y:auto;padding:12px;"></div>
               </div>
+            </div>
+            <div class="md:col-span-2 border border-slate-700/60 rounded-xl p-3 bg-slate-950/40">
+              <label class="label">Article Content (English) <span class="tiny">optional · EN ရွေးရင် ဒီစာ</span></label>
+              <textarea id="admin-post-content-en" class="field min-h-[180px] w-full text-base leading-relaxed" placeholder="English article body (optional)..."></textarea>
             </div>
             <div><label class="label">Location *</label><input id="admin-post-location" class="field" oninput="updatePostPreview()" placeholder="Bagan, Inle Lake..."></div>
             <div><label class="label">Category *</label>
@@ -4965,8 +4971,12 @@ function savePost() {
   const author = $('admin-post-author').value.trim() || 'Htoo Htet';
   const seoTitle = $('admin-post-seo-title').value.trim() || title;
   const metaDesc = $('admin-post-meta').value.trim() || desc;
+  const titleEn = ($('admin-post-title-en') && $('admin-post-title-en').value || '').trim();
+  const descEn = ($('admin-post-desc-en') && $('admin-post-desc-en').value || '').trim();
+  const contentEnRaw = ($('admin-post-content-en') && $('admin-post-content-en').value || '').trim();
+  const contentEn = contentEnRaw ? expandContentCids(contentEnRaw) : '';
   const data = {
-    title, slug, img, desc, content, location, category, author,
+    title, titleEn, slug, img, desc, descEn, content, contentEn, location, category, author,
     travelDate: $('admin-post-travel-date').value || '',
     seoTitle, metaDesc,
     sectionId: $('admin-post-section').value,
@@ -4991,13 +5001,16 @@ function editPost(id) {
   refreshPostSectionOptions();
   $('editing-post-id').value = p.id;
   $('admin-post-title').value = p.title || '';
+  if ($('admin-post-title-en')) $('admin-post-title-en').value = p.titleEn || '';
   $('admin-post-slug').value = p.slug || slugify(p.title || '');
   $('admin-post-slug').dataset.manual = '1';
   setImageFieldValue('admin-post-img', p.img || '');
   $('admin-post-location').value = p.location || '';
   $('admin-post-desc').value = p.desc || '';
+  if ($('admin-post-desc-en')) $('admin-post-desc-en').value = p.descEn || '';
   // Compact long Base64 already in content so textarea stays readable
   $('admin-post-content').value = compactContentDataUrls(p.content || '');
+  if ($('admin-post-content-en')) $('admin-post-content-en').value = compactContentDataUrls(p.contentEn || '');
   if (typeof updateContentPreview === 'function') updateContentPreview();
   $('admin-post-category').value = p.category || 'Travel Story';
   $('admin-post-travel-date').value = p.travelDate || '';
@@ -5012,7 +5025,7 @@ function editPost(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function cancelPostEdit() {
-  ['editing-post-id','admin-post-title','admin-post-slug','admin-post-location','admin-post-desc','admin-post-content','admin-post-travel-date','admin-post-seo-title','admin-post-meta'].forEach(id => $(id).value = '');
+  ['editing-post-id','admin-post-title','admin-post-title-en','admin-post-slug','admin-post-location','admin-post-desc','admin-post-desc-en','admin-post-content','admin-post-content-en','admin-post-travel-date','admin-post-seo-title','admin-post-meta'].forEach(id => { if ($(id)) $(id).value = ''; });
   setImageFieldValue('admin-post-img', '');
   $('admin-post-author').value = 'Htoo Htet';
   $('admin-post-category').value = 'Travel Story';
