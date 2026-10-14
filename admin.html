@@ -289,17 +289,10 @@ main > div {
 <!-- APP -->
 <div id="app" class="hidden min-h-screen">
   <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-800 bg-[#091220] p-5 lg:flex lg:flex-col overflow-y-auto">
-    <div class="mb-6 flex items-center gap-3 group relative">
-      <div id="admin-studio-logo-wrap" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 text-xl overflow-hidden cursor-pointer" onclick="document.getElementById('admin-studio-logo-file').click()" title="ပုံတင်ရန် နှိပ်ပါ">
-        <img id="admin-studio-logo-img" src="" alt="" class="w-full h-full object-cover hidden">
-        <i id="admin-studio-logo-icon" class="fa-solid fa-mountain-sun"></i>
-      </div>
-      <input type="file" id="admin-studio-logo-file" accept="image/*" class="hidden" onchange="onAdminStudioLogo(this)">
-      <div class="min-w-0 flex-1">
-        <input id="admin-studio-name" class="field py-1 px-2 text-sm font-black bg-transparent border-slate-700/80" value="HTOO HTET" onchange="saveAdminStudio()" onblur="saveAdminStudio()">
-        <div class="text-sm font-bold text-emerald-300 px-1">Admin Studio</div>
-      </div>
-    </div>
+    <a href="index.html" target="_blank" class="mb-6 flex items-center gap-3">
+      <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-700 text-xl"><i class="fa-solid fa-mountain-sun"></i></div>
+      <div><div class="font-black leading-tight">HTOO HTET</div><div class="text-sm font-bold text-emerald-300">Admin Studio</div></div>
+    </a>
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
     <nav class="space-y-0.5 flex-1">
       <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
@@ -312,7 +305,6 @@ main > div {
       <button class="navbtn" data-view="gallery" onclick="showView('gallery',this)"><i class="fa-solid fa-images w-4"></i> Photo Gallery</button>
       <button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Latest Travel</button>
       <button class="navbtn" data-view="addpost" onclick="showView('addpost',this)"><i class="fa-solid fa-pen-to-square w-4"></i> Add Post</button>
-      <button class="navbtn" data-view="postlist" onclick="showView('postlist',this)"><i class="fa-solid fa-list w-4"></i> Post List</button>
       <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
       <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
       <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
@@ -331,7 +323,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod9</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod7</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -352,7 +344,6 @@ main > div {
         <button class="navbtn" onclick="showView('gallery')">Photo Gallery</button>
         <button class="navbtn" onclick="showView('posts')">Latest Travel</button>
         <button class="navbtn" onclick="showView('addpost')">Add Post</button>
-        <button class="navbtn" onclick="showView('postlist')">Post List</button>
         <button class="navbtn" onclick="showView('sections')">Custom Rows</button>
         <button class="navbtn" onclick="showView('youtube')">YouTube</button>
         <button class="navbtn" onclick="showView('about')">About</button>
@@ -360,10 +351,15 @@ main > div {
       </div>
     </div>
 
-    <div class="w-full max-w-none space-y-4 p-3 sm:p-4 lg:p-5 xl:px-6">
+    <div class="w-full max-w-none space-y-6 p-3 sm:p-5 lg:p-6 xl:px-8">
 
       <!-- OVERVIEW -->
       <section id="view-overview" class="view active space-y-6">
+        <div class="overflow-hidden rounded-2xl border border-emerald-900/70 bg-gradient-to-r from-emerald-950 via-[#102d30] to-[#101b30] p-6 sm:p-8">
+          <span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">Full CMS Control</span>
+          <h2 class="mt-4 text-2xl font-black sm:text-3xl">Website အားလုံးကို<br class="sm:hidden"> ဒီနေရာက စီမံပါ</h2>
+          <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">Brand, Hero, Sponsors, Posts, Theme ၄ မျိုး (ဒီဇိုင်းကွဲ), ပုံ Upload, Font & အရွယ်အစား — အကုန် Admin ကနေ ထိန်းနိုင်ပါတယ်။</p>
+        </div>
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <div class="stat"><div class="text-sm text-slate-400">Posts</div><div id="stat-posts" class="mt-2 text-3xl font-black">0</div></div>
           <div class="stat"><div class="text-sm text-slate-400">Custom Rows</div><div id="stat-sections" class="mt-2 text-3xl font-black">0</div></div>
@@ -384,14 +380,18 @@ main > div {
 
       <!-- BRAND & SETTINGS -->
       
-      <section id="view-pagepreview" class="view space-y-3">
-        <div class="flex flex-wrap items-center gap-2">
-
+      <section id="view-pagepreview" class="view space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p class="mt-1 text-sm text-slate-400">Website UI တစ်ခုလုံး · ဒီမှာကြည့်ပြီး အောက်က ခလုတ်နဲ့ သက်ဆိုင်ရာနေရာကို ပြင်နိုင်ပါတယ်</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
             <button type="button" class="btn btn-muted text-xs" onclick="refreshPagePreviewIframe()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
             <a href="index.html" target="_blank" class="btn btn-green text-xs"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Tab</a>
+          </div>
         </div>
         <div class="flex flex-wrap gap-2 text-xs">
           <button type="button" class="btn btn-muted" onclick="showView('settings'); setTimeout(function(){var a=document.getElementById('hero-editor-anchor');if(a)a.scrollIntoView({behavior:'smooth'});},80)">✏️ Edit Hero</button>
@@ -416,16 +416,9 @@ main > div {
         </div>
       </section>
 
-<section id="view-settings" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
-          <div class="fold-head" onclick="toggleFold(this)">
-            <div>
-              <div class="fold-title">Brand · Theme · Logo</div>
-              <div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div>
-            </div>
-            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
-          </div>
-          <div class="fold-body space-y-4">
+<section id="view-settings" class="view space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Theme · Logo · Layout · Hero Banner (PC + Phone preview)</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div>
             <label class="label mb-3">Website Theme — ဒီဇိုင်း ၄ မျိုး ကွဲပြား</label>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="theme-selector">
@@ -532,11 +525,11 @@ main > div {
           <div id="layout-preview" class="hidden"></div>
           <div id="layout-preview-inner" class="hidden"></div>
           <div id="layout-preview-text" class="hidden"></div>
-          </div>
         </div><!-- /brand panel -->
 
         <div id="hero-editor-anchor" class="space-y-5 pt-2 w-full max-w-none">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Preview အပြည့် · စာတစ်ကြောင်းချင်း Font / Color / Size / Style</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-5">
           <label class="toggle-row"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
 
           <!-- FULL-BLEED LIVE PREVIEW (website-width) -->
@@ -820,8 +813,9 @@ main > div {
       </section>
 
       <!-- HERO -->
-      <section id="view-menu" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+      <section id="view-menu" class="view space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Hamburger menu ထဲမှာ ပြမယ်</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Preview · Menu Drawer</span>
             <div id="menu-preview-box" class="mt-2 space-y-1 text-sm text-emerald-100"></div>
@@ -836,8 +830,11 @@ main > div {
       </section>
 
       <!-- PROUD SPONSORS -->
-      <section id="view-proud" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-proud" class="view space-y-5">
+        <div>
+          <p class="mt-1 text-sm text-slate-400">၁) Logo Upload → Preview မှာ နေရာ/အရွယ် ချိန် → ၂) Add နှိပ် · ရှိပြီးသားကိုလည်း Preview မှာ drag လို့ရ</p>
+        </div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="md:col-span-2">
               <label class="label">Section ခေါင်းစဉ် (Live site) · Preview မှာ drag နဲ့ ရွှေ့လို့ရ</label>
@@ -910,9 +907,12 @@ main > div {
 
       <!-- OFFICIAL SPONSOR -->
       
-      <section id="view-sponsor" class="view space-y-3">
+      <section id="view-sponsor" class="view space-y-5">
         <div class="flex flex-wrap items-end justify-between gap-3">
-<button type="button" onclick="addNewSponsor()" class="btn btn-green"><i class="fa-solid fa-plus mr-2"></i>Add Sponsor</button>
+          <div>
+            <p class="mt-1 text-sm text-slate-400">Hero လို Preview · ပုံဖိဆွဲ · Sponsor အများကြီး Add လုပ်နိုင်</p>
+          </div>
+          <button type="button" onclick="addNewSponsor()" class="btn btn-green"><i class="fa-solid fa-plus mr-2"></i>Add Sponsor</button>
         </div>
 
         <div class="panel editor-shell p-4 sm:p-5 fold-panel">
@@ -1150,8 +1150,9 @@ main > div {
         </div>
       </section>
 
-<section id="view-upcoming" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+<section id="view-upcoming" class="view space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Preview မှာ ဖိဆွဲ · ထောင့် = ဆိုဒ် · ပုံ drag</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="up-active" checked onchange="updateUpcomingPreview()"><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
 
           <!-- Live Preview -->
@@ -1278,8 +1279,9 @@ main > div {
       </section>
 
 
-      <section id="view-gallery" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+      <section id="view-gallery" class="view space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Homepage ၄ ပုံ · View all · Category filter</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
           <div class="fold-head" onclick="toggleFold(this)">
             <div>
               <div class="fold-title">Gallery Settings · ခေါင်းစဉ် / Category</div>
@@ -1350,8 +1352,9 @@ main > div {
         </div>
       </section>
 
-<section id="view-posts" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+<section id="view-posts" class="view space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Post များ · Section ခေါင်းစဉ် · Banner — Hero/Sponsor လို ချိန်နိုင်</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
           <div class="fold-head" onclick="toggleFold(this)">
             <div>
               <div class="fold-title">Section ခေါင်းစဉ် · Travel Stories</div>
@@ -1390,8 +1393,12 @@ main > div {
       </section>
 
       <!-- ADD POST -->
-      <section id="view-addpost" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+      <section id="view-addpost" class="view space-y-5">
+        <div>
+          <p class="mt-1 text-sm text-slate-400">Post အသစ်တင်မယ် · ပြင်မယ် · ဖျက်မယ် — Cover ပုံ Upload · Article Content</p>
+        </div>
+<div><h3 class="font-bold text-white">Posts စာရင်း</h3><p class="text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Post Card</span>
@@ -1493,25 +1500,17 @@ main > div {
             <button id="post-cancel-button" onclick="cancelPostEdit()" class="btn btn-muted hidden">Cancel</button>
           </div>
         </div>
-      </section>
-
-      <!-- POST LIST -->
-      <section id="view-postlist" class="view space-y-3">
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
-          <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <h3 class="font-bold">Post List</h3>
-            <div class="flex items-center gap-2">
-              <span id="post-count" class="tiny">0 posts</span>
-              <button type="button" class="btn btn-green text-xs" onclick="showView('addpost')"><i class="fa-solid fa-plus mr-1"></i>Add Post</button>
-            </div>
-          </div>
+          <div class="mb-4 flex items-center justify-between"><h3 class="font-bold">Saved Posts</h3><span id="post-count" class="tiny">0 posts</span></div>
           <div id="posts-list" class="space-y-3"></div>
         </div>
+      
       </section>
 
 <!-- CUSTOM ROWS -->
-      <section id="view-sections" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-sections" class="view space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Grid · Wide · Banner (Cover + စာ) · နှိပ်ရင် စာမျက်နှာသို့</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <input type="hidden" id="section-edit-id" value="">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Row ခေါင်းစဉ် *</label><input id="section-title" class="field" placeholder="Featured Destinations" oninput="updateSectionPreview()"></div>
@@ -1614,8 +1613,9 @@ main > div {
       </section>
 
       <!-- YOUTUBE -->
-      <section id="view-youtube" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-youtube" class="view space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန်</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="yt-active" checked onchange="updateYoutubePreview()"><span class="text-sm font-semibold">YouTube Section ပြမယ်</span></label>
 
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
@@ -1679,8 +1679,9 @@ main > div {
         </div>
       </section>
 
-      <section id="view-about" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-about" class="view space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Preview · စာအရောင် · Font weight</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="about-active" checked onchange="updateAboutPreview()"><span class="text-sm font-semibold">About ပြမယ်</span></label>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · About</span>
@@ -1707,8 +1708,9 @@ main > div {
         </div>
       </section>
 
-      <section id="view-social" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-social" class="view space-y-5">
+        <div><p class="mt-1 text-sm text-slate-400">Search icon ဘေး + Header / Footer မှာ ပြမယ် (Facebook, YouTube, TikTok, Viber)</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label class="toggle-row mb-1"><input type="checkbox" id="social-show-fb" checked><span class="text-sm font-semibold">Facebook ပြမယ်</span></label>
@@ -2352,7 +2354,7 @@ function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 
 const titles = {
   overview: 'Overview', pagepreview: 'Page Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
-  proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', gallery: 'Photo Gallery', posts: 'Latest Travel', addpost: 'Add Post', postlist: 'Post List',
+  proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', gallery: 'Photo Gallery', posts: 'Latest Travel', addpost: 'Add Post',
   sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
 };
 
@@ -2587,7 +2589,6 @@ function showView(name, button) {
     }
   }
   if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
-  if (name === 'postlist') { try { renderPostsList(); } catch(e){} }
   if (name === 'addpost') { fillPostCategorySelect(); if (typeof refreshPostSectionOptions === 'function') refreshPostSectionOptions(); }
   if (name === 'menu') renderMenuList();
   if (name === 'proud') {
@@ -2638,7 +2639,6 @@ function showView(name, button) {
 
 
 function loadAll() {
-  try { applyAdminStudio(); } catch (e) {}
   if ($('footer-year')) $('footer-year').textContent = new Date().getFullYear();
 
   const s = read('hh_settings', {});
@@ -6651,65 +6651,6 @@ function toggleFold(headEl) {
   panel.classList.toggle('open');
 }
 window.toggleFold = toggleFold;
-
-
-function getAdminStudio() {
-  try {
-    return JSON.parse(localStorage.getItem('hh_admin_studio') || '{}') || {};
-  } catch (e) { return {}; }
-}
-function applyAdminStudio() {
-  var s = getAdminStudio();
-  var name = (s.name || 'HTOO HTET').trim() || 'HTOO HTET';
-  var nameEl = document.getElementById('admin-studio-name');
-  if (nameEl && document.activeElement !== nameEl) nameEl.value = name;
-  var img = document.getElementById('admin-studio-logo-img');
-  var icon = document.getElementById('admin-studio-logo-icon');
-  if (s.logo) {
-    if (img) { img.src = s.logo; img.classList.remove('hidden'); }
-    if (icon) icon.classList.add('hidden');
-  } else {
-    if (img) { img.removeAttribute('src'); img.classList.add('hidden'); }
-    if (icon) icon.classList.remove('hidden');
-  }
-  // login modal title
-  var loginH = document.querySelector('#login-modal h1');
-  if (loginH) loginH.textContent = name;
-}
-function saveAdminStudio() {
-  var s = getAdminStudio();
-  var nameEl = document.getElementById('admin-studio-name');
-  s.name = (nameEl && nameEl.value || 'HTOO HTET').trim() || 'HTOO HTET';
-  try { localStorage.setItem('hh_admin_studio', JSON.stringify(s)); } catch (e) {}
-  applyAdminStudio();
-  toast('Admin နာမည် သိမ်းပြီး');
-}
-function onAdminStudioLogo(input) {
-  var file = input && input.files && input.files[0];
-  if (!file) return;
-  if (!file.type || file.type.indexOf('image/') !== 0) {
-    toast('Image ဖိုင်သာ', true);
-    input.value = '';
-    return;
-  }
-  var reader = new FileReader();
-  reader.onload = function() {
-    var s = getAdminStudio();
-    s.logo = reader.result;
-    try { localStorage.setItem('hh_admin_studio', JSON.stringify(s)); } catch (e) {
-      toast('ပုံကြီးလွန်း — ချုံ့ပြီး ပြန်တင်ပါ', true);
-      return;
-    }
-    applyAdminStudio();
-    toast('Admin ပုံ သိမ်းပြီး');
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
-}
-window.saveAdminStudio = saveAdminStudio;
-window.onAdminStudioLogo = onAdminStudioLogo;
-window.applyAdminStudio = applyAdminStudio;
-try { applyAdminStudio(); } catch (e) {}
 
 function toast(message, isError) {
   let t = $('toast');
