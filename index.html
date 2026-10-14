@@ -1076,51 +1076,47 @@ function loadBlogData() {
   const proudMeta = read('hh_proud_meta', {});
   const proudSec = $('proud-sponsors-section');
   const proudH = (proudMeta && proudMeta.logoH) ? Number(proudMeta.logoH) : 48;
-  const proudFrameH = (proudMeta && proudMeta.frameH) ? Number(proudMeta.frameH) : 72;
+  const proudFrameH = (proudMeta && proudMeta.frameH) ? Number(proudMeta.frameH) : 100;
   const titleX = proudMeta && proudMeta.titleX != null ? proudMeta.titleX : 4;
   const titleY = proudMeta && proudMeta.titleY != null ? proudMeta.titleY : 35;
-  const activeProud = (Array.isArray(proud) ? proud : []).filter(p => p && p.active !== false);
+  const titleFs = (proudMeta && proudMeta.titleFs) ? Number(proudMeta.titleFs) : 12;
+  const activeProud = (Array.isArray(proud) ? proud : []).filter(function(p) { return p && p.active !== false; });
   if (proudSec) {
     if (activeProud.length) {
       proudSec.classList.remove('hidden');
       const list = $('proud-sponsors-list');
       const label = $('proud-label');
-      if (label) {
-        label.className = 'text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/80 shrink-0';
-        label.style.left = '';
-        label.style.top = '';
-        label.textContent = (proudMeta && proudMeta.title) ? proudMeta.title : 'Our Proud Sponsors';
-      }
-      // Simple row: logo + name under it, click opens link
       if (list && list.parentElement) {
         const row = list.parentElement;
-        row.className = 'flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full';
-        row.style.height = '';
-        row.style.minHeight = '';
-        list.className = 'flex items-center gap-5 sm:gap-8 overflow-x-auto w-full justify-start sm:justify-center py-1';
-        list.innerHTML = activeProud.map(function(p) {
+        row.className = 'relative w-full';
+        // Extra room for name labels under logos
+        const extra = 22;
+        row.style.height = (proudFrameH + extra) + 'px';
+        row.style.minHeight = (proudFrameH + extra) + 'px';
+        if (label) {
+          label.className = 'absolute z-10 font-bold uppercase tracking-[0.15em] text-emerald-400/80';
+          label.style.left = titleX + '%';
+          label.style.top = titleY + '%';
+          label.style.fontSize = titleFs + 'px';
+          label.textContent = (proudMeta && proudMeta.title) ? proudMeta.title : 'Our Proud Sponsors';
+        }
+        list.className = 'absolute inset-0';
+        list.innerHTML = activeProud.map(function(p, idx) {
           const sz = p.size || proudH;
+          const x = p.x != null ? p.x : (30 + idx * 15);
+          const y = p.y != null ? p.y : 20;
           const href = (p.link && String(p.link).trim()) ? String(p.link).trim() : '';
           const name = safe(p.name || '');
           const logo = p.logo ? safe(p.logo) : '';
-          const inner = (logo
-            ? '<img src="' + logo + '" alt="' + name + '" class="max-w-full max-h-full object-contain" style="width:' + sz + 'px;height:' + sz + 'px" onerror="this.style.display=\'none\'">'
-            : '<span class="font-bold text-sm text-white/90">' + name + '</span>') +
-            (logo && name ? '<span class="mt-1.5 text-[11px] sm:text-xs font-semibold text-emerald-200/90 text-center leading-tight max-w-[6.5rem] line-clamp-2">' + name + '</span>' : '');
+          const body = logo
+            ? ('<div class="flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/30 group-hover:border-emerald-500/50" style="width:' + sz + 'px;height:' + sz + 'px">' +
+               '<img src="' + logo + '" alt="' + name + '" class="max-w-full max-h-full object-contain p-1" onerror="this.style.display=\'none\'"></div>' +
+               (name ? '<span class="mt-1 text-[10px] sm:text-[11px] font-semibold text-emerald-200/90 text-center leading-tight max-w-full truncate" style="width:' + sz + 'px">' + name + '</span>' : ''))
+            : ('<span class="text-white/90 font-bold text-sm">' + name + '</span>');
           if (href) {
-            return '<a href="' + safe(href) + '" target="_blank" rel="noopener noreferrer" class="group flex flex-col items-center shrink-0 opacity-90 hover:opacity-100 transition" title="' + name + '">' +
-              '<div class="flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/40 group-hover:border-emerald-500/50 p-1.5" style="min-width:' + sz + 'px;min-height:' + sz + 'px">' +
-              (logo ? '<img src="' + logo + '" alt="' + name + '" class="object-contain" style="width:' + sz + 'px;height:' + sz + 'px;max-width:100%;max-height:100%" onerror="this.style.display=\'none\'">' : '<span class="font-bold text-sm text-white/90 px-2">' + name + '</span>') +
-              '</div>' +
-              (name ? '<span class="mt-1.5 text-[11px] sm:text-xs font-semibold text-emerald-200/90 text-center leading-tight max-w-[7rem] line-clamp-2 group-hover:text-emerald-300">' + name + '</span>' : '') +
-              '</a>';
+            return '<a href="' + safe(href) + '" target="_blank" rel="noopener noreferrer" class="group absolute flex flex-col items-center opacity-90 hover:opacity-100 transition" style="left:' + x + '%;top:' + y + '%" title="' + name + '">' + body + '</a>';
           }
-          return '<div class="flex flex-col items-center shrink-0 opacity-90" title="' + name + '">' +
-            '<div class="flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/40 p-1.5" style="min-width:' + sz + 'px;min-height:' + sz + 'px">' +
-            (logo ? '<img src="' + logo + '" alt="' + name + '" class="object-contain" style="width:' + sz + 'px;height:' + sz + 'px;max-width:100%;max-height:100%" onerror="this.style.display=\'none\'">' : '<span class="font-bold text-sm text-white/90 px-2">' + name + '</span>') +
-            '</div>' +
-            (name ? '<span class="mt-1.5 text-[11px] sm:text-xs font-semibold text-emerald-200/90 text-center leading-tight max-w-[7rem] line-clamp-2">' + name + '</span>' : '') +
-            '</div>';
+          return '<div class="absolute flex flex-col items-center opacity-90" style="left:' + x + '%;top:' + y + '%" title="' + name + '">' + body + '</div>';
         }).join('');
       }
     } else {
@@ -1601,7 +1597,7 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 let publicFirebaseReady = false;
 let publicDb = null;
 try {
