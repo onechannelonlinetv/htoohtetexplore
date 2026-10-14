@@ -221,6 +221,25 @@ main > div {
 #hh-confirm-ok.ok-amber { background: #b45309; }
 #hh-confirm-ok.ok-amber:hover { background: #d97706; }
 
+
+.gal-list-card { position: relative; cursor: pointer; }
+.gal-list-card.selected {
+  outline: 2px solid #34d399;
+  box-shadow: 0 0 0 3px rgba(52,211,153,.25);
+}
+.gal-list-card .gal-check {
+  position: absolute; top: 6px; left: 6px; z-index: 5;
+  width: 22px; height: 22px; border-radius: 6px;
+  border: 2px solid rgba(255,255,255,.7);
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  color: transparent; font-size: 11px;
+  pointer-events: none;
+}
+.gal-list-card.selected .gal-check {
+  background: #059669; border-color: #34d399; color: #fff;
+}
+
 </style>
 </head>
 <body class="min-h-screen">
@@ -282,7 +301,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod33</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod43</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -1283,11 +1302,16 @@ main > div {
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h3 class="font-bold">Gallery Photos (သိမ်းပြီးသား)</h3>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span id="gal-count" class="tiny">0</span>
+              <span id="gal-selected-count" class="tiny text-emerald-400 hidden">0 selected</span>
               <button type="button" id="gal-view-all-btn" onclick="toggleGalListExpand()" class="btn btn-muted text-[11px] py-1 px-2.5 hidden">View all</button>
+              <button type="button" class="btn btn-muted text-[11px] py-1 px-2.5" onclick="toggleSelectAllGallery()"><i class="fa-solid fa-check-double mr-1"></i>Select all</button>
+              <button type="button" class="btn btn-red text-[11px] py-1 px-2.5" onclick="deleteSelectedGalleryPhotos()"><i class="fa-solid fa-trash mr-1"></i>Delete selected</button>
+              <button type="button" class="btn btn-red text-[11px] py-1 px-2.5" onclick="deleteAllGalleryPhotos()"><i class="fa-solid fa-trash-can mr-1"></i>Delete all</button>
             </div>
           </div>
+          <p class="tiny mb-2 text-slate-500">ပုံနှိပ် → ရွေး · Delete selected = ရွေးထားတာ ဖျက် · Delete all = အကုန်ဖျက်</p>
           <div id="gal-list" class="gal-list-collapsed"></div>
         </div>
       </section>
@@ -5403,29 +5427,15 @@ function onGalSlotFile(i, input) {
     try {
       var blob = file;
       try {
-        if (typeof compressImageFile === 'function') blob = await compressImageFile(file, 1000, 0.72);
+        if (typeof compressImageFile === 'function') blob = await compressImageFile(file, 900, 0.68);
       } catch (e) {}
 
       var dataUrl = await fileToDataURL(blob);
       applyGalSlotImg(i, dataUrl);
       _galSlotBlobs[i] = blob;
 
-      // Storage optional (Blaze). Max 8s then data URL.
-      var finalUrl = dataUrl;
-      if (adminStorage) {
-        try {
-          finalUrl = await Promise.race([
-            uploadBlobToStorage(blob, i),
-            new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Storage slow')); }, 8000); })
-          ]);
-          applyGalSlotImg(i, finalUrl);
-        } catch (e) {
-          console.warn('Storage skip', e);
-          finalUrl = dataUrl;
-        }
-      }
-
-      var ok = await saveOneGalleryImage(finalUrl, i);
+      // INSTANT: save to Gallery Photos list with dataUrl first (no wait for Storage)
+      var ok = await saveOneGalleryImage(dataUrl, i);
       if (ok) {
         clearGalSlot(i);
         try {
@@ -5435,12 +5445,37 @@ function onGalSlotFile(i, input) {
           if (list) {
             list.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             list.style.outline = '2px solid #34d399';
-            setTimeout(function(){ list.style.outline = ''; }, 1200);
+            setTimeout(function(){ list.style.outline = ''; }, 900);
           }
         } catch (e) { console.warn(e); }
-        toast('✓ ပုံ Gallery ထဲ သိမ်းပြီး');
+        toast('✓ Gallery Photos ထဲ ရောက်ပြီး');
       } else {
-        toast('သိမ်းမရပါ — Login / Storage စစ်ပါ', true);
+        toast('သိမ်းမရပါ — Login စစ်ပါ', true);
+        input.value = '';
+        return;
+      }
+
+      // Background: try Storage URL and patch the saved photo (optional, non-blocking)
+      if (adminStorage) {
+        try {
+          var httpsUrl = await Promise.race([
+            uploadBlobToStorage(blob, i),
+            new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Storage slow')); }, 10000); })
+          ]);
+          if (httpsUrl && String(httpsUrl).indexOf('http') === 0) {
+            var g2 = getGalleryData();
+            if (g2.photos && g2.photos[0] && g2.photos[0].img === dataUrl) {
+              g2.photos[0].img = httpsUrl;
+              setGalleryData(g2);
+              if (adminDb && adminUser) {
+                try { adminDb.ref('siteData/hh_gallery').set(g2); } catch (e) {}
+              }
+              renderGalleryList();
+            }
+          }
+        } catch (e) {
+          console.warn('Storage background skip', e);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -5641,11 +5676,38 @@ function renderGalleryList() {
     console.warn('[gallery] #gal-list not in DOM');
     return;
   }
+  if (!window._galSelected) window._galSelected = {};
   var g = getGalleryData();
   var photos = (g && g.photos) ? g.photos : [];
   if (!Array.isArray(photos)) photos = [];
   var countEl = document.getElementById('gal-count');
   if (countEl) countEl.textContent = photos.length + ' photos';
+  var selCount = 0;
+  Object.keys(window._galSelected).forEach(function(k) {
+    if (window._galSelected[k]) selCount++;
+  });
+  // prune selections that no longer exist
+  var validIds = {};
+  photos.forEach(function(p, i) {
+    var id = (p && p.id) ? String(p.id) : ('idx-' + i);
+    validIds[id] = true;
+  });
+  Object.keys(window._galSelected).forEach(function(k) {
+    if (!validIds[k]) delete window._galSelected[k];
+  });
+  selCount = 0;
+  Object.keys(window._galSelected).forEach(function(k) {
+    if (window._galSelected[k]) selCount++;
+  });
+  var selEl = document.getElementById('gal-selected-count');
+  if (selEl) {
+    if (selCount > 0) {
+      selEl.textContent = selCount + ' selected';
+      selEl.classList.remove('hidden');
+    } else {
+      selEl.classList.add('hidden');
+    }
+  }
   var btn = document.getElementById('gal-view-all-btn');
   if (btn) {
     if (photos.length > 8) {
@@ -5655,7 +5717,6 @@ function renderGalleryList() {
       btn.classList.add('hidden');
     }
   }
-  // Always expand when 8 or fewer so latest photo is visible
   if (photos.length <= 8) _galListExpanded = true;
   list.classList.toggle('gal-list-collapsed', !_galListExpanded && photos.length > 8);
   if (!photos.length) {
@@ -5663,33 +5724,125 @@ function renderGalleryList() {
     list.classList.remove('gal-list-collapsed');
     return;
   }
-  // Build DOM safely — avoid safe() on huge data-URLs
   list.innerHTML = '';
   photos.forEach(function(p, i) {
     if (!p) return;
+    var id = p.id ? String(p.id) : ('idx-' + i);
+    var selected = !!window._galSelected[id];
     var card = document.createElement('div');
-    card.className = 'gal-list-card group';
-    card.title = p.caption || p.category || 'Photo';
+    card.className = 'gal-list-card group' + (selected ? ' selected' : '');
+    card.title = (p.caption || p.category || 'Photo') + ' — နှိပ်ပြီး ရွေး';
+    card.dataset.galId = id;
+    card.dataset.galIndex = String(i);
+
+    var check = document.createElement('div');
+    check.className = 'gal-check';
+    check.innerHTML = '<i class="fa-solid fa-check"></i>';
+    card.appendChild(check);
+
     var img = document.createElement('img');
     img.alt = '';
     img.loading = 'lazy';
     var src = p.img || p.url || '';
     if (src) img.src = src;
     card.appendChild(img);
+
     var del = document.createElement('button');
     del.type = 'button';
     del.className = 'gal-del';
     del.title = 'Delete';
     del.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    del.onclick = (function(idx){ return function(e){ e.stopPropagation(); deleteGalleryPhoto(idx); }; })(i);
+    del.onclick = (function(idx) {
+      return function(e) {
+        e.stopPropagation();
+        deleteGalleryPhoto(idx);
+      };
+    })(i);
     card.appendChild(del);
+
     var meta = document.createElement('div');
     meta.className = 'gal-list-meta';
     meta.textContent = p.caption || p.category || '';
     card.appendChild(meta);
+
+    card.onclick = (function(photoId) {
+      return function(e) {
+        if (e.target.closest && e.target.closest('.gal-del')) return;
+        window._galSelected[photoId] = !window._galSelected[photoId];
+        if (!window._galSelected[photoId]) delete window._galSelected[photoId];
+        renderGalleryList();
+      };
+    })(id);
+
     list.appendChild(card);
   });
 }
+
+function toggleSelectAllGallery() {
+  var g = getGalleryData();
+  var photos = (g && g.photos) ? g.photos : [];
+  if (!window._galSelected) window._galSelected = {};
+  var allSelected = photos.length > 0 && photos.every(function(p, i) {
+    var id = p.id ? String(p.id) : ('idx-' + i);
+    return !!window._galSelected[id];
+  });
+  if (allSelected) {
+    window._galSelected = {};
+  } else {
+    photos.forEach(function(p, i) {
+      var id = p.id ? String(p.id) : ('idx-' + i);
+      window._galSelected[id] = true;
+    });
+  }
+  renderGalleryList();
+}
+
+async function deleteSelectedGalleryPhotos() {
+  var g = getGalleryData();
+  var photos = (g && g.photos) ? g.photos : [];
+  if (!window._galSelected) window._galSelected = {};
+  var ids = Object.keys(window._galSelected).filter(function(k) { return window._galSelected[k]; });
+  if (!ids.length) {
+    toast('အရင် ပုံရွေးပါ (နှိပ်ပြီး select)', true);
+    return;
+  }
+  if (!(await confirmDialog(ids.length + ' ပုံ ဖျက်မလား?', { title: 'ရွေးထားသော ပုံများ ဖျက်မယ်', okText: 'Delete' }))) return;
+  var idSet = {};
+  ids.forEach(function(id) { idSet[id] = true; });
+  g.photos = photos.filter(function(p, i) {
+    var id = p.id ? String(p.id) : ('idx-' + i);
+    return !idSet[id];
+  });
+  g.photos.forEach(function(p, i) { p.order = i; });
+  window._galSelected = {};
+  setGalleryData(g);
+  // sync firebase
+  if (adminDb && adminUser) {
+    try { adminDb.ref('siteData/hh_gallery').set(g); } catch (e) {}
+  }
+  renderGalleryList();
+  try { renderOverview(); } catch (e) {}
+  toast('✓ ' + ids.length + ' ပုံ ဖျက်ပြီး');
+}
+
+async function deleteAllGalleryPhotos() {
+  var g = getGalleryData();
+  var n = (g.photos && g.photos.length) || 0;
+  if (!n) { toast('ပုံမရှိပါ'); return; }
+  if (!(await confirmDialog('Gallery ပုံ ' + n + ' ခု အကုန်ဖျက်မလား? ပြန်မရပါ။', { title: 'Delete all photos', okText: 'Delete all' }))) return;
+  g.photos = [];
+  window._galSelected = {};
+  setGalleryData(g);
+  if (adminDb && adminUser) {
+    try { adminDb.ref('siteData/hh_gallery').set(g); } catch (e) {}
+  }
+  renderGalleryList();
+  try { renderOverview(); } catch (e) {}
+  toast('✓ Gallery ပုံအားလုံး ဖျက်ပြီး');
+}
+window.toggleSelectAllGallery = toggleSelectAllGallery;
+window.deleteSelectedGalleryPhotos = deleteSelectedGalleryPhotos;
+window.deleteAllGalleryPhotos = deleteAllGalleryPhotos;
 
 
 function moveGalleryPhoto(i, d) {
