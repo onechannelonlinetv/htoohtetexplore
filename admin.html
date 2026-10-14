@@ -44,8 +44,7 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 #sp-prev-badge,#sp-prev-title,#sp-prev-desc{position:absolute}
 #sp-prev-badge .sp-resize-handle,#sp-prev-title .sp-resize-handle,#sp-prev-desc .sp-resize-handle{pointer-events:auto}
 
-#hero-live-preview [id^="hero-prev-"]{z-index:30!important;pointer-events:auto!important}
-#up-live-preview [id^="up-prev-"]{z-index:30!important;pointer-events:auto!important}
+#hero-live-preview [id^="hero-prev-"]{z-index:10}
 #content-live-preview img{max-width:100%;border-radius:10px;display:block;margin:8px 0}
 #sp-prev-logo{width:100%!important;height:100%!important;object-fit:contain!important}
 .preview-thumb{max-height:140px!important;max-width:240px!important;object-fit:contain!important;display:block!important}
@@ -378,10 +377,10 @@ main > div {
                 <div id="hero-live-preview" class="relative overflow-hidden border border-slate-700 select-none" style="width:100%;max-width:100%;height:360px;background:linear-gradient(135deg,#0a1f18,#061510);cursor:grab;border-radius:12px;">
                   <div id="hero-prev-overlay" class="absolute inset-0 pointer-events-none z-[1]" style="background:linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.25), transparent)"></div>
                   <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ဖိဆွဲရွှေ့ · ထောင့် = ဆိုဒ်</p>
-                  <div id="hero-prev-label" class="absolute cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%;top:18%;color:#f5c518;font-size:10px;touch-action:none;">Travel Journal<span class="sp-resize-handle" data-resize="hero-label" title="ဆိုဒ်"></span></div>
-                  <div id="hero-prev-title" class="absolute cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%;top:32%;font-size:16px;touch-action:none;">New Places.<span class="sp-resize-handle" data-resize="hero-title" title="ဆိုဒ်"></span></div>
-                  <div id="hero-prev-desc" class="absolute cursor-move border border-dashed border-white/20 rounded px-1.5 py-0.5" style="left:8%;top:55%;color:rgba(255,255,255,0.75);font-size:11px;touch-action:none;">Description…<span class="sp-resize-handle" data-resize="hero-desc" title="ဆိုဒ်"></span></div>
-                  <div id="hero-prev-sign" class="absolute cursor-move border border-dashed border-emerald-400/30 rounded px-1.5 py-0.5 text-[10px]" style="left:8%;top:78%;color:#6ee7b7;touch-action:none;"><span class="sp-resize-handle" data-resize="hero-sign" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%;top:18%;color:#f5c518;font-size:10px;touch-action:none;">Travel Journal<span class="sp-resize-handle" data-resize="hero-label" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%;top:32%;font-size:16px;touch-action:none;">New Places.<span class="sp-resize-handle" data-resize="hero-title" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1.5 py-0.5" style="left:8%;top:55%;color:rgba(255,255,255,0.75);font-size:11px;touch-action:none;">Description…<span class="sp-resize-handle" data-resize="hero-desc" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-sign" class="absolute z-10 cursor-move border border-dashed border-emerald-400/30 rounded px-1.5 py-0.5 text-[10px]" style="left:8%;top:78%;color:#6ee7b7;touch-action:none;"><span class="sp-resize-handle" data-resize="hero-sign" title="ဆိုဒ်"></span></div>
                 </div>
               </div>
 
@@ -669,24 +668,20 @@ main > div {
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="md:col-span-2">
-              <label class="label">Section ခေါင်းစဉ် (Live site) · Preview မှာ drag နဲ့ ရွှေ့လို့ရ</label>
+              <label class="label">Section ခေါင်းစဉ် (Live site)</label>
               <input id="proud-section-title" class="field" placeholder="Our Proud Sponsors" value="Our Proud Sponsors" oninput="saveProudMeta(); updateProudPreview();">
-            </div>
-            <div>
-              <label class="label">ခေါင်းစဉ် စာအရွယ် <span id="val-proud-title-fs" class="range-val">12px</span></label>
-              <input id="proud-title-fs" type="range" min="10" max="28" value="12" class="w-full accent-emerald-500" oninput="if($('val-proud-title-fs'))$('val-proud-title-fs').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
             </div>
             <div>
               <label class="label">Bar အမြင့်</label>
               <div class="flex items-center gap-2">
-                <input id="proud-frame-h" type="range" min="56" max="240" value="100" class="w-full" oninput="if($('val-proud-frame-h'))$('val-proud-frame-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
-                <span id="val-proud-frame-h" class="range-val">100px</span>
+                <input id="proud-frame-h" type="range" min="56" max="180" value="80" class="w-full" oninput="if($('val-proud-frame-h'))$('val-proud-frame-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
+                <span id="val-proud-frame-h" class="range-val">80px</span>
               </div>
             </div>
             <div>
               <label class="label">Logo အရွယ် (default)</label>
               <div class="flex items-center gap-2">
-                <input id="proud-logo-h" type="range" min="24" max="140" value="48" class="w-full" oninput="if($('val-proud-logo-h'))$('val-proud-logo-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
+                <input id="proud-logo-h" type="range" min="24" max="100" value="48" class="w-full" oninput="if($('val-proud-logo-h'))$('val-proud-logo-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
                 <span id="val-proud-logo-h" class="range-val">48px</span>
               </div>
             </div>
@@ -703,8 +698,8 @@ main > div {
               <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · mouse ဖိပြီး ဆွဲ / ထောင့် resize</span>
               <span class="text-[10px] text-slate-500">Add မနှိပ်ခင် staging logo ပါ ချိန်လို့ရ</span>
             </div>
-            <div id="proud-live-frame" class="relative w-full rounded-lg border border-slate-600 bg-[#0a1220] overflow-visible select-none" style="height:100px;touch-action:none">
-              <p id="proud-prev-title" class="absolute z-40 text-[12px] font-bold uppercase tracking-[0.12em] text-emerald-400 cursor-grab px-1.5 py-0.5 whitespace-nowrap rounded border border-emerald-700/40 bg-black/40" style="left:3%;top:36%;pointer-events:auto;user-select:none;touch-action:none;z-index:50;" title="Drag to move">Our Proud Sponsors</p>
+            <div id="proud-live-frame" class="relative w-full rounded-lg border border-slate-600 bg-[#0a1220] overflow-hidden select-none" style="height:80px;touch-action:none">
+              <p id="proud-prev-title" class="absolute z-30 text-[11px] sm:text-xs font-bold uppercase tracking-[0.12em] text-emerald-400 cursor-grab px-1 whitespace-nowrap" style="left:3%;top:36%;">Our Proud Sponsors</p>
               <div id="proud-preview-bar" class="absolute inset-0 z-20"></div>
               <div id="proud-staging" class="absolute inset-0 z-25 pointer-events-none"></div>
             </div>
@@ -968,18 +963,19 @@ main > div {
             </label>
             <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="height:160px;background:#1a1a1a;">
               <div class="absolute inset-0 pointer-events-none" style="z-index:1;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.15));"></div>
-              <span id="up-prev-label" class="absolute cursor-grab border border-dashed border-yellow-400/50 rounded px-1.5 py-0.5 font-bold uppercase select-none" style="left:6%;top:40%;color:#f5c518;font-size:10px;touch-action:none;z-index:30;pointer-events:auto;">Featured<span class="sp-resize-handle" data-resize="up-label" title="ဆိုဒ်"></span></span>
-              <div id="up-prev-title" class="absolute cursor-grab border border-dashed border-white/40 rounded px-1.5 py-0.5 font-black text-white select-none" style="left:6%;top:55%;font-size:14px;touch-action:none;max-width:85%;z-index:30;pointer-events:auto;">Title<span class="sp-resize-handle" data-resize="up-title" title="ဆိုဒ်"></span></div>
-              <div id="up-prev-desc" class="absolute cursor-grab border border-dashed border-white/30 rounded px-1.5 py-0.5 text-white/70 select-none" style="left:6%;top:72%;font-size:11px;touch-action:none;max-width:80%;z-index:30;pointer-events:auto;">Desc<span class="sp-resize-handle" data-resize="up-desc" title="ဆိုဒ်"></span></div>
+              <span id="up-prev-label" class="absolute z-10 cursor-grab border border-dashed border-yellow-400/40 rounded px-1 font-bold uppercase" style="left:6%;top:40%;color:#f5c518;font-size:10px;touch-action:none;">Featured</span>
+              <div id="up-prev-title" class="absolute z-10 cursor-grab border border-dashed border-white/30 rounded px-1 font-black text-white" style="left:6%;top:55%;font-size:14px;touch-action:none;max-width:85%;">Title</div>
+              <div id="up-prev-desc" class="absolute z-10 cursor-grab border border-dashed border-white/20 rounded px-1 text-white/70" style="left:6%;top:72%;font-size:11px;touch-action:none;max-width:80%;">Desc</div>
             </div>
-            <p class="tiny mt-1 text-emerald-400/80">စာတစ်ကြောင်းချင်း Preview မှာ <b>ဖိဆွဲ</b> ရွှေ့ပါ · ထောင့် handle = ဆိုဒ်</p>
-            <!-- position stored in hidden fields (drag updates these) -->
-            <input type="hidden" id="up-label-x" value="6"><input type="hidden" id="up-label-y" value="40">
-            <input type="hidden" id="up-title-x" value="6"><input type="hidden" id="up-title-y" value="55">
-            <input type="hidden" id="up-desc-x" value="6"><input type="hidden" id="up-desc-y" value="72">
-            <span id="val-ulx" class="hidden">6</span><span id="val-uly" class="hidden">40</span>
-            <span id="val-utx" class="hidden">6</span><span id="val-uty" class="hidden">55</span>
-            <span id="val-udx" class="hidden">6</span><span id="val-udy" class="hidden">72</span>
+            <p class="tiny mt-1">စာတစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
+            <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
+              <div>Label X <input type="range" id="up-label-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-ulx">6</span>%</div>
+              <div>Label Y <input type="range" id="up-label-y" min="0" max="100" value="40" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uly">40</span>%</div>
+              <div>Title X <input type="range" id="up-title-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-utx">6</span>%</div>
+              <div>Title Y <input type="range" id="up-title-y" min="0" max="100" value="55" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uty">55</span>%</div>
+              <div>Desc X <input type="range" id="up-desc-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udx">6</span>%</div>
+              <div>Desc Y <input type="range" id="up-desc-y" min="0" max="100" value="72" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udy">72</span>%</div>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -1112,31 +1108,25 @@ main > div {
             </div>
             <div class="md:col-span-2"><label class="label">Short Description * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" oninput="updatePostPreview()" placeholder="အကျဉ်းချုပ်..."></textarea></div>
             <div class="md:col-span-2">
-              <label class="label">Article Content * — ခေါင်းစဉ် / စာ / ပုံ / Photo Gallery ရောရေးနိုင်</label>
-              <div class="mb-2 space-y-2">
-                <div class="flex gap-2 flex-wrap items-center">
-                  <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('# ')"># ခေါင်းစဉ်ကြီး</button>
-                  <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('## ')">## ခေါင်းစဉ်</button>
-                  <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('### ')">### ခေါင်းစဉ်သေး</button>
-                  <label class="btn btn-green cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>ပုံ ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
-                  <select id="content-img-size" class="field text-xs py-1" style="width:auto;min-width:100px">
-                    <option value="sm">ပုံ သေး</option>
-                    <option value="md" selected>ပုံ မှန်</option>
-                    <option value="lg">ပုံ ကြီး</option>
-                    <option value="full">ပုံ အပြည့်</option>
-                  </select>
-                </div>
-                <div class="rounded-xl border border-emerald-700/50 bg-emerald-950/30 p-2.5 flex flex-wrap gap-2 items-center">
-                  <span class="text-[11px] font-bold text-emerald-300 uppercase tracking-wider shrink-0"><i class="fa-solid fa-table-cells mr-1"></i>Photo Gallery</span>
-                  <label class="btn btn-green cursor-pointer text-xs py-2"><i class="fa-solid fa-images mr-1"></i>Gallery ပုံ ထည့် (2–3)<input type="file" accept="image/*" multiple class="hidden" onchange="insertGalleryInContent(this)"></label>
-                  <select id="content-gallery-layout" class="field text-xs py-1" style="width:auto;min-width:130px" title="Gallery ပုံစံ">
-                    <option value="1-2" selected>1 ကြီး + 2 သေး</option>
-                    <option value="2-1">2 သေး + 1 ကြီး</option>
-                    <option value="2">2 ဘေးချင်း</option>
-                    <option value="3">3 ဘေးချင်း</option>
-                  </select>
-                  <span class="tiny text-slate-400">ပုံ 2 သို့မဟုတ် 3 ပုံ ရွေးပါ · Preview မှာ Layout ပြောင်း / ဖျက် ရပါသည်</span>
-                </div>
+              <label class="label">Article Content * — ခေါင်းစဉ် / စာ / ပုံ ရောရေးနိုင်</label>
+              <div class="flex gap-2 mb-2 flex-wrap items-center">
+                <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('# ')"># ခေါင်းစဉ်ကြီး</button>
+                <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('## ')">## ခေါင်းစဉ်</button>
+                <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('### ')">### ခေါင်းစဉ်သေး</button>
+                <label class="btn btn-green cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>ပုံ ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
+                <label class="btn btn-muted cursor-pointer text-xs py-2" title="2-3 ပုံ collage"><i class="fa-solid fa-table-cells mr-1"></i>Gallery 2-3 ပုံ<input type="file" accept="image/*" multiple class="hidden" onchange="insertGalleryInContent(this)"></label>
+                <select id="content-gallery-layout" class="field text-xs py-1" style="width:auto;min-width:110px" title="Gallery ပုံစံ">
+                  <option value="1-2" selected>1 ကြီး + 2 သေး</option>
+                  <option value="2-1">2 သေး + 1 ကြီး</option>
+                  <option value="2">2 ဘေးချင်း</option>
+                  <option value="3">3 ဘေးချင်း</option>
+                </select>
+                <select id="content-img-size" class="field text-xs py-1" style="width:auto;min-width:100px">
+                  <option value="sm">ပုံ သေး</option>
+                  <option value="md" selected>ပုံ မှန်</option>
+                  <option value="lg">ပုံ ကြီး</option>
+                  <option value="full">ပုံ အပြည့်</option>
+                </select>
               </div>
               <textarea id="admin-post-content" class="field min-h-[320px] sm:min-h-[420px] w-full text-base leading-relaxed" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="# ခေါင်းစဉ် ဒီလို ရေးပါ&#10;&#10;စာသား ဒီမှာ...&#10;&#10;ပုံထည့်ရန် အပေါ်က ခလုတ် သုံးပါ" oninput="updateContentPreview()"></textarea>
               <div class="mt-3 rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3">
@@ -1160,11 +1150,7 @@ main > div {
                   <button type="button" class="btn btn-green shrink-0" onclick="addCustomCategory()"><i class="fa-solid fa-plus mr-1"></i>Add Category</button>
                 </div>
               </div>
-              <p class="tiny mt-1">မူလ: Travel Story, Guide, Food, Culture, Adventure — အသစ်ရေးပြီး Add နှိပ်ပါ · အောက်က စာရင်းမှာ Edit / Delete ရပါသည်</p>
-              <div id="categories-manager" class="mt-3 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3">
-                <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-tags mr-1"></i>Categories စီမံ (Add / Edit / Delete)</p>
-                <div id="categories-list" class="space-y-2"></div>
-              </div>
+              <p class="tiny mt-1">မူလ: Travel Story, Guide, Food, Culture, Adventure — အသစ်ရေးပြီး Add နှိပ်ပါ</p>
             </div>
             <div><label class="label">Travel Date</label><input id="admin-post-travel-date" type="date" class="field"></div>
             <div><label class="label">Author</label><input id="admin-post-author" class="field" placeholder="Htoo Htet" value="Htoo Htet"></div>
@@ -1345,7 +1331,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_proud_meta','hh_categories'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_proud_meta'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1605,22 +1591,13 @@ async function insertGalleryInContent(inputEl) {
     inputEl.value = '';
     return;
   }
-  toast('Photo Gallery ပုံ ' + files.length + ' ခု ပြင်ဆင်နေသည်…');
+  toast('Gallery ပုံ ' + files.length + ' ခု ပြင်ဆင်နေသည်…');
   try {
     var cids = [];
-    var blobs = [];
     for (var i = 0; i < files.length; i++) {
       if (!files[i].type.startsWith('image/')) continue;
       var dataUrl = await fileToCompressedDataURL(files[i]);
-      var cid = storeContentImage(dataUrl);
-      cids.push(cid);
-      // keep compressed blob for optional Storage upload
-      try {
-        var b = await withTimeout(compressImageFile(files[i], 900, 0.62), 8000);
-        blobs.push({ cid: cid, blob: b });
-      } catch (e) {
-        blobs.push({ cid: cid, blob: files[i] });
-      }
+      cids.push(storeContentImage(dataUrl));
     }
     if (cids.length < 2) { toast('ပုံ 2 ခုအထက် လိုအပ်သည်'); inputEl.value = ''; return; }
     var layout = ($('content-gallery-layout') && $('content-gallery-layout').value) || '1-2';
@@ -1632,25 +1609,7 @@ async function insertGalleryInContent(inputEl) {
     ta.value = ta.value.slice(0, pos) + block + ta.value.slice(pos);
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
-    toast('Photo Gallery Preview ထဲ ပေါ်ပါပြီ');
-    // Upload each image to Firebase Storage so gallery survives after refresh
-    if (adminUser && adminStorage && blobs.length) {
-      blobs.forEach(function(item, idx) {
-        withTimeout(
-          adminStorage.ref('uploads/gallery_' + Date.now() + '_' + idx + '.jpg').put(item.blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
-          20000
-        ).then(function(httpsUrl) {
-          if (!httpsUrl) return;
-          contentImageStore[item.cid] = httpsUrl;
-          if (ta.value.indexOf('cid:' + item.cid) !== -1) {
-            ta.value = ta.value.split('cid:' + item.cid).join(httpsUrl);
-          }
-          if (typeof updateContentPreview === 'function') updateContentPreview();
-        }).catch(function(err) {
-          console.warn('Gallery storage upload failed (cid Base64 kept):', err && err.message);
-        });
-      });
-    }
+    toast('Gallery ထည့်ပြီး — Preview ကြည့်ပါ');
   } catch (err) {
     toast('Gallery မထည့်နိုင်: ' + (err.message || ''));
   }
@@ -1706,15 +1665,10 @@ function applyLiveBg(container, url, posX, posY, scale) {
     container.insertBefore(img, container.firstChild);
   }
   Array.from(container.children).forEach(function(ch) {
-    if (ch === img || (ch.classList && ch.classList.contains('live-bg-img'))) return;
-    // never lower text/label layers
-    if (ch.id && (ch.id.indexOf('hero-prev-') === 0 || ch.id.indexOf('up-prev-') === 0 || ch.id.indexOf('sp-prev-') === 0)) {
-      ch.style.zIndex = '30';
-      ch.style.pointerEvents = 'auto';
-      return;
+    if (ch !== img && !ch.classList.contains('live-bg-img')) {
+      const z = parseInt(ch.style.zIndex || '0', 10);
+      if (z < 1) ch.style.zIndex = '1';
     }
-    const z = parseInt(ch.style.zIndex || '0', 10);
-    if (isNaN(z) || z < 1) ch.style.zIndex = '1';
   });
   const px = (posX != null && !isNaN(Number(posX))) ? Number(posX) : 50;
   const py = (posY != null && !isNaN(Number(posY))) ? Number(posY) : 50;
@@ -2129,15 +2083,6 @@ function showView(name, button) {
   $('mobile-nav').classList.add('hidden');
   if (name === 'sections') renderHomeSectionsList();
   if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
-  if (name === 'addpost') {
-    try {
-      if (typeof renderPostsList === 'function') renderPostsList();
-      if (typeof refreshCategoryOptions === 'function') refreshCategoryOptions();
-      if (typeof renderCategoriesList === 'function') renderCategoriesList();
-      if (typeof updatePostPreview === 'function') updatePostPreview();
-      if (typeof updateContentPreview === 'function') updateContentPreview();
-    } catch (e) { console.warn(e); }
-  }
   if (name === 'menu') renderMenuList();
   if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
   if (name === 'hero' && typeof updateHeroPreview === 'function') updateHeroPreview();
@@ -2145,15 +2090,7 @@ function showView(name, button) {
   if (name === 'upcoming' && typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
   if (name === 'youtube' && typeof updateYoutubePreview === 'function') updateYoutubePreview();
   if (name === 'about' && typeof updateAboutPreview === 'function') updateAboutPreview();
-  if (name === 'settings') {
-    if (typeof updateSizePreview === 'function') updateSizePreview();
-    setTimeout(function() {
-      try {
-        if (typeof updateHeroPreview === 'function') updateHeroPreview();
-        if (typeof initHeroLineDrag === 'function') initHeroLineDrag();
-      } catch (e) {}
-    }, 100);
-  }
+  if (name === 'settings' && typeof updateSizePreview === 'function') updateSizePreview();
 }
 
 function loadAll() {
@@ -2715,9 +2652,8 @@ function initHeroLineDrag() {
     el.style.cursor = 'grab';
     el.style.userSelect = 'none';
     el.style.touchAction = 'none';
-    el.style.zIndex = '30';
+    el.style.zIndex = '20';
     el.style.pointerEvents = 'auto';
-    el.style.position = 'absolute';
   });
 
   if (box._heroDelegated) return;
@@ -2747,16 +2683,15 @@ function initHeroLineDrag() {
     if (!t) return;
     const p = pt(e);
     const rect = box.getBoundingClientRect();
-    if (rect.width < 10 || rect.height < 10) return;
 
     if (t.classList && t.classList.contains('sp-resize-handle')) {
       const key = t.getAttribute('data-resize');
       const cfg = sizeMap[key];
       if (!cfg) return;
-      window._heroDragState = {
+      _heroDragState = {
         type: 'resize',
         input: cfg.input, min: cfg.min, max: cfg.max,
-        sy: p.clientY, ox: parseInt($(cfg.input) && $(cfg.input).value || '12', 10)
+        sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10)
       };
       e.preventDefault();
       e.stopPropagation();
@@ -2765,7 +2700,7 @@ function initHeroLineDrag() {
 
     const cfg = map[t.id];
     if (!cfg) return;
-    window._heroDragState = {
+    _heroDragState = {
       type: 'move',
       el: t, cfg: cfg,
       startX: p.clientX, startY: p.clientY,
@@ -2780,16 +2715,16 @@ function initHeroLineDrag() {
   }
 
   function onMove(e) {
-    if (!window._heroDragState) return;
+    if (!_heroDragState) return;
     const p = pt(e);
-    const st = window._heroDragState;
-    if (st.type === 'resize') {
-      const delta = Math.round((st.sy - p.clientY) / 3);
-      const nv = Math.max(st.min, Math.min(st.max, st.ox + delta));
-      if ($(st.input)) $(st.input).value = nv;
-      const lfs = parseInt($('hero-label-fs') && $('hero-label-fs').value || '12', 10);
-      const tfs = parseInt($('hero-title-fs') && $('hero-title-fs').value || '28', 10);
-      const dfs = parseInt($('hero-desc-fs') && $('hero-desc-fs').value || '14', 10);
+    if (_heroDragState.type === 'resize') {
+      const delta = Math.round((_heroDragState.sy - p.clientY) / 3);
+      const nv = Math.max(_heroDragState.min, Math.min(_heroDragState.max, _heroDragState.ox + delta));
+      if ($(_heroDragState.input)) $(_heroDragState.input).value = nv;
+      // light update: only font sizes on preview els
+      const lfs = parseInt($('hero-label-fs')?.value || '12', 10);
+      const tfs = parseInt($('hero-title-fs')?.value || '28', 10);
+      const dfs = parseInt($('hero-desc-fs')?.value || '14', 10);
       if ($('hero-prev-label')) $('hero-prev-label').style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
       if ($('hero-prev-title')) $('hero-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
       if ($('hero-prev-desc')) $('hero-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
@@ -2797,30 +2732,31 @@ function initHeroLineDrag() {
       if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
       if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
       try { updatePhoneHeroPreview(); } catch (err) {}
-    } else if (st.type === 'move') {
-      const nx = Math.max(-5, Math.min(105, st.origL + ((p.clientX - st.startX) / st.rectW) * 100));
-      const ny = Math.max(-5, Math.min(105, st.origT + ((p.clientY - st.startY) / st.rectH) * 100));
-      st.el.style.left = nx + '%';
-      st.el.style.top = ny + '%';
-      if ($(st.cfg.xi)) $(st.cfg.xi).value = Math.round(nx);
-      if ($(st.cfg.yi)) $(st.cfg.yi).value = Math.round(ny);
-      if ($(st.cfg.vx)) $(st.cfg.vx).textContent = Math.round(nx);
-      if ($(st.cfg.vy)) $(st.cfg.vy).textContent = Math.round(ny);
+    } else if (_heroDragState.type === 'move') {
+      const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
+      const nx = Math.max(-5, Math.min(105, origL + ((p.clientX - startX) / rectW) * 100));
+      const ny = Math.max(-5, Math.min(105, origT + ((p.clientY - startY) / rectH) * 100));
+      el.style.left = nx + '%';
+      el.style.top = ny + '%';
+      if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
+      if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
+      if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
+      if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
       try { updatePhoneHeroPreview(); } catch (err) {}
     }
     if (e.cancelable) e.preventDefault();
   }
 
   function onUp() {
-    if (window._heroDragState && window._heroDragState.type === 'move' && window._heroDragState.el) {
-      window._heroDragState.el.style.cursor = 'grab';
-      window._heroDragState.el.style.borderColor = '';
+    if (_heroDragState && _heroDragState.type === 'move' && _heroDragState.el) {
+      _heroDragState.el.style.cursor = 'grab';
+      _heroDragState.el.style.borderColor = '';
     }
-    window._heroDragState = null;
+    _heroDragState = null;
   }
 
-  box.addEventListener('mousedown', onStart, true);
-  box.addEventListener('touchstart', onStart, { passive: false, capture: true });
+  box.addEventListener('mousedown', onStart);
+  box.addEventListener('touchstart', onStart, { passive: false });
   window.addEventListener('mousemove', onMove);
   window.addEventListener('touchmove', onMove, { passive: false });
   window.addEventListener('mouseup', onUp);
@@ -3455,43 +3391,27 @@ function updateUpcomingPreview() {
   const label = $('up-prev-label');
   const title = $('up-prev-title');
   const desc = $('up-prev-desc');
-  function setUpPrevText(el, textVal, resizeKey) {
-    if (!el) return;
-    var handle = el.querySelector('.sp-resize-handle');
-    while (el.firstChild) el.removeChild(el.firstChild);
-    el.appendChild(document.createTextNode(String(textVal || '')));
-    if (!handle) {
-      handle = document.createElement('span');
-      handle.className = 'sp-resize-handle';
-      handle.setAttribute('data-resize', resizeKey);
-      handle.title = 'ဆိုဒ်';
-    }
-    el.appendChild(handle);
-  }
   if (label) {
-    setUpPrevText(label, $('up-label')?.value || 'Featured', 'up-label');
+    label.textContent = $('up-label')?.value || 'Featured';
     label.style.color = $('up-label-color')?.value || '#f5c518';
     label.style.fontSize = (pos('up-label-fs', 11)) + 'px';
     label.style.left = lx + '%'; label.style.top = ly + '%';
-    label.style.zIndex = '30'; label.style.pointerEvents = 'auto'; label.style.cursor = 'grab';
   }
   if (title) {
-    setUpPrevText(title, $('up-title')?.value || 'Title', 'up-title');
+    title.textContent = $('up-title')?.value || 'Title';
     title.style.color = $('up-title-color')?.value || '#ffffff';
     title.style.fontWeight = $('up-title-weight')?.value || '900';
     const tfs = pos('up-title-fs', 22);
     title.style.fontSize = Math.max(12, Math.round(tfs * 0.65)) + 'px';
     if ($('val-up-title-fs')) $('val-up-title-fs').textContent = tfs + 'px';
     title.style.left = tx + '%'; title.style.top = ty + '%';
-    title.style.zIndex = '30'; title.style.pointerEvents = 'auto'; title.style.cursor = 'grab';
   }
   if (desc) {
-    setUpPrevText(desc, $('up-desc')?.value || 'Desc', 'up-desc');
+    desc.textContent = $('up-desc')?.value || 'Desc';
     desc.style.color = $('up-desc-color')?.value || '#cccccc';
     const dfs = pos('up-desc-fs', 13);
     desc.style.fontSize = Math.max(10, Math.round(dfs * 0.85)) + 'px';
     desc.style.left = dx + '%'; desc.style.top = dy + '%';
-    desc.style.zIndex = '30'; desc.style.pointerEvents = 'auto'; desc.style.cursor = 'grab';
   }
 
   const img = imageFieldValue('up-image');
@@ -3522,128 +3442,46 @@ function initUpcomingDrag() {
   const box = $('up-live-preview');
   if (!box) return;
   const map = {
-    'up-prev-label': { xi: 'up-label-x', yi: 'up-label-y', vx: 'val-ulx', vy: 'val-uly' },
-    'up-prev-title': { xi: 'up-title-x', yi: 'up-title-y', vx: 'val-utx', vy: 'val-uty' },
-    'up-prev-desc':  { xi: 'up-desc-x', yi: 'up-desc-y', vx: 'val-udx', vy: 'val-udy' }
+    'up-prev-label': { xi:'up-label-x', yi:'up-label-y', vx:'val-ulx', vy:'val-uly' },
+    'up-prev-title': { xi:'up-title-x', yi:'up-title-y', vx:'val-utx', vy:'val-uty' },
+    'up-prev-desc':  { xi:'up-desc-x', yi:'up-desc-y', vx:'val-udx', vy:'val-udy' }
   };
-  const sizeMap = {
-    'up-label': { input: 'up-label-fs', min: 8, max: 72 },
-    'up-title': { input: 'up-title-fs', min: 12, max: 64 },
-    'up-desc': { input: 'up-desc-fs', min: 10, max: 48 }
-  };
-
-  Object.keys(map).forEach(function(id) {
+  function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
+  Object.keys(map).forEach(function(id){
     const el = $(id);
     if (!el) return;
     el.style.cursor = 'grab';
-    el.style.userSelect = 'none';
     el.style.touchAction = 'none';
-    el.style.zIndex = '30';
-    el.style.pointerEvents = 'auto';
-    el.style.position = 'absolute';
-    // ensure resize handle exists
-    if (!el.querySelector('.sp-resize-handle')) {
-      var key = id.replace('up-prev-', 'up-');
-      var h = document.createElement('span');
-      h.className = 'sp-resize-handle';
-      h.setAttribute('data-resize', key);
-      h.title = 'ဆိုဒ်';
-      el.appendChild(h);
-    }
-  });
-
-  if (box._upDelegated) return;
-  box._upDelegated = true;
-
-  function pt(e) {
-    if (e.touches && e.touches[0]) return e.touches[0];
-    if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
-    return e;
-  }
-  function findEl(t) {
-    if (!t) return null;
-    if (t.classList && t.classList.contains('sp-resize-handle')) return t;
-    if (t.id && map[t.id]) return t;
-    if (t.closest) {
-      var h = t.closest('.sp-resize-handle');
-      if (h) return h;
-      var p = t.closest('[id^="up-prev-"]');
-      if (p && map[p.id]) return p;
-    }
-    return null;
-  }
-
-  function onStart(e) {
-    var t = findEl(e.target);
-    if (!t) return;
-    var p = pt(e);
-    var rect = box.getBoundingClientRect();
-    if (rect.width < 10) return;
-
-    if (t.classList && t.classList.contains('sp-resize-handle')) {
-      var key = t.getAttribute('data-resize');
-      var cfg = sizeMap[key];
-      if (!cfg) return;
-      window._upDragState = {
-        type: 'resize', input: cfg.input, min: cfg.min, max: cfg.max,
-        sy: p.clientY, ox: parseInt($(cfg.input) && $(cfg.input).value || '12', 10)
-      };
-      e.preventDefault(); e.stopPropagation();
-      return;
-    }
-    var c = map[t.id];
-    if (!c) return;
-    window._upDragState = {
-      type: 'move', el: t, cfg: c,
-      startX: p.clientX, startY: p.clientY,
-      origL: parseFloat(t.style.left) || 0,
-      origT: parseFloat(t.style.top) || 0,
-      rectW: rect.width, rectH: rect.height
+    el.onmousedown = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      const c = map[id];
+      const r = box.getBoundingClientRect();
+      el.style.cursor = 'grabbing';
+      function move(ev){
+        const p = pt(ev);
+        let x = Math.max(0, Math.min(95, ((p.clientX - r.left) / r.width) * 100));
+        let y = Math.max(0, Math.min(90, ((p.clientY - r.top) / r.height) * 100));
+        el.style.left = x + '%';
+        el.style.top = y + '%';
+        el.style.position = 'absolute';
+        if ($(c.xi)) $(c.xi).value = Math.round(x);
+        if ($(c.yi)) $(c.yi).value = Math.round(y);
+        if ($(c.vx)) $(c.vx).textContent = Math.round(x) + '%';
+        if ($(c.vy)) $(c.vy).textContent = Math.round(y) + '%';
+      }
+      function up(){
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+        el.style.cursor = 'grab';
+        if (typeof saveUpcoming === 'function') {
+          try { /* keep fields; user can save */ } catch (err) {}
+        }
+      }
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
     };
-    t.style.cursor = 'grabbing';
-    t.style.borderColor = 'rgba(34,211,238,0.9)';
-    e.preventDefault(); e.stopPropagation();
-  }
-
-  function onMove(e) {
-    if (!window._upDragState) return;
-    var p = pt(e);
-    var st = window._upDragState;
-    if (st.type === 'resize') {
-      var delta = Math.round((st.sy - p.clientY) / 3);
-      var nv = Math.max(st.min, Math.min(st.max, st.ox + delta));
-      if ($(st.input)) $(st.input).value = nv;
-      if (st.input === 'up-label-fs' && $('up-prev-label')) $('up-prev-label').style.fontSize = nv + 'px';
-      if (st.input === 'up-title-fs' && $('up-prev-title')) $('up-prev-title').style.fontSize = Math.max(12, Math.round(nv * 0.65)) + 'px';
-      if (st.input === 'up-desc-fs' && $('up-prev-desc')) $('up-prev-desc').style.fontSize = Math.max(10, Math.round(nv * 0.85)) + 'px';
-      if ($('val-up-title-fs') && st.input === 'up-title-fs') $('val-up-title-fs').textContent = nv + 'px';
-    } else if (st.type === 'move') {
-      var nx = Math.max(0, Math.min(95, st.origL + ((p.clientX - st.startX) / st.rectW) * 100));
-      var ny = Math.max(0, Math.min(90, st.origT + ((p.clientY - st.startY) / st.rectH) * 100));
-      st.el.style.left = nx + '%';
-      st.el.style.top = ny + '%';
-      if ($(st.cfg.xi)) $(st.cfg.xi).value = Math.round(nx);
-      if ($(st.cfg.yi)) $(st.cfg.yi).value = Math.round(ny);
-      if ($(st.cfg.vx)) $(st.cfg.vx).textContent = Math.round(nx);
-      if ($(st.cfg.vy)) $(st.cfg.vy).textContent = Math.round(ny);
-    }
-    if (e.cancelable) e.preventDefault();
-  }
-
-  function onUp() {
-    if (window._upDragState && window._upDragState.type === 'move' && window._upDragState.el) {
-      window._upDragState.el.style.cursor = 'grab';
-      window._upDragState.el.style.borderColor = '';
-    }
-    window._upDragState = null;
-  }
-
-  box.addEventListener('mousedown', onStart, true);
-  box.addEventListener('touchstart', onStart, { passive: false, capture: true });
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('touchmove', onMove, { passive: false });
-  window.addEventListener('mouseup', onUp);
-  window.addEventListener('touchend', onUp);
+  });
 }
 
 
@@ -4132,26 +3970,15 @@ function updateProudPreview() {
   if (!bar) return;
   const m = (typeof getProudMeta === 'function') ? getProudMeta() : {};
   const logoH = Number(m.logoH) || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  const frameH = Number(m.frameH) || parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '100', 10) || 100;
-  const titleFs = Number(m.titleFs) || parseInt(($('proud-title-fs') && $('proud-title-fs').value) || '12', 10) || 12;
-  if (frame) {
-    frame.style.height = frameH + 'px';
-    frame.style.minHeight = frameH + 'px';
-  }
+  const frameH = Number(m.frameH) || parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '80', 10) || 80;
+  if (frame) frame.style.height = frameH + 'px';
   if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = frameH + 'px';
   if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = logoH + 'px';
-  if ($('val-proud-title-fs')) $('val-proud-title-fs').textContent = titleFs + 'px';
-  if ($('proud-title-fs') && document.activeElement !== $('proud-title-fs')) {
-    $('proud-title-fs').value = titleFs;
-  }
   const titleEl = $('proud-prev-title');
   if (titleEl) {
     titleEl.textContent = (($('proud-section-title') && $('proud-section-title').value) || m.title || 'Our Proud Sponsors').trim();
     titleEl.style.left = (m.titleX != null ? m.titleX : 3) + '%';
     titleEl.style.top = (m.titleY != null ? m.titleY : 36) + '%';
-    titleEl.style.fontSize = titleFs + 'px';
-    titleEl.style.pointerEvents = 'auto';
-    titleEl.style.zIndex = '40';
   }
   const items = getProud().filter(function(p) { return p.active !== false; });
   bar.innerHTML = items.map(function(p, idx) {
@@ -4161,20 +3988,15 @@ function updateProudPreview() {
     const x = p.x != null ? p.x : (28 + idx * 16);
     const y = p.y != null ? p.y : 18;
     if (p.logo) {
-      return '<div class="proud-logo-item absolute" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;cursor:grab;z-index:20;touch-action:none;">' +
-        '<div class="w-full flex flex-col items-center">' +
-        '<div class="proud-logo-box w-full flex items-center justify-center rounded-md bg-white/10 border border-emerald-600/40" style="width:' + sz + 'px;height:' + sz + 'px;">' +
+      return '<div class="proud-logo-item absolute" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;cursor:grab;z-index:20">' +
+        '<div class="w-full h-full flex items-center justify-center rounded-md bg-white/10 border border-emerald-600/40">' +
         '<img src="' + safe(p.logo) + '" alt="" class="max-w-full max-h-full object-contain p-0.5" draggable="false">' +
-        '</div>' +
-        '<span class="mt-0.5 text-[9px] font-bold text-emerald-200/90 text-center leading-tight max-w-full truncate px-0.5" style="width:' + sz + 'px" title="' + safe(p.name) + '">' + safe(p.name || '') + '</span>' +
-        '</div><span class="sp-resize-handle proud-resize" title="Resize"></span></div>';
+        '</div><span class="sp-resize-handle proud-resize"></span></div>';
     }
-    return '<span class="proud-logo-item absolute text-xs font-bold text-white/90 cursor-grab px-1" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;z-index:20;touch-action:none;">' + safe(p.name) + '</span>';
+    return '<span class="proud-logo-item absolute text-xs font-bold text-white/90 cursor-grab px-1" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;z-index:20">' + safe(p.name) + '</span>';
   }).join('');
-  bar.style.pointerEvents = 'none';
-  bar.querySelectorAll('.proud-logo-item').forEach(function(el){ el.style.pointerEvents = 'auto'; });
   if (typeof updateProudStaging === 'function') updateProudStaging();
-  if (typeof initProudDrag === 'function') setTimeout(initProudDrag, 40);
+  if (typeof initProudDrag === 'function') setTimeout(initProudDrag, 30);
 }
 
 /* Staging = not yet Added logo/name — adjustable in preview before Add */
@@ -4185,29 +4007,20 @@ function updateProudStaging() {
   const name = (($('proud-name') && $('proud-name').value) || '').trim();
   let logo = '';
   if (typeof imageFieldValue === 'function') logo = imageFieldValue('proud-logo');
-  if (!logo && $('proud-logo')) {
-    const full = ($('proud-logo').dataset && $('proud-logo').dataset.fullUrl) || '';
-    const raw = ($('proud-logo').value || '').trim();
-    if (full && typeof isRealImageUrl === 'function' && isRealImageUrl(full)) logo = full;
-    else if (typeof isRealImageUrl === 'function' && isRealImageUrl(raw)) logo = raw;
-  }
+  if (!logo && $('proud-logo')) logo = ($('proud-logo').value || '').trim();
   if (!name && !logo) { box.innerHTML = ''; return; }
   const st = window._proudStaging;
   const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
   if (!st.size) st.size = logoH;
   let html = '';
-  const badLogo = !logo || logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0 || logo.indexOf('data:image...') === 0 || logo.indexOf('Preview') !== -1;
-  if (!badLogo) {
-    html = '<div id="proud-stage-item" class="absolute" style="left:' + st.x + '%;top:' + st.y + '%;width:' + st.size + 'px;cursor:grab;z-index:40;pointer-events:auto;touch-action:none;">' +
-      '<div class="w-full flex flex-col items-center">' +
-      '<div class="proud-logo-box w-full flex items-center justify-center rounded-md bg-amber-500/20 border-2 border-amber-400" style="width:' + st.size + 'px;height:' + st.size + 'px;">' +
+  if (logo && logo.indexOf('blob:') !== 0) {
+    html = '<div id="proud-stage-item" class="absolute" style="left:' + st.x + '%;top:' + st.y + '%;width:' + st.size + 'px;height:' + st.size + 'px;cursor:grab;z-index:40;pointer-events:auto">' +
+      '<div class="w-full h-full flex items-center justify-center rounded-md bg-amber-500/20 border-2 border-amber-400">' +
       '<img src="' + safe(logo) + '" class="max-w-full max-h-full object-contain p-0.5" draggable="false">' +
-      '</div>' +
-      (name ? '<span class="mt-0.5 text-[9px] font-bold text-amber-200 text-center leading-tight max-w-full truncate">' + safe(name) + '</span>' : '') +
-      '</div><span class="sp-resize-handle proud-stage-resize" title="Resize"></span>' +
+      '</div><span class="sp-resize-handle proud-stage-resize"></span>' +
       '<span class="absolute -top-4 left-0 text-[9px] text-amber-300 font-bold whitespace-nowrap">STAGING (Add မနှိပ်ရသေး)</span></div>';
   } else if (name) {
-    html = '<span id="proud-stage-item" class="absolute text-xs font-bold text-amber-300 cursor-grab px-1 border border-amber-500/50 rounded" style="left:' + st.x + '%;top:' + st.y + '%;z-index:40;pointer-events:auto;touch-action:none;">' + safe(name) + ' *</span>';
+    html = '<span id="proud-stage-item" class="absolute text-xs font-bold text-amber-300 cursor-grab px-1 border border-amber-500/50 rounded" style="left:' + st.x + '%;top:' + st.y + '%;z-index:40;pointer-events:auto">' + safe(name) + ' *</span>';
   }
   box.innerHTML = html;
   box.style.pointerEvents = 'none';
@@ -4218,74 +4031,40 @@ function updateProudStaging() {
   }
 }
 
-function _proudPointerPos(ev) {
-  if (ev.touches && ev.touches[0]) return { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
-  if (ev.changedTouches && ev.changedTouches[0]) return { x: ev.changedTouches[0].clientX, y: ev.changedTouches[0].clientY };
-  return { x: ev.clientX, y: ev.clientY };
-}
-
 function initProudStagingDrag() {
   const frame = $('proud-live-frame');
   const el = $('proud-stage-item');
   if (!frame || !el || el._bound) return;
   el._bound = true;
-  function startMove(e) {
-    if (e.target && e.target.classList && e.target.classList.contains('proud-stage-resize')) return;
+  el.addEventListener('mousedown', function(e) {
+    if (e.target.classList && e.target.classList.contains('proud-stage-resize')) return;
     e.preventDefault();
-    e.stopPropagation();
     const rect = frame.getBoundingClientRect();
     function move(ev) {
-      const p = _proudPointerPos(ev);
-      const x = Math.max(0, Math.min(90, ((p.x - rect.left) / rect.width) * 100));
-      const y = Math.max(0, Math.min(80, ((p.y - rect.top) / rect.height) * 100));
+      const x = Math.max(0, Math.min(90, ((ev.clientX - rect.left) / rect.width) * 100));
+      const y = Math.max(0, Math.min(80, ((ev.clientY - rect.top) / rect.height) * 100));
       el.style.left = x + '%'; el.style.top = y + '%';
       window._proudStaging.x = x; window._proudStaging.y = y;
     }
-    function up() {
-      document.removeEventListener('mousemove', move);
-      document.removeEventListener('mouseup', up);
-      document.removeEventListener('touchmove', move);
-      document.removeEventListener('touchend', up);
-    }
+    function up() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
     document.addEventListener('mousemove', move);
     document.addEventListener('mouseup', up);
-    document.addEventListener('touchmove', move, { passive: false });
-    document.addEventListener('touchend', up);
-  }
-  el.addEventListener('mousedown', startMove);
-  el.addEventListener('touchstart', startMove, { passive: false });
+  });
   const h = el.querySelector('.proud-stage-resize');
   if (h && !h._bound) {
     h._bound = true;
-    function startResize(e) {
+    h.addEventListener('mousedown', function(e) {
       e.preventDefault(); e.stopPropagation();
-      const start = _proudPointerPos(e);
-      const startSz = el.offsetWidth || window._proudStaging.size || 48;
+      const startX = e.clientX, startW = el.offsetWidth;
       function move(ev) {
-        const p = _proudPointerPos(ev);
-        // proportional: use the larger delta so width+height grow together
-        const dx = p.x - start.x;
-        const dy = p.y - start.y;
-        const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-        const nw = Math.max(24, Math.min(160, startSz + delta));
-        el.style.width = nw + 'px';
-        const box = el.querySelector('.proud-logo-box');
-        if (box) { box.style.width = nw + 'px'; box.style.height = nw + 'px'; }
+        const nw = Math.max(24, Math.min(120, startW + (ev.clientX - startX)));
+        el.style.width = nw + 'px'; el.style.height = nw + 'px';
         window._proudStaging.size = nw;
       }
-      function up() {
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', up);
-        document.removeEventListener('touchmove', move);
-        document.removeEventListener('touchend', up);
-      }
+      function up() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
       document.addEventListener('mousemove', move);
       document.addEventListener('mouseup', up);
-      document.addEventListener('touchmove', move, { passive: false });
-      document.addEventListener('touchend', up);
-    }
-    h.addEventListener('mousedown', startResize);
-    h.addEventListener('touchstart', startResize, { passive: false });
+    });
   }
 }
 
@@ -4326,9 +4105,8 @@ function saveProudMetaFields(extra) {
   const m = (typeof getProudMeta === 'function') ? getProudMeta() : {};
   const title = (($('proud-section-title') && $('proud-section-title').value) || '').trim() || 'Our Proud Sponsors';
   const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  const frameH = parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '100', 10) || 100;
-  const titleFs = parseInt(($('proud-title-fs') && $('proud-title-fs').value) || '12', 10) || 12;
-  const next = Object.assign({}, m, { title: title, logoH: logoH, frameH: frameH, titleFs: titleFs }, extra || {});
+  const frameH = parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '80', 10) || 80;
+  const next = Object.assign({}, m, { title: title, logoH: logoH, frameH: frameH }, extra || {});
   if (typeof write === 'function') write('hh_proud_meta', next);
   else localStorage.setItem('hh_proud_meta', JSON.stringify(next));
 }
@@ -4337,41 +4115,28 @@ function initProudDrag() {
   const frame = $('proud-live-frame');
   if (!frame) return;
   const titleEl = $('proud-prev-title');
-
   function bindDrag(el, onMove, onEnd) {
     if (!el) return;
-    // clear previous handlers by cloning flag
-    el.onmousedown = null;
-    function start(e) {
+    el.onmousedown = function(e) {
       if (e.target && e.target.classList && (e.target.classList.contains('proud-resize') || e.target.classList.contains('proud-stage-resize'))) return;
       e.preventDefault();
       e.stopPropagation();
       const rect = frame.getBoundingClientRect();
       function move(ev) {
-        const p = _proudPointerPos(ev);
-        const x = Math.max(0, Math.min(92, ((p.x - rect.left) / rect.width) * 100));
-        const y = Math.max(0, Math.min(88, ((p.y - rect.top) / rect.height) * 100));
+        const x = Math.max(0, Math.min(92, ((ev.clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(85, ((ev.clientY - rect.top) / rect.height) * 100));
         onMove(x, y);
       }
       function up() {
         document.removeEventListener('mousemove', move);
         document.removeEventListener('mouseup', up);
-        document.removeEventListener('touchmove', move);
-        document.removeEventListener('touchend', up);
         if (onEnd) onEnd();
       }
       document.addEventListener('mousemove', move);
       document.addEventListener('mouseup', up);
-      document.addEventListener('touchmove', move, { passive: false });
-      document.addEventListener('touchend', up);
-    }
-    el.onmousedown = start;
-    el.ontouchstart = start;
+    };
   }
-
   if (titleEl) {
-    titleEl.style.pointerEvents = 'auto';
-    titleEl.style.cursor = 'grab';
     bindDrag(titleEl, function(x, y) {
       titleEl.style.left = x + '%'; titleEl.style.top = y + '%';
       titleEl._tx = x; titleEl._ty = y;
@@ -4379,7 +4144,6 @@ function initProudDrag() {
       saveProudMetaFields({ titleX: Math.round(titleEl._tx || 3), titleY: Math.round(titleEl._ty || 36) });
     });
   }
-
   const bar = $('proud-preview-bar');
   if (!bar) return;
   bar.querySelectorAll('.proud-logo-item').forEach(function(el) {
@@ -4396,78 +4160,24 @@ function initProudDrag() {
     });
     const handle = el.querySelector('.proud-resize');
     if (handle) {
-      function startResize(e) {
+      handle.onmousedown = function(e) {
         e.preventDefault(); e.stopPropagation();
-        const start = _proudPointerPos(e);
-        const box = el.querySelector('.proud-logo-box');
-        const startSz = (box && box.offsetWidth) || el.offsetWidth || 48;
+        const startX = e.clientX, startW = el.offsetWidth;
         function move(ev) {
-          const p = _proudPointerPos(ev);
-          const dx = p.x - start.x;
-          const dy = p.y - start.y;
-          // proportional square: use dominant axis so width+height grow together
-          const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-          const nw = Math.max(24, Math.min(160, startSz + delta));
-          el.style.width = nw + 'px';
-          if (box) { box.style.width = nw + 'px'; box.style.height = nw + 'px'; }
-          else { el.style.height = nw + 'px'; }
-          el._sz = nw;
+          const nw = Math.max(24, Math.min(120, startW + (ev.clientX - startX)));
+          el.style.width = nw + 'px'; el.style.height = nw + 'px'; el._sz = nw;
         }
         function up() {
           document.removeEventListener('mousemove', move);
           document.removeEventListener('mouseup', up);
-          document.removeEventListener('touchmove', move);
-          document.removeEventListener('touchend', up);
           const items = getProud();
           if (items[idx] && el._sz) { items[idx].size = Math.round(el._sz); write('hh_proud_sponsors', items); }
         }
         document.addEventListener('mousemove', move);
         document.addEventListener('mouseup', up);
-        document.addEventListener('touchmove', move, { passive: false });
-        document.addEventListener('touchend', up);
-      }
-      handle.onmousedown = startResize;
-      handle.ontouchstart = startResize;
+      };
     }
   });
-}
-
-
-function getProud() {
-  try {
-    var a = read('hh_proud_sponsors', []);
-    return Array.isArray(a) ? a : [];
-  } catch (e) { return []; }
-}
-
-function renderProudList() {
-  var box = $('proud-list');
-  if (!box) return;
-  var items = getProud();
-  if (!items.length) {
-    box.innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-5 text-center text-sm text-slate-400">Proud Sponsor မရှိသေးပါ။ အပေါ်က form ဖြည့်ပြီး Add နှိပ်ပါ။</p>';
-    if (typeof updateProudPreview === 'function') updateProudPreview();
-    return;
-  }
-  box.innerHTML = items.map(function(p, i) {
-    var active = p.active !== false;
-    var logoHtml = p.logo
-      ? '<img src="' + safe(p.logo) + '" alt="" class="h-12 w-12 rounded-lg object-contain bg-white/10 border border-slate-600 p-0.5" onerror="this.style.display=\'none\'">'
-      : '<div class="h-12 w-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 text-xs">—</div>';
-    return '<div class="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-3">' +
-      '<div class="flex items-center gap-3 min-w-0 flex-1">' + logoHtml +
-        '<div class="min-w-0">' +
-          '<p class="font-bold truncate">' + safe(p.name || 'Unnamed') + '</p>' +
-          (p.link ? '<a href="' + safe(p.link) + '" target="_blank" rel="noopener" class="tiny text-emerald-400 hover:underline truncate block">' + safe(p.link) + '</a>' : '<p class="tiny">Link မရှိ</p>') +
-        '</div></div>' +
-      '<div class="flex flex-wrap gap-2">' +
-        '<button type="button" class="btn btn-muted text-xs" onclick="toggleProud(' + i + ')">' + (active ? '✓ Active' : '○ Hidden') + '</button>' +
-        '<button type="button" class="btn btn-muted text-xs" onclick="moveProud(' + i + ',-1)"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
-        '<button type="button" class="btn btn-muted text-xs" onclick="moveProud(' + i + ',1)"' + (i === items.length - 1 ? ' disabled' : '') + '>↓</button>' +
-        '<button type="button" class="btn btn-red text-xs" onclick="deleteProud(' + i + ')"><i class="fa-regular fa-trash-can"></i></button>' +
-      '</div></div>';
-  }).join('');
-  if (typeof updateProudPreview === 'function') updateProudPreview();
 }
 
 function getProudMeta() {
@@ -4487,68 +4197,42 @@ function loadProudMeta() {
     if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = (m.logoH || 48) + 'px';
   }
   if ($('proud-frame-h')) {
-    $('proud-frame-h').value = m.frameH || 100;
-    if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = (m.frameH || 100) + 'px';
+    $('proud-frame-h').value = m.frameH || 80;
+    if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = (m.frameH || 80) + 'px';
   }
-  if ($('proud-title-fs')) {
-    $('proud-title-fs').value = m.titleFs || 12;
-    if ($('val-proud-title-fs')) $('val-proud-title-fs').textContent = (m.titleFs || 12) + 'px';
-  }
-  if ($('proud-live-frame') && m.frameH) $('proud-live-frame').style.height = (m.frameH || 100) + 'px';
+  if ($('proud-live-frame') && m.frameH) $('proud-live-frame').style.height = (m.frameH || 80) + 'px';
 }
 
 function addProud() {
-  try {
-    var nameEl = $('proud-name');
-    var name = (nameEl && nameEl.value || '').trim();
-    if (!name) { alert('Name ထည့်ပါ။'); return; }
-
-    var logo = '';
-    if (typeof imageFieldValue === 'function') logo = imageFieldValue('proud-logo') || '';
-    if (!logo) {
-      var el = $('proud-logo');
-      if (el) {
-        var full = (el.dataset && el.dataset.fullUrl) || '';
-        var raw = (el.value || '').trim();
-        if (full && typeof isRealImageUrl === 'function' && isRealImageUrl(full)) logo = full;
-        else if (typeof isRealImageUrl === 'function' && isRealImageUrl(raw)) logo = raw;
-        else if (raw.indexOf('http') === 0 || raw.indexOf('data:image/') === 0) logo = raw;
-      }
-    }
-    // reject only incomplete placeholder / blob
-    if (logo && (logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0 || logo.indexOf('data:image...') === 0 || logo.indexOf('Preview') !== -1)) {
-      alert('Logo Upload ပြီးသည်အထိ စောင့်ပါ။ (✓ Preview အဆင်သင့် ဖြစ်မှ Add နှိပ်ပါ)');
-      return;
-    }
-
-    var st = window._proudStaging || { x: 55, y: 20, size: 48 };
-    var items = getProud();
-    items.push({
-      id: Date.now(),
-      name: name,
-      logo: logo || '',
-      link: (($('proud-link') && $('proud-link').value) || '').trim(),
-      active: true,
-      x: Math.round(st.x || 55),
-      y: Math.round(st.y || 20),
-      size: Math.round(st.size || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48)
-    });
-    write('hh_proud_sponsors', items);
-
-    if (nameEl) nameEl.value = '';
-    if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
-    else if ($('proud-logo')) { $('proud-logo').value = ''; try { delete $('proud-logo').dataset.fullUrl; } catch (e) {} }
-    if ($('proud-link')) $('proud-link').value = '';
-    var prev = $('proud-logo-preview'); if (prev) prev.innerHTML = '';
-    window._proudStaging = { x: 55, y: 20, size: parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48 };
-    if (typeof updateProudStaging === 'function') updateProudStaging();
-    if (typeof renderProudList === 'function') renderProudList();
-    if (typeof renderOverview === 'function') renderOverview();
-    if (typeof toast === 'function') toast(logo ? 'သိမ်းပြီး — Preview နေရာအတိုင်း' : 'Proud Sponsor ထည့်ပြီး');
-  } catch (err) {
-    console.error('addProud error', err);
-    alert('Add မအောင်မြင်: ' + (err && err.message ? err.message : err));
+  const name = (($('proud-name') && $('proud-name').value) || '').trim();
+  if (!name) return alert('Name ထည့်ပါ။');
+  let logo = (typeof imageFieldValue === 'function') ? imageFieldValue('proud-logo') : '';
+  if (!logo && $('proud-logo')) logo = ($('proud-logo').value || '').trim();
+  if (logo && (logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0)) {
+    return alert('Logo Upload ပြီးသည်အထိ စောင့်ပါ။');
   }
+  const st = window._proudStaging || { x: 55, y: 20, size: 48 };
+  const items = getProud();
+  items.push({
+    id: Date.now(),
+    name: name,
+    logo: logo,
+    link: (($('proud-link') && $('proud-link').value) || '').trim(),
+    active: true,
+    x: Math.round(st.x),
+    y: Math.round(st.y),
+    size: Math.round(st.size || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48)
+  });
+  write('hh_proud_sponsors', items);
+  if ($('proud-name')) $('proud-name').value = '';
+  if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
+  else if ($('proud-logo')) { $('proud-logo').value = ''; delete $('proud-logo').dataset.fullUrl; }
+  if ($('proud-link')) $('proud-link').value = '';
+  const prev = $('proud-logo-preview'); if (prev) prev.innerHTML = '';
+  window._proudStaging = { x: 55, y: 20, size: parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48 };
+  renderProudList();
+  if (typeof renderOverview === 'function') renderOverview();
+  toast(logo ? 'သိမ်းပြီး — Preview နေရာအတိုင်း' : 'Proud Sponsor ထည့်ပြီး');
 }
 
 function toggleProud(i) {
@@ -4603,86 +4287,6 @@ function refreshCategoryOptions(selected) {
   }).join('');
   if ([].some.call(sel.options, function(o) { return o.value === current; })) sel.value = current;
   else if (sel.options.length) sel.selectedIndex = 0;
-  if (typeof renderCategoriesList === 'function') renderCategoriesList();
-}
-function isDefaultCategory(name) {
-  const key = String(name || '').trim().toLowerCase();
-  return DEFAULT_CATEGORIES.some(function(c) { return c.toLowerCase() === key; });
-}
-function renderCategoriesList() {
-  const box = $('categories-list');
-  if (!box) return;
-  const cats = getCategories();
-  if (!cats.length) {
-    box.innerHTML = '<p class="text-xs text-slate-500">Category မရှိသေးပါ။</p>';
-    return;
-  }
-  box.innerHTML = cats.map(function(c) {
-    const locked = isDefaultCategory(c);
-    return '<div class="flex flex-wrap items-center gap-2 rounded-lg border border-slate-700/80 bg-slate-950/50 px-3 py-2">' +
-      '<span class="flex-1 min-w-[120px] text-sm font-semibold text-white">' + safe(c) +
-      (locked ? ' <span class="text-[10px] text-slate-500 font-normal">(default)</span>' : '') + '</span>' +
-      '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="editCategory(' + JSON.stringify(String(c)) + ')"' + (locked ? ' disabled title="Default category ပြင်မရ"' : '') + '><i class="fa-solid fa-pen mr-1"></i>Edit</button>' +
-      '<button type="button" class="btn btn-red text-xs py-1 px-2" onclick="deleteCategory(' + JSON.stringify(String(c)) + ')"' + (locked ? ' disabled title="Default category ဖျက်မရ"' : '') + '><i class="fa-regular fa-trash-can"></i></button>' +
-      '</div>';
-  }).join('');
-}
-function editCategory(oldName) {
-  if (isDefaultCategory(oldName)) { toast('Default category ကို ပြင်မရပါ'); return; }
-  const next = prompt('Category နာမည်အသစ်:', oldName);
-  if (next == null) return;
-  const name = String(next).trim();
-  if (!name) { toast('နာမည် ဗလာမရ'); return; }
-  if (name.toLowerCase() === String(oldName).toLowerCase()) return;
-  const cats = getCategories();
-  if (cats.some(function(c) { return c.toLowerCase() === name.toLowerCase(); })) {
-    toast('Category နာမည် ရှိပြီးသား');
-    return;
-  }
-  // update custom list
-  const custom = [];
-  try { const raw = JSON.parse(localStorage.getItem('hh_categories') || '[]'); if (Array.isArray(raw)) raw.forEach(function(c){ custom.push(c); }); } catch(e) {}
-  const idx = custom.findIndex(function(c) { return String(c).toLowerCase() === String(oldName).toLowerCase(); });
-  if (idx >= 0) custom[idx] = name;
-  else custom.push(name);
-  saveCategories(custom);
-  // rename on posts
-  const posts = getPosts();
-  let changed = 0;
-  posts.forEach(function(p) {
-    if (String(p.category || '').toLowerCase() === String(oldName).toLowerCase()) {
-      p.category = name;
-      changed++;
-    }
-  });
-  if (changed) write('hh_posts', posts);
-  refreshCategoryOptions(name);
-  renderCategoriesList();
-  if (typeof renderPostsList === 'function') renderPostsList();
-  if (typeof updatePostPreview === 'function') updatePostPreview();
-  toast('Category ပြင်ပြီး' + (changed ? ' · Post ' + changed + ' ခု update' : ''));
-}
-function deleteCategory(name) {
-  if (isDefaultCategory(name)) { toast('Default category ကို ဖျက်မရပါ'); return; }
-  if (!confirm('Category "' + name + '" ကို ဖျက်မလား?\n(Post များမှာ ရှိရင် Travel Story သို့ ပြောင်းမယ်)')) return;
-  const custom = [];
-  try { const raw = JSON.parse(localStorage.getItem('hh_categories') || '[]'); if (Array.isArray(raw)) raw.forEach(function(c){ custom.push(c); }); } catch(e) {}
-  const next = custom.filter(function(c) { return String(c).toLowerCase() !== String(name).toLowerCase(); });
-  saveCategories(next);
-  const posts = getPosts();
-  let changed = 0;
-  posts.forEach(function(p) {
-    if (String(p.category || '').toLowerCase() === String(name).toLowerCase()) {
-      p.category = 'Travel Story';
-      changed++;
-    }
-  });
-  if (changed) write('hh_posts', posts);
-  refreshCategoryOptions('Travel Story');
-  renderCategoriesList();
-  if (typeof renderPostsList === 'function') renderPostsList();
-  if (typeof updatePostPreview === 'function') updatePostPreview();
-  toast('Category ဖျက်ပြီး' + (changed ? ' · Post ' + changed + ' ခု ပြင်ပြီး' : ''));
 }
 function addCustomCategory() {
   const input = $('admin-new-category');
@@ -4695,7 +4299,6 @@ function addCustomCategory() {
     saveCategories(cats);
   }
   refreshCategoryOptions(name);
-  if (typeof renderCategoriesList === 'function') renderCategoriesList();
   if (input) input.value = '';
   if (typeof updatePostPreview === 'function') updatePostPreview();
   toast(exists ? 'Category ရှိပြီးသား — ရွေးထားပါပြီ' : 'Category ထည့်ပြီး: ' + name);
@@ -4728,16 +4331,7 @@ function savePost() {
   const img = imageFieldValue('admin-post-img');
   const desc = $('admin-post-desc').value.trim();
   // Expand short cid: refs back to real data URLs / https before saving
-  let content = expandContentCids($('admin-post-content').value.trim());
-  if (/\bcid:[a-z0-9]+/i.test(content)) {
-    // last-chance: try resolve any leftover cid via store
-    content = content.replace(/\bcid:([a-z0-9]+)/gi, function(m, id) {
-      return (contentImageStore[id] || m);
-    });
-    if (/\bcid:[a-z0-9]+/i.test(content)) {
-      return alert('Photo Gallery / ပုံ တချို့ မတင်ရသေးပါ။ ခဏစောင့်ပြီး ပြန်သိမ်းပါ (သို့) ပုံ ပြန်ထည့်ပါ။');
-    }
-  }
+  const content = expandContentCids($('admin-post-content').value.trim());
   const location = $('admin-post-location').value.trim();
   const category = $('admin-post-category').value;
   if (!title) return alert('Title ထည့်ပေးပါ။');
@@ -4820,15 +4414,13 @@ function deletePost(id) {
 function renderPostsList() {
   if (typeof refreshCategoryOptions === "function") refreshCategoryOptions();
   const posts = getPosts();
-  if ($('post-count')) $('post-count').textContent = posts.length + ' posts';
-  if (typeof refreshPostSectionOptions === 'function') refreshPostSectionOptions();
-  const listEl = $('posts-list');
-  if (!listEl) return;
+  $('post-count').textContent = posts.length + ' posts';
+  refreshPostSectionOptions();
   if (!posts.length) {
-    listEl.innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Post မရှိသေးပါ။</p>';
+    $('posts-list').innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Post မရှိသေးပါ။</p>';
     return;
   }
-  listEl.innerHTML = posts.map(p => {
+  $('posts-list').innerHTML = posts.map(p => {
     const dateStr = p.publishedDate ? new Date(p.publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
     return `<article class="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-3 sm:flex-row sm:items-center">
       <img src="${safe(p.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=180')}" onerror="this.style.display='none'" class="h-20 w-full rounded-lg object-cover sm:w-28">
