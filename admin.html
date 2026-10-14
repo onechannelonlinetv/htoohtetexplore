@@ -1356,9 +1356,9 @@ function resolveContentUrl(url) {
   return url;
 }
 function expandContentCids(raw) {
-  return String(raw || '').replace(/\[img([^\]]*)\]\s*cid:([a-z0-9]+)\s*\[\/img\]/gi, function(m, attrs, id) {
+  return String(raw || '').replace(/\[img([^\]]*)\]\s*cid:([A-Za-z0-9_-]+)\s*\[\/img\]/gi, function(m, attrs, id) {
     const real = contentImageStore[id];
-    if (real) return '[img' + attrs + ']' + real + '[/img]';
+    if (real && String(real).indexOf('cid:') !== 0) return '[img' + attrs + ']' + real + '[/img]';
     return m;
   });
 }
@@ -1598,10 +1598,21 @@ async function insertGalleryInContent(inputEl) {
   toast('Gallery ပုံ ' + files.length + ' ခု ပြင်ဆင်နေသည်…');
   try {
     var cids = [];
+    var blobs = [];
     for (var i = 0; i < files.length; i++) {
       if (!files[i].type.startsWith('image/')) continue;
-      var dataUrl = await fileToCompressedDataURL(files[i]);
-      cids.push(storeContentImage(dataUrl));
+      var blob = files[i];
+      try { blob = await withTimeout(compressImageFile(files[i], 900, 0.62), 8000); } catch (e) { blob = files[i]; }
+      var dataUrl = await fileToDataURL(blob);
+      if (dataUrl.length > 650000) {
+        try {
+          blob = await compressImageFile(files[i], 640, 0.48);
+          dataUrl = await fileToDataURL(blob);
+        } catch (e2) {}
+      }
+      var cid = storeContentImage(dataUrl);
+      cids.push(cid);
+      blobs.push(blob);
     }
     if (cids.length < 2) { toast('ပုံ 2 ခုအထက် လိုအပ်သည်'); inputEl.value = ''; return; }
     var layout = ($('content-gallery-layout') && $('content-gallery-layout').value) || '1-2';
@@ -1613,7 +1624,28 @@ async function insertGalleryInContent(inputEl) {
     ta.value = ta.value.slice(0, pos) + block + ta.value.slice(pos);
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
-    toast('Gallery ထည့်ပြီး — Preview ကြည့်ပါ');
+    toast('Gallery Preview ထဲ ပေါ်ပါပြီ — Upload လုပ်နေသည်…');
+    // Upload each gallery image to Firebase Storage (same as single images)
+    if (typeof adminUser !== 'undefined' && adminUser && typeof adminStorage !== 'undefined' && adminStorage) {
+      for (var j = 0; j < cids.length; j++) {
+        (function(cid, blob, idx) {
+          withTimeout(
+            adminStorage.ref('uploads/gallery_' + Date.now() + '_' + idx + '.jpg').put(blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
+            20000
+          ).then(function(httpsUrl) {
+            if (!httpsUrl) return;
+            contentImageStore[cid] = httpsUrl;
+            if (ta.value.indexOf('cid:' + cid) !== -1) {
+              ta.value = ta.value.split('cid:' + cid).join(httpsUrl);
+            }
+            if (typeof updateContentPreview === 'function') updateContentPreview();
+            if (idx === cids.length - 1) toast('Gallery ပုံအားလုံး Firebase သိမ်းပြီး');
+          }).catch(function(err) {
+            console.warn('Gallery storage upload failed (using Base64 via cid):', err && err.message);
+          });
+        })(cids[j], blobs[j], j);
+      }
+    }
   } catch (err) {
     toast('Gallery မထည့်နိုင်: ' + (err.message || ''));
   }
@@ -4497,6 +4529,9 @@ function savePost() {
   if (!img || img.indexOf('blob:') === 0 || img.indexOf('data:image…') === 0) return alert('Cover Image ကို Upload ခလုတ်နဲ့ ထည့်ပါ။ (ပြီးသည်အထိ စောင့်ပါ — blob မသုံးရ)');
   if (!desc) return alert('Short Description ထည့်ပေးပါ။');
   if (!content) return alert('Article Content ထည့်ပေးပါ။');
+  if (content.indexOf('cid:') !== -1) {
+    return alert('Gallery/ပုံ Upload မပြီးသေးပါ။ စက္ကန့်အနည်းငယ် စောင့်ပြီး Save ပြန်နှိပ်ပါ။ (သို့မဟုတ် ပုံပြန်ထည့်ပါ)');
+  }
   if (!location) return alert('Location ထည့်ပေးပါ။');
   if (!category) return alert('Category ရွေးပေးပါ။');
 
