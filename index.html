@@ -433,6 +433,26 @@
     </div>
   </section>
 
+  <!-- PHOTO GALLERY -->
+  <section id="photo-gallery-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9 hidden">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <i class="fa-solid fa-images text-emerald-400 text-sm"></i>
+          <h2 id="gal-public-heading" class="text-xl sm:text-2xl font-black text-white">Photo Gallery</h2>
+        </div>
+        <p id="gal-public-subtitle" class="text-xs sm:text-sm text-emerald-400/70">ခရီးလမ်းမှ အလှပုံများ</p>
+      </div>
+      <div id="gal-public-cats" class="flex flex-wrap gap-2"></div>
+    </div>
+    <div id="gal-public-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3"></div>
+    <div class="mt-4 text-center">
+      <button type="button" id="gal-public-view-all" class="btn hidden rounded-full border border-emerald-700/50 bg-emerald-950/60 px-5 py-2 text-sm font-bold text-emerald-200 hover:bg-emerald-900/50" onclick="toggleGalleryViewAll()">
+        View all
+      </button>
+    </div>
+  </section>
+
   <!-- TRAVEL STORIES -->
   <section id="stories" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9">
     <div id="stories-banner-wrap" class="hidden mb-5 overflow-hidden border border-emerald-800/40 shadow-xl">
@@ -901,6 +921,7 @@ function renderMenu() {
   const menu = siteMenu.length ? siteMenu : [
     { label: 'Home', href: '#home' },
     { label: 'Travel Stories', href: '#stories' },
+    { label: 'Photo Gallery', href: '#photo-gallery-section' },
     { label: 'YouTube', href: '#youtube-section' },
     { label: 'About', href: '#about-section' },
     { label: 'Contact', href: '#contact' }
@@ -1132,6 +1153,12 @@ function loadBlogData() {
   } else if (proudSec) {
     proudSec.classList.add('hidden');
   }
+
+
+  // Photo Gallery (hh_gallery)
+  try {
+    renderPublicGallery();
+  } catch (e) { console.warn('gallery', e); }
 
   // Official sponsors (array or legacy object)
   let sponsorRaw = read('hh_sponsor', []);
@@ -1407,6 +1434,118 @@ function formatArticleBody(raw) {
   return t;
 }
 
+
+/* ---- Public Photo Gallery ---- */
+var _galPublicExpanded = false;
+var _galPublicFilter = '';
+function getPublicGallery() {
+  try {
+    var g = read('hh_gallery', null);
+    if (!g || Array.isArray(g)) {
+      return { active: true, heading: 'Photo Gallery', subtitle: '', previewCount: 4, categories: [], photos: Array.isArray(g) ? g : [] };
+    }
+    if (!Array.isArray(g.photos)) g.photos = [];
+    if (!Array.isArray(g.categories)) g.categories = [];
+    return g;
+  } catch (e) {
+    return { active: false, heading: 'Photo Gallery', subtitle: '', previewCount: 4, categories: [], photos: [] };
+  }
+}
+function renderPublicGallery() {
+  var g = getPublicGallery();
+  var sec = $('photo-gallery-section');
+  if (!sec) return;
+  var photos = (g.photos || []).filter(function(p) {
+    return p && p.active !== false && p.img;
+  });
+  if (g.active === false || !photos.length) {
+    sec.classList.add('hidden');
+    return;
+  }
+  sec.classList.remove('hidden');
+  var heading = $('gal-public-heading');
+  var sub = $('gal-public-subtitle');
+  if (heading) heading.textContent = g.heading || 'Photo Gallery';
+  if (sub) {
+    sub.textContent = g.subtitle || '';
+    sub.classList.toggle('hidden', !(g.subtitle || '').trim());
+  }
+  var cats = g.categories || [];
+  var catBox = $('gal-public-cats');
+  if (catBox) {
+    var allLabel = 'အားလုံး';
+    var html = '<button type="button" class="gal-cat-btn rounded-full px-3 py-1 text-[11px] font-bold border ' +
+      (!_galPublicFilter ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-slate-600 text-slate-300 hover:border-emerald-600') +
+      '" data-cat="" onclick="setGalleryFilter(\'\')">' + allLabel + '</button>';
+    cats.forEach(function(c) {
+      if (!c) return;
+      var on = _galPublicFilter === c;
+      html += '<button type="button" class="gal-cat-btn rounded-full px-3 py-1 text-[11px] font-bold border ' +
+        (on ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-slate-600 text-slate-300 hover:border-emerald-600') +
+        '" data-cat="' + safe(c) + '" onclick="setGalleryFilter(\'' + safe(c).replace(/'/g, "\\'") + '\')">' + safe(c) + '</button>';
+    });
+    catBox.innerHTML = html;
+  }
+  var filtered = photos;
+  if (_galPublicFilter) {
+    filtered = photos.filter(function(p) {
+      return String(p.category || '') === String(_galPublicFilter);
+    });
+  }
+  var previewN = Math.max(2, Math.min(12, parseInt(g.previewCount, 10) || 4));
+  var show = _galPublicExpanded ? filtered : filtered.slice(0, previewN);
+  var grid = $('gal-public-grid');
+  if (grid) {
+    if (!show.length) {
+      grid.innerHTML = '<div class="col-span-full text-center text-sm text-slate-400 py-8">ဒီအမျိုးအစားမှာ ပုံမရှိသေးပါ</div>';
+    } else {
+      var allSrcs = filtered.map(function(p) { return p.img; });
+      grid.innerHTML = show.map(function(p, i) {
+        var src = safe(p.img);
+        var cap = safe(p.caption || p.category || '');
+        return '<button type="button" class="group relative aspect-square overflow-hidden rounded-xl border border-emerald-900/40 bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50" onclick="openGalleryLightbox(' + i + ')">' +
+          '<img src="' + src + '" alt="' + cap + '" class="w-full h-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
+          (cap ? '<span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5 text-[10px] font-semibold text-white text-left line-clamp-1">' + cap + '</span>' : '') +
+          '</button>';
+      }).join('');
+      // store list for lightbox
+      window._galLightboxList = allSrcs;
+      window._galLightboxOffset = _galPublicExpanded ? 0 : 0;
+      // map visible index to full filtered list index
+      window._galVisibleToFull = show.map(function(p) {
+        return filtered.indexOf(p);
+      });
+    }
+  }
+  var btn = $('gal-public-view-all');
+  if (btn) {
+    if (filtered.length > previewN) {
+      btn.classList.remove('hidden');
+      btn.textContent = _galPublicExpanded ? 'Show less' : ('View all · ' + filtered.length);
+    } else {
+      btn.classList.add('hidden');
+      _galPublicExpanded = false;
+    }
+  }
+}
+function setGalleryFilter(cat) {
+  _galPublicFilter = cat || '';
+  _galPublicExpanded = false;
+  renderPublicGallery();
+}
+function toggleGalleryViewAll() {
+  _galPublicExpanded = !_galPublicExpanded;
+  renderPublicGallery();
+}
+function openGalleryLightbox(visibleIndex) {
+  var list = window._galLightboxList || [];
+  var map = window._galVisibleToFull || [];
+  var fullIdx = (map[visibleIndex] != null) ? map[visibleIndex] : visibleIndex;
+  var src = list[fullIdx] || list[visibleIndex];
+  if (!src) return;
+  if (typeof openLightbox === 'function') openLightbox(src, list);
+}
+
 let lightboxList = [];
 let lightboxIndex = 0;
 function openLightbox(src, list) {
@@ -1594,7 +1733,7 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_upcoming','hh_gallery','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 let publicFirebaseReady = false;
 let publicDb = null;
 try {
