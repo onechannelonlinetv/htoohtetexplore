@@ -4718,7 +4718,7 @@ function renderPresetList() {
     const mode = (p.hh_settings && p.hh_settings.mode) || 'dark';
     return `<div class="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
       <div class="flex-1 min-w-0">
-        <p class="font-bold truncate">${safe(p.name)}</p>
+        <p class="font-bold truncate">${safe(p.name)}</p> 
         <p class="tiny">${safe(theme)} · ${safe(mode)} · ${d}</p>
       </div>
       <div class="flex gap-2">
