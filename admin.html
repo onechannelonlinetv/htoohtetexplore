@@ -350,7 +350,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod14</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod15</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -554,8 +554,15 @@ main > div {
         </div><!-- /brand panel -->
 
         <div id="hero-editor-anchor" class="space-y-5 pt-2 w-full max-w-none">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-5">
-          <label class="toggle-row"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-5 fold-panel open">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div class="flex items-center gap-3 flex-wrap min-w-0">
+              <div class="fold-title">Hero</div>
+              <label class="toggle-row mb-0" onclick="event.stopPropagation()"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
+            </div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-5">
 
           <!-- FULL-BLEED LIVE PREVIEW (website-width) -->
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-2 sm:p-3 space-y-2 w-full">
@@ -829,6 +836,7 @@ main > div {
           <span id="val-hsx" class="hidden">8</span><span id="val-hsy" class="hidden">78</span>
 
           <button onclick="saveHero()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Hero</button>
+          </div>
         </div>
       </div>
 
@@ -970,11 +978,15 @@ main > div {
 
         <div id="sponsor-list" class="space-y-2"></div>
 
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4" id="sponsor-editor">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <h3 class="font-bold text-white" id="sponsor-editor-title">Sponsor တည်းဖြတ်</h3>
-            <label class="toggle-row mb-0"><input type="checkbox" id="admin-sponsor-active" checked onchange="updateSponsorPreview()"><span class="text-sm font-semibold">ပြမယ်</span></label>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4 fold-panel open" id="sponsor-editor">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div class="flex items-center gap-3 flex-wrap min-w-0">
+              <div class="fold-title" id="sponsor-editor-title">Sponsor တည်းဖြတ်</div>
+              <label class="toggle-row mb-0" onclick="event.stopPropagation()"><input type="checkbox" id="admin-sponsor-active" checked onchange="updateSponsorPreview()"><span class="text-sm font-semibold">ပြမယ်</span></label>
+            </div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
           </div>
+          <div class="fold-body space-y-4">
           <input type="hidden" id="admin-sponsor-edit-id" value="">
 
           <!-- Live Preview · Desktop + Phone -->
@@ -1176,6 +1188,7 @@ main > div {
           <div class="flex flex-wrap gap-2">
             <button type="button" onclick="saveCurrentSponsor()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Sponsor</button>
             <button type="button" onclick="resetSponsorForm()" class="btn btn-muted">Clear Form</button>
+          </div>
           </div>
         </div>
       </section>
