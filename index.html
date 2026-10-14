@@ -359,6 +359,32 @@
     font-size: 10px; font-weight: 700; color: rgba(255,255,255,.92);
   }
 
+
+  /* Mode toggle — always visible shade (dark + light) */
+  .mode-toggle-btn {
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    color: #f8fafc !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .mode-toggle-btn:hover {
+    background: rgba(30, 41, 59, 0.85);
+    border-color: rgba(52, 211, 153, 0.5);
+  }
+  body.mode-light .mode-toggle-btn {
+    background: #e2e8f0 !important;
+    border: 1px solid #94a3b8 !important;
+    color: #0f172a !important;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.12);
+  }
+  body.mode-light .mode-toggle-btn:hover {
+    background: #cbd5e1 !important;
+    border-color: #64748b !important;
+  }
+  body.mode-light .mode-toggle-btn #mode-toggle-icon {
+    color: #0f172a !important;
+  }
+
 </style>
 </head>
 <body class="min-h-screen antialiased theme-forest mode-dark">
@@ -388,7 +414,7 @@
         </div>
         <!-- Social icons (on/off controlled by admin) -->
         <div class="flex items-center gap-0.5 sm:gap-1" id="social-links-header"></div>
-        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
+        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="mode-toggle-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition">
           <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
         </button>
         <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
