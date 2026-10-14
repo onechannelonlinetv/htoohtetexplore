@@ -1357,7 +1357,6 @@ function formatArticleBody(raw) {
     var m;
     while ((m = re.exec(inner)) !== null) {
       var u = (m[1] || '').trim();
-      // skip unresolved temporary cid: refs (must be expanded on save / uploaded)
       if (!u || u.indexOf('cid:') === 0) continue;
       imgs.push(u);
     }
@@ -1387,11 +1386,9 @@ function formatArticleBody(raw) {
       gridCss = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:min(280px,40vw);margin:1.25rem 0;';
       cellHtml = imgs.slice(0, 3).map(cell).join('');
     } else if (imgs.length >= 3 && layout !== '2') {
-      // fallback 3-col when layout unknown
       gridCss = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:min(280px,40vw);margin:1.25rem 0;';
       cellHtml = imgs.slice(0, 3).map(cell).join('');
     } else {
-      // layout "2" or only 2 images
       gridCss = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;height:min(300px,42vw);margin:1.25rem 0;';
       cellHtml = imgs.slice(0, 2).map(cell).join('');
     }
