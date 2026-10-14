@@ -661,73 +661,24 @@ main > div {
 
       <!-- PROUD SPONSORS -->
       <section id="view-proud" class="view space-y-5">
-        <div>
-          <h2 class="text-xl font-black">Proud Sponsors</h2>
-          <p class="mt-1 text-sm text-slate-400">၁) Logo Upload → Preview မှာ နေရာ/အရွယ် ချိန် → ၂) Add နှိပ် · ရှိပြီးသားကိုလည်း Preview မှာ drag လို့ရ</p>
-        </div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div class="md:col-span-2">
-              <label class="label">Section ခေါင်းစဉ် (Live site)</label>
-              <input id="proud-section-title" class="field" placeholder="Our Proud Sponsors" value="Our Proud Sponsors" oninput="saveProudMeta(); updateProudPreview();">
-            </div>
-            <div>
-              <label class="label">Bar အမြင့်</label>
-              <div class="flex items-center gap-2">
-                <input id="proud-frame-h" type="range" min="56" max="180" value="80" class="w-full" oninput="if($('val-proud-frame-h'))$('val-proud-frame-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
-                <span id="val-proud-frame-h" class="range-val">80px</span>
-              </div>
-            </div>
-            <div>
-              <label class="label">Logo အရွယ် (default)</label>
-              <div class="flex items-center gap-2">
-                <input id="proud-logo-h" type="range" min="24" max="100" value="48" class="w-full" oninput="if($('val-proud-logo-h'))$('val-proud-logo-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
-                <span id="val-proud-logo-h" class="range-val">48px</span>
-              </div>
-            </div>
-            <div class="md:col-span-2 flex flex-wrap items-end gap-2">
-              <button type="button" class="btn btn-muted text-xs" onclick="applyProudLayout('left')">စာ ဘယ် · Logo ညာ</button>
-              <button type="button" class="btn btn-muted text-xs" onclick="applyProudLayout('center')">အလယ်စု</button>
-              <button type="button" class="btn btn-muted text-xs" onclick="applyProudLayout('spread')">ညီတူ ခွဲ</button>
-            </div>
+        <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ကြည့် · logo Upload</p></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Proud Bar</span>
+            <div id="proud-preview-bar" class="mt-2 flex flex-wrap items-center gap-4 min-h-[40px]"></div>
           </div>
-
-          <!-- LIVE PREVIEW: drag title + logos here -->
-          <div class="rounded-xl border-2 border-dashed border-emerald-600/50 bg-[#050a12] p-3">
-            <div class="flex justify-between items-center mb-2 gap-2">
-              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · mouse ဖိပြီး ဆွဲ / ထောင့် resize</span>
-              <span class="text-[10px] text-slate-500">Add မနှိပ်ခင် staging logo ပါ ချိန်လို့ရ</span>
-            </div>
-            <div id="proud-live-frame" class="relative w-full rounded-lg border border-slate-600 bg-[#0a1220] overflow-hidden select-none" style="height:80px;touch-action:none">
-              <p id="proud-prev-title" class="absolute z-30 text-[11px] sm:text-xs font-bold uppercase tracking-[0.12em] text-emerald-400 cursor-grab px-1 whitespace-nowrap" style="left:3%;top:36%;">Our Proud Sponsors</p>
-              <div id="proud-preview-bar" class="absolute inset-0 z-20"></div>
-              <div id="proud-staging" class="absolute inset-0 z-25 pointer-events-none"></div>
-            </div>
-          </div>
-
-          <!-- Add form -->
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-4 mb-4">
+            <div><label class="label">Name *</label><input id="proud-name" class="field" placeholder="AYA Bank"></div>
             <div>
-              <label class="label">Name *</label>
-              <input id="proud-name" class="field" placeholder="vezoom" oninput="updateProudStaging()">
-            </div>
-            <div>
-              <label class="label">Logo Upload</label>
+              <label class="label">Logo</label>
               <div class="flex gap-1">
-                <input id="proud-logo" class="field flex-1" placeholder="Upload နှိပ်ပါ" oninput="updateProudStaging()">
-                <label class="btn btn-muted cursor-pointer px-3"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this,'proud-logo');setTimeout(updateProudStaging,400)"></label>
+                <input id="proud-logo" class="field flex-1" placeholder="URL / Upload">
+                <label class="btn btn-muted cursor-pointer px-3"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'proud-logo')"></label>
               </div>
-              <div id="proud-logo-preview" class="mt-2"></div>
             </div>
-            <div>
-              <label class="label">Link</label>
-              <input id="proud-link" class="field" placeholder="https://...">
-            </div>
-            <div class="flex items-end">
-              <button type="button" onclick="addProud()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add (Preview အတိုင်း သိမ်း)</button>
-            </div>
+            <div><label class="label">Link</label><input id="proud-link" class="field" placeholder="https://..."></div>
+            <div class="flex items-end"><button onclick="addProud()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add</button></div>
           </div>
-          <p class="tiny">Upload ပြီး Preview ထဲ အနီ/စိမ်း frame နဲ့ ပေါ်မယ် → drag ချိန် → Add နှိပ်</p>
           <div id="proud-list" class="space-y-2"></div>
         </div>
       </section>
@@ -1135,22 +1086,14 @@ main > div {
               </div>
             </div>
             <div><label class="label">Location *</label><input id="admin-post-location" class="field" oninput="updatePostPreview()" placeholder="Bagan, Inle Lake..."></div>
-            <div class="md:col-span-2">
-              <label class="label">Category *</label>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <select id="admin-post-category" class="field flex-1" onchange="updatePostPreview()">
-                  <option value="Travel Story">Travel Story</option>
-                  <option value="Guide">Guide</option>
-                  <option value="Food">Food</option>
-                  <option value="Culture">Culture</option>
-                  <option value="Adventure">Adventure</option>
-                </select>
-                <div class="flex gap-2 flex-1">
-                  <input id="admin-new-category" class="field flex-1" placeholder="အသစ် ရေးမယ် (ဥပမာ LOCAL TRIP)" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomCategory();}">
-                  <button type="button" class="btn btn-green shrink-0" onclick="addCustomCategory()"><i class="fa-solid fa-plus mr-1"></i>Add Category</button>
-                </div>
-              </div>
-              <p class="tiny mt-1">မူလ: Travel Story, Guide, Food, Culture, Adventure — အသစ်ရေးပြီး Add နှိပ်ပါ</p>
+            <div><label class="label">Category *</label>
+              <select id="admin-post-category" class="field" onchange="updatePostPreview()">
+                <option value="Travel Story">Travel Story</option>
+                <option value="Guide">Guide</option>
+                <option value="Food">Food</option>
+                <option value="Culture">Culture</option>
+                <option value="Adventure">Adventure</option>
+              </select>
             </div>
             <div><label class="label">Travel Date</label><input id="admin-post-travel-date" type="date" class="field"></div>
             <div><label class="label">Author</label><input id="admin-post-author" class="field" placeholder="Htoo Htet" value="Htoo Htet"></div>
@@ -1331,7 +1274,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_proud_meta'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1813,9 +1756,6 @@ function showPreviewIfUrl(inputId) {
   if (v && (v.startsWith('http') || v.startsWith('data:image'))) {
     setImagePreview(box, v, '');
   }
-  if (inputId === 'proud-logo' && typeof updateProudStaging === 'function') {
-    setTimeout(updateProudStaging, 100);
-  }
 }
 
 async function signInAdmin() {
@@ -1856,7 +1796,6 @@ async function signInAdmin() {
     $('app').classList.remove('hidden');
     loadAll();
     try { renderOverview(); } catch (e2) {}
-    try { if (typeof refreshCategoryOptions === "function") refreshCategoryOptions(); } catch (e3) {}
   } catch (e) {
     $('login-error').textContent = e.message || 'Login မအောင်မြင်ပါ။';
   } finally {
@@ -2067,12 +2006,6 @@ function showView(name, button) {
   }
   if (name === 'pagepreview') {
     setTimeout(function() { try { refreshPagePreviewIframe(); } catch (e) {} }, 100);
-  }
-  if (name === 'proud') {
-    setTimeout(function() { try { if (typeof loadProudMeta==='function') loadProudMeta(); if (typeof updateProudPreview==='function') updateProudPreview(); } catch (e) {} }, 80);
-  }
-  if (name === 'upcoming') {
-    setTimeout(function() { try { if (typeof updateUpcomingPreview==='function') updateUpcomingPreview(); if (typeof initUpcomingDrag==='function') initUpcomingDrag(); } catch (e) {} }, 80);
   }
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -3440,7 +3373,8 @@ let _upDrag = null;
 
 function initUpcomingDrag() {
   const box = $('up-live-preview');
-  if (!box) return;
+  if (!box || box._upDragReady) return;
+  box._upDragReady = true;
   const map = {
     'up-prev-label': { xi:'up-label-x', yi:'up-label-y', vx:'val-ulx', vy:'val-uly' },
     'up-prev-title': { xi:'up-title-x', yi:'up-title-y', vx:'val-utx', vy:'val-uty' },
@@ -3449,41 +3383,52 @@ function initUpcomingDrag() {
   function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
   Object.keys(map).forEach(function(id){
     const el = $(id);
-    if (!el) return;
+    if (!el || el._bound) return;
+    el._bound = true;
     el.style.cursor = 'grab';
-    el.style.touchAction = 'none';
-    el.onmousedown = function(e){
-      e.preventDefault();
-      e.stopPropagation();
+    el.addEventListener('mousedown', function(e){
       const c = map[id];
+      const p = pt(e);
       const r = box.getBoundingClientRect();
+      _upDrag = { el:el, c:c, sx:p.clientX, sy:p.clientY, ol:parseFloat(el.style.left)||0, ot:parseFloat(el.style.top)||0, rw:r.width, rh:r.height };
       el.style.cursor = 'grabbing';
-      function move(ev){
-        const p = pt(ev);
-        let x = Math.max(0, Math.min(95, ((p.clientX - r.left) / r.width) * 100));
-        let y = Math.max(0, Math.min(90, ((p.clientY - r.top) / r.height) * 100));
-        el.style.left = x + '%';
-        el.style.top = y + '%';
-        el.style.position = 'absolute';
-        if ($(c.xi)) $(c.xi).value = Math.round(x);
-        if ($(c.yi)) $(c.yi).value = Math.round(y);
-        if ($(c.vx)) $(c.vx).textContent = Math.round(x) + '%';
-        if ($(c.vy)) $(c.vy).textContent = Math.round(y) + '%';
-      }
-      function up(){
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', up);
-        el.style.cursor = 'grab';
-        if (typeof saveUpcoming === 'function') {
-          try { /* keep fields; user can save */ } catch (err) {}
-        }
-      }
-      document.addEventListener('mousemove', move);
-      document.addEventListener('mouseup', up);
-    };
+      e.preventDefault();
+    });
+    el.addEventListener('touchstart', function(e){
+      const c = map[id];
+      const p = pt(e);
+      const r = box.getBoundingClientRect();
+      _upDrag = { el:el, c:c, sx:p.clientX, sy:p.clientY, ol:parseFloat(el.style.left)||0, ot:parseFloat(el.style.top)||0, rw:r.width, rh:r.height };
+      e.preventDefault();
+    }, { passive:false });
   });
+  if (!window._upDragWin) {
+    window._upDragWin = true;
+    window.addEventListener('mousemove', function(e){
+      if (!_upDrag) return;
+      const p = pt(e);
+      const nx = Math.max(0, Math.min(100, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
+      const ny = Math.max(0, Math.min(100, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
+      _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
+      if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
+      if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
+      if ($(_upDrag.c.vx)) $(_upDrag.c.vx).textContent = Math.round(nx);
+      if ($(_upDrag.c.vy)) $(_upDrag.c.vy).textContent = Math.round(ny);
+    });
+    window.addEventListener('touchmove', function(e){
+      if (!_upDrag) return;
+      const p = pt(e);
+      const nx = Math.max(0, Math.min(100, _upDrag.ol + ((p.clientX-_upDrag.sx)/_upDrag.rw)*100));
+      const ny = Math.max(0, Math.min(100, _upDrag.ot + ((p.clientY-_upDrag.sy)/_upDrag.rh)*100));
+      _upDrag.el.style.left = nx+'%'; _upDrag.el.style.top = ny+'%';
+      if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nx);
+      if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(ny);
+      e.preventDefault();
+    }, { passive:false });
+    window.addEventListener('mouseup', function(){ if (_upDrag){ _upDrag.el.style.cursor='grab'; _upDrag=null; } });
+    window.addEventListener('touchend', function(){ _upDrag=null; });
+  }
 }
-
 
 function saveUpcoming() {
   function gv(id, def) {
@@ -3966,275 +3911,104 @@ function updatePostPreview() {
 }
 function updateProudPreview() {
   const bar = $('proud-preview-bar');
-  const frame = $('proud-live-frame');
   if (!bar) return;
-  const m = (typeof getProudMeta === 'function') ? getProudMeta() : {};
-  const logoH = Number(m.logoH) || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  const frameH = Number(m.frameH) || parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '80', 10) || 80;
-  if (frame) frame.style.height = frameH + 'px';
-  if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = frameH + 'px';
-  if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = logoH + 'px';
-  const titleEl = $('proud-prev-title');
-  if (titleEl) {
-    titleEl.textContent = (($('proud-section-title') && $('proud-section-title').value) || m.title || 'Our Proud Sponsors').trim();
-    titleEl.style.left = (m.titleX != null ? m.titleX : 3) + '%';
-    titleEl.style.top = (m.titleY != null ? m.titleY : 36) + '%';
+  const items = getProud().filter(p => p.active !== false);
+  if (!items.length) {
+    bar.innerHTML = '<span class="text-xs text-slate-500">Sponsor မရှိသေး</span>';
+    return;
   }
-  const items = getProud().filter(function(p) { return p.active !== false; });
-  bar.innerHTML = items.map(function(p, idx) {
-    const all = getProud();
-    const realIdx = all.findIndex(function(x) { return String(x.id) === String(p.id); });
-    const sz = p.size || logoH;
-    const x = p.x != null ? p.x : (28 + idx * 16);
-    const y = p.y != null ? p.y : 18;
-    if (p.logo) {
-      return '<div class="proud-logo-item absolute" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;cursor:grab;z-index:20">' +
-        '<div class="w-full h-full flex items-center justify-center rounded-md bg-white/10 border border-emerald-600/40">' +
-        '<img src="' + safe(p.logo) + '" alt="" class="max-w-full max-h-full object-contain p-0.5" draggable="false">' +
-        '</div><span class="sp-resize-handle proud-resize"></span></div>';
-    }
-    return '<span class="proud-logo-item absolute text-xs font-bold text-white/90 cursor-grab px-1" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;z-index:20">' + safe(p.name) + '</span>';
+  bar.innerHTML = items.map(p => {
+    if (p.logo) return '<img src="'+safe(p.logo)+'" class="h-8 object-contain opacity-90" alt="'+safe(p.name)+'" onerror="this.style.display=\'none\'">';
+    return '<span class="text-white/90 font-bold text-sm">'+safe(p.name)+'</span>';
   }).join('');
-  if (typeof updateProudStaging === 'function') updateProudStaging();
-  if (typeof initProudDrag === 'function') setTimeout(initProudDrag, 30);
 }
-
-/* Staging = not yet Added logo/name — adjustable in preview before Add */
-window._proudStaging = window._proudStaging || { x: 55, y: 20, size: 48 };
-function updateProudStaging() {
-  const box = $('proud-staging');
-  if (!box) return;
-  const name = (($('proud-name') && $('proud-name').value) || '').trim();
-  let logo = '';
-  if (typeof imageFieldValue === 'function') logo = imageFieldValue('proud-logo');
-  if (!logo && $('proud-logo')) logo = ($('proud-logo').value || '').trim();
-  if (!name && !logo) { box.innerHTML = ''; return; }
-  const st = window._proudStaging;
-  const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  if (!st.size) st.size = logoH;
-  let html = '';
-  if (logo && logo.indexOf('blob:') !== 0) {
-    html = '<div id="proud-stage-item" class="absolute" style="left:' + st.x + '%;top:' + st.y + '%;width:' + st.size + 'px;height:' + st.size + 'px;cursor:grab;z-index:40;pointer-events:auto">' +
-      '<div class="w-full h-full flex items-center justify-center rounded-md bg-amber-500/20 border-2 border-amber-400">' +
-      '<img src="' + safe(logo) + '" class="max-w-full max-h-full object-contain p-0.5" draggable="false">' +
-      '</div><span class="sp-resize-handle proud-stage-resize"></span>' +
-      '<span class="absolute -top-4 left-0 text-[9px] text-amber-300 font-bold whitespace-nowrap">STAGING (Add မနှိပ်ရသေး)</span></div>';
-  } else if (name) {
-    html = '<span id="proud-stage-item" class="absolute text-xs font-bold text-amber-300 cursor-grab px-1 border border-amber-500/50 rounded" style="left:' + st.x + '%;top:' + st.y + '%;z-index:40;pointer-events:auto">' + safe(name) + ' *</span>';
-  }
-  box.innerHTML = html;
-  box.style.pointerEvents = 'none';
-  const item = $('proud-stage-item');
-  if (item) {
-    item.style.pointerEvents = 'auto';
-    if (typeof initProudStagingDrag === 'function') initProudStagingDrag();
-  }
-}
-
-function initProudStagingDrag() {
-  const frame = $('proud-live-frame');
-  const el = $('proud-stage-item');
-  if (!frame || !el || el._bound) return;
-  el._bound = true;
-  el.addEventListener('mousedown', function(e) {
-    if (e.target.classList && e.target.classList.contains('proud-stage-resize')) return;
-    e.preventDefault();
-    const rect = frame.getBoundingClientRect();
-    function move(ev) {
-      const x = Math.max(0, Math.min(90, ((ev.clientX - rect.left) / rect.width) * 100));
-      const y = Math.max(0, Math.min(80, ((ev.clientY - rect.top) / rect.height) * 100));
-      el.style.left = x + '%'; el.style.top = y + '%';
-      window._proudStaging.x = x; window._proudStaging.y = y;
-    }
-    function up() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup', up);
+function saveSocial() {
+  write('hh_social', {
+    fb: $('admin-fb').value.trim(),
+    tt: $('admin-tt').value.trim(),
+    yt: $('admin-yt').value.trim(),
+    vb: $('admin-vb').value.trim(),
+    showFb: $('social-show-fb')?.checked !== false,
+    showYt: $('social-show-yt')?.checked !== false,
+    showTt: $('social-show-tt')?.checked !== false,
+    showVb: $('social-show-vb')?.checked !== false
   });
-  const h = el.querySelector('.proud-stage-resize');
-  if (h && !h._bound) {
-    h._bound = true;
-    h.addEventListener('mousedown', function(e) {
-      e.preventDefault(); e.stopPropagation();
-      const startX = e.clientX, startW = el.offsetWidth;
-      function move(ev) {
-        const nw = Math.max(24, Math.min(120, startW + (ev.clientX - startX)));
-        el.style.width = nw + 'px'; el.style.height = nw + 'px';
-        window._proudStaging.size = nw;
-      }
-      function up() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
-      document.addEventListener('mousemove', move);
-      document.addEventListener('mouseup', up);
-    });
-  }
+  toast('Social Links သိမ်းပြီးပါပြီ။');
 }
 
-function applyProudLayout(mode) {
+/* ---- Menu ---- */
+function getMenu() { return read('hh_menu', []); }
+function renderMenuList() {
+  const list = $('menu-list');
+  const items = getMenu();
+  const prev = $('menu-preview-box');
+  if (prev) {
+    const show = items.length ? items : [{label:'Home'},{label:'Travel Stories'},{label:'YouTube'},{label:'About'},{label:'Contact'}];
+    prev.innerHTML = show.map(m => '<div class="rounded-lg px-3 py-2 hover:bg-emerald-900/40">› ' + safe(m.label) + '</div>').join('');
+  }
+  if (!items.length) {
+    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Menu မရှိသေး — Default menu သုံးနေပါတယ်။</p>';
+    return;
+  }
+  list.innerHTML = items.map((m, i) => `
+    <div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
+      <span class="text-xs font-black text-violet-300 w-6">${String(i+1).padStart(2,'0')}</span>
+      <div class="flex-1 min-w-0"><p class="font-bold truncate">${safe(m.label)}</p><p class="tiny truncate">${safe(m.href)}</p></div>
+      <button class="btn btn-muted" onclick="moveMenu(${i},-1)" ${i===0?'disabled':''}>↑</button>
+      <button class="btn btn-muted" onclick="moveMenu(${i},1)" ${i===items.length-1?'disabled':''}>↓</button>
+      <button class="btn btn-red" onclick="deleteMenu(${i})"><i class="fa-regular fa-trash-can"></i></button>
+    </div>`).join('');
+}
+function addMenuItem() {
+  const label = $('menu-label').value.trim(), href = $('menu-href').value.trim();
+  if (!label || !href) return alert('Label နဲ့ Link ထည့်ပါ။');
+  const items = getMenu();
+  items.push({ label, href });
+  write('hh_menu', items);
+  $('menu-label').value = ''; $('menu-href').value = '';
+  renderMenuList(); toast('Menu ထည့်ပြီးပါပြီ။');
+}
+function moveMenu(i, d) {
+  const a = getMenu(), n = i + d;
+  if (n < 0 || n >= a.length) return;
+  [a[i], a[n]] = [a[n], a[i]];
+  write('hh_menu', a); renderMenuList();
+}
+function deleteMenu(i) {
+  if (!confirm('ဖျက်မှာ သေချာပါသလား?')) return;
+  const a = getMenu(); a.splice(i, 1); write('hh_menu', a); renderMenuList(); toast('ဖျက်ပြီးပါပြီ။');
+}
+
+/* ---- Proud Sponsors ---- */
+function getProud() { return read('hh_proud_sponsors', []); }
+function renderProudList() {
+  const list = $('proud-list');
   const items = getProud();
-  const active = items.filter(function(p) { return p.active !== false; });
-  const n = active.length || 1;
-  const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  if (mode === 'left') {
-    saveProudMetaFields({ titleX: 3, titleY: 38 });
-    active.forEach(function(p, i) {
-      const idx = items.findIndex(function(x) { return String(x.id) === String(p.id); });
-      if (idx >= 0) { items[idx].x = 32 + i * 14; items[idx].y = 20; items[idx].size = logoH; }
-    });
-  } else if (mode === 'center') {
-    saveProudMetaFields({ titleX: 36, titleY: 6 });
-    const start = Math.max(8, 50 - n * 7);
-    active.forEach(function(p, i) {
-      const idx = items.findIndex(function(x) { return String(x.id) === String(p.id); });
-      if (idx >= 0) { items[idx].x = start + i * 14; items[idx].y = 42; items[idx].size = logoH; }
-    });
-  } else {
-    saveProudMetaFields({ titleX: 3, titleY: 38 });
-    active.forEach(function(p, i) {
-      const idx = items.findIndex(function(x) { return String(x.id) === String(p.id); });
-      if (idx >= 0) {
-        items[idx].x = n <= 1 ? 50 : Math.round(12 + i * (75 / Math.max(1, n - 1)));
-        items[idx].y = 20; items[idx].size = logoH;
-      }
-    });
+  if (typeof updateProudPreview === 'function') updateProudPreview();
+  $('stat-proud') && ($('stat-proud').textContent = items.length);
+  if (!items.length) {
+    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Proud Sponsor မရှိသေးပါ။</p>';
+    return;
   }
-  write('hh_proud_sponsors', items);
-  updateProudPreview();
-  toast('Layout သုံးပြီး');
+  list.innerHTML = items.map((p, i) => `
+    <div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
+      ${p.logo ? `<img src="${safe(p.logo)}" class="h-8 w-12 object-contain rounded bg-white/10" onerror="this.style.display='none'">` : ''}
+      <div class="flex-1 min-w-0"><p class="font-bold">${safe(p.name)}</p><p class="tiny">${p.active === false ? 'Hidden' : 'Visible'}</p></div>
+      <button class="btn btn-muted" onclick="toggleProud(${i})">${p.active === false ? 'Show' : 'Hide'}</button>
+      <button class="btn btn-muted" onclick="moveProud(${i},-1)" ${i===0?'disabled':''}>↑</button>
+      <button class="btn btn-muted" onclick="moveProud(${i},1)" ${i===items.length-1?'disabled':''}>↓</button>
+      <button class="btn btn-red" onclick="deleteProud(${i})"><i class="fa-regular fa-trash-can"></i></button>
+    </div>`).join('');
 }
-
-function saveProudMetaFields(extra) {
-  const m = (typeof getProudMeta === 'function') ? getProudMeta() : {};
-  const title = (($('proud-section-title') && $('proud-section-title').value) || '').trim() || 'Our Proud Sponsors';
-  const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  const frameH = parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '80', 10) || 80;
-  const next = Object.assign({}, m, { title: title, logoH: logoH, frameH: frameH }, extra || {});
-  if (typeof write === 'function') write('hh_proud_meta', next);
-  else localStorage.setItem('hh_proud_meta', JSON.stringify(next));
-}
-
-function initProudDrag() {
-  const frame = $('proud-live-frame');
-  if (!frame) return;
-  const titleEl = $('proud-prev-title');
-  function bindDrag(el, onMove, onEnd) {
-    if (!el) return;
-    el.onmousedown = function(e) {
-      if (e.target && e.target.classList && (e.target.classList.contains('proud-resize') || e.target.classList.contains('proud-stage-resize'))) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const rect = frame.getBoundingClientRect();
-      function move(ev) {
-        const x = Math.max(0, Math.min(92, ((ev.clientX - rect.left) / rect.width) * 100));
-        const y = Math.max(0, Math.min(85, ((ev.clientY - rect.top) / rect.height) * 100));
-        onMove(x, y);
-      }
-      function up() {
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', up);
-        if (onEnd) onEnd();
-      }
-      document.addEventListener('mousemove', move);
-      document.addEventListener('mouseup', up);
-    };
-  }
-  if (titleEl) {
-    bindDrag(titleEl, function(x, y) {
-      titleEl.style.left = x + '%'; titleEl.style.top = y + '%';
-      titleEl._tx = x; titleEl._ty = y;
-    }, function() {
-      saveProudMetaFields({ titleX: Math.round(titleEl._tx || 3), titleY: Math.round(titleEl._ty || 36) });
-    });
-  }
-  const bar = $('proud-preview-bar');
-  if (!bar) return;
-  bar.querySelectorAll('.proud-logo-item').forEach(function(el) {
-    const idx = parseInt(el.getAttribute('data-idx'), 10);
-    bindDrag(el, function(x, y) {
-      el.style.left = x + '%'; el.style.top = y + '%';
-      el._lx = x; el._ly = y;
-    }, function() {
-      const items = getProud();
-      if (items[idx]) {
-        items[idx].x = Math.round(el._lx); items[idx].y = Math.round(el._ly);
-        write('hh_proud_sponsors', items);
-      }
-    });
-    const handle = el.querySelector('.proud-resize');
-    if (handle) {
-      handle.onmousedown = function(e) {
-        e.preventDefault(); e.stopPropagation();
-        const startX = e.clientX, startW = el.offsetWidth;
-        function move(ev) {
-          const nw = Math.max(24, Math.min(120, startW + (ev.clientX - startX)));
-          el.style.width = nw + 'px'; el.style.height = nw + 'px'; el._sz = nw;
-        }
-        function up() {
-          document.removeEventListener('mousemove', move);
-          document.removeEventListener('mouseup', up);
-          const items = getProud();
-          if (items[idx] && el._sz) { items[idx].size = Math.round(el._sz); write('hh_proud_sponsors', items); }
-        }
-        document.addEventListener('mousemove', move);
-        document.addEventListener('mouseup', up);
-      };
-    }
-  });
-}
-
-function getProudMeta() {
-  try {
-    const m = JSON.parse(localStorage.getItem('hh_proud_meta') || '{}');
-    return m && typeof m === 'object' ? m : {};
-  } catch (e) { return {}; }
-}
-function saveProudMeta() {
-  saveProudMetaFields({});
-}
-function loadProudMeta() {
-  const m = getProudMeta();
-  if ($('proud-section-title')) $('proud-section-title').value = m.title || 'Our Proud Sponsors';
-  if ($('proud-logo-h')) {
-    $('proud-logo-h').value = m.logoH || 48;
-    if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = (m.logoH || 48) + 'px';
-  }
-  if ($('proud-frame-h')) {
-    $('proud-frame-h').value = m.frameH || 80;
-    if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = (m.frameH || 80) + 'px';
-  }
-  if ($('proud-live-frame') && m.frameH) $('proud-live-frame').style.height = (m.frameH || 80) + 'px';
-}
-
 function addProud() {
-  const name = (($('proud-name') && $('proud-name').value) || '').trim();
+  const name = $('proud-name').value.trim();
   if (!name) return alert('Name ထည့်ပါ။');
-  let logo = (typeof imageFieldValue === 'function') ? imageFieldValue('proud-logo') : '';
-  if (!logo && $('proud-logo')) logo = ($('proud-logo').value || '').trim();
-  if (logo && (logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0)) {
-    return alert('Logo Upload ပြီးသည်အထိ စောင့်ပါ။');
-  }
-  const st = window._proudStaging || { x: 55, y: 20, size: 48 };
   const items = getProud();
-  items.push({
-    id: Date.now(),
-    name: name,
-    logo: logo,
-    link: (($('proud-link') && $('proud-link').value) || '').trim(),
-    active: true,
-    x: Math.round(st.x),
-    y: Math.round(st.y),
-    size: Math.round(st.size || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48)
-  });
+  items.push({ id: Date.now(), name, logo: $('proud-logo').value.trim(), link: $('proud-link').value.trim(), active: true });
   write('hh_proud_sponsors', items);
-  if ($('proud-name')) $('proud-name').value = '';
-  if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
-  else if ($('proud-logo')) { $('proud-logo').value = ''; delete $('proud-logo').dataset.fullUrl; }
-  if ($('proud-link')) $('proud-link').value = '';
-  const prev = $('proud-logo-preview'); if (prev) prev.innerHTML = '';
-  window._proudStaging = { x: 55, y: 20, size: parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48 };
-  renderProudList();
-  if (typeof renderOverview === 'function') renderOverview();
-  toast(logo ? 'သိမ်းပြီး — Preview နေရာအတိုင်း' : 'Proud Sponsor ထည့်ပြီး');
+  $('proud-name').value = ''; $('proud-logo').value = ''; $('proud-link').value = '';
+  renderProudList(); renderOverview(); toast('Proud Sponsor ထည့်ပြီးပါပြီ။');
 }
-
 function toggleProud(i) {
   const a = getProud(); a[i].active = a[i].active === false ? true : false;
   write('hh_proud_sponsors', a); renderProudList();
@@ -4248,60 +4022,6 @@ function moveProud(i, d) {
 function deleteProud(i) {
   if (!confirm('ဖျက်မှာ သေချာပါသလား?')) return;
   const a = getProud(); a.splice(i, 1); write('hh_proud_sponsors', a); renderProudList(); renderOverview(); toast('ဖျက်ပြီးပါပြီ။');
-}
-
-
-/* ---- Categories ---- */
-const DEFAULT_CATEGORIES = ['Travel Story', 'Guide', 'Food', 'Culture', 'Adventure'];
-function getCategories() {
-  let custom = [];
-  try { custom = JSON.parse(localStorage.getItem('hh_categories') || '[]'); } catch (e) { custom = []; }
-  if (!Array.isArray(custom)) custom = [];
-  const seen = {};
-  const out = [];
-  DEFAULT_CATEGORIES.concat(custom).forEach(function(c) {
-    const n = String(c || '').trim();
-    if (!n) return;
-    const key = n.toLowerCase();
-    if (seen[key]) return;
-    seen[key] = true;
-    out.push(n);
-  });
-  return out;
-}
-function saveCategories(list) {
-  const defaults = DEFAULT_CATEGORIES.map(function(c) { return c.toLowerCase(); });
-  const custom = (list || []).filter(function(c) {
-    return c && defaults.indexOf(String(c).toLowerCase()) === -1;
-  });
-  if (typeof write === 'function') write('hh_categories', custom);
-  else localStorage.setItem('hh_categories', JSON.stringify(custom));
-}
-function refreshCategoryOptions(selected) {
-  const sel = $('admin-post-category');
-  if (!sel) return;
-  const current = selected != null ? selected : (sel.value || 'Travel Story');
-  const cats = getCategories();
-  sel.innerHTML = cats.map(function(c) {
-    return '<option value="' + String(c).replace(/"/g, '&quot;') + '">' + String(c).replace(/</g, '&lt;') + '</option>';
-  }).join('');
-  if ([].some.call(sel.options, function(o) { return o.value === current; })) sel.value = current;
-  else if (sel.options.length) sel.selectedIndex = 0;
-}
-function addCustomCategory() {
-  const input = $('admin-new-category');
-  const name = (input && input.value || '').trim();
-  if (!name) { toast('Category နာမည် ရေးပါ'); return; }
-  const cats = getCategories();
-  const exists = cats.some(function(c) { return c.toLowerCase() === name.toLowerCase(); });
-  if (!exists) {
-    cats.push(name);
-    saveCategories(cats);
-  }
-  refreshCategoryOptions(name);
-  if (input) input.value = '';
-  if (typeof updatePostPreview === 'function') updatePostPreview();
-  toast(exists ? 'Category ရှိပြီးသား — ရွေးထားပါပြီ' : 'Category ထည့်ပြီး: ' + name);
 }
 
 /* ---- Posts ---- */
@@ -4380,8 +4100,7 @@ function editPost(id) {
   // Compact long Base64 already in content so textarea stays readable
   $('admin-post-content').value = compactContentDataUrls(p.content || '');
   if (typeof updateContentPreview === 'function') updateContentPreview();
-  if (typeof refreshCategoryOptions === 'function') refreshCategoryOptions(p.category || 'Travel Story');
-  else if ($('admin-post-category')) $('admin-post-category').value = p.category || 'Travel Story';
+  $('admin-post-category').value = p.category || 'Travel Story';
   $('admin-post-travel-date').value = p.travelDate || '';
   $('admin-post-author').value = p.author || 'Htoo Htet';
   $('admin-post-seo-title').value = p.seoTitle || '';
@@ -4397,8 +4116,7 @@ function cancelPostEdit() {
   ['editing-post-id','admin-post-title','admin-post-slug','admin-post-location','admin-post-desc','admin-post-content','admin-post-travel-date','admin-post-seo-title','admin-post-meta'].forEach(id => $(id).value = '');
   setImageFieldValue('admin-post-img', '');
   $('admin-post-author').value = 'Htoo Htet';
-  if (typeof refreshCategoryOptions === 'function') refreshCategoryOptions('Travel Story');
-  else if ($('admin-post-category')) $('admin-post-category').value = 'Travel Story';
+  $('admin-post-category').value = 'Travel Story';
   $('admin-post-section').value = 'latest';
   delete $('admin-post-slug').dataset.manual;
   const prev = $('admin-post-img-preview'); if (prev) prev.innerHTML = '';
@@ -4412,7 +4130,6 @@ function deletePost(id) {
   renderPostsList(); renderOverview(); toast('Post ဖျက်ပြီးပါပြီ။');
 }
 function renderPostsList() {
-  if (typeof refreshCategoryOptions === "function") refreshCategoryOptions();
   const posts = getPosts();
   $('post-count').textContent = posts.length + ' posts';
   refreshPostSectionOptions();
@@ -4587,4 +4304,3 @@ function toast(message) {
 </script>
 </body>
 </html>
- 
