@@ -230,7 +230,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN</p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -275,6 +275,14 @@ main > div {
           <div class="stat"><div class="text-sm text-slate-400">Gallery Photos</div><div id="stat-gallery" class="mt-2 text-3xl font-black">0</div></div>
         </div>
         <p id="overview-sync-status" class="text-xs text-slate-500 mt-2">ဒေတာ: local အရင် · Firebase sync နောက်မှ</p>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <button type="button" class="btn btn-green text-xs" onclick="exportSiteBackup()"><i class="fa-solid fa-download mr-1"></i>Backup Export</button>
+          <label class="btn btn-muted text-xs cursor-pointer"><i class="fa-solid fa-upload mr-1"></i>Backup Restore
+            <input type="file" accept="application/json,.json" class="hidden" onchange="importSiteBackup(this)">
+          </label>
+          <button type="button" class="btn btn-muted text-xs" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
+          <button type="button" class="btn btn-muted text-xs" onclick="renderOverview();toast('Overview refresh ပြီး')"><i class="fa-solid fa-rotate mr-1"></i>Refresh Stats</button>
+        </div>
       </section>
 
       <!-- BRAND & SETTINGS -->
@@ -5349,7 +5357,16 @@ function onGalSlotFile(i, input) {
       var ok = await saveOneGalleryImage(finalUrl, i);
       if (ok) {
         clearGalSlot(i);
-        try { renderGalleryList(); renderOverview(); } catch (e) {}
+        try {
+          renderGalleryList();
+          renderOverview();
+          var list = document.getElementById('gal-list');
+          if (list) {
+            list.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            list.style.outline = '2px solid #34d399';
+            setTimeout(function(){ list.style.outline = ''; }, 1200);
+          }
+        } catch (e) { console.warn(e); }
         toast('✓ ပုံ Gallery ထဲ သိမ်းပြီး');
       } else {
         toast('သိမ်းမရပါ — Login / Storage စစ်ပါ', true);
@@ -6057,31 +6074,57 @@ function deleteHomeSection(i) {
 }
 
 function renderOverview() {
-  try {
-    var posts = typeof getPosts==='function' ? getPosts() : [];
-    var sections = typeof getHomeSections==='function' ? getHomeSections() : [];
-    var proud = typeof getProud==='function' ? getProud() : [];
-    if (!Array.isArray(posts)) posts = [];
-    if (!Array.isArray(sections)) sections = [];
-    if (!Array.isArray(proud)) proud = [];
-    if ($('stat-posts')) $('stat-posts').textContent = String(posts.length);
-    if ($('stat-sections')) $('stat-sections').textContent = String(sections.length);
-    if ($('stat-proud')) $('stat-proud').textContent = String(proud.length);
-    var spText = '0';
-    if (typeof getSponsorList==='function') {
-      var _spl = getSponsorList() || [];
-      if (!Array.isArray(_spl)) _spl = [];
-      spText = _spl.length ? (_spl.filter(function(s){return s && s.active!==false}).length + '/' + _spl.length) : '0';
-    }
-    if ($('stat-sponsor')) $('stat-sponsor').textContent = spText;
-    // optional gallery stat if element exists
+  function safeLen(fn) {
     try {
-      var g = typeof getGalleryData==='function' ? getGalleryData() : null;
-      var gn = (g && Array.isArray(g.photos)) ? g.photos.length : 0;
+      var v = typeof fn === 'function' ? fn() : null;
+      if (Array.isArray(v)) return v.length;
+      return 0;
+    } catch (e) { return 0; }
+  }
+  function readArr(key) {
+    try {
+      var v = JSON.parse(localStorage.getItem(key) || 'null');
+      if (Array.isArray(v)) return v;
+      return [];
+    } catch (e) { return []; }
+  }
+  try {
+    var posts = safeLen(typeof getPosts === 'function' ? getPosts : null);
+    if (!posts) posts = readArr('hh_posts').length;
+    var sections = safeLen(typeof getHomeSections === 'function' ? getHomeSections : null);
+    if (!sections) sections = readArr('hh_home_sections').length;
+    var proud = safeLen(typeof getProud === 'function' ? getProud : null);
+    if (!proud) proud = readArr('hh_proud_sponsors').length;
+    if ($('stat-posts')) $('stat-posts').textContent = String(posts);
+    if ($('stat-sections')) $('stat-sections').textContent = String(sections);
+    if ($('stat-proud')) $('stat-proud').textContent = String(proud);
+    var spText = '0';
+    try {
+      if (typeof getSponsorList === 'function') {
+        var _spl = getSponsorList() || [];
+        if (!Array.isArray(_spl)) _spl = [];
+        spText = _spl.length ? (_spl.filter(function(s){return s && s.active!==false}).length + '/' + _spl.length) : '0';
+      } else {
+        var raw = readArr('hh_sponsor');
+        spText = String(raw.length);
+      }
+    } catch (e) {}
+    if ($('stat-sponsor')) $('stat-sponsor').textContent = spText;
+    try {
+      var gn = 0;
+      if (typeof getGalleryData === 'function') {
+        var g = getGalleryData();
+        gn = (g && Array.isArray(g.photos)) ? g.photos.length : 0;
+      } else {
+        var gg = JSON.parse(localStorage.getItem('hh_gallery') || 'null');
+        gn = (gg && Array.isArray(gg.photos)) ? gg.photos.length : 0;
+      }
       if ($('stat-gallery')) $('stat-gallery').textContent = String(gn);
     } catch (e) {}
   } catch (e) { console.warn('renderOverview', e); }
 }
+window.renderOverview = renderOverview;
+
 
 /* ---- Theme Presets (full layout snapshot) ---- */
 function getPresets() { return read('hh_theme_presets', []); }
