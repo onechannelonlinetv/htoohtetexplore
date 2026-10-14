@@ -323,7 +323,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod7</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod8</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -351,15 +351,10 @@ main > div {
       </div>
     </div>
 
-    <div class="w-full max-w-none space-y-6 p-3 sm:p-5 lg:p-6 xl:px-8">
+    <div class="w-full max-w-none space-y-4 p-3 sm:p-4 lg:p-5 xl:px-6">
 
       <!-- OVERVIEW -->
       <section id="view-overview" class="view active space-y-6">
-        <div class="overflow-hidden rounded-2xl border border-emerald-900/70 bg-gradient-to-r from-emerald-950 via-[#102d30] to-[#101b30] p-6 sm:p-8">
-          <span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">Full CMS Control</span>
-          <h2 class="mt-4 text-2xl font-black sm:text-3xl">Website အားလုံးကို<br class="sm:hidden"> ဒီနေရာက စီမံပါ</h2>
-          <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">Brand, Hero, Sponsors, Posts, Theme ၄ မျိုး (ဒီဇိုင်းကွဲ), ပုံ Upload, Font & အရွယ်အစား — အကုန် Admin ကနေ ထိန်းနိုင်ပါတယ်။</p>
-        </div>
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <div class="stat"><div class="text-sm text-slate-400">Posts</div><div id="stat-posts" class="mt-2 text-3xl font-black">0</div></div>
           <div class="stat"><div class="text-sm text-slate-400">Custom Rows</div><div id="stat-sections" class="mt-2 text-3xl font-black">0</div></div>
@@ -380,18 +375,14 @@ main > div {
 
       <!-- BRAND & SETTINGS -->
       
-      <section id="view-pagepreview" class="view space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p class="mt-1 text-sm text-slate-400">Website UI တစ်ခုလုံး · ဒီမှာကြည့်ပြီး အောက်က ခလုတ်နဲ့ သက်ဆိုင်ရာနေရာကို ပြင်နိုင်ပါတယ်</p>
-          </div>
-          <div class="flex flex-wrap gap-2">
+      <section id="view-pagepreview" class="view space-y-3">
+        <div class="flex flex-wrap items-center gap-2">
+
             <button type="button" class="btn btn-muted text-xs" onclick="refreshPagePreviewIframe()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
             <a href="index.html" target="_blank" class="btn btn-green text-xs"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Tab</a>
-          </div>
         </div>
         <div class="flex flex-wrap gap-2 text-xs">
           <button type="button" class="btn btn-muted" onclick="showView('settings'); setTimeout(function(){var a=document.getElementById('hero-editor-anchor');if(a)a.scrollIntoView({behavior:'smooth'});},80)">✏️ Edit Hero</button>
@@ -416,9 +407,16 @@ main > div {
         </div>
       </section>
 
-<section id="view-settings" class="view space-y-5">
-        <div><p class="mt-1 text-sm text-slate-400">Theme · Logo · Layout · Hero Banner (PC + Phone preview)</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+<section id="view-settings" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div>
+              <div class="fold-title">Brand · Theme · Logo</div>
+              <div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div>
+            </div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-4">
           <div>
             <label class="label mb-3">Website Theme — ဒီဇိုင်း ၄ မျိုး ကွဲပြား</label>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="theme-selector">
@@ -525,11 +523,11 @@ main > div {
           <div id="layout-preview" class="hidden"></div>
           <div id="layout-preview-inner" class="hidden"></div>
           <div id="layout-preview-text" class="hidden"></div>
+          </div>
         </div><!-- /brand panel -->
 
         <div id="hero-editor-anchor" class="space-y-5 pt-2 w-full max-w-none">
-        <div><p class="mt-1 text-sm text-slate-400">Preview အပြည့် · စာတစ်ကြောင်းချင်း Font / Color / Size / Style</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-5">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-5">
           <label class="toggle-row"><input type="checkbox" id="hero-active" checked onchange="updateHeroPreview()"><span class="text-sm font-semibold">Hero ပြမယ်</span></label>
 
           <!-- FULL-BLEED LIVE PREVIEW (website-width) -->
@@ -813,9 +811,8 @@ main > div {
       </section>
 
       <!-- HERO -->
-      <section id="view-menu" class="view space-y-5">
-        <div><p class="mt-1 text-sm text-slate-400">Hamburger menu ထဲမှာ ပြမယ်</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+      <section id="view-menu" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <div class="rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Preview · Menu Drawer</span>
             <div id="menu-preview-box" class="mt-2 space-y-1 text-sm text-emerald-100"></div>
@@ -830,11 +827,8 @@ main > div {
       </section>
 
       <!-- PROUD SPONSORS -->
-      <section id="view-proud" class="view space-y-5">
-        <div>
-          <p class="mt-1 text-sm text-slate-400">၁) Logo Upload → Preview မှာ နေရာ/အရွယ် ချိန် → ၂) Add နှိပ် · ရှိပြီးသားကိုလည်း Preview မှာ drag လို့ရ</p>
-        </div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-proud" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="md:col-span-2">
               <label class="label">Section ခေါင်းစဉ် (Live site) · Preview မှာ drag နဲ့ ရွှေ့လို့ရ</label>
@@ -907,12 +901,9 @@ main > div {
 
       <!-- OFFICIAL SPONSOR -->
       
-      <section id="view-sponsor" class="view space-y-5">
+      <section id="view-sponsor" class="view space-y-3">
         <div class="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p class="mt-1 text-sm text-slate-400">Hero လို Preview · ပုံဖိဆွဲ · Sponsor အများကြီး Add လုပ်နိုင်</p>
-          </div>
-          <button type="button" onclick="addNewSponsor()" class="btn btn-green"><i class="fa-solid fa-plus mr-2"></i>Add Sponsor</button>
+<button type="button" onclick="addNewSponsor()" class="btn btn-green"><i class="fa-solid fa-plus mr-2"></i>Add Sponsor</button>
         </div>
 
         <div class="panel editor-shell p-4 sm:p-5 fold-panel">
@@ -1150,9 +1141,8 @@ main > div {
         </div>
       </section>
 
-<section id="view-upcoming" class="view space-y-5">
-        <div><p class="mt-1 text-sm text-slate-400">Preview မှာ ဖိဆွဲ · ထောင့် = ဆိုဒ် · ပုံ drag</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+<section id="view-upcoming" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="up-active" checked onchange="updateUpcomingPreview()"><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
 
           <!-- Live Preview -->
@@ -1279,9 +1269,8 @@ main > div {
       </section>
 
 
-      <section id="view-gallery" class="view space-y-5">
-        <div><p class="mt-1 text-sm text-slate-400">Homepage ၄ ပုံ · View all · Category filter</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+      <section id="view-gallery" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
           <div class="fold-head" onclick="toggleFold(this)">
             <div>
               <div class="fold-title">Gallery Settings · ခေါင်းစဉ် / Category</div>
@@ -1352,9 +1341,8 @@ main > div {
         </div>
       </section>
 
-<section id="view-posts" class="view space-y-5">
-        <div><p class="mt-1 text-sm text-slate-400">Post များ · Section ခေါင်းစဉ် · Banner — Hero/Sponsor လို ချိန်နိုင်</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+<section id="view-posts" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
           <div class="fold-head" onclick="toggleFold(this)">
             <div>
               <div class="fold-title">Section ခေါင်းစဉ် · Travel Stories</div>
@@ -1393,12 +1381,8 @@ main > div {
       </section>
 
       <!-- ADD POST -->
-      <section id="view-addpost" class="view space-y-5">
-        <div>
-          <p class="mt-1 text-sm text-slate-400">Post အသစ်တင်မယ် · ပြင်မယ် · ဖျက်မယ် — Cover ပုံ Upload · Article Content</p>
-        </div>
-<div><h3 class="font-bold text-white">Posts စာရင်း</h3><p class="text-sm text-slate-400">Add / Edit / Delete — Cover ပုံ Upload</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+      <section id="view-addpost" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6">
           <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Post Card</span>
@@ -1508,9 +1492,8 @@ main > div {
       </section>
 
 <!-- CUSTOM ROWS -->
-      <section id="view-sections" class="view space-y-5">
-        <div><p class="mt-1 text-sm text-slate-400">Grid · Wide · Banner (Cover + စာ) · နှိပ်ရင် စာမျက်နှာသို့</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-sections" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <input type="hidden" id="section-edit-id" value="">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Row ခေါင်းစဉ် *</label><input id="section-title" class="field" placeholder="Featured Destinations" oninput="updateSectionPreview()"></div>
@@ -1613,9 +1596,8 @@ main > div {
       </section>
 
       <!-- YOUTUBE -->
-      <section id="view-youtube" class="view space-y-5">
-        <div><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ချိန်</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-youtube" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="yt-active" checked onchange="updateYoutubePreview()"><span class="text-sm font-semibold">YouTube Section ပြမယ်</span></label>
 
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
@@ -1679,9 +1661,8 @@ main > div {
         </div>
       </section>
 
-      <section id="view-about" class="view space-y-5">
-        <div><p class="mt-1 text-sm text-slate-400">Preview · စာအရောင် · Font weight</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-about" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <label class="toggle-row"><input type="checkbox" id="about-active" checked onchange="updateAboutPreview()"><span class="text-sm font-semibold">About ပြမယ်</span></label>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · About</span>
@@ -1708,9 +1689,8 @@ main > div {
         </div>
       </section>
 
-      <section id="view-social" class="view space-y-5">
-        <div><p class="mt-1 text-sm text-slate-400">Search icon ဘေး + Header / Footer မှာ ပြမယ် (Facebook, YouTube, TikTok, Viber)</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+      <section id="view-social" class="view space-y-3">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label class="toggle-row mb-1"><input type="checkbox" id="social-show-fb" checked><span class="text-sm font-semibold">Facebook ပြမယ်</span></label>
