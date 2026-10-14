@@ -1079,39 +1079,48 @@ function loadBlogData() {
   const proudFrameH = (proudMeta && proudMeta.frameH) ? Number(proudMeta.frameH) : 72;
   const titleX = proudMeta && proudMeta.titleX != null ? proudMeta.titleX : 4;
   const titleY = proudMeta && proudMeta.titleY != null ? proudMeta.titleY : 35;
-  const activeProud = proud.filter(p => p.active !== false);
+  const activeProud = (Array.isArray(proud) ? proud : []).filter(p => p && p.active !== false);
   if (proudSec) {
     if (activeProud.length) {
       proudSec.classList.remove('hidden');
-      const inner = proudSec.querySelector('.max-w-7xl') || proudSec;
-      // Use free-position stage
-      let stage = $('proud-stage');
-      if (!stage) {
-        // rebuild section content once
-      }
       const list = $('proud-sponsors-list');
       const label = $('proud-label');
-      // Switch to relative stage layout
+      if (label) {
+        label.className = 'text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/80 shrink-0';
+        label.style.left = '';
+        label.style.top = '';
+        label.textContent = (proudMeta && proudMeta.title) ? proudMeta.title : 'Our Proud Sponsors';
+      }
+      // Simple row: logo + name under it, click opens link
       if (list && list.parentElement) {
         const row = list.parentElement;
-        row.className = 'relative w-full';
-        row.style.height = proudFrameH + 'px';
-        row.style.minHeight = proudFrameH + 'px';
-        if (label) {
-          label.className = 'absolute z-10 text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/80';
-          label.style.left = titleX + '%';
-          label.style.top = titleY + '%';
-          label.textContent = (proudMeta && proudMeta.title) ? proudMeta.title : 'Our Proud Sponsors';
-        }
-        list.className = 'absolute inset-0';
-        list.innerHTML = activeProud.map(function(p, idx) {
+        row.className = 'flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full';
+        row.style.height = '';
+        row.style.minHeight = '';
+        list.className = 'flex items-center gap-5 sm:gap-8 overflow-x-auto w-full justify-start sm:justify-center py-1';
+        list.innerHTML = activeProud.map(function(p) {
           const sz = p.size || proudH;
-          const x = p.x != null ? p.x : (30 + idx * 15);
-          const y = p.y != null ? p.y : 20;
-          if (p.logo) {
-            return '<a href="' + safe(p.link || '#') + '" target="_blank" rel="noopener" class="absolute opacity-90 hover:opacity-100 transition flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/30" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px" title="' + safe(p.name) + '"><img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="max-w-full max-h-full object-contain p-1" onerror="this.style.display=\'none\'"></a>';
+          const href = (p.link && String(p.link).trim()) ? String(p.link).trim() : '';
+          const name = safe(p.name || '');
+          const logo = p.logo ? safe(p.logo) : '';
+          const inner = (logo
+            ? '<img src="' + logo + '" alt="' + name + '" class="max-w-full max-h-full object-contain" style="width:' + sz + 'px;height:' + sz + 'px" onerror="this.style.display=\'none\'">'
+            : '<span class="font-bold text-sm text-white/90">' + name + '</span>') +
+            (logo && name ? '<span class="mt-1.5 text-[11px] sm:text-xs font-semibold text-emerald-200/90 text-center leading-tight max-w-[6.5rem] line-clamp-2">' + name + '</span>' : '');
+          if (href) {
+            return '<a href="' + safe(href) + '" target="_blank" rel="noopener noreferrer" class="group flex flex-col items-center shrink-0 opacity-90 hover:opacity-100 transition" title="' + name + '">' +
+              '<div class="flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/40 group-hover:border-emerald-500/50 p-1.5" style="min-width:' + sz + 'px;min-height:' + sz + 'px">' +
+              (logo ? '<img src="' + logo + '" alt="' + name + '" class="object-contain" style="width:' + sz + 'px;height:' + sz + 'px;max-width:100%;max-height:100%" onerror="this.style.display=\'none\'">' : '<span class="font-bold text-sm text-white/90 px-2">' + name + '</span>') +
+              '</div>' +
+              (name ? '<span class="mt-1.5 text-[11px] sm:text-xs font-semibold text-emerald-200/90 text-center leading-tight max-w-[7rem] line-clamp-2 group-hover:text-emerald-300">' + name + '</span>' : '') +
+              '</a>';
           }
-          return '<span class="absolute text-white/90 font-bold text-sm" style="left:' + x + '%;top:' + y + '%">' + safe(p.name) + '</span>';
+          return '<div class="flex flex-col items-center shrink-0 opacity-90" title="' + name + '">' +
+            '<div class="flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/40 p-1.5" style="min-width:' + sz + 'px;min-height:' + sz + 'px">' +
+            (logo ? '<img src="' + logo + '" alt="' + name + '" class="object-contain" style="width:' + sz + 'px;height:' + sz + 'px;max-width:100%;max-height:100%" onerror="this.style.display=\'none\'">' : '<span class="font-bold text-sm text-white/90 px-2">' + name + '</span>') +
+            '</div>' +
+            (name ? '<span class="mt-1.5 text-[11px] sm:text-xs font-semibold text-emerald-200/90 text-center leading-tight max-w-[7rem] line-clamp-2">' + name + '</span>' : '') +
+            '</div>';
         }).join('');
       }
     } else {
