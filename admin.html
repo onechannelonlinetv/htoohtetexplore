@@ -1710,7 +1710,7 @@ main > div {
               <label class="label text-red-300 font-bold">YouTube Video / Playlist Link</label>
               <p class="tiny">Video သို့မဟုတ် Playlist link ကူးထည့်ပါ · Website မှာ YouTube cover ပေါ်မယ် · Play နှိပ်ရင် YouTube ကို ဖွင့်မယ် · Thumbnail ဗလာ = YouTube cover အလိုအလျောက်</p>
               <input id="yt-video-url" class="field" placeholder="https://www.youtube.com/watch?v=... သို့မဟုတ် playlist?list=..." oninput="updateYoutubePreview()">
-              <div id="yt-embed-preview" class="mt-2 hidden rounded-lg overflow-hidden border border-slate-700 aspect-video bg-black"></div>
+              <div id="yt-embed-preview" class="mt-2 hidden rounded-lg overflow-hidden border border-slate-700 bg-black"></div>
             </div>
             <div class="md:col-span-2"><label class="label">Title</label><textarea id="yt-title" class="field min-h-14" oninput="updateYoutubePreview()"></textarea></div>
             <div>
@@ -4409,9 +4409,13 @@ function updateYoutubePreview() {
       var thumbSrc = (parsed.type === 'video') ? ('https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg') : '';
       var custom = (typeof imageFieldValue === 'function' ? imageFieldValue('yt-thumb') : '') || '';
       var img = custom || thumbSrc || '';
-      ep.innerHTML = '<div class="relative w-full min-h-[160px] bg-black flex items-center justify-center">' +
-        (img ? '<img src="' + img + '" class="absolute inset-0 w-full h-full object-cover opacity-80" alt="">' : '') +
-        '<div class="relative z-10 text-center"><div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-play text-white"></i></div><p class="text-[11px] text-white/90 font-bold">Play → YouTube မှာ ဖွင့်မယ်</p></div></div>';
+      ep.innerHTML = '<a href="' + (parsed.type === 'playlist'
+          ? ('https://www.youtube.com/playlist?list=' + encodeURIComponent(parsed.id))
+          : ('https://www.youtube.com/watch?v=' + encodeURIComponent(parsed.id) + (parsed.list ? ('&list=' + encodeURIComponent(parsed.list)) : '')))
+        + '" target="_blank" rel="noopener" class="relative block w-full aspect-video bg-black group">' +
+        (img ? '<img src="' + img.replace(/"/g, '&quot;') + '" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 transition" alt="">' : '') +
+        '<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>' +
+        '<div class="relative z-10 flex flex-col items-center justify-center h-full min-h-[140px]"><div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center mb-2 shadow-lg group-hover:scale-110 transition"><i class="fa-solid fa-play text-white"></i></div><p class="text-[11px] text-white/90 font-bold">Play → YouTube မှာ ဖွင့်မယ်</p></div></a>';
     } else {
       ep.classList.add('hidden');
       ep.innerHTML = '';
