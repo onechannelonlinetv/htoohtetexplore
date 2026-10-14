@@ -1076,16 +1076,48 @@ function loadBlogData() {
   const proudMeta = read('hh_proud_meta', {});
   const proudSec = $('proud-sponsors-section');
   const proudH = (proudMeta && proudMeta.logoH) ? Number(proudMeta.logoH) : 48;
-  if ($('proud-label')) $('proud-label').textContent = (proudMeta && proudMeta.title) ? proudMeta.title : 'Our Proud Sponsors';
-  if (proud.length && proud.some(p => p.active !== false)) {
-    proudSec.classList.remove('hidden');
-    $('proud-sponsors-list').innerHTML = proud.filter(p => p.active !== false).map(p => {
-      if (p.logo) {
-        return `<a href="${safe(p.link || '#')}" target="_blank" rel="noopener" class="shrink-0 opacity-90 hover:opacity-100 transition flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/30 px-3 py-1" style="height:${proudH}px;min-width:${proudH}px" title="${safe(p.name)}"><img src="${safe(p.logo)}" alt="${safe(p.name)}" style="max-height:${Math.max(20, proudH - 10)}px;max-width:${Math.round(proudH * 2.8)}px;width:auto;object-fit:contain" onerror="this.style.display='none'"></a>`;
+  const proudFrameH = (proudMeta && proudMeta.frameH) ? Number(proudMeta.frameH) : 72;
+  const titleX = proudMeta && proudMeta.titleX != null ? proudMeta.titleX : 4;
+  const titleY = proudMeta && proudMeta.titleY != null ? proudMeta.titleY : 35;
+  const activeProud = proud.filter(p => p.active !== false);
+  if (proudSec) {
+    if (activeProud.length) {
+      proudSec.classList.remove('hidden');
+      const inner = proudSec.querySelector('.max-w-7xl') || proudSec;
+      // Use free-position stage
+      let stage = $('proud-stage');
+      if (!stage) {
+        // rebuild section content once
       }
-      return `<span class="text-white/90 font-bold text-sm shrink-0 opacity-80 px-2">${safe(p.name)}</span>`;
-    }).join('');
-  } else if (proudSec) proudSec.classList.add('hidden');
+      const list = $('proud-sponsors-list');
+      const label = $('proud-label');
+      // Switch to relative stage layout
+      if (list && list.parentElement) {
+        const row = list.parentElement;
+        row.className = 'relative w-full';
+        row.style.height = proudFrameH + 'px';
+        row.style.minHeight = proudFrameH + 'px';
+        if (label) {
+          label.className = 'absolute z-10 text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/80';
+          label.style.left = titleX + '%';
+          label.style.top = titleY + '%';
+          label.textContent = (proudMeta && proudMeta.title) ? proudMeta.title : 'Our Proud Sponsors';
+        }
+        list.className = 'absolute inset-0';
+        list.innerHTML = activeProud.map(function(p, idx) {
+          const sz = p.size || proudH;
+          const x = p.x != null ? p.x : (30 + idx * 15);
+          const y = p.y != null ? p.y : 20;
+          if (p.logo) {
+            return '<a href="' + safe(p.link || '#') + '" target="_blank" rel="noopener" class="absolute opacity-90 hover:opacity-100 transition flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/30" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px" title="' + safe(p.name) + '"><img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="max-w-full max-h-full object-contain p-1" onerror="this.style.display=\'none\'"></a>';
+          }
+          return '<span class="absolute text-white/90 font-bold text-sm" style="left:' + x + '%;top:' + y + '%">' + safe(p.name) + '</span>';
+        }).join('');
+      }
+    } else {
+      proudSec.classList.add('hidden');
+    }
+  }
 
   // Official sponsors (array or legacy object)
   let sponsorRaw = read('hh_sponsor', []);
