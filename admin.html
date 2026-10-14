@@ -44,7 +44,8 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 #sp-prev-badge,#sp-prev-title,#sp-prev-desc{position:absolute}
 #sp-prev-badge .sp-resize-handle,#sp-prev-title .sp-resize-handle,#sp-prev-desc .sp-resize-handle{pointer-events:auto}
 
-#hero-live-preview [id^="hero-prev-"]{z-index:10}
+#hero-live-preview [id^="hero-prev-"]{z-index:30!important;pointer-events:auto!important}
+#up-live-preview [id^="up-prev-"]{z-index:30!important;pointer-events:auto!important}
 #content-live-preview img{max-width:100%;border-radius:10px;display:block;margin:8px 0}
 #sp-prev-logo{width:100%!important;height:100%!important;object-fit:contain!important}
 .preview-thumb{max-height:140px!important;max-width:240px!important;object-fit:contain!important;display:block!important}
@@ -377,10 +378,10 @@ main > div {
                 <div id="hero-live-preview" class="relative overflow-hidden border border-slate-700 select-none" style="width:100%;max-width:100%;height:360px;background:linear-gradient(135deg,#0a1f18,#061510);cursor:grab;border-radius:12px;">
                   <div id="hero-prev-overlay" class="absolute inset-0 pointer-events-none z-[1]" style="background:linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.25), transparent)"></div>
                   <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ဖိဆွဲရွှေ့ · ထောင့် = ဆိုဒ်</p>
-                  <div id="hero-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%;top:18%;color:#f5c518;font-size:10px;touch-action:none;">Travel Journal<span class="sp-resize-handle" data-resize="hero-label" title="ဆိုဒ်"></span></div>
-                  <div id="hero-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%;top:32%;font-size:16px;touch-action:none;">New Places.<span class="sp-resize-handle" data-resize="hero-title" title="ဆိုဒ်"></span></div>
-                  <div id="hero-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1.5 py-0.5" style="left:8%;top:55%;color:rgba(255,255,255,0.75);font-size:11px;touch-action:none;">Description…<span class="sp-resize-handle" data-resize="hero-desc" title="ဆိုဒ်"></span></div>
-                  <div id="hero-prev-sign" class="absolute z-10 cursor-move border border-dashed border-emerald-400/30 rounded px-1.5 py-0.5 text-[10px]" style="left:8%;top:78%;color:#6ee7b7;touch-action:none;"><span class="sp-resize-handle" data-resize="hero-sign" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-label" class="absolute cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%;top:18%;color:#f5c518;font-size:10px;touch-action:none;">Travel Journal<span class="sp-resize-handle" data-resize="hero-label" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-title" class="absolute cursor-move border border-dashed border-white/30 rounded px-1.5 py-0.5 font-black leading-tight text-white" style="left:8%;top:32%;font-size:16px;touch-action:none;">New Places.<span class="sp-resize-handle" data-resize="hero-title" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-desc" class="absolute cursor-move border border-dashed border-white/20 rounded px-1.5 py-0.5" style="left:8%;top:55%;color:rgba(255,255,255,0.75);font-size:11px;touch-action:none;">Description…<span class="sp-resize-handle" data-resize="hero-desc" title="ဆိုဒ်"></span></div>
+                  <div id="hero-prev-sign" class="absolute cursor-move border border-dashed border-emerald-400/30 rounded px-1.5 py-0.5 text-[10px]" style="left:8%;top:78%;color:#6ee7b7;touch-action:none;"><span class="sp-resize-handle" data-resize="hero-sign" title="ဆိုဒ်"></span></div>
                 </div>
               </div>
 
@@ -967,19 +968,18 @@ main > div {
             </label>
             <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="height:160px;background:#1a1a1a;">
               <div class="absolute inset-0 pointer-events-none" style="z-index:1;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.15));"></div>
-              <span id="up-prev-label" class="absolute z-10 cursor-grab border border-dashed border-yellow-400/40 rounded px-1 font-bold uppercase" style="left:6%;top:40%;color:#f5c518;font-size:10px;touch-action:none;">Featured</span>
-              <div id="up-prev-title" class="absolute z-10 cursor-grab border border-dashed border-white/30 rounded px-1 font-black text-white" style="left:6%;top:55%;font-size:14px;touch-action:none;max-width:85%;">Title</div>
-              <div id="up-prev-desc" class="absolute z-10 cursor-grab border border-dashed border-white/20 rounded px-1 text-white/70" style="left:6%;top:72%;font-size:11px;touch-action:none;max-width:80%;">Desc</div>
+              <span id="up-prev-label" class="absolute cursor-grab border border-dashed border-yellow-400/50 rounded px-1.5 py-0.5 font-bold uppercase select-none" style="left:6%;top:40%;color:#f5c518;font-size:10px;touch-action:none;z-index:30;pointer-events:auto;">Featured<span class="sp-resize-handle" data-resize="up-label" title="ဆိုဒ်"></span></span>
+              <div id="up-prev-title" class="absolute cursor-grab border border-dashed border-white/40 rounded px-1.5 py-0.5 font-black text-white select-none" style="left:6%;top:55%;font-size:14px;touch-action:none;max-width:85%;z-index:30;pointer-events:auto;">Title<span class="sp-resize-handle" data-resize="up-title" title="ဆိုဒ်"></span></div>
+              <div id="up-prev-desc" class="absolute cursor-grab border border-dashed border-white/30 rounded px-1.5 py-0.5 text-white/70 select-none" style="left:6%;top:72%;font-size:11px;touch-action:none;max-width:80%;z-index:30;pointer-events:auto;">Desc<span class="sp-resize-handle" data-resize="up-desc" title="ဆိုဒ်"></span></div>
             </div>
-            <p class="tiny mt-1">စာတစ်ကြောင်းချင်း Preview မှာ ဖိဆွဲပါ</p>
-            <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
-              <div>Label X <input type="range" id="up-label-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-ulx">6</span>%</div>
-              <div>Label Y <input type="range" id="up-label-y" min="0" max="100" value="40" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uly">40</span>%</div>
-              <div>Title X <input type="range" id="up-title-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-utx">6</span>%</div>
-              <div>Title Y <input type="range" id="up-title-y" min="0" max="100" value="55" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-uty">55</span>%</div>
-              <div>Desc X <input type="range" id="up-desc-x" min="0" max="100" value="6" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udx">6</span>%</div>
-              <div>Desc Y <input type="range" id="up-desc-y" min="0" max="100" value="72" class="w-full accent-sky-500" oninput="updateUpcomingPreview()"> <span id="val-udy">72</span>%</div>
-            </div>
+            <p class="tiny mt-1 text-emerald-400/80">စာတစ်ကြောင်းချင်း Preview မှာ <b>ဖိဆွဲ</b> ရွှေ့ပါ · ထောင့် handle = ဆိုဒ်</p>
+            <!-- position stored in hidden fields (drag updates these) -->
+            <input type="hidden" id="up-label-x" value="6"><input type="hidden" id="up-label-y" value="40">
+            <input type="hidden" id="up-title-x" value="6"><input type="hidden" id="up-title-y" value="55">
+            <input type="hidden" id="up-desc-x" value="6"><input type="hidden" id="up-desc-y" value="72">
+            <span id="val-ulx" class="hidden">6</span><span id="val-uly" class="hidden">40</span>
+            <span id="val-utx" class="hidden">6</span><span id="val-uty" class="hidden">55</span>
+            <span id="val-udx" class="hidden">6</span><span id="val-udy" class="hidden">72</span>
           </div>
 
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -1669,10 +1669,15 @@ function applyLiveBg(container, url, posX, posY, scale) {
     container.insertBefore(img, container.firstChild);
   }
   Array.from(container.children).forEach(function(ch) {
-    if (ch !== img && !ch.classList.contains('live-bg-img')) {
-      const z = parseInt(ch.style.zIndex || '0', 10);
-      if (z < 1) ch.style.zIndex = '1';
+    if (ch === img || (ch.classList && ch.classList.contains('live-bg-img'))) return;
+    // never lower text/label layers
+    if (ch.id && (ch.id.indexOf('hero-prev-') === 0 || ch.id.indexOf('up-prev-') === 0 || ch.id.indexOf('sp-prev-') === 0)) {
+      ch.style.zIndex = '30';
+      ch.style.pointerEvents = 'auto';
+      return;
     }
+    const z = parseInt(ch.style.zIndex || '0', 10);
+    if (isNaN(z) || z < 1) ch.style.zIndex = '1';
   });
   const px = (posX != null && !isNaN(Number(posX))) ? Number(posX) : 50;
   const py = (posY != null && !isNaN(Number(posY))) ? Number(posY) : 50;
@@ -2094,7 +2099,15 @@ function showView(name, button) {
   if (name === 'upcoming' && typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
   if (name === 'youtube' && typeof updateYoutubePreview === 'function') updateYoutubePreview();
   if (name === 'about' && typeof updateAboutPreview === 'function') updateAboutPreview();
-  if (name === 'settings' && typeof updateSizePreview === 'function') updateSizePreview();
+  if (name === 'settings') {
+    if (typeof updateSizePreview === 'function') updateSizePreview();
+    setTimeout(function() {
+      try {
+        if (typeof updateHeroPreview === 'function') updateHeroPreview();
+        if (typeof initHeroLineDrag === 'function') initHeroLineDrag();
+      } catch (e) {}
+    }, 100);
+  }
 }
 
 function loadAll() {
@@ -2656,8 +2669,9 @@ function initHeroLineDrag() {
     el.style.cursor = 'grab';
     el.style.userSelect = 'none';
     el.style.touchAction = 'none';
-    el.style.zIndex = '20';
+    el.style.zIndex = '30';
     el.style.pointerEvents = 'auto';
+    el.style.position = 'absolute';
   });
 
   if (box._heroDelegated) return;
@@ -2687,15 +2701,16 @@ function initHeroLineDrag() {
     if (!t) return;
     const p = pt(e);
     const rect = box.getBoundingClientRect();
+    if (rect.width < 10 || rect.height < 10) return;
 
     if (t.classList && t.classList.contains('sp-resize-handle')) {
       const key = t.getAttribute('data-resize');
       const cfg = sizeMap[key];
       if (!cfg) return;
-      _heroDragState = {
+      window._heroDragState = {
         type: 'resize',
         input: cfg.input, min: cfg.min, max: cfg.max,
-        sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10)
+        sy: p.clientY, ox: parseInt($(cfg.input) && $(cfg.input).value || '12', 10)
       };
       e.preventDefault();
       e.stopPropagation();
@@ -2704,7 +2719,7 @@ function initHeroLineDrag() {
 
     const cfg = map[t.id];
     if (!cfg) return;
-    _heroDragState = {
+    window._heroDragState = {
       type: 'move',
       el: t, cfg: cfg,
       startX: p.clientX, startY: p.clientY,
@@ -2719,16 +2734,16 @@ function initHeroLineDrag() {
   }
 
   function onMove(e) {
-    if (!_heroDragState) return;
+    if (!window._heroDragState) return;
     const p = pt(e);
-    if (_heroDragState.type === 'resize') {
-      const delta = Math.round((_heroDragState.sy - p.clientY) / 3);
-      const nv = Math.max(_heroDragState.min, Math.min(_heroDragState.max, _heroDragState.ox + delta));
-      if ($(_heroDragState.input)) $(_heroDragState.input).value = nv;
-      // light update: only font sizes on preview els
-      const lfs = parseInt($('hero-label-fs')?.value || '12', 10);
-      const tfs = parseInt($('hero-title-fs')?.value || '28', 10);
-      const dfs = parseInt($('hero-desc-fs')?.value || '14', 10);
+    const st = window._heroDragState;
+    if (st.type === 'resize') {
+      const delta = Math.round((st.sy - p.clientY) / 3);
+      const nv = Math.max(st.min, Math.min(st.max, st.ox + delta));
+      if ($(st.input)) $(st.input).value = nv;
+      const lfs = parseInt($('hero-label-fs') && $('hero-label-fs').value || '12', 10);
+      const tfs = parseInt($('hero-title-fs') && $('hero-title-fs').value || '28', 10);
+      const dfs = parseInt($('hero-desc-fs') && $('hero-desc-fs').value || '14', 10);
       if ($('hero-prev-label')) $('hero-prev-label').style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
       if ($('hero-prev-title')) $('hero-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
       if ($('hero-prev-desc')) $('hero-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
@@ -2736,31 +2751,30 @@ function initHeroLineDrag() {
       if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
       if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
       try { updatePhoneHeroPreview(); } catch (err) {}
-    } else if (_heroDragState.type === 'move') {
-      const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
-      const nx = Math.max(-5, Math.min(105, origL + ((p.clientX - startX) / rectW) * 100));
-      const ny = Math.max(-5, Math.min(105, origT + ((p.clientY - startY) / rectH) * 100));
-      el.style.left = nx + '%';
-      el.style.top = ny + '%';
-      if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
-      if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
-      if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
-      if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
+    } else if (st.type === 'move') {
+      const nx = Math.max(-5, Math.min(105, st.origL + ((p.clientX - st.startX) / st.rectW) * 100));
+      const ny = Math.max(-5, Math.min(105, st.origT + ((p.clientY - st.startY) / st.rectH) * 100));
+      st.el.style.left = nx + '%';
+      st.el.style.top = ny + '%';
+      if ($(st.cfg.xi)) $(st.cfg.xi).value = Math.round(nx);
+      if ($(st.cfg.yi)) $(st.cfg.yi).value = Math.round(ny);
+      if ($(st.cfg.vx)) $(st.cfg.vx).textContent = Math.round(nx);
+      if ($(st.cfg.vy)) $(st.cfg.vy).textContent = Math.round(ny);
       try { updatePhoneHeroPreview(); } catch (err) {}
     }
     if (e.cancelable) e.preventDefault();
   }
 
   function onUp() {
-    if (_heroDragState && _heroDragState.type === 'move' && _heroDragState.el) {
-      _heroDragState.el.style.cursor = 'grab';
-      _heroDragState.el.style.borderColor = '';
+    if (window._heroDragState && window._heroDragState.type === 'move' && window._heroDragState.el) {
+      window._heroDragState.el.style.cursor = 'grab';
+      window._heroDragState.el.style.borderColor = '';
     }
-    _heroDragState = null;
+    window._heroDragState = null;
   }
 
-  box.addEventListener('mousedown', onStart);
-  box.addEventListener('touchstart', onStart, { passive: false });
+  box.addEventListener('mousedown', onStart, true);
+  box.addEventListener('touchstart', onStart, { passive: false, capture: true });
   window.addEventListener('mousemove', onMove);
   window.addEventListener('touchmove', onMove, { passive: false });
   window.addEventListener('mouseup', onUp);
@@ -3395,27 +3409,43 @@ function updateUpcomingPreview() {
   const label = $('up-prev-label');
   const title = $('up-prev-title');
   const desc = $('up-prev-desc');
+  function setUpPrevText(el, textVal, resizeKey) {
+    if (!el) return;
+    var handle = el.querySelector('.sp-resize-handle');
+    while (el.firstChild) el.removeChild(el.firstChild);
+    el.appendChild(document.createTextNode(String(textVal || '')));
+    if (!handle) {
+      handle = document.createElement('span');
+      handle.className = 'sp-resize-handle';
+      handle.setAttribute('data-resize', resizeKey);
+      handle.title = 'ဆိုဒ်';
+    }
+    el.appendChild(handle);
+  }
   if (label) {
-    label.textContent = $('up-label')?.value || 'Featured';
+    setUpPrevText(label, $('up-label')?.value || 'Featured', 'up-label');
     label.style.color = $('up-label-color')?.value || '#f5c518';
     label.style.fontSize = (pos('up-label-fs', 11)) + 'px';
     label.style.left = lx + '%'; label.style.top = ly + '%';
+    label.style.zIndex = '30'; label.style.pointerEvents = 'auto'; label.style.cursor = 'grab';
   }
   if (title) {
-    title.textContent = $('up-title')?.value || 'Title';
+    setUpPrevText(title, $('up-title')?.value || 'Title', 'up-title');
     title.style.color = $('up-title-color')?.value || '#ffffff';
     title.style.fontWeight = $('up-title-weight')?.value || '900';
     const tfs = pos('up-title-fs', 22);
     title.style.fontSize = Math.max(12, Math.round(tfs * 0.65)) + 'px';
     if ($('val-up-title-fs')) $('val-up-title-fs').textContent = tfs + 'px';
     title.style.left = tx + '%'; title.style.top = ty + '%';
+    title.style.zIndex = '30'; title.style.pointerEvents = 'auto'; title.style.cursor = 'grab';
   }
   if (desc) {
-    desc.textContent = $('up-desc')?.value || 'Desc';
+    setUpPrevText(desc, $('up-desc')?.value || 'Desc', 'up-desc');
     desc.style.color = $('up-desc-color')?.value || '#cccccc';
     const dfs = pos('up-desc-fs', 13);
     desc.style.fontSize = Math.max(10, Math.round(dfs * 0.85)) + 'px';
     desc.style.left = dx + '%'; desc.style.top = dy + '%';
+    desc.style.zIndex = '30'; desc.style.pointerEvents = 'auto'; desc.style.cursor = 'grab';
   }
 
   const img = imageFieldValue('up-image');
@@ -3446,46 +3476,128 @@ function initUpcomingDrag() {
   const box = $('up-live-preview');
   if (!box) return;
   const map = {
-    'up-prev-label': { xi:'up-label-x', yi:'up-label-y', vx:'val-ulx', vy:'val-uly' },
-    'up-prev-title': { xi:'up-title-x', yi:'up-title-y', vx:'val-utx', vy:'val-uty' },
-    'up-prev-desc':  { xi:'up-desc-x', yi:'up-desc-y', vx:'val-udx', vy:'val-udy' }
+    'up-prev-label': { xi: 'up-label-x', yi: 'up-label-y', vx: 'val-ulx', vy: 'val-uly' },
+    'up-prev-title': { xi: 'up-title-x', yi: 'up-title-y', vx: 'val-utx', vy: 'val-uty' },
+    'up-prev-desc':  { xi: 'up-desc-x', yi: 'up-desc-y', vx: 'val-udx', vy: 'val-udy' }
   };
-  function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
-  Object.keys(map).forEach(function(id){
+  const sizeMap = {
+    'up-label': { input: 'up-label-fs', min: 8, max: 72 },
+    'up-title': { input: 'up-title-fs', min: 12, max: 64 },
+    'up-desc': { input: 'up-desc-fs', min: 10, max: 48 }
+  };
+
+  Object.keys(map).forEach(function(id) {
     const el = $(id);
     if (!el) return;
     el.style.cursor = 'grab';
+    el.style.userSelect = 'none';
     el.style.touchAction = 'none';
-    el.onmousedown = function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      const c = map[id];
-      const r = box.getBoundingClientRect();
-      el.style.cursor = 'grabbing';
-      function move(ev){
-        const p = pt(ev);
-        let x = Math.max(0, Math.min(95, ((p.clientX - r.left) / r.width) * 100));
-        let y = Math.max(0, Math.min(90, ((p.clientY - r.top) / r.height) * 100));
-        el.style.left = x + '%';
-        el.style.top = y + '%';
-        el.style.position = 'absolute';
-        if ($(c.xi)) $(c.xi).value = Math.round(x);
-        if ($(c.yi)) $(c.yi).value = Math.round(y);
-        if ($(c.vx)) $(c.vx).textContent = Math.round(x) + '%';
-        if ($(c.vy)) $(c.vy).textContent = Math.round(y) + '%';
-      }
-      function up(){
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', up);
-        el.style.cursor = 'grab';
-        if (typeof saveUpcoming === 'function') {
-          try { /* keep fields; user can save */ } catch (err) {}
-        }
-      }
-      document.addEventListener('mousemove', move);
-      document.addEventListener('mouseup', up);
-    };
+    el.style.zIndex = '30';
+    el.style.pointerEvents = 'auto';
+    el.style.position = 'absolute';
+    // ensure resize handle exists
+    if (!el.querySelector('.sp-resize-handle')) {
+      var key = id.replace('up-prev-', 'up-');
+      var h = document.createElement('span');
+      h.className = 'sp-resize-handle';
+      h.setAttribute('data-resize', key);
+      h.title = 'ဆိုဒ်';
+      el.appendChild(h);
+    }
   });
+
+  if (box._upDelegated) return;
+  box._upDelegated = true;
+
+  function pt(e) {
+    if (e.touches && e.touches[0]) return e.touches[0];
+    if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
+    return e;
+  }
+  function findEl(t) {
+    if (!t) return null;
+    if (t.classList && t.classList.contains('sp-resize-handle')) return t;
+    if (t.id && map[t.id]) return t;
+    if (t.closest) {
+      var h = t.closest('.sp-resize-handle');
+      if (h) return h;
+      var p = t.closest('[id^="up-prev-"]');
+      if (p && map[p.id]) return p;
+    }
+    return null;
+  }
+
+  function onStart(e) {
+    var t = findEl(e.target);
+    if (!t) return;
+    var p = pt(e);
+    var rect = box.getBoundingClientRect();
+    if (rect.width < 10) return;
+
+    if (t.classList && t.classList.contains('sp-resize-handle')) {
+      var key = t.getAttribute('data-resize');
+      var cfg = sizeMap[key];
+      if (!cfg) return;
+      window._upDragState = {
+        type: 'resize', input: cfg.input, min: cfg.min, max: cfg.max,
+        sy: p.clientY, ox: parseInt($(cfg.input) && $(cfg.input).value || '12', 10)
+      };
+      e.preventDefault(); e.stopPropagation();
+      return;
+    }
+    var c = map[t.id];
+    if (!c) return;
+    window._upDragState = {
+      type: 'move', el: t, cfg: c,
+      startX: p.clientX, startY: p.clientY,
+      origL: parseFloat(t.style.left) || 0,
+      origT: parseFloat(t.style.top) || 0,
+      rectW: rect.width, rectH: rect.height
+    };
+    t.style.cursor = 'grabbing';
+    t.style.borderColor = 'rgba(34,211,238,0.9)';
+    e.preventDefault(); e.stopPropagation();
+  }
+
+  function onMove(e) {
+    if (!window._upDragState) return;
+    var p = pt(e);
+    var st = window._upDragState;
+    if (st.type === 'resize') {
+      var delta = Math.round((st.sy - p.clientY) / 3);
+      var nv = Math.max(st.min, Math.min(st.max, st.ox + delta));
+      if ($(st.input)) $(st.input).value = nv;
+      if (st.input === 'up-label-fs' && $('up-prev-label')) $('up-prev-label').style.fontSize = nv + 'px';
+      if (st.input === 'up-title-fs' && $('up-prev-title')) $('up-prev-title').style.fontSize = Math.max(12, Math.round(nv * 0.65)) + 'px';
+      if (st.input === 'up-desc-fs' && $('up-prev-desc')) $('up-prev-desc').style.fontSize = Math.max(10, Math.round(nv * 0.85)) + 'px';
+      if ($('val-up-title-fs') && st.input === 'up-title-fs') $('val-up-title-fs').textContent = nv + 'px';
+    } else if (st.type === 'move') {
+      var nx = Math.max(0, Math.min(95, st.origL + ((p.clientX - st.startX) / st.rectW) * 100));
+      var ny = Math.max(0, Math.min(90, st.origT + ((p.clientY - st.startY) / st.rectH) * 100));
+      st.el.style.left = nx + '%';
+      st.el.style.top = ny + '%';
+      if ($(st.cfg.xi)) $(st.cfg.xi).value = Math.round(nx);
+      if ($(st.cfg.yi)) $(st.cfg.yi).value = Math.round(ny);
+      if ($(st.cfg.vx)) $(st.cfg.vx).textContent = Math.round(nx);
+      if ($(st.cfg.vy)) $(st.cfg.vy).textContent = Math.round(ny);
+    }
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function onUp() {
+    if (window._upDragState && window._upDragState.type === 'move' && window._upDragState.el) {
+      window._upDragState.el.style.cursor = 'grab';
+      window._upDragState.el.style.borderColor = '';
+    }
+    window._upDragState = null;
+  }
+
+  box.addEventListener('mousedown', onStart, true);
+  box.addEventListener('touchstart', onStart, { passive: false, capture: true });
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
 }
 
 
