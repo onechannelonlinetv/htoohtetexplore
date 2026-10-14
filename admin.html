@@ -1112,25 +1112,31 @@ main > div {
             </div>
             <div class="md:col-span-2"><label class="label">Short Description * <span class="tiny">(Card မှာပြမယ်)</span></label><textarea id="admin-post-desc" class="field min-h-20" oninput="updatePostPreview()" placeholder="အကျဉ်းချုပ်..."></textarea></div>
             <div class="md:col-span-2">
-              <label class="label">Article Content * — ခေါင်းစဉ် / စာ / ပုံ ရောရေးနိုင်</label>
-              <div class="flex gap-2 mb-2 flex-wrap items-center">
-                <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('# ')"># ခေါင်းစဉ်ကြီး</button>
-                <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('## ')">## ခေါင်းစဉ်</button>
-                <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('### ')">### ခေါင်းစဉ်သေး</button>
-                <label class="btn btn-green cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>ပုံ ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
-                <label class="btn btn-muted cursor-pointer text-xs py-2" title="2-3 ပုံ collage"><i class="fa-solid fa-table-cells mr-1"></i>Gallery 2-3 ပုံ<input type="file" accept="image/*" multiple class="hidden" onchange="insertGalleryInContent(this)"></label>
-                <select id="content-gallery-layout" class="field text-xs py-1" style="width:auto;min-width:110px" title="Gallery ပုံစံ">
-                  <option value="1-2" selected>1 ကြီး + 2 သေး</option>
-                  <option value="2-1">2 သေး + 1 ကြီး</option>
-                  <option value="2">2 ဘေးချင်း</option>
-                  <option value="3">3 ဘေးချင်း</option>
-                </select>
-                <select id="content-img-size" class="field text-xs py-1" style="width:auto;min-width:100px">
-                  <option value="sm">ပုံ သေး</option>
-                  <option value="md" selected>ပုံ မှန်</option>
-                  <option value="lg">ပုံ ကြီး</option>
-                  <option value="full">ပုံ အပြည့်</option>
-                </select>
+              <label class="label">Article Content * — ခေါင်းစဉ် / စာ / ပုံ / Photo Gallery ရောရေးနိုင်</label>
+              <div class="mb-2 space-y-2">
+                <div class="flex gap-2 flex-wrap items-center">
+                  <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('# ')"># ခေါင်းစဉ်ကြီး</button>
+                  <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('## ')">## ခေါင်းစဉ်</button>
+                  <button type="button" class="btn btn-muted text-xs py-2" onclick="insertHeading('### ')">### ခေါင်းစဉ်သေး</button>
+                  <label class="btn btn-green cursor-pointer text-xs py-2"><i class="fa-solid fa-image mr-1"></i>ပုံ ထည့်<input type="file" accept="image/*" class="hidden" onchange="insertImageInContent(this)"></label>
+                  <select id="content-img-size" class="field text-xs py-1" style="width:auto;min-width:100px">
+                    <option value="sm">ပုံ သေး</option>
+                    <option value="md" selected>ပုံ မှန်</option>
+                    <option value="lg">ပုံ ကြီး</option>
+                    <option value="full">ပုံ အပြည့်</option>
+                  </select>
+                </div>
+                <div class="rounded-xl border border-emerald-700/50 bg-emerald-950/30 p-2.5 flex flex-wrap gap-2 items-center">
+                  <span class="text-[11px] font-bold text-emerald-300 uppercase tracking-wider shrink-0"><i class="fa-solid fa-table-cells mr-1"></i>Photo Gallery</span>
+                  <label class="btn btn-green cursor-pointer text-xs py-2"><i class="fa-solid fa-images mr-1"></i>Gallery ပုံ ထည့် (2–3)<input type="file" accept="image/*" multiple class="hidden" onchange="insertGalleryInContent(this)"></label>
+                  <select id="content-gallery-layout" class="field text-xs py-1" style="width:auto;min-width:130px" title="Gallery ပုံစံ">
+                    <option value="1-2" selected>1 ကြီး + 2 သေး</option>
+                    <option value="2-1">2 သေး + 1 ကြီး</option>
+                    <option value="2">2 ဘေးချင်း</option>
+                    <option value="3">3 ဘေးချင်း</option>
+                  </select>
+                  <span class="tiny text-slate-400">ပုံ 2 သို့မဟုတ် 3 ပုံ ရွေးပါ · Preview မှာ Layout ပြောင်း / ဖျက် ရပါသည်</span>
+                </div>
               </div>
               <textarea id="admin-post-content" class="field min-h-[320px] sm:min-h-[420px] w-full text-base leading-relaxed" onkeyup="updateContentPreview()" onpaste="setTimeout(updateContentPreview,20)" placeholder="# ခေါင်းစဉ် ဒီလို ရေးပါ&#10;&#10;စာသား ဒီမှာ...&#10;&#10;ပုံထည့်ရန် အပေါ်က ခလုတ် သုံးပါ" oninput="updateContentPreview()"></textarea>
               <div class="mt-3 rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3">
@@ -1599,13 +1605,22 @@ async function insertGalleryInContent(inputEl) {
     inputEl.value = '';
     return;
   }
-  toast('Gallery ပုံ ' + files.length + ' ခု ပြင်ဆင်နေသည်…');
+  toast('Photo Gallery ပုံ ' + files.length + ' ခု ပြင်ဆင်နေသည်…');
   try {
     var cids = [];
+    var blobs = [];
     for (var i = 0; i < files.length; i++) {
       if (!files[i].type.startsWith('image/')) continue;
       var dataUrl = await fileToCompressedDataURL(files[i]);
-      cids.push(storeContentImage(dataUrl));
+      var cid = storeContentImage(dataUrl);
+      cids.push(cid);
+      // keep compressed blob for optional Storage upload
+      try {
+        var b = await withTimeout(compressImageFile(files[i], 900, 0.62), 8000);
+        blobs.push({ cid: cid, blob: b });
+      } catch (e) {
+        blobs.push({ cid: cid, blob: files[i] });
+      }
     }
     if (cids.length < 2) { toast('ပုံ 2 ခုအထက် လိုအပ်သည်'); inputEl.value = ''; return; }
     var layout = ($('content-gallery-layout') && $('content-gallery-layout').value) || '1-2';
@@ -1617,7 +1632,25 @@ async function insertGalleryInContent(inputEl) {
     ta.value = ta.value.slice(0, pos) + block + ta.value.slice(pos);
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
-    toast('Gallery ထည့်ပြီး — Preview ကြည့်ပါ');
+    toast('Photo Gallery Preview ထဲ ပေါ်ပါပြီ');
+    // Upload each image to Firebase Storage so gallery survives after refresh
+    if (adminUser && adminStorage && blobs.length) {
+      blobs.forEach(function(item, idx) {
+        withTimeout(
+          adminStorage.ref('uploads/gallery_' + Date.now() + '_' + idx + '.jpg').put(item.blob, { contentType: 'image/jpeg' }).then(function(s) { return s.ref.getDownloadURL(); }),
+          20000
+        ).then(function(httpsUrl) {
+          if (!httpsUrl) return;
+          contentImageStore[item.cid] = httpsUrl;
+          if (ta.value.indexOf('cid:' + item.cid) !== -1) {
+            ta.value = ta.value.split('cid:' + item.cid).join(httpsUrl);
+          }
+          if (typeof updateContentPreview === 'function') updateContentPreview();
+        }).catch(function(err) {
+          console.warn('Gallery storage upload failed (cid Base64 kept):', err && err.message);
+        });
+      });
+    }
   } catch (err) {
     toast('Gallery မထည့်နိုင်: ' + (err.message || ''));
   }
@@ -4695,7 +4728,16 @@ function savePost() {
   const img = imageFieldValue('admin-post-img');
   const desc = $('admin-post-desc').value.trim();
   // Expand short cid: refs back to real data URLs / https before saving
-  const content = expandContentCids($('admin-post-content').value.trim());
+  let content = expandContentCids($('admin-post-content').value.trim());
+  if (/\bcid:[a-z0-9]+/i.test(content)) {
+    // last-chance: try resolve any leftover cid via store
+    content = content.replace(/\bcid:([a-z0-9]+)/gi, function(m, id) {
+      return (contentImageStore[id] || m);
+    });
+    if (/\bcid:[a-z0-9]+/i.test(content)) {
+      return alert('Photo Gallery / ပုံ တချို့ မတင်ရသေးပါ။ ခဏစောင့်ပြီး ပြန်သိမ်းပါ (သို့) ပုံ ပြန်ထည့်ပါ။');
+    }
+  }
   const location = $('admin-post-location').value.trim();
   const category = $('admin-post-category').value;
   if (!title) return alert('Title ထည့်ပေးပါ။');
