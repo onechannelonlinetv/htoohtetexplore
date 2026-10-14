@@ -668,24 +668,20 @@ main > div {
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="md:col-span-2">
-              <label class="label">Section ခေါင်းစဉ် (Live site) · Preview မှာ drag နဲ့ ရွှေ့လို့ရ</label>
+              <label class="label">Section ခေါင်းစဉ် (Live site)</label>
               <input id="proud-section-title" class="field" placeholder="Our Proud Sponsors" value="Our Proud Sponsors" oninput="saveProudMeta(); updateProudPreview();">
-            </div>
-            <div>
-              <label class="label">ခေါင်းစဉ် စာအရွယ် <span id="val-proud-title-fs" class="range-val">12px</span></label>
-              <input id="proud-title-fs" type="range" min="10" max="28" value="12" class="w-full accent-emerald-500" oninput="if($('val-proud-title-fs'))$('val-proud-title-fs').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
             </div>
             <div>
               <label class="label">Bar အမြင့်</label>
               <div class="flex items-center gap-2">
-                <input id="proud-frame-h" type="range" min="56" max="240" value="100" class="w-full" oninput="if($('val-proud-frame-h'))$('val-proud-frame-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
-                <span id="val-proud-frame-h" class="range-val">100px</span>
+                <input id="proud-frame-h" type="range" min="56" max="180" value="80" class="w-full" oninput="if($('val-proud-frame-h'))$('val-proud-frame-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
+                <span id="val-proud-frame-h" class="range-val">80px</span>
               </div>
             </div>
             <div>
               <label class="label">Logo အရွယ် (default)</label>
               <div class="flex items-center gap-2">
-                <input id="proud-logo-h" type="range" min="24" max="140" value="48" class="w-full" oninput="if($('val-proud-logo-h'))$('val-proud-logo-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
+                <input id="proud-logo-h" type="range" min="24" max="100" value="48" class="w-full" oninput="if($('val-proud-logo-h'))$('val-proud-logo-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
                 <span id="val-proud-logo-h" class="range-val">48px</span>
               </div>
             </div>
@@ -702,8 +698,8 @@ main > div {
               <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · mouse ဖိပြီး ဆွဲ / ထောင့် resize</span>
               <span class="text-[10px] text-slate-500">Add မနှိပ်ခင် staging logo ပါ ချိန်လို့ရ</span>
             </div>
-            <div id="proud-live-frame" class="relative w-full rounded-lg border border-slate-600 bg-[#0a1220] overflow-visible select-none" style="height:100px;touch-action:none">
-              <p id="proud-prev-title" class="absolute z-40 text-[12px] font-bold uppercase tracking-[0.12em] text-emerald-400 cursor-grab px-1.5 py-0.5 whitespace-nowrap rounded border border-emerald-700/40 bg-black/40" style="left:3%;top:36%;pointer-events:auto;user-select:none;touch-action:none;z-index:50;" title="Drag to move">Our Proud Sponsors</p>
+            <div id="proud-live-frame" class="relative w-full rounded-lg border border-slate-600 bg-[#0a1220] overflow-hidden select-none" style="height:80px;touch-action:none">
+              <p id="proud-prev-title" class="absolute z-30 text-[11px] sm:text-xs font-bold uppercase tracking-[0.12em] text-emerald-400 cursor-grab px-1 whitespace-nowrap" style="left:3%;top:36%;">Our Proud Sponsors</p>
               <div id="proud-preview-bar" class="absolute inset-0 z-20"></div>
               <div id="proud-staging" class="absolute inset-0 z-25 pointer-events-none"></div>
             </div>
@@ -3974,26 +3970,15 @@ function updateProudPreview() {
   if (!bar) return;
   const m = (typeof getProudMeta === 'function') ? getProudMeta() : {};
   const logoH = Number(m.logoH) || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  const frameH = Number(m.frameH) || parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '100', 10) || 100;
-  const titleFs = Number(m.titleFs) || parseInt(($('proud-title-fs') && $('proud-title-fs').value) || '12', 10) || 12;
-  if (frame) {
-    frame.style.height = frameH + 'px';
-    frame.style.minHeight = frameH + 'px';
-  }
+  const frameH = Number(m.frameH) || parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '80', 10) || 80;
+  if (frame) frame.style.height = frameH + 'px';
   if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = frameH + 'px';
   if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = logoH + 'px';
-  if ($('val-proud-title-fs')) $('val-proud-title-fs').textContent = titleFs + 'px';
-  if ($('proud-title-fs') && document.activeElement !== $('proud-title-fs')) {
-    $('proud-title-fs').value = titleFs;
-  }
   const titleEl = $('proud-prev-title');
   if (titleEl) {
     titleEl.textContent = (($('proud-section-title') && $('proud-section-title').value) || m.title || 'Our Proud Sponsors').trim();
     titleEl.style.left = (m.titleX != null ? m.titleX : 3) + '%';
     titleEl.style.top = (m.titleY != null ? m.titleY : 36) + '%';
-    titleEl.style.fontSize = titleFs + 'px';
-    titleEl.style.pointerEvents = 'auto';
-    titleEl.style.zIndex = '40';
   }
   const items = getProud().filter(function(p) { return p.active !== false; });
   bar.innerHTML = items.map(function(p, idx) {
@@ -4003,20 +3988,15 @@ function updateProudPreview() {
     const x = p.x != null ? p.x : (28 + idx * 16);
     const y = p.y != null ? p.y : 18;
     if (p.logo) {
-      return '<div class="proud-logo-item absolute" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;cursor:grab;z-index:20;touch-action:none;">' +
-        '<div class="w-full flex flex-col items-center">' +
-        '<div class="proud-logo-box w-full flex items-center justify-center rounded-md bg-white/10 border border-emerald-600/40" style="width:' + sz + 'px;height:' + sz + 'px;">' +
+      return '<div class="proud-logo-item absolute" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;cursor:grab;z-index:20">' +
+        '<div class="w-full h-full flex items-center justify-center rounded-md bg-white/10 border border-emerald-600/40">' +
         '<img src="' + safe(p.logo) + '" alt="" class="max-w-full max-h-full object-contain p-0.5" draggable="false">' +
-        '</div>' +
-        '<span class="mt-0.5 text-[9px] font-bold text-emerald-200/90 text-center leading-tight max-w-full truncate px-0.5" style="width:' + sz + 'px" title="' + safe(p.name) + '">' + safe(p.name || '') + '</span>' +
-        '</div><span class="sp-resize-handle proud-resize" title="Resize"></span></div>';
+        '</div><span class="sp-resize-handle proud-resize"></span></div>';
     }
-    return '<span class="proud-logo-item absolute text-xs font-bold text-white/90 cursor-grab px-1" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;z-index:20;touch-action:none;">' + safe(p.name) + '</span>';
+    return '<span class="proud-logo-item absolute text-xs font-bold text-white/90 cursor-grab px-1" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;z-index:20">' + safe(p.name) + '</span>';
   }).join('');
-  bar.style.pointerEvents = 'none';
-  bar.querySelectorAll('.proud-logo-item').forEach(function(el){ el.style.pointerEvents = 'auto'; });
   if (typeof updateProudStaging === 'function') updateProudStaging();
-  if (typeof initProudDrag === 'function') setTimeout(initProudDrag, 40);
+  if (typeof initProudDrag === 'function') setTimeout(initProudDrag, 30);
 }
 
 /* Staging = not yet Added logo/name — adjustable in preview before Add */
@@ -4027,29 +4007,20 @@ function updateProudStaging() {
   const name = (($('proud-name') && $('proud-name').value) || '').trim();
   let logo = '';
   if (typeof imageFieldValue === 'function') logo = imageFieldValue('proud-logo');
-  if (!logo && $('proud-logo')) {
-    const full = ($('proud-logo').dataset && $('proud-logo').dataset.fullUrl) || '';
-    const raw = ($('proud-logo').value || '').trim();
-    if (full && typeof isRealImageUrl === 'function' && isRealImageUrl(full)) logo = full;
-    else if (typeof isRealImageUrl === 'function' && isRealImageUrl(raw)) logo = raw;
-  }
+  if (!logo && $('proud-logo')) logo = ($('proud-logo').value || '').trim();
   if (!name && !logo) { box.innerHTML = ''; return; }
   const st = window._proudStaging;
   const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
   if (!st.size) st.size = logoH;
   let html = '';
-  const badLogo = !logo || logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0 || logo.indexOf('data:image...') === 0 || logo.indexOf('Preview') !== -1;
-  if (!badLogo) {
-    html = '<div id="proud-stage-item" class="absolute" style="left:' + st.x + '%;top:' + st.y + '%;width:' + st.size + 'px;cursor:grab;z-index:40;pointer-events:auto;touch-action:none;">' +
-      '<div class="w-full flex flex-col items-center">' +
-      '<div class="proud-logo-box w-full flex items-center justify-center rounded-md bg-amber-500/20 border-2 border-amber-400" style="width:' + st.size + 'px;height:' + st.size + 'px;">' +
+  if (logo && logo.indexOf('blob:') !== 0) {
+    html = '<div id="proud-stage-item" class="absolute" style="left:' + st.x + '%;top:' + st.y + '%;width:' + st.size + 'px;height:' + st.size + 'px;cursor:grab;z-index:40;pointer-events:auto">' +
+      '<div class="w-full h-full flex items-center justify-center rounded-md bg-amber-500/20 border-2 border-amber-400">' +
       '<img src="' + safe(logo) + '" class="max-w-full max-h-full object-contain p-0.5" draggable="false">' +
-      '</div>' +
-      (name ? '<span class="mt-0.5 text-[9px] font-bold text-amber-200 text-center leading-tight max-w-full truncate">' + safe(name) + '</span>' : '') +
-      '</div><span class="sp-resize-handle proud-stage-resize" title="Resize"></span>' +
+      '</div><span class="sp-resize-handle proud-stage-resize"></span>' +
       '<span class="absolute -top-4 left-0 text-[9px] text-amber-300 font-bold whitespace-nowrap">STAGING (Add မနှိပ်ရသေး)</span></div>';
   } else if (name) {
-    html = '<span id="proud-stage-item" class="absolute text-xs font-bold text-amber-300 cursor-grab px-1 border border-amber-500/50 rounded" style="left:' + st.x + '%;top:' + st.y + '%;z-index:40;pointer-events:auto;touch-action:none;">' + safe(name) + ' *</span>';
+    html = '<span id="proud-stage-item" class="absolute text-xs font-bold text-amber-300 cursor-grab px-1 border border-amber-500/50 rounded" style="left:' + st.x + '%;top:' + st.y + '%;z-index:40;pointer-events:auto">' + safe(name) + ' *</span>';
   }
   box.innerHTML = html;
   box.style.pointerEvents = 'none';
@@ -4060,74 +4031,40 @@ function updateProudStaging() {
   }
 }
 
-function _proudPointerPos(ev) {
-  if (ev.touches && ev.touches[0]) return { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
-  if (ev.changedTouches && ev.changedTouches[0]) return { x: ev.changedTouches[0].clientX, y: ev.changedTouches[0].clientY };
-  return { x: ev.clientX, y: ev.clientY };
-}
-
 function initProudStagingDrag() {
   const frame = $('proud-live-frame');
   const el = $('proud-stage-item');
   if (!frame || !el || el._bound) return;
   el._bound = true;
-  function startMove(e) {
-    if (e.target && e.target.classList && e.target.classList.contains('proud-stage-resize')) return;
+  el.addEventListener('mousedown', function(e) {
+    if (e.target.classList && e.target.classList.contains('proud-stage-resize')) return;
     e.preventDefault();
-    e.stopPropagation();
     const rect = frame.getBoundingClientRect();
     function move(ev) {
-      const p = _proudPointerPos(ev);
-      const x = Math.max(0, Math.min(90, ((p.x - rect.left) / rect.width) * 100));
-      const y = Math.max(0, Math.min(80, ((p.y - rect.top) / rect.height) * 100));
+      const x = Math.max(0, Math.min(90, ((ev.clientX - rect.left) / rect.width) * 100));
+      const y = Math.max(0, Math.min(80, ((ev.clientY - rect.top) / rect.height) * 100));
       el.style.left = x + '%'; el.style.top = y + '%';
       window._proudStaging.x = x; window._proudStaging.y = y;
     }
-    function up() {
-      document.removeEventListener('mousemove', move);
-      document.removeEventListener('mouseup', up);
-      document.removeEventListener('touchmove', move);
-      document.removeEventListener('touchend', up);
-    }
+    function up() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
     document.addEventListener('mousemove', move);
     document.addEventListener('mouseup', up);
-    document.addEventListener('touchmove', move, { passive: false });
-    document.addEventListener('touchend', up);
-  }
-  el.addEventListener('mousedown', startMove);
-  el.addEventListener('touchstart', startMove, { passive: false });
+  });
   const h = el.querySelector('.proud-stage-resize');
   if (h && !h._bound) {
     h._bound = true;
-    function startResize(e) {
+    h.addEventListener('mousedown', function(e) {
       e.preventDefault(); e.stopPropagation();
-      const start = _proudPointerPos(e);
-      const startSz = el.offsetWidth || window._proudStaging.size || 48;
+      const startX = e.clientX, startW = el.offsetWidth;
       function move(ev) {
-        const p = _proudPointerPos(ev);
-        // proportional: use the larger delta so width+height grow together
-        const dx = p.x - start.x;
-        const dy = p.y - start.y;
-        const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-        const nw = Math.max(24, Math.min(160, startSz + delta));
-        el.style.width = nw + 'px';
-        const box = el.querySelector('.proud-logo-box');
-        if (box) { box.style.width = nw + 'px'; box.style.height = nw + 'px'; }
+        const nw = Math.max(24, Math.min(120, startW + (ev.clientX - startX)));
+        el.style.width = nw + 'px'; el.style.height = nw + 'px';
         window._proudStaging.size = nw;
       }
-      function up() {
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', up);
-        document.removeEventListener('touchmove', move);
-        document.removeEventListener('touchend', up);
-      }
+      function up() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
       document.addEventListener('mousemove', move);
       document.addEventListener('mouseup', up);
-      document.addEventListener('touchmove', move, { passive: false });
-      document.addEventListener('touchend', up);
-    }
-    h.addEventListener('mousedown', startResize);
-    h.addEventListener('touchstart', startResize, { passive: false });
+    });
   }
 }
 
@@ -4168,9 +4105,8 @@ function saveProudMetaFields(extra) {
   const m = (typeof getProudMeta === 'function') ? getProudMeta() : {};
   const title = (($('proud-section-title') && $('proud-section-title').value) || '').trim() || 'Our Proud Sponsors';
   const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  const frameH = parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '100', 10) || 100;
-  const titleFs = parseInt(($('proud-title-fs') && $('proud-title-fs').value) || '12', 10) || 12;
-  const next = Object.assign({}, m, { title: title, logoH: logoH, frameH: frameH, titleFs: titleFs }, extra || {});
+  const frameH = parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '80', 10) || 80;
+  const next = Object.assign({}, m, { title: title, logoH: logoH, frameH: frameH }, extra || {});
   if (typeof write === 'function') write('hh_proud_meta', next);
   else localStorage.setItem('hh_proud_meta', JSON.stringify(next));
 }
@@ -4179,41 +4115,28 @@ function initProudDrag() {
   const frame = $('proud-live-frame');
   if (!frame) return;
   const titleEl = $('proud-prev-title');
-
   function bindDrag(el, onMove, onEnd) {
     if (!el) return;
-    // clear previous handlers by cloning flag
-    el.onmousedown = null;
-    function start(e) {
+    el.onmousedown = function(e) {
       if (e.target && e.target.classList && (e.target.classList.contains('proud-resize') || e.target.classList.contains('proud-stage-resize'))) return;
       e.preventDefault();
       e.stopPropagation();
       const rect = frame.getBoundingClientRect();
       function move(ev) {
-        const p = _proudPointerPos(ev);
-        const x = Math.max(0, Math.min(92, ((p.x - rect.left) / rect.width) * 100));
-        const y = Math.max(0, Math.min(88, ((p.y - rect.top) / rect.height) * 100));
+        const x = Math.max(0, Math.min(92, ((ev.clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(85, ((ev.clientY - rect.top) / rect.height) * 100));
         onMove(x, y);
       }
       function up() {
         document.removeEventListener('mousemove', move);
         document.removeEventListener('mouseup', up);
-        document.removeEventListener('touchmove', move);
-        document.removeEventListener('touchend', up);
         if (onEnd) onEnd();
       }
       document.addEventListener('mousemove', move);
       document.addEventListener('mouseup', up);
-      document.addEventListener('touchmove', move, { passive: false });
-      document.addEventListener('touchend', up);
-    }
-    el.onmousedown = start;
-    el.ontouchstart = start;
+    };
   }
-
   if (titleEl) {
-    titleEl.style.pointerEvents = 'auto';
-    titleEl.style.cursor = 'grab';
     bindDrag(titleEl, function(x, y) {
       titleEl.style.left = x + '%'; titleEl.style.top = y + '%';
       titleEl._tx = x; titleEl._ty = y;
@@ -4221,7 +4144,6 @@ function initProudDrag() {
       saveProudMetaFields({ titleX: Math.round(titleEl._tx || 3), titleY: Math.round(titleEl._ty || 36) });
     });
   }
-
   const bar = $('proud-preview-bar');
   if (!bar) return;
   bar.querySelectorAll('.proud-logo-item').forEach(function(el) {
@@ -4238,78 +4160,24 @@ function initProudDrag() {
     });
     const handle = el.querySelector('.proud-resize');
     if (handle) {
-      function startResize(e) {
+      handle.onmousedown = function(e) {
         e.preventDefault(); e.stopPropagation();
-        const start = _proudPointerPos(e);
-        const box = el.querySelector('.proud-logo-box');
-        const startSz = (box && box.offsetWidth) || el.offsetWidth || 48;
+        const startX = e.clientX, startW = el.offsetWidth;
         function move(ev) {
-          const p = _proudPointerPos(ev);
-          const dx = p.x - start.x;
-          const dy = p.y - start.y;
-          // proportional square: use dominant axis so width+height grow together
-          const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-          const nw = Math.max(24, Math.min(160, startSz + delta));
-          el.style.width = nw + 'px';
-          if (box) { box.style.width = nw + 'px'; box.style.height = nw + 'px'; }
-          else { el.style.height = nw + 'px'; }
-          el._sz = nw;
+          const nw = Math.max(24, Math.min(120, startW + (ev.clientX - startX)));
+          el.style.width = nw + 'px'; el.style.height = nw + 'px'; el._sz = nw;
         }
         function up() {
           document.removeEventListener('mousemove', move);
           document.removeEventListener('mouseup', up);
-          document.removeEventListener('touchmove', move);
-          document.removeEventListener('touchend', up);
           const items = getProud();
           if (items[idx] && el._sz) { items[idx].size = Math.round(el._sz); write('hh_proud_sponsors', items); }
         }
         document.addEventListener('mousemove', move);
         document.addEventListener('mouseup', up);
-        document.addEventListener('touchmove', move, { passive: false });
-        document.addEventListener('touchend', up);
-      }
-      handle.onmousedown = startResize;
-      handle.ontouchstart = startResize;
+      };
     }
   });
-}
-
-
-function getProud() {
-  try {
-    var a = read('hh_proud_sponsors', []);
-    return Array.isArray(a) ? a : [];
-  } catch (e) { return []; }
-}
-
-function renderProudList() {
-  var box = $('proud-list');
-  if (!box) return;
-  var items = getProud();
-  if (!items.length) {
-    box.innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-5 text-center text-sm text-slate-400">Proud Sponsor မရှိသေးပါ။ အပေါ်က form ဖြည့်ပြီး Add နှိပ်ပါ။</p>';
-    if (typeof updateProudPreview === 'function') updateProudPreview();
-    return;
-  }
-  box.innerHTML = items.map(function(p, i) {
-    var active = p.active !== false;
-    var logoHtml = p.logo
-      ? '<img src="' + safe(p.logo) + '" alt="" class="h-12 w-12 rounded-lg object-contain bg-white/10 border border-slate-600 p-0.5" onerror="this.style.display=\'none\'">'
-      : '<div class="h-12 w-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 text-xs">—</div>';
-    return '<div class="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-3">' +
-      '<div class="flex items-center gap-3 min-w-0 flex-1">' + logoHtml +
-        '<div class="min-w-0">' +
-          '<p class="font-bold truncate">' + safe(p.name || 'Unnamed') + '</p>' +
-          (p.link ? '<a href="' + safe(p.link) + '" target="_blank" rel="noopener" class="tiny text-emerald-400 hover:underline truncate block">' + safe(p.link) + '</a>' : '<p class="tiny">Link မရှိ</p>') +
-        '</div></div>' +
-      '<div class="flex flex-wrap gap-2">' +
-        '<button type="button" class="btn btn-muted text-xs" onclick="toggleProud(' + i + ')">' + (active ? '✓ Active' : '○ Hidden') + '</button>' +
-        '<button type="button" class="btn btn-muted text-xs" onclick="moveProud(' + i + ',-1)"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
-        '<button type="button" class="btn btn-muted text-xs" onclick="moveProud(' + i + ',1)"' + (i === items.length - 1 ? ' disabled' : '') + '>↓</button>' +
-        '<button type="button" class="btn btn-red text-xs" onclick="deleteProud(' + i + ')"><i class="fa-regular fa-trash-can"></i></button>' +
-      '</div></div>';
-  }).join('');
-  if (typeof updateProudPreview === 'function') updateProudPreview();
 }
 
 function getProudMeta() {
@@ -4329,68 +4197,42 @@ function loadProudMeta() {
     if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = (m.logoH || 48) + 'px';
   }
   if ($('proud-frame-h')) {
-    $('proud-frame-h').value = m.frameH || 100;
-    if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = (m.frameH || 100) + 'px';
+    $('proud-frame-h').value = m.frameH || 80;
+    if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = (m.frameH || 80) + 'px';
   }
-  if ($('proud-title-fs')) {
-    $('proud-title-fs').value = m.titleFs || 12;
-    if ($('val-proud-title-fs')) $('val-proud-title-fs').textContent = (m.titleFs || 12) + 'px';
-  }
-  if ($('proud-live-frame') && m.frameH) $('proud-live-frame').style.height = (m.frameH || 100) + 'px';
+  if ($('proud-live-frame') && m.frameH) $('proud-live-frame').style.height = (m.frameH || 80) + 'px';
 }
 
 function addProud() {
-  try {
-    var nameEl = $('proud-name');
-    var name = (nameEl && nameEl.value || '').trim();
-    if (!name) { alert('Name ထည့်ပါ။'); return; }
-
-    var logo = '';
-    if (typeof imageFieldValue === 'function') logo = imageFieldValue('proud-logo') || '';
-    if (!logo) {
-      var el = $('proud-logo');
-      if (el) {
-        var full = (el.dataset && el.dataset.fullUrl) || '';
-        var raw = (el.value || '').trim();
-        if (full && typeof isRealImageUrl === 'function' && isRealImageUrl(full)) logo = full;
-        else if (typeof isRealImageUrl === 'function' && isRealImageUrl(raw)) logo = raw;
-        else if (raw.indexOf('http') === 0 || raw.indexOf('data:image/') === 0) logo = raw;
-      }
-    }
-    // reject only incomplete placeholder / blob
-    if (logo && (logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0 || logo.indexOf('data:image...') === 0 || logo.indexOf('Preview') !== -1)) {
-      alert('Logo Upload ပြီးသည်အထိ စောင့်ပါ။ (✓ Preview အဆင်သင့် ဖြစ်မှ Add နှိပ်ပါ)');
-      return;
-    }
-
-    var st = window._proudStaging || { x: 55, y: 20, size: 48 };
-    var items = getProud();
-    items.push({
-      id: Date.now(),
-      name: name,
-      logo: logo || '',
-      link: (($('proud-link') && $('proud-link').value) || '').trim(),
-      active: true,
-      x: Math.round(st.x || 55),
-      y: Math.round(st.y || 20),
-      size: Math.round(st.size || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48)
-    });
-    write('hh_proud_sponsors', items);
-
-    if (nameEl) nameEl.value = '';
-    if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
-    else if ($('proud-logo')) { $('proud-logo').value = ''; try { delete $('proud-logo').dataset.fullUrl; } catch (e) {} }
-    if ($('proud-link')) $('proud-link').value = '';
-    var prev = $('proud-logo-preview'); if (prev) prev.innerHTML = '';
-    window._proudStaging = { x: 55, y: 20, size: parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48 };
-    if (typeof updateProudStaging === 'function') updateProudStaging();
-    if (typeof renderProudList === 'function') renderProudList();
-    if (typeof renderOverview === 'function') renderOverview();
-    if (typeof toast === 'function') toast(logo ? 'သိမ်းပြီး — Preview နေရာအတိုင်း' : 'Proud Sponsor ထည့်ပြီး');
-  } catch (err) {
-    console.error('addProud error', err);
-    alert('Add မအောင်မြင်: ' + (err && err.message ? err.message : err));
+  const name = (($('proud-name') && $('proud-name').value) || '').trim();
+  if (!name) return alert('Name ထည့်ပါ။');
+  let logo = (typeof imageFieldValue === 'function') ? imageFieldValue('proud-logo') : '';
+  if (!logo && $('proud-logo')) logo = ($('proud-logo').value || '').trim();
+  if (logo && (logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0)) {
+    return alert('Logo Upload ပြီးသည်အထိ စောင့်ပါ။');
   }
+  const st = window._proudStaging || { x: 55, y: 20, size: 48 };
+  const items = getProud();
+  items.push({
+    id: Date.now(),
+    name: name,
+    logo: logo,
+    link: (($('proud-link') && $('proud-link').value) || '').trim(),
+    active: true,
+    x: Math.round(st.x),
+    y: Math.round(st.y),
+    size: Math.round(st.size || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48)
+  });
+  write('hh_proud_sponsors', items);
+  if ($('proud-name')) $('proud-name').value = '';
+  if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
+  else if ($('proud-logo')) { $('proud-logo').value = ''; delete $('proud-logo').dataset.fullUrl; }
+  if ($('proud-link')) $('proud-link').value = '';
+  const prev = $('proud-logo-preview'); if (prev) prev.innerHTML = '';
+  window._proudStaging = { x: 55, y: 20, size: parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48 };
+  renderProudList();
+  if (typeof renderOverview === 'function') renderOverview();
+  toast(logo ? 'သိမ်းပြီး — Preview နေရာအတိုင်း' : 'Proud Sponsor ထည့်ပြီး');
 }
 
 function toggleProud(i) {
