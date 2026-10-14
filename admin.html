@@ -242,25 +242,26 @@ main > div {
 
 
 /* Collapsible panels */
-.fold-panel open { overflow: hidden; }
+
+.fold-panel { overflow: hidden; }
 .fold-head {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  cursor: pointer; user-select: none; margin: -4px -4px 0; padding: 4px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  cursor: pointer; user-select: none; padding: 6px 4px;
   border-radius: 10px;
 }
 .fold-head:hover { background: rgba(16,185,129,.06); }
-.fold-head .fold-title { font-weight: 800; font-size: 14px; color: #e2e8f0; }
-.fold-head .fold-hint { font-size: 11px; color: #64748b; }
+.fold-head .fold-title { font-weight: 800; font-size: 13px; color: #e2e8f0; }
+.fold-head .fold-hint { display: none; }
 .fold-head .fold-arrow {
-  width: 32px; height: 32px; border-radius: 8px;
+  width: 28px; height: 28px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   background: #1a2940; border: 1px solid #2b3c55; color: #94a3b8;
   transition: transform .2s ease, background .15s;
   flex-shrink: 0;
 }
-.fold-panel open.open .fold-arrow { transform: rotate(180deg); background: #12352f; color: #6ee7b7; border-color: #10b98155; }
-.fold-body { display: none; padding-top: 14px; }
-.fold-panel open.open .fold-body { display: block; }
+.fold-panel.open .fold-arrow { transform: rotate(180deg); background: #12352f; color: #6ee7b7; border-color: #10b98155; }
+.fold-body { display: none; padding-top: 8px; }
+.fold-panel.open .fold-body { display: block; }
 
 </style>
 </head>
@@ -305,7 +306,6 @@ main > div {
       <div class="fold-head" onclick="toggleFold(this)">
         <div>
           <div class="fold-title">Workspace</div>
-          <div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div>
         </div>
         <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
       </div>
@@ -333,7 +333,6 @@ main > div {
       <div class="fold-head" onclick="toggleFold(this)">
         <div>
           <div class="fold-title">Tools</div>
-          <div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div>
         </div>
         <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
       </div>
@@ -351,7 +350,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod13</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod14</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -6723,7 +6722,7 @@ window.alert = function(message) {
 
 
 function toggleFold(headEl) {
-  var panel = headEl && headEl.closest ? headEl.closest('.fold-panel open') : null;
+  var panel = headEl && headEl.closest ? headEl.closest('.fold-panel') : null;
   if (!panel) return;
   panel.classList.toggle('open');
 }
