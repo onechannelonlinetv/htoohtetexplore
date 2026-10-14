@@ -1076,31 +1076,28 @@ function loadBlogData() {
   const proudMeta = read('hh_proud_meta', {});
   const proudSec = $('proud-sponsors-section');
   const proudH = (proudMeta && proudMeta.logoH) ? Number(proudMeta.logoH) : 48;
-  const proudFrameH = (proudMeta && proudMeta.frameH) ? Number(proudMeta.frameH) : 72;
+  const proudFrameH = (proudMeta && proudMeta.frameH) ? Number(proudMeta.frameH) : 100;
   const titleX = proudMeta && proudMeta.titleX != null ? proudMeta.titleX : 4;
   const titleY = proudMeta && proudMeta.titleY != null ? proudMeta.titleY : 35;
-  const activeProud = proud.filter(p => p.active !== false);
+  const titleFs = (proudMeta && proudMeta.titleFs) ? Number(proudMeta.titleFs) : 12;
+  const activeProud = (Array.isArray(proud) ? proud : []).filter(function(p) { return p && p.active !== false; });
   if (proudSec) {
     if (activeProud.length) {
       proudSec.classList.remove('hidden');
-      const inner = proudSec.querySelector('.max-w-7xl') || proudSec;
-      // Use free-position stage
-      let stage = $('proud-stage');
-      if (!stage) {
-        // rebuild section content once
-      }
       const list = $('proud-sponsors-list');
       const label = $('proud-label');
-      // Switch to relative stage layout
       if (list && list.parentElement) {
         const row = list.parentElement;
         row.className = 'relative w-full';
-        row.style.height = proudFrameH + 'px';
-        row.style.minHeight = proudFrameH + 'px';
+        // Extra room for name labels under logos
+        const extra = 22;
+        row.style.height = (proudFrameH + extra) + 'px';
+        row.style.minHeight = (proudFrameH + extra) + 'px';
         if (label) {
-          label.className = 'absolute z-10 text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/80';
+          label.className = 'absolute z-10 font-bold uppercase tracking-[0.15em] text-emerald-400/80';
           label.style.left = titleX + '%';
           label.style.top = titleY + '%';
+          label.style.fontSize = titleFs + 'px';
           label.textContent = (proudMeta && proudMeta.title) ? proudMeta.title : 'Our Proud Sponsors';
         }
         list.className = 'absolute inset-0';
@@ -1108,10 +1105,18 @@ function loadBlogData() {
           const sz = p.size || proudH;
           const x = p.x != null ? p.x : (30 + idx * 15);
           const y = p.y != null ? p.y : 20;
-          if (p.logo) {
-            return '<a href="' + safe(p.link || '#') + '" target="_blank" rel="noopener" class="absolute opacity-90 hover:opacity-100 transition flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/30" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px" title="' + safe(p.name) + '"><img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="max-w-full max-h-full object-contain p-1" onerror="this.style.display=\'none\'"></a>';
+          const href = (p.link && String(p.link).trim()) ? String(p.link).trim() : '';
+          const name = safe(p.name || '');
+          const logo = p.logo ? safe(p.logo) : '';
+          const body = logo
+            ? ('<div class="flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/30 group-hover:border-emerald-500/50" style="width:' + sz + 'px;height:' + sz + 'px">' +
+               '<img src="' + logo + '" alt="' + name + '" class="max-w-full max-h-full object-contain p-1" onerror="this.style.display=\'none\'"></div>' +
+               (name ? '<span class="mt-1 text-[10px] sm:text-[11px] font-semibold text-emerald-200/90 text-center leading-tight max-w-full truncate" style="width:' + sz + 'px">' + name + '</span>' : ''))
+            : ('<span class="text-white/90 font-bold text-sm">' + name + '</span>');
+          if (href) {
+            return '<a href="' + safe(href) + '" target="_blank" rel="noopener noreferrer" class="group absolute flex flex-col items-center opacity-90 hover:opacity-100 transition" style="left:' + x + '%;top:' + y + '%" title="' + name + '">' + body + '</a>';
           }
-          return '<span class="absolute text-white/90 font-bold text-sm" style="left:' + x + '%;top:' + y + '%">' + safe(p.name) + '</span>';
+          return '<div class="absolute flex flex-col items-center opacity-90" style="left:' + x + '%;top:' + y + '%" title="' + name + '">' + body + '</div>';
         }).join('');
       }
     } else {
@@ -1351,32 +1356,46 @@ function formatArticleBody(raw) {
     var re = /\[img(?:[^\]]*)\]([\s\S]*?)\[\/img\]/gi;
     var m;
     while ((m = re.exec(inner)) !== null) {
-      var u = (m[1]||'').trim();
-      if (u) imgs.push(u);
+      var u = (m[1] || '').trim();
+      // skip unresolved temporary cid: refs (must be expanded on save / uploaded)
+      if (!u || u.indexOf('cid:') === 0) continue;
+      imgs.push(u);
     }
     imgs = imgs.slice(0, 3);
     if (!imgs.length) return '';
-    layout = layout || '1-2';
+    layout = (layout || '1-2').toString().trim();
+    function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
     function cell(u) {
-      return '<div style="border-radius:14px;overflow:hidden;min-height:0;"><img src="'+u.replace(/"/g,'&quot;')+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
+      return '<div style="border-radius:14px;overflow:hidden;min-height:0;height:100%;">' +
+        '<img src="' + escAttr(u) + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;">' +
+        '</div>';
     }
+    var gridCss = '';
+    var cellHtml = '';
     if (layout === '1-2' && imgs.length >= 3) {
-      return '<div style="display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;">' +
-        '<div style="grid-row:1/3;border-radius:14px;overflow:hidden;">'+cell(imgs[0]).replace(/^<div/, '<div').replace('min-height:0','height:100%')+'</div>' +
-        cell(imgs[1]) + cell(imgs[2]) + '</div>';
-    }
-    if (layout === '2-1' && imgs.length >= 3) {
-      return '<div style="display:grid;grid-template-columns:1fr 1.2fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;">' +
+      gridCss = 'display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;';
+      cellHtml =
+        '<div style="grid-row:1/3;border-radius:14px;overflow:hidden;height:100%;"><img src="' + escAttr(imgs[0]) + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;"></div>' +
+        cell(imgs[1]) + cell(imgs[2]);
+    } else if (layout === '2-1' && imgs.length >= 3) {
+      gridCss = 'display:grid;grid-template-columns:1fr 1.2fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;';
+      cellHtml =
         cell(imgs[0]) +
-        '<div style="grid-row:1/3;grid-column:2;border-radius:14px;overflow:hidden;"><img src="'+imgs[1].replace(/"/g,'&quot;')+'" style="width:100%;height:100%;object-fit:cover;display:block;"></div>' +
-        cell(imgs[2]) + '</div>';
+        '<div style="grid-row:1/3;grid-column:2;border-radius:14px;overflow:hidden;height:100%;"><img src="' + escAttr(imgs[1]) + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;"></div>' +
+        cell(imgs[2]);
+    } else if (layout === '3' && imgs.length >= 3) {
+      gridCss = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:min(280px,40vw);margin:1.25rem 0;';
+      cellHtml = imgs.slice(0, 3).map(cell).join('');
+    } else if (imgs.length >= 3 && layout !== '2') {
+      // fallback 3-col when layout unknown
+      gridCss = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:min(280px,40vw);margin:1.25rem 0;';
+      cellHtml = imgs.slice(0, 3).map(cell).join('');
+    } else {
+      // layout "2" or only 2 images
+      gridCss = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;height:min(300px,42vw);margin:1.25rem 0;';
+      cellHtml = imgs.slice(0, 2).map(cell).join('');
     }
-    if (layout === '3' || imgs.length >= 3) {
-      return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:min(280px,40vw);margin:1.25rem 0;">' +
-        imgs.slice(0,3).map(cell).join('') + '</div>';
-    }
-    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;height:min(300px,42vw);margin:1.25rem 0;">' +
-      imgs.slice(0,2).map(cell).join('') + '</div>';
+    return '<div class="article-gallery" style="' + gridCss + '">' + cellHtml + '</div>';
   }
   let t = String(raw);
   // galleries first (before escaping)
@@ -1386,12 +1405,13 @@ function formatArticleBody(raw) {
   // remaining single images
   t = t.replace(/\[img((?:\s+\w+=[^\s\]]+)*)\]([\s\S]*?)\[\/img\]/gi, function(_, attrs, u) {
     u = (u||'').trim();
+    if (!u || u.indexOf('cid:') === 0) return '';
     attrs = attrs || '';
     var size = 'md', w = null;
     var sm = attrs.match(/\bsize=(sm|md|lg|full)/i); if (sm) size = sm[1].toLowerCase();
     var wm = attrs.match(/\bw=(\d{1,3})/i); if (wm) w = Math.max(15, Math.min(100, parseInt(wm[1],10)));
     if (w == null) w = { sm:40, md:70, lg:90, full:100 }[size] || 70;
-    return '<img src="'+u.replace(/"/g,'&quot;')+'" alt="" style="width:'+w+'%;max-width:100%;border-radius:12px;margin:1rem 0;display:block;height:auto;object-fit:contain;background:rgba(0,0,0,.4)">';
+    return '<img src="'+u.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" alt="" loading="lazy" style="width:'+w+'%;max-width:100%;border-radius:12px;margin:1rem 0;display:block;height:auto;object-fit:contain;background:rgba(0,0,0,.4);cursor:zoom-in">';
   });
   // escape remaining text carefully: split by tags
   t = t.split(/(<[^>]+>)/).map(function(part) {
@@ -1592,7 +1612,7 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 let publicFirebaseReady = false;
 let publicDb = null;
 try {
