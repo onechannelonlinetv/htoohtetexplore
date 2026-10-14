@@ -1249,16 +1249,23 @@ main > div {
             <div><label class="label">Location *</label><input id="admin-post-location" class="field" oninput="updatePostPreview()" placeholder="Bagan, Inle Lake..."></div>
             <div class="md:col-span-2">
               <label class="label">Category *</label>
-              <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-end">
-                <div>
-                  <p class="tiny mb-1 text-slate-500">ရှိပြီးသား ရွေးပါ</p>
-                  <select id="admin-post-category" class="field" onchange="updatePostPreview()"></select>
+              <select id="admin-post-category" class="field mb-3" onchange="updatePostPreview()">
+                <option value="Travel Story">Travel Story</option>
+                <option value="Guide">Guide</option>
+                <option value="Food">Food</option>
+                <option value="Culture">Culture</option>
+                <option value="Adventure">Adventure</option>
+              </select>
+              <div class="rounded-xl border border-slate-700 bg-slate-950/50 p-3">
+                <p class="text-xs font-bold text-slate-400 mb-2">Category စီမံ · Add / Edit / Delete</p>
+                <div class="flex flex-wrap gap-2 mb-2">
+                  <input id="admin-post-category-new" class="field flex-1 min-w-[140px]" placeholder="Category အသစ် သို့မဟုတ် ပြင်မည့် နာမည်">
+                  <button type="button" class="btn btn-green" onclick="addPostCategory()"><i class="fa-solid fa-plus mr-1"></i>Add</button>
+                  <button type="button" class="btn btn-muted" onclick="renamePostCategory()"><i class="fa-solid fa-pen mr-1"></i>Rename</button>
+                  <button type="button" class="btn btn-red" onclick="deletePostCategory()"><i class="fa-regular fa-trash-can mr-1"></i>Delete</button>
                 </div>
-                <div>
-                  <p class="tiny mb-1 text-slate-500">အသစ် ရေးမယ်</p>
-                  <input id="admin-post-category-new" class="field" placeholder="ဥပမာ · Road Trip, Temple...">
-                </div>
-                <button type="button" class="btn btn-green h-[42px] shrink-0" onclick="addPostCategory()"><i class="fa-solid fa-plus mr-1"></i>Add Category</button>
+                <div id="post-category-chips" class="flex flex-wrap gap-1.5"></div>
+                <p class="tiny mt-2 text-slate-500">Chip နှိပ် → ရွေးမယ် · Rename = ရွေးထားတာကို input စာနဲ့ ပြင် · Delete = ရွေးထားတာ ဖျက်</p>
               </div>
             </div>
             <div><label class="label">Travel Date</label><input id="admin-post-travel-date" type="date" class="field"></div>
@@ -1687,7 +1694,7 @@ function forceSyncAllToFirebase() {
 function read(key, fallback = []) {
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
 }
-function asArray(v) {
+function asArray(v, fallback) {
   if (Array.isArray(v)) return v;
   if (v && typeof v === 'object') {
     return Object.keys(v).sort(function(a,b){
@@ -1696,7 +1703,8 @@ function asArray(v) {
       return String(a).localeCompare(String(b));
     }).map(function(k){ return v[k]; }).filter(function(x){ return x != null; });
   }
-  return Array.isArray(fallback) ? fallback.slice() : [];
+  if (Array.isArray(fallback)) return fallback.slice();
+  return [];
 }
 function write(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
@@ -4960,9 +4968,14 @@ function autoSlug() {
 
 const DEFAULT_POST_CATEGORIES = ['Travel Story', 'Guide', 'Food', 'Culture', 'Adventure'];
 function getPostCategories() {
-  var list = asArray(read('hh_categories', null));
-  if (!list.length) list = DEFAULT_POST_CATEGORIES.slice();
-  // also merge categories used on existing posts
+  var raw = null;
+  try { raw = JSON.parse(localStorage.getItem('hh_categories')); } catch (e) { raw = null; }
+  var list = asArray(raw, []);
+  // If never saved or empty, seed defaults
+  if (!list.length) {
+    list = DEFAULT_POST_CATEGORIES.slice();
+    try { localStorage.setItem('hh_categories', JSON.stringify(list)); } catch (e) {}
+  }
   try {
     getPosts().forEach(function(p) {
       var c = (p && p.category || '').trim();
@@ -4972,20 +4985,50 @@ function getPostCategories() {
   return list;
 }
 function savePostCategories(list) {
-  write('hh_categories', list);
+  list = (list || []).map(function(c){ return String(c || '').trim(); }).filter(Boolean);
+  // unique
+  var seen = {};
+  list = list.filter(function(c){ if (seen[c]) return false; seen[c] = 1; return true; });
+  try {
+    if (typeof write === 'function') write('hh_categories', list);
+    else localStorage.setItem('hh_categories', JSON.stringify(list));
+  } catch (e) {
+    try { localStorage.setItem('hh_categories', JSON.stringify(list)); } catch (e2) {}
+  }
+  return list;
+}
+function renderCategoryChips(selected) {
+  var box = $('post-category-chips');
+  if (!box) return;
+  var list = getPostCategories();
+  var cur = selected || ($('admin-post-category') && $('admin-post-category').value) || '';
+  box.innerHTML = list.map(function(c) {
+    var on = c === cur;
+    return '<button type="button" class="px-2.5 py-1 rounded-lg text-xs font-bold border transition ' +
+      (on ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-slate-800 border-slate-600 text-slate-300 hover:border-emerald-500') +
+      '" onclick="selectPostCategory(\'' + String(c).replace(/\\/g,'\\\\').replace(/'/g, "\\'") + '\')">' + safe(c) + '</button>';
+  }).join('') || '<span class="text-xs text-slate-500">Category မရှိသေး</span>';
 }
 function fillPostCategorySelect(selected) {
   var sel = $('admin-post-category');
   if (!sel) return;
   var list = getPostCategories();
-  var cur = selected || sel.value || 'Travel Story';
+  if (!list.length) list = DEFAULT_POST_CATEGORIES.slice();
+  var cur = selected || sel.value || list[0] || 'Travel Story';
   sel.innerHTML = list.map(function(c) {
-    return '<option value="' + safe(c) + '"' + (c === cur ? ' selected' : '') + '>' + safe(c) + '</option>';
+    return '<option value="' + safe(c) + '">' + safe(c) + '</option>';
   }).join('');
-  if (list.indexOf(cur) < 0 && cur) {
-    sel.innerHTML += '<option value="' + safe(cur) + '" selected>' + safe(cur) + '</option>';
+  if (list.indexOf(cur) < 0) {
+    sel.innerHTML += '<option value="' + safe(cur) + '">' + safe(cur) + '</option>';
   }
-  sel.value = cur;
+  try { sel.value = cur; } catch (e) {}
+  renderCategoryChips(cur);
+}
+function selectPostCategory(name) {
+  fillPostCategorySelect(name);
+  var input = $('admin-post-category-new');
+  if (input) input.value = name;
+  if (typeof updatePostPreview === 'function') updatePostPreview();
 }
 function addPostCategory() {
   var input = $('admin-post-category-new');
@@ -4994,8 +5037,7 @@ function addPostCategory() {
   var list = getPostCategories();
   if (list.indexOf(name) >= 0) {
     fillPostCategorySelect(name);
-    if (input) input.value = '';
-    toast('Category ရှိပြီးသား — ရွေးထားပါတယ်');
+    toast('ရှိပြီးသား — ရွေးထားပါတယ်');
     return;
   }
   list.push(name);
@@ -5003,9 +5045,48 @@ function addPostCategory() {
   fillPostCategorySelect(name);
   if (input) input.value = '';
   if (typeof updatePostPreview === 'function') updatePostPreview();
-  toast('✓ Category ထည့်ပြီး: ' + name);
+  toast('✓ ထည့်ပြီး: ' + name);
+}
+function renamePostCategory() {
+  var sel = $('admin-post-category');
+  var oldName = sel && sel.value;
+  var input = $('admin-post-category-new');
+  var newName = (input && input.value || '').trim();
+  if (!oldName) { toast('အရင် Category ရွေးပါ', true); return; }
+  if (!newName) { toast('အသစ် နာမည် input မှာ ရေးပါ', true); return; }
+  if (oldName === newName) { toast('နာမည် အတူတူပါ'); return; }
+  var list = getPostCategories().map(function(c){ return c === oldName ? newName : c; });
+  savePostCategories(list);
+  // update posts using old category
+  try {
+    var posts = getPosts();
+    var changed = false;
+    posts.forEach(function(p){
+      if (p && p.category === oldName) { p.category = newName; changed = true; }
+    });
+    if (changed) write('hh_posts', posts);
+  } catch (e) {}
+  fillPostCategorySelect(newName);
+  if (input) input.value = '';
+  if (typeof renderPostsList === 'function') renderPostsList();
+  toast('✓ ပြင်ပြီး: ' + oldName + ' → ' + newName);
+}
+function deletePostCategory() {
+  var sel = $('admin-post-category');
+  var name = sel && sel.value;
+  if (!name) { toast('ဖျက်မယ့် Category ရွေးပါ', true); return; }
+  var list = getPostCategories();
+  if (list.length <= 1) { toast('နောက်ဆုံး Category ဖျက်လို့မရ', true); return; }
+  if (!confirm('"' + name + '" ကို ဖျက်မလား?')) return;
+  list = list.filter(function(c){ return c !== name; });
+  savePostCategories(list);
+  fillPostCategorySelect(list[0]);
+  toast('ဖျက်ပြီး: ' + name);
 }
 window.addPostCategory = addPostCategory;
+window.renamePostCategory = renamePostCategory;
+window.deletePostCategory = deletePostCategory;
+window.selectPostCategory = selectPostCategory;
 window.fillPostCategorySelect = fillPostCategorySelect;
 
 function savePost() {
