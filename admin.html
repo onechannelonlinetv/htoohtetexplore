@@ -1247,14 +1247,14 @@ main > div {
               <textarea id="admin-post-content-en" class="field min-h-[180px] w-full text-base leading-relaxed" placeholder="English article body (optional)..."></textarea>
             </div>
             <div><label class="label">Location *</label><input id="admin-post-location" class="field" oninput="updatePostPreview()" placeholder="Bagan, Inle Lake..."></div>
-            <div><label class="label">Category *</label>
-              <select id="admin-post-category" class="field" onchange="updatePostPreview()">
-                <option value="Travel Story">Travel Story</option>
-                <option value="Guide">Guide</option>
-                <option value="Food">Food</option>
-                <option value="Culture">Culture</option>
-                <option value="Adventure">Adventure</option>
-              </select>
+            <div>
+              <label class="label">Category *</label>
+              <select id="admin-post-category" class="field" onchange="updatePostPreview()"></select>
+              <div class="mt-2 flex gap-2">
+                <input id="admin-post-category-new" class="field flex-1" placeholder="Category အသစ် ရေးပါ...">
+                <button type="button" class="btn btn-muted shrink-0" onclick="addPostCategory()"><i class="fa-solid fa-plus mr-1"></i>Add</button>
+              </div>
+              <p class="tiny mt-1">ရှိပြီးသား ရွေးပါ · သို့မဟုတ် အသစ်ရေးပြီး Add</p>
             </div>
             <div><label class="label">Travel Date</label><input id="admin-post-travel-date" type="date" class="field"></div>
             <div><label class="label">Author</label><input id="admin-post-author" class="field" placeholder="Htoo Htet" value="Htoo Htet"></div>
@@ -1524,7 +1524,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2331,6 +2331,7 @@ function showView(name, button) {
     }
   }
   if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
+  if (name === 'addpost') { fillPostCategorySelect(); if (typeof refreshPostSectionOptions === 'function') refreshPostSectionOptions(); }
   if (name === 'menu') renderMenuList();
   if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
   if (name === 'hero' && typeof updateHeroPreview === 'function') updateHeroPreview();
@@ -2535,6 +2536,7 @@ function loadAll() {
   renderProudList();
   renderHomeSectionsList();
   renderPostsList();
+  if (typeof fillPostCategorySelect === 'function') fillPostCategorySelect();
   renderOverview();
   if (typeof updateSponsorPreview === 'function') updateSponsorPreview();
   if (typeof renderPresetList === 'function') renderPresetList();
@@ -4950,6 +4952,57 @@ function autoSlug() {
   const slugEl = $('admin-post-slug');
   if (!slugEl.dataset.manual) slugEl.value = slugify(title);
 }
+
+const DEFAULT_POST_CATEGORIES = ['Travel Story', 'Guide', 'Food', 'Culture', 'Adventure'];
+function getPostCategories() {
+  var list = asArray(read('hh_categories', null));
+  if (!list.length) list = DEFAULT_POST_CATEGORIES.slice();
+  // also merge categories used on existing posts
+  try {
+    getPosts().forEach(function(p) {
+      var c = (p && p.category || '').trim();
+      if (c && list.indexOf(c) < 0) list.push(c);
+    });
+  } catch (e) {}
+  return list;
+}
+function savePostCategories(list) {
+  write('hh_categories', list);
+}
+function fillPostCategorySelect(selected) {
+  var sel = $('admin-post-category');
+  if (!sel) return;
+  var list = getPostCategories();
+  var cur = selected || sel.value || 'Travel Story';
+  sel.innerHTML = list.map(function(c) {
+    return '<option value="' + safe(c) + '"' + (c === cur ? ' selected' : '') + '>' + safe(c) + '</option>';
+  }).join('');
+  if (list.indexOf(cur) < 0 && cur) {
+    sel.innerHTML += '<option value="' + safe(cur) + '" selected>' + safe(cur) + '</option>';
+  }
+  sel.value = cur;
+}
+function addPostCategory() {
+  var input = $('admin-post-category-new');
+  var name = (input && input.value || '').trim();
+  if (!name) { toast('Category နာမည် ရေးပါ', true); return; }
+  var list = getPostCategories();
+  if (list.indexOf(name) >= 0) {
+    fillPostCategorySelect(name);
+    if (input) input.value = '';
+    toast('Category ရှိပြီးသား — ရွေးထားပါတယ်');
+    return;
+  }
+  list.push(name);
+  savePostCategories(list);
+  fillPostCategorySelect(name);
+  if (input) input.value = '';
+  if (typeof updatePostPreview === 'function') updatePostPreview();
+  toast('✓ Category ထည့်ပြီး: ' + name);
+}
+window.addPostCategory = addPostCategory;
+window.fillPostCategorySelect = fillPostCategorySelect;
+
 function savePost() {
   const title = $('admin-post-title').value.trim();
   const slug = $('admin-post-slug').value.trim() || slugify(title);
@@ -5012,7 +5065,7 @@ function editPost(id) {
   $('admin-post-content').value = compactContentDataUrls(p.content || '');
   if ($('admin-post-content-en')) $('admin-post-content-en').value = compactContentDataUrls(p.contentEn || '');
   if (typeof updateContentPreview === 'function') updateContentPreview();
-  $('admin-post-category').value = p.category || 'Travel Story';
+  fillPostCategorySelect(p.category || 'Travel Story');
   $('admin-post-travel-date').value = p.travelDate || '';
   $('admin-post-author').value = p.author || 'Htoo Htet';
   $('admin-post-seo-title').value = p.seoTitle || '';
@@ -5028,7 +5081,7 @@ function cancelPostEdit() {
   ['editing-post-id','admin-post-title','admin-post-title-en','admin-post-slug','admin-post-location','admin-post-desc','admin-post-desc-en','admin-post-content','admin-post-content-en','admin-post-travel-date','admin-post-seo-title','admin-post-meta'].forEach(id => { if ($(id)) $(id).value = ''; });
   setImageFieldValue('admin-post-img', '');
   $('admin-post-author').value = 'Htoo Htet';
-  $('admin-post-category').value = 'Travel Story';
+  fillPostCategorySelect('Travel Story');
   $('admin-post-section').value = 'latest';
   delete $('admin-post-slug').dataset.manual;
   const prev = $('admin-post-img-preview'); if (prev) prev.innerHTML = '';
