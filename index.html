@@ -760,15 +760,16 @@
           </a>
         </div>
         <div class="shrink-0">
-          <div class="w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative">
-            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70">
+          <a id="youtube-video-link" href="#" target="_blank" rel="noopener" class="block w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl">
+            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-95 transition duration-300 group-hover:scale-105">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20 pointer-events-none"></div>
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
-              <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl mb-2">
+              <div class="w-12 h-12 rounded-full bg-red-600/95 flex items-center justify-center shadow-xl mb-2 group-hover:scale-110 transition">
                 <i class="fa-solid fa-play text-white text-base ml-0.5"></i>
               </div>
-              <span class="text-xs font-bold text-white/90">HTOO HTET</span>
+              <span id="youtube-thumb-caption" class="text-xs font-bold text-white/90">YouTube မှာ ကြည့်မယ်</span>
             </div>
-          </div>
+          </a>
         </div>
       </div>
     </div>
@@ -1612,8 +1613,34 @@ function loadBlogData() {
     if (yt.desc) $('youtube-desc').textContent = yt.desc;
     if (yt.link) $('youtube-link').href = yt.link;
     else if (social.yt) $('youtube-link').href = social.yt;
-    if (yt.thumb) $('youtube-thumb').src = yt.thumb;
     if (yt.bgImage) $('youtube-bg').src = yt.bgImage;
+
+    // Video / playlist from admin: show that video's thumbnail; click opens YouTube (no autoplay embed)
+    var parsed = (typeof parseYoutubeUrl === 'function') ? parseYoutubeUrl(yt.videoUrl || '') : null;
+    var watchUrl = '';
+    var autoThumb = '';
+    if (parsed) {
+      if (parsed.type === 'playlist') {
+        watchUrl = 'https://www.youtube.com/playlist?list=' + encodeURIComponent(parsed.id);
+      } else {
+        watchUrl = 'https://www.youtube.com/watch?v=' + encodeURIComponent(parsed.id);
+        if (parsed.list) watchUrl += '&list=' + encodeURIComponent(parsed.list);
+        autoThumb = 'https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg';
+      }
+    }
+    var thumbSrc = (yt.thumb && String(yt.thumb).trim()) || autoThumb || '';
+    if (thumbSrc && $('youtube-thumb')) $('youtube-thumb').src = thumbSrc;
+    var vLink = $('youtube-video-link');
+    if (vLink) {
+      vLink.href = watchUrl || yt.link || (social && social.yt) || 'https://www.youtube.com';
+      vLink.setAttribute('aria-label', parsed && parsed.type === 'playlist' ? 'Open playlist on YouTube' : 'Open video on YouTube');
+    }
+    var cap = $('youtube-thumb-caption');
+    if (cap) {
+      if (parsed && parsed.type === 'playlist') cap.textContent = 'Playlist ကြည့်မယ်';
+      else if (parsed) cap.textContent = 'YouTube မှာ ကြည့်မယ်';
+      else cap.textContent = 'Channel ကြည့်မယ်';
+    }
   }
 
   const about = read('hh_about', {});
@@ -2183,6 +2210,20 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
+
+function parseYoutubeUrl(url) {
+  url = String(url || '').trim();
+  if (!url) return null;
+  var pl = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+  var v = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{6,})/);
+  if (!v) v = url.match(/[?&]v=([a-zA-Z0-9_-]{6,})/);
+  if (pl && !v) return { type: 'playlist', id: pl[1] };
+  if (v && pl) return { type: 'video', id: v[1], list: pl[1] };
+  if (v) return { type: 'video', id: v[1] };
+  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return { type: 'video', id: url };
+  return null;
+}
+
 const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_upcoming','hh_gallery','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 let publicFirebaseReady = false;
 let publicDb = null;
