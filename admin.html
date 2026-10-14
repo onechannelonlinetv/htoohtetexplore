@@ -1566,6 +1566,14 @@ main > div {
               <button type="button" class="btn btn-green text-xs" onclick="showView('addpost')"><i class="fa-solid fa-plus mr-1"></i>Add Post</button>
             </div>
           </div>
+          <div class="relative mb-3">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none"></i>
+            <input id="post-list-search" type="search" class="field pl-10 pr-10" placeholder="ခေါင်းစဉ်၊ နေရာ၊ အမျိုးအစား ရှာရန်..." oninput="renderPostsList()" autocomplete="off">
+            <button type="button" id="post-list-search-clear" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-slate-500 hover:text-emerald-300 hover:bg-slate-800 hidden items-center justify-center" onclick="clearPostListSearch()" title="Clear">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+          </div>
+          <p id="post-list-search-empty" class="hidden rounded-xl border border-dashed border-slate-700 p-4 text-center text-sm text-slate-400">ရှာတွေ့သော Post မရှိပါ။</p>
           <div id="posts-list" class="space-y-3"></div>
         </div>
       </section>
@@ -1710,7 +1718,7 @@ main > div {
               <label class="label text-red-300 font-bold">YouTube Video / Playlist Link</label>
               <p class="tiny">Video သို့မဟုတ် Playlist link ကူးထည့်ပါ · Website မှာ YouTube cover ပေါ်မယ် · Play နှိပ်ရင် YouTube ကို ဖွင့်မယ် · Thumbnail ဗလာ = YouTube cover အလိုအလျောက်</p>
               <input id="yt-video-url" class="field" placeholder="https://www.youtube.com/watch?v=... သို့မဟုတ် playlist?list=..." oninput="updateYoutubePreview()">
-              <div id="yt-embed-preview" class="mt-2 hidden rounded-lg overflow-hidden border border-slate-700 bg-black"></div>
+              <div id="yt-embed-preview" class="mt-2 hidden rounded-lg overflow-hidden border border-slate-700 aspect-video bg-black"></div>
             </div>
             <div class="md:col-span-2"><label class="label">Title</label><textarea id="yt-title" class="field min-h-14" oninput="updateYoutubePreview()"></textarea></div>
             <div>
@@ -4409,13 +4417,9 @@ function updateYoutubePreview() {
       var thumbSrc = (parsed.type === 'video') ? ('https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg') : '';
       var custom = (typeof imageFieldValue === 'function' ? imageFieldValue('yt-thumb') : '') || '';
       var img = custom || thumbSrc || '';
-      ep.innerHTML = '<a href="' + (parsed.type === 'playlist'
-          ? ('https://www.youtube.com/playlist?list=' + encodeURIComponent(parsed.id))
-          : ('https://www.youtube.com/watch?v=' + encodeURIComponent(parsed.id) + (parsed.list ? ('&list=' + encodeURIComponent(parsed.list)) : '')))
-        + '" target="_blank" rel="noopener" class="relative block w-full aspect-video bg-black group">' +
-        (img ? '<img src="' + img.replace(/"/g, '&quot;') + '" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 transition" alt="">' : '') +
-        '<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>' +
-        '<div class="relative z-10 flex flex-col items-center justify-center h-full min-h-[140px]"><div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center mb-2 shadow-lg group-hover:scale-110 transition"><i class="fa-solid fa-play text-white"></i></div><p class="text-[11px] text-white/90 font-bold">Play → YouTube မှာ ဖွင့်မယ်</p></div></a>';
+      ep.innerHTML = '<div class="relative w-full min-h-[160px] bg-black flex items-center justify-center">' +
+        (img ? '<img src="' + img + '" class="absolute inset-0 w-full h-full object-cover opacity-80" alt="">' : '') +
+        '<div class="relative z-10 text-center"><div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-play text-white"></i></div><p class="text-[11px] text-white/90 font-bold">Play → YouTube မှာ ဖွင့်မယ်</p></div></div>';
     } else {
       ep.classList.add('hidden');
       ep.innerHTML = '';
@@ -6266,15 +6270,54 @@ async function deletePost(id) {
   write('hh_posts', getPosts().filter(p => String(p.id) !== String(id)));
   renderPostsList(); renderOverview(); toast('Post ဖျက်ပြီးပါပြီ။');
 }
+function clearPostListSearch() {
+  var inp = $('post-list-search');
+  if (inp) inp.value = '';
+  renderPostsList();
+  try { if (inp) inp.focus(); } catch (e) {}
+}
+window.clearPostListSearch = clearPostListSearch;
+
 function renderPostsList() {
-  const posts = getPosts();
+  const allPosts = getPosts();
+  const q = (($('post-list-search') && $('post-list-search').value) || '').trim().toLowerCase();
+  const clearBtn = $('post-list-search-clear');
+  if (clearBtn) {
+    if (q) {
+      clearBtn.classList.remove('hidden');
+      clearBtn.style.display = 'flex';
+    } else {
+      clearBtn.classList.add('hidden');
+      clearBtn.style.display = 'none';
+    }
+  }
+  let posts = allPosts;
+  if (q) {
+    posts = allPosts.filter(function(p) {
+      var hay = [
+        p.title, p.desc, p.location, p.category, p.author, p.slug, p.type
+      ].map(function(x) { return String(x || '').toLowerCase(); }).join(' ');
+      return hay.indexOf(q) !== -1;
+    });
+  }
   const countEl = $('post-count');
   const listEl = $('posts-list');
-  if (countEl) countEl.textContent = posts.length + ' posts';
+  const emptyEl = $('post-list-search-empty');
+  if (countEl) {
+    countEl.textContent = q
+      ? (posts.length + ' / ' + allPosts.length + ' posts')
+      : (allPosts.length + ' posts');
+  }
   try { refreshPostSectionOptions(); } catch (e) {}
   if (!listEl) return;
-  if (!posts.length) {
+  if (emptyEl) emptyEl.classList.add('hidden');
+  if (!allPosts.length) {
     listEl.innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Post မရှိသေးပါ။</p>';
+    return;
+  }
+  if (q && !posts.length) {
+    listEl.innerHTML = '';
+    if (emptyEl) emptyEl.classList.remove('hidden');
     return;
   }
   listEl.innerHTML = posts.map(p => {
