@@ -4785,7 +4785,16 @@ async function commitAllGalSlots() {
   try {
     var keys = collectGalSlotKeys();
     if (!keys.length) {
-      toast('ပုံတင်ထားတဲ့ ကွက် မရှိသေးပါ (သို့) Storage URL မရသေး', true);
+      var n = 0;
+      try {
+        var g0 = getGalleryData();
+        n = (g0 && g0.photos && g0.photos.length) || 0;
+      } catch (e) {}
+      if (n > 0) {
+        toast('ကွက်ထဲ ပုံမရှိပါ · Gallery Photos ထဲ ' + n + ' ပုံ သိမ်းပြီးသား');
+      } else {
+        toast('ကွက်ထဲ ပုံအရင် ရွေးပါ');
+      }
       return false;
     }
     if (!adminUser) {
@@ -4822,7 +4831,7 @@ async function commitAllGalSlots() {
     renderGalleryList();
     if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     if (added) toast('✓ ' + added + ' ပုံ သိမ်းပြီး');
-    else toast('မသိမ်းနိုင်ပါ — Login / Storage Rules စစ်ပါ', true);
+    else toast('သိမ်းစရာ ကွက် မကျန်တော့ပါ (အလိုအလျောက် သိမ်းပြီးသား ဖြစ်နိုင်)');
     return added > 0;
   } catch (err) {
     console.error(err);
