@@ -169,6 +169,58 @@ main > div {
   pointer-events: none;
 }
 
+
+/* Custom confirm — admin style */
+#hh-confirm-modal {
+  position: fixed; inset: 0; z-index: 99998;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(2, 8, 18, 0.82); backdrop-filter: blur(8px);
+  padding: 16px;
+}
+#hh-confirm-modal.open { display: flex; }
+#hh-confirm-box {
+  width: min(92vw, 380px);
+  background: linear-gradient(165deg, #122033, #0b1422);
+  border: 1px solid #2a3f5c;
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.55);
+  padding: 22px 20px 18px;
+  animation: hhConfirmIn .18s ease-out;
+}
+@keyframes hhConfirmIn {
+  from { opacity: 0; transform: translateY(10px) scale(.97); }
+  to { opacity: 1; transform: none; }
+}
+#hh-confirm-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(239,68,68,.12); color: #fca5a5;
+  font-size: 18px; margin-bottom: 12px;
+}
+#hh-confirm-title {
+  font-size: 16px; font-weight: 800; color: #f1f5f9; margin: 0 0 6px;
+}
+#hh-confirm-msg {
+  font-size: 13px; line-height: 1.55; color: #94a3b8; margin: 0 0 18px;
+}
+#hh-confirm-actions {
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+#hh-confirm-cancel {
+  background: #1a2940; color: #dce8f7; border: 1px solid #2b3c55;
+  border-radius: 11px; padding: 10px 16px; font-weight: 700; font-size: 13px; cursor: pointer;
+}
+#hh-confirm-cancel:hover { background: #243650; }
+#hh-confirm-ok {
+  background: #b91c1c; color: #fff; border: none;
+  border-radius: 11px; padding: 10px 16px; font-weight: 700; font-size: 13px; cursor: pointer;
+}
+#hh-confirm-ok:hover { background: #dc2626; }
+#hh-confirm-ok.ok-green { background: #059669; }
+#hh-confirm-ok.ok-green:hover { background: #10b981; }
+#hh-confirm-ok.ok-amber { background: #b45309; }
+#hh-confirm-ok.ok-amber:hover { background: #d97706; }
+
 </style>
 </head>
 <body class="min-h-screen">
@@ -230,7 +282,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod2</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod33</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -3447,8 +3499,8 @@ function editSponsor(index) {
   updateSponsorPreview();
   $('sponsor-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-function deleteSponsor(index) {
-  if (!confirm('ဤ Sponsor ကို ဖျက်မလား?')) return;
+async function deleteSponsor(index) {
+  if (!(await confirmDialog('ဤ Sponsor ကို ဖျက်မလား?', { title: 'Sponsor ဖျက်မယ်', okText: 'Delete' }))) return;
   const list = getSponsorList();
   list.splice(index, 1);
   writeSponsorList(list);
@@ -4652,8 +4704,8 @@ function moveMenu(i, d) {
   [a[i], a[n]] = [a[n], a[i]];
   write('hh_menu', a); renderMenuList();
 }
-function deleteMenu(i) {
-  if (!confirm('ဖျက်မှာ သေချာပါသလား?')) return;
+async function deleteMenu(i) {
+  if (!(await confirmDialog('ဖျက်မှာ သေချာပါသလား?', { title: 'ဖျက်မယ်', okText: 'Delete' }))) return;
   const a = getMenu(); a.splice(i, 1); write('hh_menu', a); renderMenuList(); toast('ဖျက်ပြီးပါပြီ။');
 }
 
@@ -5093,8 +5145,8 @@ function moveProud(i, d) {
   [a[i], a[n]] = [a[n], a[i]];
   write('hh_proud_sponsors', a); renderProudList();
 }
-function deleteProud(i) {
-  if (!confirm('ဖျက်မှာ သေချာပါသလား?')) return;
+async function deleteProud(i) {
+  if (!(await confirmDialog('ဖျက်မှာ သေချာပါသလား?', { title: 'ဖျက်မယ်', okText: 'Delete' }))) return;
   const a = getProud(); a.splice(i, 1); write('hh_proud_sponsors', a); renderProudList(); renderOverview(); toast('ဖျက်ပြီးပါပြီ။');
 }
 
@@ -5226,12 +5278,12 @@ function renameGalCategory() {
   if (typeof renderGalleryList === 'function') renderGalleryList();
   toast('✓ ပြင်ပြီး: ' + oldName + ' → ' + newName);
 }
-function deleteGalCategory() {
+async function deleteGalCategory() {
   var name = _galSelectedCat;
   if (!name) { toast('ဖျက်မယ့် Category chip ရွေးပါ', true); return; }
   var list = getGalCategories();
   if (list.length <= 1) { toast('နောက်ဆုံး Category ဖျက်လို့မရ', true); return; }
-  if (!confirm('"' + name + '" ကို ဖျက်မလား?')) return;
+  if (!(await confirmDialog('"' + name + '" ကို ဖျက်မလား?', { title: 'ဖျက်မယ်', okText: 'Delete' }))) return;
   list = list.filter(function(c){ return c !== name; });
   saveGalCategories(list);
   selectGalCategory(list[0] || '');
@@ -5654,8 +5706,8 @@ function toggleGalleryPhoto(i) {
   g.photos[i].active = g.photos[i].active === false ? true : false;
   setGalleryData(g); renderGalleryList();
 }
-function deleteGalleryPhoto(i) {
-  if (!confirm('ဒီပုံ ဖျက်မလား?')) return;
+async function deleteGalleryPhoto(i) {
+  if (!(await confirmDialog('ဒီပုံ ဖျက်မလား?', { title: 'Gallery ပုံ ဖျက်မယ်', okText: 'Delete' }))) return;
   var g = getGalleryData();
   g.photos.splice(i, 1);
   setGalleryData(g); renderGalleryList(); try{renderOverview();}catch(e){} toast('ဖျက်ပြီး');
@@ -5786,13 +5838,13 @@ function renamePostCategory() {
   if (typeof renderPostsList === 'function') renderPostsList();
   toast('✓ ပြင်ပြီး: ' + oldName + ' → ' + newName);
 }
-function deletePostCategory() {
+async function deletePostCategory() {
   var sel = $('admin-post-category');
   var name = sel && sel.value;
   if (!name) { toast('ဖျက်မယ့် Category ရွေးပါ', true); return; }
   var list = getPostCategories();
   if (list.length <= 1) { toast('နောက်ဆုံး Category ဖျက်လို့မရ', true); return; }
-  if (!confirm('"' + name + '" ကို ဖျက်မလား?')) return;
+  if (!(await confirmDialog('"' + name + '" ကို ဖျက်မလား?', { title: 'ဖျက်မယ်', okText: 'Delete' }))) return;
   list = list.filter(function(c){ return c !== name; });
   savePostCategories(list);
   fillPostCategorySelect(list[0]);
@@ -5890,8 +5942,8 @@ function cancelPostEdit() {
   $('post-save-button').innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i>Publish Post';
   $('post-cancel-button').classList.add('hidden');
 }
-function deletePost(id) {
-  if (!confirm('ဒီ Post ကို ဖျက်မှာ သေချာပါသလား?')) return;
+async function deletePost(id) {
+  if (!(await confirmDialog('ဒီ Post ကို ဖျက်မှာ သေချာပါသလား?', { title: 'Post ဖျက်မယ်', okText: 'Delete' }))) return;
   write('hh_posts', getPosts().filter(p => String(p.id) !== String(id)));
   renderPostsList(); renderOverview(); toast('Post ဖျက်ပြီးပါပြီ။');
 }
@@ -6102,9 +6154,9 @@ function moveHomeSection(i, d) {
   [a[i], a[n]] = [a[n], a[i]];
   write('hh_home_sections', a); renderHomeSectionsList();
 }
-function deleteHomeSection(i) {
+async function deleteHomeSection(i) {
   const a = getHomeSections(), s = a[i];
-  if (!s || !confirm('ဒီ Row ကို ဖျက်မှာ သေချာပါသလား?')) return;
+  if (!s || !(await confirmDialog('ဒီ Row ကို ဖျက်မှာ သေချာပါသလား?', { title: 'Row ဖျက်မယ်', okText: 'Delete' }))) return;
   a.splice(i, 1); write('hh_home_sections', a);
   const posts = getPosts();
   posts.forEach(p => { if (String(p.sectionId) === String(s.id)) p.sectionId = 'latest'; });
@@ -6191,17 +6243,17 @@ function saveThemePreset() {
   renderPresetList();
   toast('Theme "' + name + '" သိမ်းပြီးပါပြီ။');
 }
-function loadThemePreset(id) {
+async function loadThemePreset(id) {
   const p = getPresets().find(x => String(x.id) === String(id));
   if (!p) return alert('Theme မတွေ့ပါ။');
-  if (!confirm('"' + p.name + '" ကို Load မယ် — လက်ရှိ layout အချို့ ပြောင်းသွားမယ်။')) return;
+  if (!(await confirmDialog('"' + p.name + '" ကို Load မယ် — လက်ရှိ layout အချို့ ပြောင်းသွားမယ်။', { title: 'Theme Load', okText: 'Load', tone: 'green', icon: 'fa-download' }))) return;
   const keys = ['hh_settings','hh_hero','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social'];
   keys.forEach(k => { if (p[k] != null) write(k, p[k]); });
   loadAll();
   toast('Theme "' + p.name + '" Load ပြီးပါပြီ။');
 }
-function deleteThemePreset(id) {
-  if (!confirm('ဒီ Theme ကို ဖျက်မလား?')) return;
+async function deleteThemePreset(id) {
+  if (!(await confirmDialog('ဒီ Theme ကို ဖျက်မလား?', { title: 'Theme ဖျက်မယ်', okText: 'Delete' }))) return;
   write('hh_theme_presets', getPresets().filter(x => String(x.id) !== String(id)));
   renderPresetList();
   toast('Theme ဖျက်ပြီးပါပြီ။');
@@ -6263,7 +6315,7 @@ async function importSiteBackup(input) {
   try {
     var file = input && input.files && input.files[0];
     if (!file) return;
-    if (!confirm('Backup ဖိုင်က ဒေတာတွေနဲ့ လက်ရှိ admin ဒေတာကို အစားထိုးမယ်။ သေချာပါသလား?')) {
+    if (!(await confirmDialog('Backup ဖိုင်က ဒေတာတွေနဲ့ လက်ရှိ admin ဒေတာကို အစားထိုးမယ်။ သေချာပါသလား?', { title: 'Backup Restore', okText: 'Restore', tone: 'amber', icon: 'fa-upload' }))) {
       input.value = '';
       return;
     }
@@ -6300,6 +6352,61 @@ async function importSiteBackup(input) {
 window.exportSiteBackup = exportSiteBackup;
 window.importSiteBackup = importSiteBackup;
 
+
+/* Custom confirm modal (replaces browser confirm) */
+var _hhConfirmResolver = null;
+function confirmDialog(message, options) {
+  options = options || {};
+  return new Promise(function(resolve) {
+    var modal = document.getElementById('hh-confirm-modal');
+    var titleEl = document.getElementById('hh-confirm-title');
+    var msgEl = document.getElementById('hh-confirm-msg');
+    var okBtn = document.getElementById('hh-confirm-ok');
+    var cancelBtn = document.getElementById('hh-confirm-cancel');
+    var iconEl = document.getElementById('hh-confirm-icon');
+    if (!modal || !okBtn) {
+      resolve(window.confirm(message));
+      return;
+    }
+    _hhConfirmResolver = resolve;
+    titleEl.textContent = options.title || 'သေချာပါသလား?';
+    msgEl.textContent = message || '';
+    okBtn.textContent = options.okText || 'Delete';
+    cancelBtn.textContent = options.cancelText || 'Cancel';
+    okBtn.className = '';
+    if (options.tone === 'green') okBtn.className = 'ok-green';
+    else if (options.tone === 'amber') okBtn.className = 'ok-amber';
+    if (iconEl) {
+      var ic = options.icon || 'fa-trash-can';
+      iconEl.innerHTML = '<i class="fa-solid ' + ic + '"></i>';
+      if (options.tone === 'green') {
+        iconEl.style.background = 'rgba(16,185,129,.12)';
+        iconEl.style.color = '#6ee7b7';
+      } else if (options.tone === 'amber') {
+        iconEl.style.background = 'rgba(245,158,11,.12)';
+        iconEl.style.color = '#fcd34d';
+      } else {
+        iconEl.style.background = 'rgba(239,68,68,.12)';
+        iconEl.style.color = '#fca5a5';
+      }
+    }
+    modal.classList.add('open');
+    function finish(val) {
+      modal.classList.remove('open');
+      okBtn.onclick = null;
+      cancelBtn.onclick = null;
+      modal.onclick = null;
+      _hhConfirmResolver = null;
+      resolve(val);
+    }
+    okBtn.onclick = function() { finish(true); };
+    cancelBtn.onclick = function() { finish(false); };
+    modal.onclick = function(e) { if (e.target === modal) finish(false); };
+    setTimeout(function() { try { okBtn.focus(); } catch (e) {} }, 30);
+  });
+}
+window.confirmDialog = confirmDialog;
+
 function toast(message, isError) {
   let t = $('toast');
   if (!t) {
@@ -6318,5 +6425,18 @@ function toast(message, isError) {
   window.toastTimer = setTimeout(function() { t.style.display = 'none'; }, isError ? 6000 : 3500);
 }
 </script>
+
+<div id="hh-confirm-modal" role="dialog" aria-modal="true">
+  <div id="hh-confirm-box">
+    <div id="hh-confirm-icon"><i class="fa-solid fa-trash-can"></i></div>
+    <h3 id="hh-confirm-title">သေချာပါသလား?</h3>
+    <p id="hh-confirm-msg"></p>
+    <div id="hh-confirm-actions">
+      <button type="button" id="hh-confirm-cancel">Cancel</button>
+      <button type="button" id="hh-confirm-ok">Delete</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
