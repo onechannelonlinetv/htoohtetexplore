@@ -497,10 +497,7 @@
 
   /* Header: hide on scroll-down / show on scroll-up or idle */
   .site-header {
-    transition: transform .38s cubic-bezier(.22, 1, .36, 1),
-                background .25s ease,
-                box-shadow .25s ease,
-                border-color .25s ease;
+    transition: transform .5s cubic-bezier(.25, .8, .25, 1);
     will-change: transform;
   }
   .site-header.is-hidden {
@@ -2446,56 +2443,51 @@ function initCompactHeader() {
   var header = document.getElementById('site-header');
   if (!header) return;
   var lastY = window.scrollY || 0;
-  var hidden = false;
-  var idleTimer = null;
+  var ticking = false;
   var deltaAcc = 0;
-  var IDLE_MS = 280; /* လွှတ် / scroll ရပ် → ပြန်ပေါ် */
 
   function show() {
-    hidden = false;
     header.classList.remove('is-hidden');
   }
   function hide() {
-    if ((window.scrollY || 0) < 12) { show(); return; }
-    hidden = true;
-    header.classList.add('is-hidden');
-  }
-  function scheduleShow() {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(function() {
+    if ((window.scrollY || 0) < 12) {
       show();
-      deltaAcc = 0;
-    }, IDLE_MS);
-  }
-  function onScroll() {
-    var y = window.scrollY || 0;
-    var dy = y - lastY;
-    lastY = y;
-
-    if (y < 12) {
-      clearTimeout(idleTimer);
-      show();
-      deltaAcc = 0;
       return;
     }
+    header.classList.add('is-hidden');
+  }
 
-    deltaAcc += dy;
-    if (deltaAcc > 6) {
-      hide();
-      deltaAcc = 0;
-    } else if (deltaAcc < -6) {
-      show();
-      deltaAcc = 0;
-    }
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function() {
+      ticking = false;
+      var y = window.scrollY || 0;
+      var dy = y - lastY;
+      lastY = y;
 
-    /* ဆွဲနေစဉ် ပျောက် · လွှတ် / ရပ်ရင် ပြန်ပေါ် */
-    scheduleShow();
+      // ထိပ်မှာ အမြဲပြ
+      if (y < 12) {
+        deltaAcc = 0;
+        show();
+        return;
+      }
+
+      deltaAcc += dy;
+      // အောက်ဆွဲ → ပျောက်
+      if (deltaAcc > 10) {
+        hide();
+        deltaAcc = 0;
+      }
+      // အပေါ်ဆွဲမှ → ပေါ် (လွှတ်ရုံနဲ့ မပေါ်)
+      else if (deltaAcc < -10) {
+        show();
+        deltaAcc = 0;
+      }
+    });
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('touchend', function() { scheduleShow(); }, { passive: true });
-  window.addEventListener('touchcancel', function() { scheduleShow(); }, { passive: true });
-  window.addEventListener('wheel', function() { scheduleShow(); }, { passive: true });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
