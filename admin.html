@@ -2297,7 +2297,21 @@ function showView(name, button) {
   $('page-title').textContent = titles[name] || 'Overview';
   $('mobile-nav').classList.add('hidden');
   if (name === 'sections') renderHomeSectionsList();
-  if (name === 'gallery') { loadGalleryForm(); renderGallerySlots(); renderGalleryList(); }
+  if (name === 'gallery') {
+    loadGalleryForm();
+    renderGallerySlots();
+    renderGalleryList();
+    // refresh from Firebase so list is accurate
+    if (adminUser && adminDb) {
+      adminDb.ref('siteData/hh_gallery').once('value').then(function(snap) {
+        var g = snap.val();
+        if (g && typeof g === 'object') {
+          try { originalSetItem('hh_gallery', JSON.stringify(g)); } catch (e) {}
+          renderGalleryList();
+        }
+      }).catch(function(){});
+    }
+  }
   if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
   if (name === 'menu') renderMenuList();
   if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
@@ -2310,7 +2324,7 @@ function showView(name, button) {
 }
 
 function loadAll() {
-  $('footer-year').textContent = new Date().getFullYear();
+  if ($('footer-year')) $('footer-year').textContent = new Date().getFullYear();
 
   const s = read('hh_settings', {});
   $('set-brand-name').value = s.brandName || 'HTOO HTET';
@@ -4598,44 +4612,50 @@ function onGalSlotFile(i, input) {
   var file = input.files && input.files[0];
   if (!file) return;
   if (!file.type || file.type.indexOf('image/') !== 0) {
-    toast('Image ဖိုင်သာ ရွေးပါ');
+    toast('Image ဖိုင်သာ ရွေးပါ', true);
     input.value = '';
     return;
   }
-  toast('ပုံ တင်နေသည်…');
+  if (!adminUser || !adminStorage || !adminDb) {
+    toast('Login မဝင်ရသေးပါ — အရင် Login ဝင်ပါ', true);
+    input.value = '';
+    return;
+  }
+  toast('ပုံ တင်နေသည်… စောင့်ပါ');
   (async function() {
     try {
       var blob = file;
       try {
         if (typeof compressImageFile === 'function') blob = await compressImageFile(file, 1200, 0.78);
       } catch (e) {}
-      _galSlotBlobs[i] = blob;
-      var dataUrl = await fileToDataURL(blob);
-      applyGalSlotImg(i, dataUrl);
+      // preview
+      try {
+        var previewUrl = await fileToDataURL(blob);
+        applyGalSlotImg(i, previewUrl);
+      } catch (e) {}
 
-      var finalUrl = dataUrl;
-      if (adminUser && adminStorage) {
-        try {
-          finalUrl = await uploadBlobToStorage(blob, i);
-          applyGalSlotImg(i, finalUrl);
-          delete _galSlotBlobs[i];
-        } catch (e) {
-          console.warn('storage', e);
-          // keep dataUrl
-        }
+      // REQUIRED: Firebase Storage
+      var httpsUrl;
+      try {
+        httpsUrl = await uploadBlobToStorage(blob, i);
+      } catch (e) {
+        console.error(e);
+        toast('Storage တင်မရ: ' + (e.message || e) + ' — Firebase Storage Rules စစ်ပါ', true);
+        input.value = '';
+        return;
       }
+      applyGalSlotImg(i, httpsUrl);
 
-      // AUTO-SAVE into Gallery Photos immediately
-      var ok = await saveOneGalleryImage(finalUrl, i);
+      var ok = await saveOneGalleryImage(httpsUrl, i);
       if (ok) {
         clearGalSlot(i);
         toast('✓ ပုံ Gallery ထဲ သိမ်းပြီး');
       } else {
-        toast('ကွက်ထဲ ရောက်ပါပြီ — Save Photos ထပ်နှိပ်ပါ');
+        toast('Firebase သိမ်းမရ — Rules / Login စစ်ပါ', true);
       }
     } catch (err) {
       console.error(err);
-      toast('Upload မရ: ' + (err.message || err));
+      toast('Upload မရ: ' + (err.message || err), true);
     }
     input.value = '';
   })();
@@ -4670,7 +4690,7 @@ function collectGalSlotKeys() {
     var im = slot.querySelector('img.gal-slot-img') || slot.querySelector('img');
     if (im) {
       var src = im.getAttribute('src') || im.src || '';
-      if (src) {
+      if (src && src.indexOf('http') === 0) {
         _galSlotImages[i] = src;
         keys.push(i);
       }
@@ -4682,18 +4702,40 @@ function collectGalSlotKeys() {
 
 async function uploadBlobToStorage(blob, idx) {
   if (!adminStorage) throw new Error('Storage မရ');
-  var ref = adminStorage.ref('uploads/gallery_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).slice(2, 6) + '.jpg');
+  if (!adminUser) throw new Error('Login မဝင်ရသေး');
+  var path = 'uploads/gallery_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).slice(2, 6) + '.jpg';
+  var ref = adminStorage.ref(path);
   var snap = await Promise.race([
     ref.put(blob, { contentType: 'image/jpeg' }),
-    new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Storage timeout')); }, 25000); })
+    new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Storage timeout 25s')); }, 25000); })
   ]);
-  return await snap.ref.getDownloadURL();
+  var url = await snap.ref.getDownloadURL();
+  if (!url) throw new Error('Download URL မရ');
+  return url;
 }
 
-/** Save one image URL into hh_gallery and refresh list. Returns true on success. */
 async function saveOneGalleryImage(url, slotIndex) {
-  if (!url) return false;
-  var g = getGalleryData();
+  if (!url || String(url).indexOf('http') !== 0) {
+    toast('HTTPS URL မရပါ — Storage အရင်တင်ရမယ်', true);
+    return false;
+  }
+  if (!adminUser || !adminDb) {
+    toast('Login / Database မရပါ', true);
+    return false;
+  }
+
+  // Read latest from Firebase first so we don't overwrite other devices
+  var g;
+  try {
+    var snap = await adminDb.ref('siteData/hh_gallery').once('value');
+    g = snap.val();
+  } catch (e) {
+    console.warn(e);
+    g = null;
+  }
+  if (!g || typeof g !== 'object') {
+    g = getGalleryData();
+  }
   if (!g || typeof g !== 'object') {
     g = {
       active: true,
@@ -4705,6 +4747,12 @@ async function saveOneGalleryImage(url, slotIndex) {
     };
   }
   if (!Array.isArray(g.photos)) g.photos = [];
+
+  // Drop any leftover data: URLs to keep payload small
+  g.photos = g.photos.filter(function(p) {
+    return p && p.img && String(p.img).indexOf('http') === 0;
+  });
+
   var catEl = document.getElementById('gal-default-cat');
   var cat = (catEl && catEl.value || '').trim();
   var capEl = document.getElementById('gal-slot-cap-' + slotIndex);
@@ -4719,30 +4767,27 @@ async function saveOneGalleryImage(url, slotIndex) {
   g.photos.forEach(function(p, i) { p.order = i; });
   g.active = true;
 
-  // localStorage always
+  // Write Firebase FIRST (source of truth)
   try {
-    if (typeof write === 'function') write('hh_gallery', g);
-    else localStorage.setItem('hh_gallery', JSON.stringify(g));
+    await Promise.race([
+      adminDb.ref('siteData/hh_gallery').set(g),
+      new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Firebase timeout')); }, 20000); })
+    ]);
   } catch (e) {
-    try { originalSetItem('hh_gallery', JSON.stringify(g)); } catch (e2) {
-      console.error(e2);
-      return false;
-    }
+    console.error(e);
+    toast('Firebase သိမ်းမရ: ' + (e.message || e), true);
+    return false;
   }
 
-  // Firebase direct
-  if (adminDb && adminUser) {
-    try {
-      await Promise.race([
-        adminDb.ref('siteData/hh_gallery').set(g),
-        new Promise(function(_, rej) { setTimeout(function() { rej(new Error('timeout')); }, 15000); })
-      ]);
-    } catch (e) {
-      console.warn('firebase gallery', e);
-    }
+  // Mirror local
+  try {
+    originalSetItem('hh_gallery', JSON.stringify(g));
+  } catch (e) {
+    console.warn('local', e);
   }
 
   renderGalleryList();
+  try { if (typeof renderOverview === 'function') renderOverview(); } catch (e) {}
   return true;
 }
 
@@ -4751,58 +4796,55 @@ async function commitAllGalSlots() {
   try {
     var keys = collectGalSlotKeys();
     if (!keys.length) {
-      toast('ပုံတင်ထားတဲ့ ကွက် မရှိသေးပါ');
+      toast('ပုံတင်ထားတဲ့ ကွက် မရှိသေးပါ (သို့) Storage URL မရသေး', true);
+      return false;
+    }
+    if (!adminUser) {
+      toast('Login အရင် ဝင်ပါ', true);
       return false;
     }
     if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
     toast(keys.length + ' ပုံ သိမ်းနေသည်…');
-
     var added = 0;
     for (var k = 0; k < keys.length; k++) {
       var idx = keys[k];
       var url = _galSlotImages[idx];
-      if (!url) continue;
-
-      if (String(url).indexOf('http') !== 0) {
+      if (!url || String(url).indexOf('http') !== 0) {
+        // try upload from blob
         try {
           var blob = _galSlotBlobs[idx];
-          if (!blob && String(url).indexOf('data:') === 0) {
-            var res = await fetch(url);
-            blob = await res.blob();
-          }
-          if (blob && adminUser && adminStorage) {
-            url = await uploadBlobToStorage(blob, idx);
-          }
+          if (!blob) continue;
+          url = await uploadBlobToStorage(blob, idx);
         } catch (e) {
-          console.warn(e);
+          toast('ကွက် ' + (idx + 1) + ' Storage မရ', true);
+          continue;
         }
       }
-
       var ok = await saveOneGalleryImage(url, idx);
       if (ok) {
         added++;
         clearGalSlot(idx);
       }
     }
-
     _galSlotImages = {};
     _galSlotBlobs = {};
     _galSlotCount = 4;
     renderGallerySlots();
     renderGalleryList();
-
     if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-    if (added) toast('✓ ' + added + ' ပုံ Gallery Photos ထဲ သိမ်းပြီး');
-    else toast('သိမ်းမရပါ — Login ဝင်ထားကြောင်း စစ်ပါ');
+    if (added) toast('✓ ' + added + ' ပုံ သိမ်းပြီး');
+    else toast('မသိမ်းနိုင်ပါ — Login / Storage Rules စစ်ပါ', true);
     return added > 0;
   } catch (err) {
     console.error(err);
     if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-    toast('Save မရ: ' + (err.message || err));
+    toast('Save မရ: ' + (err.message || err), true);
     return false;
   }
 }
 window.commitAllGalSlots = commitAllGalSlots;
+window.saveOneGalleryImage = saveOneGalleryImage;
+
 window.saveOneGalleryImage = saveOneGalleryImage;
 
 
@@ -5273,18 +5315,22 @@ function renderPresetList() {
   }).join('');
 }
 
-function toast(message) {
+function toast(message, isError) {
   let t = $('toast');
   if (!t) {
     t = document.createElement('div');
     t.id = 'toast';
-    t.className = 'fixed bottom-5 right-5 z-50 max-w-sm rounded-xl border border-emerald-500/30 bg-slate-900 px-4 py-3 text-sm font-semibold text-emerald-200 shadow-2xl';
+    t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99999;max-width:min(92vw,420px);padding:12px 18px;border-radius:12px;font-size:14px;font-weight:700;box-shadow:0 12px 40px rgba(0,0,0,.5);text-align:center;';
     document.body.appendChild(t);
   }
-  t.textContent = message;
+  t.textContent = message || '';
+  t.style.background = isError ? 'rgba(127,29,29,0.96)' : 'rgba(6,40,30,0.96)';
+  t.style.color = isError ? '#fecaca' : '#a7f3d0';
+  t.style.border = isError ? '1px solid rgba(248,113,113,0.5)' : '1px solid rgba(52,211,153,0.4)';
   t.classList.remove('hidden');
+  t.style.display = 'block';
   clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => t.classList.add('hidden'), 2800);
+  window.toastTimer = setTimeout(function() { t.style.display = 'none'; }, isError ? 6000 : 3500);
 }
 </script>
 </body>
