@@ -497,7 +497,7 @@
 
   /* Header: hide on scroll-down / show on scroll-up or idle */
   .site-header {
-    transition: transform .32s cubic-bezier(.22, 1, .36, 1),
+    transition: transform .38s cubic-bezier(.22, 1, .36, 1),
                 background .25s ease,
                 box-shadow .25s ease,
                 border-color .25s ease;
@@ -2449,55 +2449,53 @@ function initCompactHeader() {
   var hidden = false;
   var idleTimer = null;
   var deltaAcc = 0;
+  var IDLE_MS = 280; /* လွှတ် / scroll ရပ် → ပြန်ပေါ် */
 
   function show() {
-    if (!hidden && !header.classList.contains('is-hidden')) return;
     hidden = false;
     header.classList.remove('is-hidden');
   }
   function hide() {
-    if (window.scrollY < 16) { show(); return; }
-    if (hidden) return;
+    if ((window.scrollY || 0) < 12) { show(); return; }
     hidden = true;
     header.classList.add('is-hidden');
+  }
+  function scheduleShow() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function() {
+      show();
+      deltaAcc = 0;
+    }, IDLE_MS);
   }
   function onScroll() {
     var y = window.scrollY || 0;
     var dy = y - lastY;
     lastY = y;
 
-    // Always show at very top
-    if (y < 16) {
+    if (y < 12) {
+      clearTimeout(idleTimer);
       show();
       deltaAcc = 0;
-      clearTimeout(idleTimer);
       return;
     }
 
-    // Accumulate small wheel steps so trackpad feels natural
     deltaAcc += dy;
-    if (deltaAcc > 8) {
+    if (deltaAcc > 6) {
       hide();
       deltaAcc = 0;
-    } else if (deltaAcc < -8) {
+    } else if (deltaAcc < -6) {
       show();
       deltaAcc = 0;
     }
 
-    // When user stops scrolling / releases finger → show again
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(function() {
-      show();
-      deltaAcc = 0;
-    }, 480);
+    /* ဆွဲနေစဉ် ပျောက် · လွှတ် / ရပ်ရင် ပြန်ပေါ် */
+    scheduleShow();
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
-  // Touch end on mobile: show shortly after finger lifts
-  window.addEventListener('touchend', function() {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(show, 220);
-  }, { passive: true });
+  window.addEventListener('touchend', function() { scheduleShow(); }, { passive: true });
+  window.addEventListener('touchcancel', function() { scheduleShow(); }, { passive: true });
+  window.addEventListener('wheel', function() { scheduleShow(); }, { passive: true });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
