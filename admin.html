@@ -661,39 +661,73 @@ main > div {
 
       <!-- PROUD SPONSORS -->
       <section id="view-proud" class="view space-y-5">
-        <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ကြည့် · logo Upload</p></div>
+        <div>
+          <h2 class="text-xl font-black">Proud Sponsors</h2>
+          <p class="mt-1 text-sm text-slate-400">၁) Logo Upload → Preview မှာ နေရာ/အရွယ် ချိန် → ၂) Add နှိပ် · ရှိပြီးသားကိုလည်း Preview မှာ drag လို့ရ</p>
+        </div>
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="label">Section ခေါင်းစဉ် (Live site မှာ ပေါ်မယ်)</label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="md:col-span-2">
+              <label class="label">Section ခေါင်းစဉ် (Live site)</label>
               <input id="proud-section-title" class="field" placeholder="Our Proud Sponsors" value="Our Proud Sponsors" oninput="saveProudMeta(); updateProudPreview();">
             </div>
             <div>
-              <label class="label">Logo Frame အမြင့် (px) — ဘယ်ပုံမဆို ဒီ frame ထဲ ဝင်မယ်</label>
+              <label class="label">Bar အမြင့်</label>
               <div class="flex items-center gap-2">
-                <input id="proud-logo-h" type="range" min="28" max="96" value="48" class="w-full" oninput="if($('val-proud-logo-h'))$('val-proud-logo-h').textContent=this.value+'px'; saveProudMeta(); updateProudPreview();">
+                <input id="proud-frame-h" type="range" min="56" max="180" value="80" class="w-full" oninput="if($('val-proud-frame-h'))$('val-proud-frame-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
+                <span id="val-proud-frame-h" class="range-val">80px</span>
+              </div>
+            </div>
+            <div>
+              <label class="label">Logo အရွယ် (default)</label>
+              <div class="flex items-center gap-2">
+                <input id="proud-logo-h" type="range" min="24" max="100" value="48" class="w-full" oninput="if($('val-proud-logo-h'))$('val-proud-logo-h').textContent=this.value+'px';saveProudMeta();updateProudPreview();">
                 <span id="val-proud-logo-h" class="range-val">48px</span>
               </div>
             </div>
+            <div class="md:col-span-2 flex flex-wrap items-end gap-2">
+              <button type="button" class="btn btn-muted text-xs" onclick="applyProudLayout('left')">စာ ဘယ် · Logo ညာ</button>
+              <button type="button" class="btn btn-muted text-xs" onclick="applyProudLayout('center')">အလယ်စု</button>
+              <button type="button" class="btn btn-muted text-xs" onclick="applyProudLayout('spread')">ညီတူ ခွဲ</button>
+            </div>
           </div>
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Proud Bar</span>
-            <p id="proud-prev-title" class="text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/80 mt-2 mb-2">Our Proud Sponsors</p>
-            <div id="proud-preview-bar" class="flex flex-wrap items-center gap-4 min-h-[48px]"></div>
+
+          <!-- LIVE PREVIEW: drag title + logos here -->
+          <div class="rounded-xl border-2 border-dashed border-emerald-600/50 bg-[#050a12] p-3">
+            <div class="flex justify-between items-center mb-2 gap-2">
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · mouse ဖိပြီး ဆွဲ / ထောင့် resize</span>
+              <span class="text-[10px] text-slate-500">Add မနှိပ်ခင် staging logo ပါ ချိန်လို့ရ</span>
+            </div>
+            <div id="proud-live-frame" class="relative w-full rounded-lg border border-slate-600 bg-[#0a1220] overflow-hidden select-none" style="height:80px;touch-action:none">
+              <p id="proud-prev-title" class="absolute z-30 text-[11px] sm:text-xs font-bold uppercase tracking-[0.12em] text-emerald-400 cursor-grab px-1 whitespace-nowrap" style="left:3%;top:36%;">Our Proud Sponsors</p>
+              <div id="proud-preview-bar" class="absolute inset-0 z-20"></div>
+              <div id="proud-staging" class="absolute inset-0 z-25 pointer-events-none"></div>
+            </div>
           </div>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
-            <div><label class="label">Name *</label><input id="proud-name" class="field" placeholder="AYA Bank"></div>
+
+          <!-- Add form -->
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <label class="label">Name *</label>
+              <input id="proud-name" class="field" placeholder="vezoom" oninput="updateProudStaging()">
+            </div>
             <div>
               <label class="label">Logo Upload</label>
               <div class="flex gap-1">
-                <input id="proud-logo" class="field flex-1" placeholder="Upload ခလုတ်နှိပ်ပါ">
-                <label class="btn btn-muted cursor-pointer px-3"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this, 'proud-logo')"></label>
+                <input id="proud-logo" class="field flex-1" placeholder="Upload နှိပ်ပါ" oninput="updateProudStaging()">
+                <label class="btn btn-muted cursor-pointer px-3"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this,'proud-logo');setTimeout(updateProudStaging,400)"></label>
               </div>
               <div id="proud-logo-preview" class="mt-2"></div>
             </div>
-            <div><label class="label">Link</label><input id="proud-link" class="field" placeholder="https://..."></div>
-            <div class="flex items-end"><button type="button" onclick="addProud()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add</button></div>
+            <div>
+              <label class="label">Link</label>
+              <input id="proud-link" class="field" placeholder="https://...">
+            </div>
+            <div class="flex items-end">
+              <button type="button" onclick="addProud()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add (Preview အတိုင်း သိမ်း)</button>
+            </div>
           </div>
+          <p class="tiny">Upload ပြီး Preview ထဲ အနီ/စိမ်း frame နဲ့ ပေါ်မယ် → drag ချိန် → Add နှိပ်</p>
           <div id="proud-list" class="space-y-2"></div>
         </div>
       </section>
@@ -3937,99 +3971,145 @@ function updateProudPreview() {
   const bar = $('proud-preview-bar');
   const frame = $('proud-live-frame');
   if (!bar) return;
-  const m = typeof getProudMeta === 'function' ? getProudMeta() : {};
-  const logoH = m.logoH || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  const frameH = m.frameH || parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '72', 10) || 72;
-  const titleX = m.titleX != null ? m.titleX : 4;
-  const titleY = m.titleY != null ? m.titleY : 35;
+  const m = (typeof getProudMeta === 'function') ? getProudMeta() : {};
+  const logoH = Number(m.logoH) || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
+  const frameH = Number(m.frameH) || parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '80', 10) || 80;
   if (frame) frame.style.height = frameH + 'px';
   if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = frameH + 'px';
   if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = logoH + 'px';
   const titleEl = $('proud-prev-title');
   if (titleEl) {
-    titleEl.textContent = (($('proud-section-title') && $('proud-section-title').value) || m.title || 'Our Proud Sponsors');
-    titleEl.style.left = titleX + '%';
-    titleEl.style.top = titleY + '%';
-    titleEl.style.cursor = 'grab';
+    titleEl.textContent = (($('proud-section-title') && $('proud-section-title').value) || m.title || 'Our Proud Sponsors').trim();
+    titleEl.style.left = (m.titleX != null ? m.titleX : 3) + '%';
+    titleEl.style.top = (m.titleY != null ? m.titleY : 36) + '%';
   }
-  const items = getProud().filter(p => p.active !== false);
-  if (!items.length) {
-    bar.innerHTML = '<span class="absolute text-xs text-slate-500" style="left:40%;top:40%">Sponsor မရှိသေး — အောက်က Add နှိပ်ပါ</span>';
-    if (typeof initProudDrag === 'function') initProudDrag();
-    return;
-  }
-  // Place logos with stored x/y/size or auto-layout
+  const items = getProud().filter(function(p) { return p.active !== false; });
   bar.innerHTML = items.map(function(p, idx) {
     const all = getProud();
     const realIdx = all.findIndex(function(x) { return String(x.id) === String(p.id); });
     const sz = p.size || logoH;
-    const x = p.x != null ? p.x : (25 + idx * 18);
-    const y = p.y != null ? p.y : 20;
+    const x = p.x != null ? p.x : (28 + idx * 16);
+    const y = p.y != null ? p.y : 18;
     if (p.logo) {
-      return '<div class="proud-logo-item absolute z-10 group" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;cursor:grab">' +
-        '<div class="w-full h-full flex items-center justify-center rounded-lg bg-white/5 border border-slate-600/50 px-1">' +
-        '<img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="max-w-full max-h-full object-contain pointer-events-none" draggable="false">' +
-        '</div>' +
-        '<span class="sp-resize-handle proud-resize" title="Resize"></span>' +
-        '</div>';
+      return '<div class="proud-logo-item absolute" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;cursor:grab;z-index:20">' +
+        '<div class="w-full h-full flex items-center justify-center rounded-md bg-white/10 border border-emerald-600/40">' +
+        '<img src="' + safe(p.logo) + '" alt="" class="max-w-full max-h-full object-contain p-0.5" draggable="false">' +
+        '</div><span class="sp-resize-handle proud-resize"></span></div>';
     }
-    return '<span class="proud-logo-item absolute z-10 text-sm font-bold text-white/80 cursor-grab px-2" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%">' + safe(p.name) + '</span>';
+    return '<span class="proud-logo-item absolute text-xs font-bold text-white/90 cursor-grab px-1" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;z-index:20">' + safe(p.name) + '</span>';
   }).join('');
-  if (typeof initProudDrag === 'function') initProudDrag();
+  if (typeof updateProudStaging === 'function') updateProudStaging();
+  if (typeof initProudDrag === 'function') setTimeout(initProudDrag, 30);
+}
+
+/* Staging = not yet Added logo/name — adjustable in preview before Add */
+window._proudStaging = window._proudStaging || { x: 55, y: 20, size: 48 };
+function updateProudStaging() {
+  const box = $('proud-staging');
+  if (!box) return;
+  const name = (($('proud-name') && $('proud-name').value) || '').trim();
+  let logo = '';
+  if (typeof imageFieldValue === 'function') logo = imageFieldValue('proud-logo');
+  if (!logo && $('proud-logo')) logo = ($('proud-logo').value || '').trim();
+  if (!name && !logo) { box.innerHTML = ''; return; }
+  const st = window._proudStaging;
+  const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
+  if (!st.size) st.size = logoH;
+  let html = '';
+  if (logo && logo.indexOf('blob:') !== 0) {
+    html = '<div id="proud-stage-item" class="absolute" style="left:' + st.x + '%;top:' + st.y + '%;width:' + st.size + 'px;height:' + st.size + 'px;cursor:grab;z-index:40;pointer-events:auto">' +
+      '<div class="w-full h-full flex items-center justify-center rounded-md bg-amber-500/20 border-2 border-amber-400">' +
+      '<img src="' + safe(logo) + '" class="max-w-full max-h-full object-contain p-0.5" draggable="false">' +
+      '</div><span class="sp-resize-handle proud-stage-resize"></span>' +
+      '<span class="absolute -top-4 left-0 text-[9px] text-amber-300 font-bold whitespace-nowrap">STAGING (Add မနှိပ်ရသေး)</span></div>';
+  } else if (name) {
+    html = '<span id="proud-stage-item" class="absolute text-xs font-bold text-amber-300 cursor-grab px-1 border border-amber-500/50 rounded" style="left:' + st.x + '%;top:' + st.y + '%;z-index:40;pointer-events:auto">' + safe(name) + ' *</span>';
+  }
+  box.innerHTML = html;
+  box.style.pointerEvents = 'none';
+  const item = $('proud-stage-item');
+  if (item) {
+    item.style.pointerEvents = 'auto';
+    if (typeof initProudStagingDrag === 'function') initProudStagingDrag();
+  }
+}
+
+function initProudStagingDrag() {
+  const frame = $('proud-live-frame');
+  const el = $('proud-stage-item');
+  if (!frame || !el || el._bound) return;
+  el._bound = true;
+  el.addEventListener('mousedown', function(e) {
+    if (e.target.classList && e.target.classList.contains('proud-stage-resize')) return;
+    e.preventDefault();
+    const rect = frame.getBoundingClientRect();
+    function move(ev) {
+      const x = Math.max(0, Math.min(90, ((ev.clientX - rect.left) / rect.width) * 100));
+      const y = Math.max(0, Math.min(80, ((ev.clientY - rect.top) / rect.height) * 100));
+      el.style.left = x + '%'; el.style.top = y + '%';
+      window._proudStaging.x = x; window._proudStaging.y = y;
+    }
+    function up() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+  });
+  const h = el.querySelector('.proud-stage-resize');
+  if (h && !h._bound) {
+    h._bound = true;
+    h.addEventListener('mousedown', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      const startX = e.clientX, startW = el.offsetWidth;
+      function move(ev) {
+        const nw = Math.max(24, Math.min(120, startW + (ev.clientX - startX)));
+        el.style.width = nw + 'px'; el.style.height = nw + 'px';
+        window._proudStaging.size = nw;
+      }
+      function up() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    });
+  }
 }
 
 function applyProudLayout(mode) {
   const items = getProud();
-  const active = items.filter(p => p.active !== false);
+  const active = items.filter(function(p) { return p.active !== false; });
   const n = active.length || 1;
   const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
   if (mode === 'left') {
     saveProudMetaFields({ titleX: 3, titleY: 38 });
     active.forEach(function(p, i) {
-      const idx = items.findIndex(x => String(x.id) === String(p.id));
-      if (idx >= 0) {
-        items[idx].x = 35 + i * 12;
-        items[idx].y = 22;
-        items[idx].size = logoH;
-      }
+      const idx = items.findIndex(function(x) { return String(x.id) === String(p.id); });
+      if (idx >= 0) { items[idx].x = 32 + i * 14; items[idx].y = 20; items[idx].size = logoH; }
     });
   } else if (mode === 'center') {
-    saveProudMetaFields({ titleX: 38, titleY: 8 });
-    const start = Math.max(5, 50 - n * 8);
+    saveProudMetaFields({ titleX: 36, titleY: 6 });
+    const start = Math.max(8, 50 - n * 7);
     active.forEach(function(p, i) {
-      const idx = items.findIndex(x => String(x.id) === String(p.id));
-      if (idx >= 0) {
-        items[idx].x = start + i * 14;
-        items[idx].y = 40;
-        items[idx].size = logoH;
-      }
+      const idx = items.findIndex(function(x) { return String(x.id) === String(p.id); });
+      if (idx >= 0) { items[idx].x = start + i * 14; items[idx].y = 42; items[idx].size = logoH; }
     });
-  } else { // spread
+  } else {
     saveProudMetaFields({ titleX: 3, titleY: 38 });
     active.forEach(function(p, i) {
-      const idx = items.findIndex(x => String(x.id) === String(p.id));
+      const idx = items.findIndex(function(x) { return String(x.id) === String(p.id); });
       if (idx >= 0) {
-        items[idx].x = n === 1 ? 45 : (10 + i * (80 / Math.max(1, n - 1)));
-        items[idx].y = 22;
-        items[idx].size = logoH;
+        items[idx].x = n <= 1 ? 50 : Math.round(12 + i * (75 / Math.max(1, n - 1)));
+        items[idx].y = 20; items[idx].size = logoH;
       }
     });
   }
   write('hh_proud_sponsors', items);
   updateProudPreview();
-  toast('Layout: ' + mode);
+  toast('Layout သုံးပြီး');
 }
 
 function saveProudMetaFields(extra) {
-  const m = getProudMeta();
+  const m = (typeof getProudMeta === 'function') ? getProudMeta() : {};
   const title = (($('proud-section-title') && $('proud-section-title').value) || '').trim() || 'Our Proud Sponsors';
   const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
-  const frameH = parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '72', 10) || 72;
-  const next = Object.assign({}, m, {
-    title: title,
-    logoH: logoH,
-    frameH: frameH
-  }, extra || {});
+  const frameH = parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '80', 10) || 80;
+  const next = Object.assign({}, m, { title: title, logoH: logoH, frameH: frameH }, extra || {});
   if (typeof write === 'function') write('hh_proud_meta', next);
   else localStorage.setItem('hh_proud_meta', JSON.stringify(next));
 }
@@ -4039,166 +4119,70 @@ function initProudDrag() {
   if (!frame) return;
   const titleEl = $('proud-prev-title');
   function bindDrag(el, onMove, onEnd) {
-    if (!el || el._proudBound) return;
-    el._proudBound = true;
-    el.addEventListener('mousedown', function(e) {
-      if (e.target && e.target.classList && e.target.classList.contains('proud-resize')) return;
+    if (!el) return;
+    el.onmousedown = function(e) {
+      if (e.target && e.target.classList && (e.target.classList.contains('proud-resize') || e.target.classList.contains('proud-stage-resize'))) return;
       e.preventDefault();
-      el.style.cursor = 'grabbing';
+      e.stopPropagation();
       const rect = frame.getBoundingClientRect();
       function move(ev) {
         const x = Math.max(0, Math.min(92, ((ev.clientX - rect.left) / rect.width) * 100));
         const y = Math.max(0, Math.min(85, ((ev.clientY - rect.top) / rect.height) * 100));
-        onMove(x, y, ev);
+        onMove(x, y);
       }
       function up() {
         document.removeEventListener('mousemove', move);
         document.removeEventListener('mouseup', up);
-        el.style.cursor = 'grab';
         if (onEnd) onEnd();
       }
       document.addEventListener('mousemove', move);
       document.addEventListener('mouseup', up);
-    });
+    };
   }
   if (titleEl) {
-    titleEl._proudBound = false;
     bindDrag(titleEl, function(x, y) {
-      titleEl.style.left = x + '%';
-      titleEl.style.top = y + '%';
+      titleEl.style.left = x + '%'; titleEl.style.top = y + '%';
       titleEl._tx = x; titleEl._ty = y;
     }, function() {
-      saveProudMetaFields({ titleX: Math.round(titleEl._tx), titleY: Math.round(titleEl._ty) });
+      saveProudMetaFields({ titleX: Math.round(titleEl._tx || 3), titleY: Math.round(titleEl._ty || 36) });
     });
   }
-  bar = $('proud-preview-bar');
+  const bar = $('proud-preview-bar');
   if (!bar) return;
   bar.querySelectorAll('.proud-logo-item').forEach(function(el) {
-    el._proudBound = false;
     const idx = parseInt(el.getAttribute('data-idx'), 10);
     bindDrag(el, function(x, y) {
-      el.style.left = x + '%';
-      el.style.top = y + '%';
+      el.style.left = x + '%'; el.style.top = y + '%';
       el._lx = x; el._ly = y;
     }, function() {
       const items = getProud();
       if (items[idx]) {
-        items[idx].x = Math.round(el._lx);
-        items[idx].y = Math.round(el._ly);
+        items[idx].x = Math.round(el._lx); items[idx].y = Math.round(el._ly);
         write('hh_proud_sponsors', items);
       }
     });
-    // resize
     const handle = el.querySelector('.proud-resize');
-    if (handle && !handle._bound) {
-      handle._bound = true;
-      handle.addEventListener('mousedown', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const startX = e.clientX;
-        const startW = el.offsetWidth;
+    if (handle) {
+      handle.onmousedown = function(e) {
+        e.preventDefault(); e.stopPropagation();
+        const startX = e.clientX, startW = el.offsetWidth;
         function move(ev) {
           const nw = Math.max(24, Math.min(120, startW + (ev.clientX - startX)));
-          el.style.width = nw + 'px';
-          el.style.height = nw + 'px';
-          el._sz = nw;
+          el.style.width = nw + 'px'; el.style.height = nw + 'px'; el._sz = nw;
         }
         function up() {
           document.removeEventListener('mousemove', move);
           document.removeEventListener('mouseup', up);
           const items = getProud();
-          if (items[idx] && el._sz) {
-            items[idx].size = Math.round(el._sz);
-            write('hh_proud_sponsors', items);
-          }
+          if (items[idx] && el._sz) { items[idx].size = Math.round(el._sz); write('hh_proud_sponsors', items); }
         }
         document.addEventListener('mousemove', move);
         document.addEventListener('mouseup', up);
-      });
+      };
     }
   });
 }
 
-
-function saveSocial() {
-  write('hh_social', {
-    fb: $('admin-fb').value.trim(),
-    tt: $('admin-tt').value.trim(),
-    yt: $('admin-yt').value.trim(),
-    vb: $('admin-vb').value.trim(),
-    showFb: $('social-show-fb')?.checked !== false,
-    showYt: $('social-show-yt')?.checked !== false,
-    showTt: $('social-show-tt')?.checked !== false,
-    showVb: $('social-show-vb')?.checked !== false
-  });
-  toast('Social Links သိမ်းပြီးပါပြီ။');
-}
-
-/* ---- Menu ---- */
-function getMenu() { return read('hh_menu', []); }
-function renderMenuList() {
-  const list = $('menu-list');
-  const items = getMenu();
-  const prev = $('menu-preview-box');
-  if (prev) {
-    const show = items.length ? items : [{label:'Home'},{label:'Travel Stories'},{label:'YouTube'},{label:'About'},{label:'Contact'}];
-    prev.innerHTML = show.map(m => '<div class="rounded-lg px-3 py-2 hover:bg-emerald-900/40">› ' + safe(m.label) + '</div>').join('');
-  }
-  if (!items.length) {
-    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Menu မရှိသေး — Default menu သုံးနေပါတယ်။</p>';
-    return;
-  }
-  list.innerHTML = items.map((m, i) => `
-    <div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-      <span class="text-xs font-black text-violet-300 w-6">${String(i+1).padStart(2,'0')}</span>
-      <div class="flex-1 min-w-0"><p class="font-bold truncate">${safe(m.label)}</p><p class="tiny truncate">${safe(m.href)}</p></div>
-      <button class="btn btn-muted" onclick="moveMenu(${i},-1)" ${i===0?'disabled':''}>↑</button>
-      <button class="btn btn-muted" onclick="moveMenu(${i},1)" ${i===items.length-1?'disabled':''}>↓</button>
-      <button class="btn btn-red" onclick="deleteMenu(${i})"><i class="fa-regular fa-trash-can"></i></button>
-    </div>`).join('');
-}
-function addMenuItem() {
-  const label = $('menu-label').value.trim(), href = $('menu-href').value.trim();
-  if (!label || !href) return alert('Label နဲ့ Link ထည့်ပါ။');
-  const items = getMenu();
-  items.push({ label, href });
-  write('hh_menu', items);
-  $('menu-label').value = ''; $('menu-href').value = '';
-  renderMenuList(); toast('Menu ထည့်ပြီးပါပြီ။');
-}
-function moveMenu(i, d) {
-  const a = getMenu(), n = i + d;
-  if (n < 0 || n >= a.length) return;
-  [a[i], a[n]] = [a[n], a[i]];
-  write('hh_menu', a); renderMenuList();
-}
-function deleteMenu(i) {
-  if (!confirm('ဖျက်မှာ သေချာပါသလား?')) return;
-  const a = getMenu(); a.splice(i, 1); write('hh_menu', a); renderMenuList(); toast('ဖျက်ပြီးပါပြီ။');
-}
-
-/* ---- Proud Sponsors ---- */
-function getProud() { return read('hh_proud_sponsors', []); }
-function renderProudList() {
-  if (typeof loadProudMeta === 'function') loadProudMeta();
-  const list = $('proud-list');
-  const items = getProud();
-  if (typeof updateProudPreview === 'function') updateProudPreview();
-  $('stat-proud') && ($('stat-proud').textContent = items.length);
-  if (!items.length) {
-    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Proud Sponsor မရှိသေးပါ။</p>';
-    return;
-  }
-  list.innerHTML = items.map((p, i) => `
-    <div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-      ${p.logo ? `<span class="flex items-center justify-center rounded-lg bg-white/10 border border-slate-600" style="width:64px;height:40px"><img src="${safe(p.logo)}" class="max-h-8 max-w-[56px] object-contain" onerror="this.parentElement.style.display='none'"></span>` : ''}
-      <div class="flex-1 min-w-0"><p class="font-bold">${safe(p.name)}</p><p class="tiny">${p.active === false ? 'Hidden' : 'Visible'}</p></div>
-      <button class="btn btn-muted" onclick="toggleProud(${i})">${p.active === false ? 'Show' : 'Hide'}</button>
-      <button class="btn btn-muted" onclick="moveProud(${i},-1)" ${i===0?'disabled':''}>↑</button>
-      <button class="btn btn-muted" onclick="moveProud(${i},1)" ${i===items.length-1?'disabled':''}>↓</button>
-      <button class="btn btn-red" onclick="deleteProud(${i})"><i class="fa-regular fa-trash-can"></i></button>
-    </div>`).join('');
-}
 function getProudMeta() {
   try {
     const m = JSON.parse(localStorage.getItem('hh_proud_meta') || '{}');
@@ -4216,42 +4200,44 @@ function loadProudMeta() {
     if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = (m.logoH || 48) + 'px';
   }
   if ($('proud-frame-h')) {
-    $('proud-frame-h').value = m.frameH || 72;
-    if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = (m.frameH || 72) + 'px';
+    $('proud-frame-h').value = m.frameH || 80;
+    if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = (m.frameH || 80) + 'px';
   }
-  if ($('proud-prev-title')) {
-    $('proud-prev-title').textContent = m.title || 'Our Proud Sponsors';
-    if (m.titleX != null) $('proud-prev-title').style.left = m.titleX + '%';
-    if (m.titleY != null) $('proud-prev-title').style.top = m.titleY + '%';
-  }
-  if ($('proud-live-frame') && m.frameH) $('proud-live-frame').style.height = m.frameH + 'px';
+  if ($('proud-live-frame') && m.frameH) $('proud-live-frame').style.height = (m.frameH || 80) + 'px';
 }
 
 function addProud() {
-  const name = ($('proud-name') && $('proud-name').value || '').trim();
+  const name = (($('proud-name') && $('proud-name').value) || '').trim();
   if (!name) return alert('Name ထည့်ပါ။');
-  const logo = (typeof imageFieldValue === 'function') ? imageFieldValue('proud-logo') : (($('proud-logo') && $('proud-logo').value) || '').trim();
+  let logo = (typeof imageFieldValue === 'function') ? imageFieldValue('proud-logo') : '';
+  if (!logo && $('proud-logo')) logo = ($('proud-logo').value || '').trim();
   if (logo && (logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0)) {
     return alert('Logo Upload ပြီးသည်အထိ စောင့်ပါ။');
   }
+  const st = window._proudStaging || { x: 55, y: 20, size: 48 };
   const items = getProud();
   items.push({
     id: Date.now(),
     name: name,
     logo: logo,
     link: (($('proud-link') && $('proud-link').value) || '').trim(),
-    active: true
+    active: true,
+    x: Math.round(st.x),
+    y: Math.round(st.y),
+    size: Math.round(st.size || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48)
   });
   write('hh_proud_sponsors', items);
   if ($('proud-name')) $('proud-name').value = '';
   if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
-  else if ($('proud-logo')) $('proud-logo').value = '';
+  else if ($('proud-logo')) { $('proud-logo').value = ''; delete $('proud-logo').dataset.fullUrl; }
   if ($('proud-link')) $('proud-link').value = '';
   const prev = $('proud-logo-preview'); if (prev) prev.innerHTML = '';
+  window._proudStaging = { x: 55, y: 20, size: parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48 };
   renderProudList();
   if (typeof renderOverview === 'function') renderOverview();
-  toast(logo ? 'Proud Sponsor ထည့်ပြီး (logo ပါ)' : 'Proud Sponsor ထည့်ပြီးပါပြီ');
+  toast(logo ? 'သိမ်းပြီး — Preview နေရာအတိုင်း' : 'Proud Sponsor ထည့်ပြီး');
 }
+
 function toggleProud(i) {
   const a = getProud(); a[i].active = a[i].active === false ? true : false;
   write('hh_proud_sponsors', a); renderProudList();
