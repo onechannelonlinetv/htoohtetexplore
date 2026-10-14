@@ -68,7 +68,9 @@
     backdrop-filter: blur(16px);
   }
   body.theme-ocean #hero-section {
-    clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+    /* no slant — keep rectangular hero */
+    clip-path: none;
+    border-radius: 0 0 1.25rem 1.25rem;
   }
   body.theme-ocean .card-bg {
     border-radius: 1.5rem;
@@ -210,6 +212,70 @@
   body.mode-light #upcoming-banner .text-white,
   body.mode-light #youtube-section .text-white,
   body.mode-light #article-page .text-white { color: #ffffff !important; }
+
+  /* Mode toggle — polished */
+  #mode-toggle {
+    border: 1px solid rgba(16,185,129,0.35);
+    transition: background .2s, color .2s, box-shadow .2s, transform .15s;
+  }
+  #mode-toggle:hover { transform: scale(1.06); }
+  body.mode-dark #mode-toggle {
+    background: rgba(6, 78, 59, 0.45);
+    color: #ecfdf5;
+    box-shadow: 0 0 0 1px rgba(52,211,153,0.15);
+  }
+  body.mode-light {
+    --brand-bg: #f1f5f9;
+    --brand-surface: #ffffff;
+    --brand-card: #ffffff;
+    --brand-text: #0f172a;
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+  body.mode-light header {
+    background: rgba(255,255,255,0.92) !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 12px rgba(15,23,42,0.06);
+  }
+  body.mode-light footer {
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
+    color: #334155;
+  }
+  body.mode-light .surface-bg { background: #ffffff; }
+  body.mode-light .card-bg {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 4px 20px rgba(15,23,42,0.06);
+  }
+  body.mode-light #mode-toggle {
+    background: linear-gradient(145deg, #fef3c7, #fde68a) !important;
+    color: #92400e !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 2px 10px rgba(245,158,11,0.25);
+  }
+  body.mode-light #mode-toggle-icon { color: #92400e !important; }
+  body.mode-light #search-toggle,
+  body.mode-light #menu-toggle {
+    color: #0f172a !important;
+    background: #e2e8f0 !important;
+  }
+  body.mode-light #photo-gallery-section .text-white,
+  body.mode-light #stories .text-white { color: #0f172a !important; }
+  body.mode-light #gal-public-view-all {
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+    border-color: #6ee7b7 !important;
+  }
+  body.mode-light #gallery-page {
+    background: #f1f5f9;
+  }
+  body.mode-light #gallery-page .text-white { color: #0f172a !important; }
+  #gallery-page {
+    position: fixed; inset: 0; z-index: 60; overflow-y: auto;
+    background: var(--brand-bg, #061510);
+  }
+
   #article-body img { cursor: zoom-in; border-radius: 12px; }
   /* Official Sponsor — responsive */
   .sp-banner {
@@ -465,7 +531,7 @@
     </div>
     <div id="gal-public-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3"></div>
     <div class="mt-4 text-center">
-      <button type="button" id="gal-public-view-all" class="btn hidden rounded-full border border-emerald-700/50 bg-emerald-950/60 px-5 py-2 text-sm font-bold text-emerald-200 hover:bg-emerald-900/50" onclick="toggleGalleryViewAll()">
+      <button type="button" id="gal-public-view-all" class="btn hidden rounded-full border border-emerald-700/50 bg-emerald-950/60 px-5 py-2 text-sm font-bold text-emerald-200 hover:bg-emerald-900/50" onclick="openGalleryPage()">
         View all
       </button>
     </div>
@@ -578,6 +644,26 @@
 
 <!-- ARTICLE MODAL -->
 <!-- FULL PAGE ARTICLE (replaces modal popup) -->
+
+  <!-- PHOTO GALLERY FULL PAGE -->
+  <section id="gallery-page" class="hidden min-h-screen">
+    <div class="sticky top-0 z-30 border-b border-emerald-900/40 surface-bg/95 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-3">
+        <button type="button" onclick="closeGalleryPage()" class="inline-flex items-center gap-2 rounded-full border border-emerald-800/50 bg-emerald-950/50 px-4 py-2 text-sm font-bold text-emerald-100 hover:bg-emerald-900/60 transition">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </button>
+        <div class="min-w-0 flex-1">
+          <h2 id="gal-page-heading" class="text-lg sm:text-xl font-black text-white truncate">Photo Gallery</h2>
+          <p id="gal-page-subtitle" class="text-xs text-emerald-400/70 truncate"></p>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div id="gal-page-cats" class="flex flex-wrap gap-2 mb-5"></div>
+      <div id="gal-page-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3"></div>
+    </div>
+  </section>
+
 <section id="article-page" class="hidden min-h-screen">
   <div class="sticky top-0 z-40 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
@@ -1597,9 +1683,93 @@ function setGalleryFilter(cat) {
   renderPublicGallery();
 }
 function toggleGalleryViewAll() {
-  _galPublicExpanded = !_galPublicExpanded;
-  renderPublicGallery();
+  openGalleryPage();
 }
+function openGalleryPage() {
+  var page = document.getElementById('gallery-page');
+  if (!page) return;
+  // hide main home sections visually via page overlay style
+  page.classList.remove('hidden');
+  page.style.display = '';
+  document.body.style.overflow = 'hidden';
+  page.scrollTop = 0;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderGalleryPage();
+  try { history.pushState({ gal: 1 }, '', '#gallery'); } catch (e) {}
+}
+function closeGalleryPage() {
+  var page = document.getElementById('gallery-page');
+  if (page) {
+    page.classList.add('hidden');
+    page.style.display = 'none';
+  }
+  document.body.style.overflow = '';
+  try {
+    if (location.hash === '#gallery') history.pushState('', '', location.pathname + location.search);
+  } catch (e) {}
+  var home = document.getElementById('photo-gallery-section');
+  if (home) home.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function renderGalleryPage() {
+  try {
+    var g = getPublicGallery();
+    var heading = document.getElementById('gal-page-heading');
+    var sub = document.getElementById('gal-page-subtitle');
+    if (heading) heading.textContent = g.heading || 'Photo Gallery';
+    if (sub) {
+      sub.textContent = g.subtitle || '';
+      sub.classList.toggle('hidden', !(g.subtitle || '').trim());
+    }
+    var photos = (g.photos || []).filter(function(p) {
+      return p && p.active !== false && photoSrc(p);
+    });
+    var cats = g.categories || [];
+    var catBox = document.getElementById('gal-page-cats');
+    if (catBox) {
+      var html = '<button type="button" class="gal-cat-btn rounded-full px-3 py-1 text-[11px] font-bold border ' +
+        (!_galPublicFilter ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-slate-600 text-slate-300 hover:border-emerald-600') +
+        '" onclick="_galPublicFilter=\'\';renderGalleryPage();renderPublicGallery();">အားလုံး</button>';
+      cats.forEach(function(c) {
+        if (!c) return;
+        var on = _galPublicFilter === c;
+        var esc = String(c).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        html += '<button type="button" class="gal-cat-btn rounded-full px-3 py-1 text-[11px] font-bold border ' +
+          (on ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-slate-600 text-slate-300 hover:border-emerald-600') +
+          '" onclick="_galPublicFilter=\'' + esc + '\';renderGalleryPage();renderPublicGallery();">' + safe(c) + '</button>';
+      });
+      catBox.innerHTML = html;
+    }
+    var filtered = photos;
+    if (_galPublicFilter) {
+      filtered = photos.filter(function(p) {
+        return String(p.category || '') === String(_galPublicFilter);
+      });
+    }
+    var grid = document.getElementById('gal-page-grid');
+    if (!grid) return;
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="col-span-full text-center text-sm text-slate-400 py-16">ပုံမရှိသေးပါ</div>';
+      return;
+    }
+    var allSrcs = filtered.map(function(p) { return photoSrc(p); });
+    window._galLightboxList = allSrcs;
+    window._galVisibleToFull = filtered.map(function(_, i) { return i; });
+    grid.innerHTML = filtered.map(function(p, i) {
+      var src = safe(photoSrc(p));
+      var cap = safe(p.caption || p.category || '');
+      return '<button type="button" class="group relative aspect-square overflow-hidden rounded-xl border border-emerald-900/40 bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50" onclick="openGalleryLightbox(' + i + ')">' +
+        '<img src="' + src + '" alt="' + cap + '" class="w-full h-full object-cover transition duration-300 group-hover:scale-105" loading="lazy">' +
+        (cap ? '<span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5 text-[10px] font-semibold text-white text-left line-clamp-1">' + cap + '</span>' : '') +
+        '</button>';
+    }).join('');
+  } catch (err) {
+    console.error('[gallery page]', err);
+  }
+}
+window.addEventListener('popstate', function() {
+  if (location.hash !== '#gallery') closeGalleryPage();
+});
+
 function openGalleryLightbox(visibleIndex) {
   var list = window._galLightboxList || [];
   var map = window._galVisibleToFull || [];
