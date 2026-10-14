@@ -242,7 +242,7 @@ main > div {
 
 
 /* Collapsible panels */
-.fold-panel { overflow: hidden; }
+.fold-panel open { overflow: hidden; }
 .fold-head {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   cursor: pointer; user-select: none; margin: -4px -4px 0; padding: 4px;
@@ -258,9 +258,9 @@ main > div {
   transition: transform .2s ease, background .15s;
   flex-shrink: 0;
 }
-.fold-panel.open .fold-arrow { transform: rotate(180deg); background: #12352f; color: #6ee7b7; border-color: #10b98155; }
+.fold-panel open.open .fold-arrow { transform: rotate(180deg); background: #12352f; color: #6ee7b7; border-color: #10b98155; }
 .fold-body { display: none; padding-top: 14px; }
-.fold-panel.open .fold-body { display: block; }
+.fold-panel open.open .fold-body { display: block; }
 
 </style>
 </head>
@@ -289,48 +289,69 @@ main > div {
 <!-- APP -->
 <div id="app" class="hidden min-h-screen">
   <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-800 bg-[#091220] p-5 lg:flex lg:flex-col overflow-y-auto">
-    <div class="mb-6 flex items-center gap-3">
-      <button type="button" id="admin-studio-logo-wrap" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 text-lg overflow-hidden" title="ပုံပြောင်း" onclick="document.getElementById('admin-studio-logo-file').click()">
+    <div class="mb-4 flex items-center gap-3">
+      <button type="button" id="admin-studio-logo-wrap" class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 text-xl overflow-hidden" title="ပုံပြောင်း" onclick="document.getElementById('admin-studio-logo-file').click()">
         <img id="admin-studio-logo-img" alt="" class="w-full h-full object-cover hidden">
         <i id="admin-studio-logo-icon" class="fa-solid fa-mountain-sun"></i>
       </button>
       <input type="file" id="admin-studio-logo-file" accept="image/*" class="hidden" onchange="onAdminStudioLogo(this)">
       <div class="min-w-0 flex-1">
-        <input id="admin-studio-name" type="text" class="bg-transparent border-0 outline-none text-white font-black text-[15px] w-full leading-tight p-0" value="HTOO HTET" placeholder="နာမည်" onchange="saveAdminStudio()" onblur="saveAdminStudio()">
-        <div class="text-sm font-bold text-emerald-300 leading-tight">Admin Studio</div>
+        <input id="admin-studio-name" type="text" class="bg-transparent border-0 outline-none text-white font-black text-lg w-full leading-tight p-0" value="HTOO HTET" placeholder="နာမည်" onchange="saveAdminStudio()" onblur="saveAdminStudio()">
+        <div class="text-sm font-bold text-emerald-300 leading-tight mt-0.5">Admin Studio</div>
       </div>
     </div>
-    <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
-    <nav class="space-y-0.5 flex-1">
-      <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
-      <button class="navbtn" data-view="pagepreview" onclick="showView('pagepreview',this);setTimeout(function(){if(typeof refreshPagePreviewIframe==='function')refreshPagePreviewIframe();},120);"><i class="fa-solid fa-eye w-4"></i> Preview</button>
-      <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Hero</button>
-      <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
-      <button class="navbtn" data-view="proud" onclick="showView('proud',this)"><i class="fa-solid fa-handshake w-4"></i> Proud Sponsors</button>
-      <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
-      <button class="navbtn" data-view="upcoming" onclick="showView('upcoming',this)"><i class="fa-solid fa-map-location-dot w-4"></i> Upcoming</button>
-      <button class="navbtn" data-view="gallery" onclick="showView('gallery',this)"><i class="fa-solid fa-images w-4"></i> Photo Gallery</button>
-      <button class="navbtn" data-view="addpost" onclick="showView('addpost',this)"><i class="fa-solid fa-pen-to-square w-4"></i> Add Post</button>
-      <button class="navbtn" data-view="postlist" onclick="showView('postlist',this)"><i class="fa-solid fa-list w-4"></i> Post List</button>
-      <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
-      <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
-      <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
-      <button class="navbtn" data-view="social" onclick="showView('social',this)"><i class="fa-solid fa-share-nodes w-4"></i> Social Links</button>
-    </nav>
-    <div class="mt-6 border-t border-slate-800 pt-4 space-y-2">
-      <a href="index.html" target="_blank" class="btn btn-muted block text-center text-xs py-2"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
-      <button type="button" class="btn btn-muted text-xs w-full" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
-      <button type="button" class="btn btn-muted text-xs w-full" onclick="exportSiteBackup()"><i class="fa-solid fa-download mr-1"></i>Backup Export</button>
-      <label class="btn btn-muted text-xs w-full block text-center cursor-pointer"><i class="fa-solid fa-upload mr-1"></i>Backup Restore
-        <input type="file" accept="application/json,.json" class="hidden" onchange="importSiteBackup(this)">
-      </label>
+
+    <div class="fold-panel open mb-2" id="sidebar-workspace-fold">
+      <div class="fold-head" onclick="toggleFold(this)">
+        <div>
+          <div class="fold-title">Workspace</div>
+          <div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div>
+        </div>
+        <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="fold-body">
+        <nav class="space-y-0.5">
+          <button class="navbtn active" data-view="overview" onclick="showView('overview',this)"><i class="fa-solid fa-chart-pie w-4"></i> Overview</button>
+          <button class="navbtn" data-view="pagepreview" onclick="showView('pagepreview',this);setTimeout(function(){if(typeof refreshPagePreviewIframe==='function')refreshPagePreviewIframe();},120);"><i class="fa-solid fa-eye w-4"></i> Preview</button>
+          <button class="navbtn" data-view="settings" onclick="showView('settings',this)"><i class="fa-solid fa-palette w-4"></i> Brand & Hero</button>
+          <button class="navbtn" data-view="menu" onclick="showView('menu',this)"><i class="fa-solid fa-bars w-4"></i> Menu Items</button>
+          <button class="navbtn" data-view="proud" onclick="showView('proud',this)"><i class="fa-solid fa-handshake w-4"></i> Proud Sponsors</button>
+          <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
+          <button class="navbtn" data-view="upcoming" onclick="showView('upcoming',this)"><i class="fa-solid fa-map-location-dot w-4"></i> Upcoming</button>
+          <button class="navbtn" data-view="gallery" onclick="showView('gallery',this)"><i class="fa-solid fa-images w-4"></i> Photo Gallery</button>
+          <button class="navbtn" data-view="addpost" onclick="showView('addpost',this)"><i class="fa-solid fa-pen-to-square w-4"></i> Add Post</button>
+          <button class="navbtn" data-view="postlist" onclick="showView('postlist',this)"><i class="fa-solid fa-list w-4"></i> Post List</button>
+          <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
+          <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
+          <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
+          <button class="navbtn" data-view="social" onclick="showView('social',this)"><i class="fa-solid fa-share-nodes w-4"></i> Social Links</button>
+        </nav>
+      </div>
+    </div>
+
+    <div class="fold-panel open mt-3" id="sidebar-tools-fold">
+      <div class="fold-head" onclick="toggleFold(this)">
+        <div>
+          <div class="fold-title">Tools</div>
+          <div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div>
+        </div>
+        <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="fold-body space-y-2">
+        <a href="index.html" target="_blank" class="btn btn-muted block text-center text-xs py-2"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
+        <button type="button" class="btn btn-muted text-xs w-full" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
+        <button type="button" class="btn btn-muted text-xs w-full" onclick="exportSiteBackup()"><i class="fa-solid fa-download mr-1"></i>Backup Export</button>
+        <label class="btn btn-muted text-xs w-full block text-center cursor-pointer"><i class="fa-solid fa-upload mr-1"></i>Backup Restore
+          <input type="file" accept="application/json,.json" class="hidden" onchange="importSiteBackup(this)">
+        </label>
+      </div>
     </div>
   </aside>
 
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod12</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod13</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -415,7 +436,7 @@ main > div {
       </section>
 
 <section id="view-settings" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel open">
           <div class="fold-head" onclick="toggleFold(this)">
             <div>
               <div class="fold-title">Brand · Theme · Logo</div>
@@ -819,7 +840,13 @@ main > div {
 
       <!-- HERO -->
       <section id="view-menu" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+<div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">Menu Items</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+
           <div class="rounded-xl border border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Preview · Menu Drawer</span>
             <div id="menu-preview-box" class="mt-2 space-y-1 text-sm text-emerald-100"></div>
@@ -835,7 +862,13 @@ main > div {
 
       <!-- PROUD SPONSORS -->
       <section id="view-proud" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+<div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6 space-y-4">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">Proud Sponsors</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="md:col-span-2">
               <label class="label">Section ခေါင်းစဉ် (Live site) · Preview မှာ drag နဲ့ ရွှေ့လို့ရ</label>
@@ -913,7 +946,7 @@ main > div {
 <button type="button" onclick="addNewSponsor()" class="btn btn-green"><i class="fa-solid fa-plus mr-2"></i>Add Sponsor</button>
         </div>
 
-        <div class="panel editor-shell p-4 sm:p-5 fold-panel">
+        <div class="panel editor-shell p-4 sm:p-5 fold-panel open">
           <div class="fold-head" onclick="toggleFold(this)">
             <div>
               <div class="fold-title">Section Heading · Homepage ခေါင်းစဉ်</div>
@@ -1149,7 +1182,13 @@ main > div {
       </section>
 
 <section id="view-upcoming" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+<div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6 space-y-4">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">Upcoming</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+
           <label class="toggle-row"><input type="checkbox" id="up-active" checked onchange="updateUpcomingPreview()"><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
 
           <!-- Live Preview -->
@@ -1277,7 +1316,7 @@ main > div {
 
 
       <section id="view-gallery" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel open">
           <div class="fold-head" onclick="toggleFold(this)">
             <div>
               <div class="fold-title">Gallery Settings · ခေါင်းစဉ် / Category</div>
@@ -1349,7 +1388,7 @@ main > div {
       </section>
 
 <section id="view-posts" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel">
+<div class="panel editor-shell p-4 sm:p-5 lg:p-6 fold-panel open">
           <div class="fold-head" onclick="toggleFold(this)">
             <div>
               <div class="fold-title">Section ခေါင်းစဉ် · Travel Stories</div>
@@ -1389,7 +1428,13 @@ main > div {
 
       <!-- ADD POST -->
       <section id="view-addpost" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+<div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">Add Post</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+
           <h3 id="post-form-heading" class="mb-4 font-bold"><i class="fa-solid fa-pen-to-square mr-2 text-sky-300"></i>Add New Travel Post</h3>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Post Card</span>
@@ -1495,7 +1540,13 @@ main > div {
 
       <!-- POST LIST -->
       <section id="view-postlist" class="view space-y-3">
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
+        <div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">Post List</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+
           <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
             <h3 class="font-bold">Post List</h3>
             <div class="flex items-center gap-2">
@@ -1509,7 +1560,13 @@ main > div {
 
 <!-- CUSTOM ROWS -->
       <section id="view-sections" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+<div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6 space-y-4">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">Custom Rows</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+
           <input type="hidden" id="section-edit-id" value="">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Row ခေါင်းစဉ် *</label><input id="section-title" class="field" placeholder="Featured Destinations" oninput="updateSectionPreview()"></div>
@@ -1613,7 +1670,13 @@ main > div {
 
       <!-- YOUTUBE -->
       <section id="view-youtube" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+<div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6 space-y-4">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">YouTube</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+
           <label class="toggle-row"><input type="checkbox" id="yt-active" checked onchange="updateYoutubePreview()"><span class="text-sm font-semibold">YouTube Section ပြမယ်</span></label>
 
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
@@ -1678,7 +1741,13 @@ main > div {
       </section>
 
       <section id="view-about" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+<div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6 space-y-4">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">About</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+
           <label class="toggle-row"><input type="checkbox" id="about-active" checked onchange="updateAboutPreview()"><span class="text-sm font-semibold">About ပြမယ်</span></label>
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-4">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · About</span>
@@ -1706,7 +1775,13 @@ main > div {
       </section>
 
       <section id="view-social" class="view space-y-3">
-<div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+<div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6 space-y-4">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">Social Links</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label class="toggle-row mb-1"><input type="checkbox" id="social-show-fb" checked><span class="text-sm font-semibold">Facebook ပြမယ်</span></label>
@@ -6648,7 +6723,7 @@ window.alert = function(message) {
 
 
 function toggleFold(headEl) {
-  var panel = headEl && headEl.closest ? headEl.closest('.fold-panel') : null;
+  var panel = headEl && headEl.closest ? headEl.closest('.fold-panel open') : null;
   if (!panel) return;
   panel.classList.toggle('open');
 }
