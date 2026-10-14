@@ -187,6 +187,24 @@
   body.mode-light .bg-emerald-950\/80,
   body.mode-light .bg-emerald-950,
   body.mode-light .bg-emerald-900\/50 { background: #f1f5f9 !important; color: #0f172a !important; }
+  body.mode-light #mode-toggle,
+  body.mode-light #search-toggle,
+  body.mode-light #menu-toggle {
+    color: #0f172a !important;
+    background: #e2e8f0 !important;
+  }
+  body.mode-light #mode-toggle:hover,
+  body.mode-light #search-toggle:hover,
+  body.mode-light #menu-toggle:hover {
+    background: #cbd5e1 !important;
+  }
+  body.mode-light #mode-toggle-icon { color: #0f172a !important; }
+  #mode-toggle {
+    border: 1px solid rgba(16,185,129,0.35);
+  }
+  body.mode-light #mode-toggle {
+    border-color: #94a3b8;
+  }
   body.mode-light #hero-section .text-white,
   body.mode-light #sponsor-container .text-white,
   body.mode-light #upcoming-banner .text-white,
@@ -683,6 +701,11 @@ function applyThemeClass(theme, mode) {
   document.body.classList.add(mode === 'light' ? 'mode-light' : 'mode-dark');
   const icon = document.getElementById('mode-toggle-icon');
   if (icon) icon.className = mode === 'light' ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
+  const btn = document.getElementById('mode-toggle');
+  if (btn) {
+    btn.title = mode === 'light' ? 'Switch to Dark mode' : 'Switch to Light mode';
+    btn.setAttribute('aria-label', btn.title);
+  }
 }
 
 function toggleUserMode() {
@@ -693,6 +716,11 @@ function toggleUserMode() {
   document.body.classList.add(next === 'light' ? 'mode-light' : 'mode-dark');
   const icon = document.getElementById('mode-toggle-icon');
   if (icon) icon.className = next === 'light' ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
+  const btn = document.getElementById('mode-toggle');
+  if (btn) {
+    btn.title = next === 'light' ? 'Switch to Dark mode' : 'Switch to Light mode';
+    btn.setAttribute('aria-label', btn.title);
+  }
 }
 
 /* ---- Language (EN / မြန်မာ) ---- */
