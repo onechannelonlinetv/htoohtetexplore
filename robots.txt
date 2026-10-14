@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://onechannelonlinetv.github.io/htoohtetexplore/sitemap.xml
