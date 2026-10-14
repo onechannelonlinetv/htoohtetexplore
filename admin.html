@@ -1676,6 +1676,17 @@ function forceSyncAllToFirebase() {
 function read(key, fallback = []) {
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
 }
+function asArray(v) {
+  if (Array.isArray(v)) return v;
+  if (v && typeof v === 'object') {
+    return Object.keys(v).sort(function(a,b){
+      var na = parseInt(a,10), nb = parseInt(b,10);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return String(a).localeCompare(String(b));
+    }).map(function(k){ return v[k]; }).filter(function(x){ return x != null; });
+  }
+  return Array.isArray(fallback) ? fallback.slice() : [];
+}
 function write(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
 function togglePasswordVisibility() {
@@ -2322,8 +2333,23 @@ function showView(name, button) {
   if (name === 'youtube' && typeof updateYoutubePreview === 'function') updateYoutubePreview();
   if (name === 'about' && typeof updateAboutPreview === 'function') updateAboutPreview();
   if (name === 'settings' && typeof updateSizePreview === 'function') updateSizePreview();
-  if (name === 'overview' && typeof renderOverview === 'function') renderOverview();
+  if (name === 'overview') {
+    if (typeof renderOverview === 'function') renderOverview();
+    if (adminUser && adminDb) {
+      adminDb.ref('siteData').once('value').then(function(snap) {
+        var data = snap.val();
+        if (!data) return;
+        ['hh_posts','hh_home_sections','hh_proud_sponsors','hh_sponsor','hh_gallery'].forEach(function(k) {
+          if (data[k] != null) {
+            try { originalSetItem(k, JSON.stringify(data[k])); } catch (e) {}
+          }
+        });
+        if (typeof renderOverview === 'function') renderOverview();
+      }).catch(function(){});
+    }
+  }
 }
+
 
 
 function loadAll() {
@@ -4453,7 +4479,7 @@ function deleteMenu(i) {
 }
 
 /* ---- Proud Sponsors ---- */
-function getProud() { return read('hh_proud_sponsors', []); }
+function getProud() { return asArray(read('hh_proud_sponsors', [])); }
 function renderProudList() {
   const list = $('proud-list');
   const items = getProud();
@@ -4498,7 +4524,7 @@ function deleteProud(i) {
 }
 
 /* ---- Posts ---- */
-function getPosts() { return read('hh_posts', []); }
+function getPosts() { return asArray(read('hh_posts', [])); }
 
 function getGalleryData() {
   var g = read('hh_gallery', null);
@@ -4507,6 +4533,7 @@ function getGalleryData() {
   }
   if (!g.photos) g.photos = [];
   if (!g.categories) g.categories = ['Road Trip','Mountain','River','Sunset'];
+  if (g && g.photos) g.photos = asArray(g.photos);
   return g;
 }
 function loadGalleryForm() {
@@ -4820,7 +4847,7 @@ async function commitAllGalSlots() {
     renderGalleryList();
     if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     if (added) toast('✓ ' + added + ' ပုံ သိမ်းပြီး');
-    else toast('သိမ်းစရာ ကွက် မကျန်တော့ပါ');
+    else toast('ကွက်ထဲ ပုံမရှိပါ · အလိုအလျောက် သိမ်းပြီးသား ဖြစ်နိုင်');
     return added > 0;
   } catch (err) {
     console.error(err);
@@ -4898,7 +4925,7 @@ function deleteGalleryPhoto(i) {
   write('hh_gallery', g); renderGalleryList(); toast('ဖျက်ပြီး');
 }
 
-function getHomeSections() { return read('hh_home_sections', []); }
+function getHomeSections() { return asArray(read('hh_home_sections', [])); }
 function refreshPostSectionOptions() {
   const sel = $('admin-post-section'), current = sel.value || 'latest';
   sel.innerHTML = '<option value="latest">Latest Travel Posts (default)</option>' +
