@@ -220,6 +220,10 @@ main > div {
     <div class="mt-6 border-t border-slate-800 pt-4 space-y-2">
       <a href="index.html" target="_blank" class="btn btn-muted block text-center text-xs py-2"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
       <button type="button" class="btn btn-muted text-xs w-full" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
+      <button type="button" class="btn btn-muted text-xs w-full" onclick="exportSiteBackup()"><i class="fa-solid fa-download mr-1"></i>Backup Export</button>
+      <label class="btn btn-muted text-xs w-full block text-center cursor-pointer"><i class="fa-solid fa-upload mr-1"></i>Backup Restore
+        <input type="file" accept="application/json,.json" class="hidden" onchange="importSiteBackup(this)">
+      </label>
     </div>
   </aside>
 
@@ -270,6 +274,7 @@ main > div {
           <div class="stat"><div class="text-sm text-slate-400">Official Sponsor</div><div id="stat-sponsor" class="mt-2 text-xl font-black">—</div></div>
           <div class="stat"><div class="text-sm text-slate-400">Gallery Photos</div><div id="stat-gallery" class="mt-2 text-3xl font-black">0</div></div>
         </div>
+        <p id="overview-sync-status" class="text-xs text-slate-500 mt-2">ဒေတာ: local အရင် · Firebase sync နောက်မှ</p>
       </section>
 
       <!-- BRAND & SETTINGS -->
@@ -2126,34 +2131,50 @@ async function signInAdmin() {
       throw new Error('ဒီအကောင့်ကို Admin အဖြစ် ခွင့်မပြုထားပါ။');
     }
     adminUser = credential.user;
-    const snap = await adminDb.ref('siteData').once('value');
-    const data = snap.val();
+    // PRODUCTION: show UI immediately from localStorage (no wait for Firebase)
     remoteSyncReady = false;
-    if (data) {
-      Object.keys(data).forEach(k => { if (DATA_KEYS.includes(k)) originalSetItem(k, JSON.stringify(data[k])); });
-    } else {
-      const seed = {};
-      DATA_KEYS.forEach(k => {
-        const v = localStorage.getItem(k);
-        if (v !== null) { try { seed[k] = JSON.parse(v); } catch { seed[k] = v; } }
-      });
-      if (!seed.hh_social) seed.hh_social = { fb: '', tt: '', yt: '', vb: '' };
-      if (!seed.hh_sponsor) seed.hh_sponsor = [{ id: 1, active: true, title: 'Veezoom Myanmar', badge: 'Official Sponsor', desc: '', link: '', img: '' }];
-      if (!seed.hh_posts) seed.hh_posts = [];
-      if (!seed.hh_home_sections) seed.hh_home_sections = [];
-      if (!seed.hh_gallery) seed.hh_gallery = { active: true, heading: 'Photo Gallery', subtitle: 'ခရီးလမ်းမှ အလှပုံများ', previewCount: 4, categories: ['Road Trip','Mountain','River','Sunset'], photos: [] };
-      if (!seed.hh_settings) seed.hh_settings = { brandName: 'HTOO HTET', brandTagline: 'Travel Journal & Beyond' };
-      if (!seed.hh_proud_sponsors) seed.hh_proud_sponsors = [];
-      if (!seed.hh_proud_meta) seed.hh_proud_meta = { title: 'Our Proud Sponsors', titleFs: 12, frameH: 100, logoH: 48, titleX: 3, titleY: 36 };
-      if (!seed.hh_menu) seed.hh_menu = [];
-      await adminDb.ref('siteData').set(seed);
-      Object.keys(seed).forEach(k => originalSetItem(k, JSON.stringify(seed[k])));
-    }
-    remoteSyncReady = true;
     $('login-modal').classList.add('hidden');
     $('app').classList.remove('hidden');
-    loadAll();
     try { renderOverview(); } catch (e2) {}
+    try { loadAll(); } catch (e3) { console.warn(e3); }
+    try { renderOverview(); } catch (e4) {}
+    var st = $('overview-sync-status');
+    if (st) st.textContent = 'Local ဒေတာ ပြထားသည် · Firebase ချိန်နေသည်…';
+
+    // Background: pull Firebase then refresh
+    try {
+      const snap = await adminDb.ref('siteData').once('value');
+      const data = snap.val();
+      if (data) {
+        Object.keys(data).forEach(k => { if (DATA_KEYS.includes(k)) originalSetItem(k, JSON.stringify(data[k])); });
+      } else {
+        const seed = {};
+        DATA_KEYS.forEach(k => {
+          const v = localStorage.getItem(k);
+          if (v !== null) { try { seed[k] = JSON.parse(v); } catch { seed[k] = v; } }
+        });
+        if (!seed.hh_social) seed.hh_social = { fb: '', tt: '', yt: '', vb: '' };
+        if (!seed.hh_sponsor) seed.hh_sponsor = [{ id: 1, active: true, title: 'Veezoom Myanmar', badge: 'Official Sponsor', desc: '', link: '', img: '' }];
+        if (!seed.hh_posts) seed.hh_posts = [];
+        if (!seed.hh_home_sections) seed.hh_home_sections = [];
+        if (!seed.hh_gallery) seed.hh_gallery = { active: true, heading: 'Photo Gallery', subtitle: 'ခရီးလမ်းမှ အလှပုံများ', previewCount: 4, categories: ['Road Trip','Mountain','River','Sunset'], photos: [] };
+        if (!seed.hh_settings) seed.hh_settings = { brandName: 'HTOO HTET', brandTagline: 'Travel Journal & Beyond' };
+        if (!seed.hh_proud_sponsors) seed.hh_proud_sponsors = [];
+        if (!seed.hh_proud_meta) seed.hh_proud_meta = { title: 'Our Proud Sponsors', titleFs: 12, frameH: 100, logoH: 48, titleX: 3, titleY: 36 };
+        if (!seed.hh_menu) seed.hh_menu = [];
+        await adminDb.ref('siteData').set(seed);
+        Object.keys(seed).forEach(k => originalSetItem(k, JSON.stringify(seed[k])));
+      }
+      remoteSyncReady = true;
+      try { loadAll(); } catch (e5) {}
+      try { renderOverview(); } catch (e6) {}
+      if (st) st.textContent = '✓ Firebase sync ပြီး · ' + new Date().toLocaleTimeString();
+    } catch (syncErr) {
+      console.error(syncErr);
+      remoteSyncReady = true; // allow local writes to queue when possible
+      if (st) st.textContent = '⚠ Firebase မရသေး — local နဲ့ ဆက်အလုပ်လုပ်နေသည်';
+      toast('Firebase sync နှောင့်: local ဒေတာ သုံးနေသည်', true);
+    }
   } catch (e) {
     $('login-error').textContent = e.message || 'Login မအောင်မြင်ပါ။';
   } finally {
@@ -2415,14 +2436,21 @@ function showView(name, button) {
     loadGalleryForm();
     renderGallerySlots();
     renderGalleryList();
-    // refresh from Firebase so list is accurate
+    // Firebase refresh: only apply if remote has MORE photos (never wipe local newer saves)
     if (adminUser && adminDb) {
       adminDb.ref('siteData/hh_gallery').once('value').then(function(snap) {
-        var g = snap.val();
-        if (g && typeof g === 'object') {
-          try { originalSetItem('hh_gallery', JSON.stringify(g)); } catch (e) {}
+        var remote = snap.val();
+        if (!remote || typeof remote !== 'object') return;
+        var local = null;
+        try { local = JSON.parse(localStorage.getItem('hh_gallery') || 'null'); } catch (e) { local = null; }
+        var localN = (local && Array.isArray(local.photos)) ? local.photos.length : 0;
+        var remoteN = Array.isArray(remote.photos) ? remote.photos.length : 0;
+        if (remoteN > localN) {
+          try { originalSetItem('hh_gallery', JSON.stringify(remote)); } catch (e) {}
           renderGalleryList();
+          try { renderOverview(); } catch (e) {}
         }
+        // if local is ahead or equal, keep local — user just saved
       }).catch(function(){});
     }
   }
@@ -2447,10 +2475,26 @@ function showView(name, button) {
       adminDb.ref('siteData').once('value').then(function(snap) {
         var data = snap.val();
         if (!data) return;
+        function localLen(key) {
+          try {
+            var v = JSON.parse(localStorage.getItem(key) || 'null');
+            if (!v) return 0;
+            if (Array.isArray(v)) return v.length;
+            if (v.photos && Array.isArray(v.photos)) return v.photos.length;
+            return 1;
+          } catch (e) { return 0; }
+        }
+        function remoteLen(v) {
+          if (!v) return 0;
+          if (Array.isArray(v)) return v.length;
+          if (v.photos && Array.isArray(v.photos)) return v.photos.length;
+          return 1;
+        }
         ['hh_posts','hh_home_sections','hh_proud_sponsors','hh_sponsor','hh_gallery'].forEach(function(k) {
-          if (data[k] != null) {
-            try { originalSetItem(k, JSON.stringify(data[k])); } catch (e) {}
-          }
+          if (data[k] == null) return;
+          // never replace local with fewer items (protects just-saved gallery/posts)
+          if (remoteLen(data[k]) < localLen(k)) return;
+          try { originalSetItem(k, JSON.stringify(data[k])); } catch (e) {}
         });
         if (typeof renderOverview === 'function') renderOverview();
       }).catch(function(){});
@@ -5305,9 +5349,10 @@ function onGalSlotFile(i, input) {
       var ok = await saveOneGalleryImage(finalUrl, i);
       if (ok) {
         clearGalSlot(i);
+        try { renderGalleryList(); renderOverview(); } catch (e) {}
         toast('✓ ပုံ Gallery ထဲ သိမ်းပြီး');
       } else {
-        toast('သိမ်းမရပါ — Login စစ်ပါ', true);
+        toast('သိမ်းမရပါ — Login / Storage စစ်ပါ', true);
       }
     } catch (err) {
       console.error(err);
@@ -5408,27 +5453,38 @@ async function saveOneGalleryImage(url, slotIndex) {
   g.photos.forEach(function(p, i) { p.order = i; });
   g.active = true;
 
-  // 1) Local + UI immediately
+  // 1) Local + UI immediately (always visible without tab switch)
   try {
     originalSetItem('hh_gallery', JSON.stringify(g));
   } catch (e) {
     try { localStorage.setItem('hh_gallery', JSON.stringify(g)); } catch (e2) {
-      toast('localStorage မဆန့်ပါ', true);
+      toast('localStorage မဆန့်ပါ — ပုံအရေအတွက် လျှော့ပါ သို့မဟုတ် Storage URL သုံးပါ', true);
       return false;
     }
   }
-  renderGalleryList();
-  try { if (typeof renderOverview === 'function') renderOverview(); } catch (e) {}
-
-  // 2) Firebase background
   try {
-    await Promise.race([
-      adminDb.ref('siteData/hh_gallery').set(g),
-      new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Firebase timeout')); }, 12000); })
-    ]);
-  } catch (e) {
-    console.error(e);
-    toast('UI မှာ ပေါ်ပါပြီ · Firebase sync နှောင့်: ' + (e.message || e), true);
+    if (typeof renderGalleryList === 'function') renderGalleryList();
+  } catch (e) { console.warn(e); }
+  try {
+    if (typeof renderOverview === 'function') renderOverview();
+  } catch (e) {}
+  // force reflow if gallery view is active
+  try {
+    var list = document.getElementById('gal-list');
+    if (list) list.scrollTop = list.scrollTop;
+  } catch (e) {}
+
+  // 2) Firebase background (does not block UI)
+  if (adminDb && adminUser) {
+    try {
+      await Promise.race([
+        adminDb.ref('siteData/hh_gallery').set(g),
+        new Promise(function(_, rej) { setTimeout(function() { rej(new Error('Firebase timeout')); }, 12000); })
+      ]);
+    } catch (e) {
+      console.error(e);
+      toast('Gallery UI မှာ ပေါ်ပြီး · Firebase sync နောက်မှ: ' + (e.message || e), true);
+    }
   }
   return true;
 }
@@ -6092,6 +6148,75 @@ function renderPresetList() {
     </div>`;
   }).join('');
 }
+
+
+/* ---- Production: Backup / Restore ---- */
+function exportSiteBackup() {
+  try {
+    var payload = {
+      exportedAt: new Date().toISOString(),
+      version: 1,
+      site: 'HTOO HTET',
+      data: {}
+    };
+    (DATA_KEYS || []).forEach(function(k) {
+      var raw = localStorage.getItem(k);
+      if (raw === null) return;
+      try { payload.data[k] = JSON.parse(raw); } catch (e) { payload.data[k] = raw; }
+    });
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'htoo-htet-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() { try { URL.revokeObjectURL(a.href); a.remove(); } catch (e) {} }, 500);
+    toast('✓ Backup ဖိုင် download ပြီး');
+  } catch (err) {
+    console.error(err);
+    toast('Backup မရ: ' + (err.message || err), true);
+  }
+}
+async function importSiteBackup(input) {
+  try {
+    var file = input && input.files && input.files[0];
+    if (!file) return;
+    if (!confirm('Backup ဖိုင်က ဒေတာတွေနဲ့ လက်ရှိ admin ဒေတာကို အစားထိုးမယ်။ သေချာပါသလား?')) {
+      input.value = '';
+      return;
+    }
+    var text = await file.text();
+    var parsed = JSON.parse(text);
+    var data = parsed.data || parsed;
+    if (!data || typeof data !== 'object') throw new Error('Backup ဖိုင် ပုံစံ မမှန်');
+    var keys = Object.keys(data);
+    if (!keys.length) throw new Error('Backup ထဲ ဒေတာ မရှိ');
+    keys.forEach(function(k) {
+      try { originalSetItem(k, JSON.stringify(data[k])); } catch (e) {
+        try { localStorage.setItem(k, JSON.stringify(data[k])); } catch (e2) {}
+      }
+    });
+    if (adminUser && adminDb && remoteSyncReady) {
+      toast('Firebase သို့ Restore sync လုပ်နေသည်…');
+      try {
+        await adminDb.ref('siteData').update(data);
+      } catch (e) {
+        console.error(e);
+        toast('Local restore ပြီး · Firebase sync မရ: ' + (e.message || e), true);
+      }
+    }
+    try { loadAll(); } catch (e) {}
+    try { renderOverview(); } catch (e) {}
+    try { if (typeof renderGalleryList === 'function') renderGalleryList(); } catch (e) {}
+    toast('✓ Backup restore ပြီး (' + keys.length + ' keys)');
+  } catch (err) {
+    console.error(err);
+    toast('Restore မရ: ' + (err.message || err), true);
+  }
+  if (input) input.value = '';
+}
+window.exportSiteBackup = exportSiteBackup;
+window.importSiteBackup = importSiteBackup;
 
 function toast(message, isError) {
   let t = $('toast');
