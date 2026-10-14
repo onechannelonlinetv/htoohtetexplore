@@ -1589,7 +1589,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -4549,7 +4549,7 @@ function deleteMenu(i) {
   const a = getMenu(); a.splice(i, 1); write('hh_menu', a); renderMenuList(); toast('ဖျက်ပြီးပါပြီ။');
 }
 
-/* ---- Proud Sponsors (from admin-3: drag/resize/staging/meta) ---- */
+/* ---- Proud Sponsors (drag/resize/staging/meta) ---- */
 function updateProudPreview() {
   const bar = $('proud-preview-bar');
   const frame = $('proud-live-frame');
