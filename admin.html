@@ -1625,7 +1625,7 @@ async function insertGalleryInContent(inputEl) {
     ta.focus();
     if (typeof updateContentPreview === 'function') updateContentPreview();
     toast('Gallery Preview ထဲ ပေါ်ပါပြီ — Upload လုပ်နေသည်…');
-    // Upload each gallery image to Firebase Storage (same as single images)
+    // Upload each gallery image to Firebase Storage (same as single content images)
     if (typeof adminUser !== 'undefined' && adminUser && typeof adminStorage !== 'undefined' && adminStorage) {
       for (var j = 0; j < cids.length; j++) {
         (function(cid, blob, idx) {
