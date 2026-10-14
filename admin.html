@@ -44,7 +44,8 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 #sp-prev-badge,#sp-prev-title,#sp-prev-desc{position:absolute}
 #sp-prev-badge .sp-resize-handle,#sp-prev-title .sp-resize-handle,#sp-prev-desc .sp-resize-handle{pointer-events:auto}
 
-#hero-live-preview [id^="hero-prev-"]{z-index:10}
+#hero-live-preview [id^="hero-prev-"]{z-index:50!important;pointer-events:auto!important;cursor:grab!important}
+#hero-live-preview .sp-resize-handle{z-index:60!important;pointer-events:auto!important}
 #content-live-preview img{max-width:100%;border-radius:10px;display:block;margin:8px 0}
 #sp-prev-logo{width:100%!important;height:100%!important;object-fit:contain!important}
 .preview-thumb{max-height:140px!important;max-width:240px!important;object-fit:contain!important;display:block!important}
@@ -3014,28 +3015,8 @@ function initHeroLineDrag() {
     'hero-label': { input: 'hero-label-fs', min: 8, max: 72 },
     'hero-title': { input: 'hero-title-fs', min: 14, max: 140 },
     'hero-desc': { input: 'hero-desc-fs', min: 10, max: 80 },
-    'hero-sign': { input: 'hero-sign-fs', min: 8, max: 48 } /* falls back if missing */
+    'hero-sign': { input: 'hero-sign-fs', min: 8, max: 48 }
   };
-
-  Object.keys(map).forEach(function(id) {
-    const el = $(id);
-    if (!el) return;
-    el.style.cursor = 'grab';
-    el.style.userSelect = 'none';
-    el.style.webkitUserSelect = 'none';
-    el.style.touchAction = 'none';
-    el.style.zIndex = '40';
-    el.style.pointerEvents = 'auto';
-    el.style.position = 'absolute';
-  });
-  // ensure resize handles are interactive
-  box.querySelectorAll('.sp-resize-handle').forEach(function(h) {
-    h.style.pointerEvents = 'auto';
-    h.style.zIndex = '50';
-  });
-
-  if (box._heroDelegated) return;
-  box._heroDelegated = true;
 
   function pt(e) {
     if (e.touches && e.touches[0]) return e.touches[0];
@@ -3043,106 +3024,131 @@ function initHeroLineDrag() {
     return e;
   }
 
-  function findPrevEl(t) {
-    if (!t) return null;
-    if (t.classList && t.classList.contains('sp-resize-handle')) return t;
-    if (t.id && map[t.id]) return t;
-    if (t.closest) {
-      const h = t.closest('.sp-resize-handle');
-      if (h) return h;
-      const p = t.closest('[id^="hero-prev-"]');
-      if (p && map[p.id]) return p;
+  // Style every text layer so it can receive pointer events
+  Object.keys(map).forEach(function(id) {
+    const el = $(id);
+    if (!el) return;
+    el.style.cursor = 'grab';
+    el.style.userSelect = 'none';
+    el.style.webkitUserSelect = 'none';
+    el.style.touchAction = 'none';
+    el.style.zIndex = '50';
+    el.style.pointerEvents = 'auto';
+    el.style.position = 'absolute';
+  });
+  box.querySelectorAll('.sp-resize-handle').forEach(function(h) {
+    h.style.pointerEvents = 'auto';
+    h.style.zIndex = '60';
+    h.style.cursor = 'nwse-resize';
+  });
+
+  // Bind once on box (delegation) — but normalize text nodes
+  if (!box._heroDelegatedV2) {
+    box._heroDelegatedV2 = true;
+    // disable old flag so we don't double-bind if both flags somehow set
+    box._heroDelegated = true;
+
+    function findPrevEl(t) {
+      if (!t) return null;
+      // FIX: clicking text hits a Text Node which has no .closest / .id
+      if (t.nodeType === 3) t = t.parentElement;
+      if (!t) return null;
+      if (t.classList && t.classList.contains('sp-resize-handle')) return t;
+      if (t.id && map[t.id]) return t;
+      if (typeof t.closest === 'function') {
+        const h = t.closest('.sp-resize-handle');
+        if (h) return h;
+        const p = t.closest('[id^="hero-prev-"]');
+        if (p && map[p.id]) return p;
+      }
+      return null;
     }
-    return null;
-  }
 
-  function onStart(e) {
-    const t = findPrevEl(e.target);
-    if (!t) return;
-    const p = pt(e);
-    const rect = box.getBoundingClientRect();
+    function onStart(e) {
+      const t = findPrevEl(e.target);
+      if (!t) return;
+      const p = pt(e);
+      const rect = box.getBoundingClientRect();
 
-    if (t.classList && t.classList.contains('sp-resize-handle')) {
-      const key = t.getAttribute('data-resize');
-      const cfg = sizeMap[key];
+      if (t.classList && t.classList.contains('sp-resize-handle')) {
+        const key = t.getAttribute('data-resize');
+        const cfg = sizeMap[key];
+        if (!cfg) return;
+        // if input missing (e.g. hero-sign-fs), skip resize
+        if (!$(cfg.input)) return;
+        _heroDragState = {
+          type: 'resize',
+          input: cfg.input, min: cfg.min, max: cfg.max,
+          sy: p.clientY, ox: parseInt($(cfg.input).value || '12', 10)
+        };
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      const cfg = map[t.id];
       if (!cfg) return;
       _heroDragState = {
-        type: 'resize',
-        input: cfg.input, min: cfg.min, max: cfg.max,
-        sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10)
+        type: 'move',
+        el: t, cfg: cfg,
+        startX: p.clientX, startY: p.clientY,
+        origL: parseFloat(t.style.left) || 0,
+        origT: parseFloat(t.style.top) || 0,
+        rectW: rect.width || 1, rectH: rect.height || 1
       };
+      t.style.cursor = 'grabbing';
+      t.style.borderColor = 'rgba(52,211,153,0.95)';
       e.preventDefault();
       e.stopPropagation();
-      return;
     }
 
-    const cfg = map[t.id];
-    if (!cfg) return;
-    _heroDragState = {
-      type: 'move',
-      el: t, cfg: cfg,
-      startX: p.clientX, startY: p.clientY,
-      origL: parseFloat(t.style.left) || 0,
-      origT: parseFloat(t.style.top) || 0,
-      rectW: rect.width || 1, rectH: rect.height || 1
-    };
-    t.style.cursor = 'grabbing';
-    t.style.borderColor = 'rgba(52,211,153,0.9)';
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation && e.stopImmediatePropagation();
-    t.style.borderColor = 'rgba(34,211,238,0.9)';
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  function onMove(e) {
-    if (!_heroDragState) return;
-    const p = pt(e);
-    if (_heroDragState.type === 'resize') {
-      const delta = Math.round((_heroDragState.sy - p.clientY) / 3);
-      const nv = Math.max(_heroDragState.min, Math.min(_heroDragState.max, _heroDragState.ox + delta));
-      if ($(_heroDragState.input)) $(_heroDragState.input).value = nv;
-      // light update: only font sizes on preview els
-      const lfs = parseInt($('hero-label-fs')?.value || '12', 10);
-      const tfs = parseInt($('hero-title-fs')?.value || '28', 10);
-      const dfs = parseInt($('hero-desc-fs')?.value || '14', 10);
-      if ($('hero-prev-label')) $('hero-prev-label').style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
-      if ($('hero-prev-title')) $('hero-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
-      if ($('hero-prev-desc')) $('hero-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
-      if ($('val-hero-label-fs')) $('val-hero-label-fs').textContent = lfs + 'px';
-      if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
-      if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
-      try { updatePhoneHeroPreview(); } catch (err) {}
-    } else if (_heroDragState.type === 'move') {
-      const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
-      const nx = Math.max(-5, Math.min(105, origL + ((p.clientX - startX) / rectW) * 100));
-      const ny = Math.max(-5, Math.min(105, origT + ((p.clientY - startY) / rectH) * 100));
-      el.style.left = nx + '%';
-      el.style.top = ny + '%';
-      if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
-      if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
-      if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
-      if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
-      try { updatePhoneHeroPreview(); } catch (err) {}
+    function onMove(e) {
+      if (!_heroDragState) return;
+      const p = pt(e);
+      if (_heroDragState.type === 'resize') {
+        const delta = Math.round((_heroDragState.sy - p.clientY) / 2.5);
+        const nv = Math.max(_heroDragState.min, Math.min(_heroDragState.max, _heroDragState.ox + delta));
+        if ($(_heroDragState.input)) $(_heroDragState.input).value = nv;
+        const lfs = parseInt($('hero-label-fs')?.value || '12', 10);
+        const tfs = parseInt($('hero-title-fs')?.value || '28', 10);
+        const dfs = parseInt($('hero-desc-fs')?.value || '14', 10);
+        if ($('hero-prev-label')) $('hero-prev-label').style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
+        if ($('hero-prev-title')) $('hero-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
+        if ($('hero-prev-desc')) $('hero-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
+        if ($('val-hero-label-fs')) $('val-hero-label-fs').textContent = lfs + 'px';
+        if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
+        if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
+        try { updatePhoneHeroPreview(); } catch (err) {}
+      } else if (_heroDragState.type === 'move') {
+        const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
+        const nx = Math.max(-5, Math.min(105, origL + ((p.clientX - startX) / rectW) * 100));
+        const ny = Math.max(-5, Math.min(105, origT + ((p.clientY - startY) / rectH) * 100));
+        el.style.left = nx + '%';
+        el.style.top = ny + '%';
+        if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
+        if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
+        if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
+        if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
+        try { updatePhoneHeroPreview(); } catch (err) {}
+      }
+      if (e.cancelable) e.preventDefault();
     }
-    if (e.cancelable) e.preventDefault();
-  }
 
-  function onUp() {
-    if (_heroDragState && _heroDragState.type === 'move' && _heroDragState.el) {
-      _heroDragState.el.style.cursor = 'grab';
-      _heroDragState.el.style.borderColor = '';
+    function onUp() {
+      if (_heroDragState && _heroDragState.type === 'move' && _heroDragState.el) {
+        _heroDragState.el.style.cursor = 'grab';
+        _heroDragState.el.style.borderColor = '';
+      }
+      _heroDragState = null;
     }
-    _heroDragState = null;
-  }
 
-  box.addEventListener('mousedown', onStart);
-  box.addEventListener('touchstart', onStart, { passive: false });
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('touchmove', onMove, { passive: false });
-  window.addEventListener('mouseup', onUp);
-  window.addEventListener('touchend', onUp);
+    box.addEventListener('mousedown', onStart, true); // capture phase beats image drag
+    box.addEventListener('touchstart', onStart, { passive: false, capture: true });
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+  }
 }
 
 
