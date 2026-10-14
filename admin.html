@@ -289,16 +289,21 @@ main > div {
 <!-- APP -->
 <div id="app" class="hidden min-h-screen">
   <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-800 bg-[#091220] p-5 lg:flex lg:flex-col overflow-y-auto">
-    <div class="mb-6 flex items-center gap-3 group relative">
-      <div id="admin-studio-logo-wrap" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 text-xl overflow-hidden cursor-pointer" onclick="document.getElementById('admin-studio-logo-file').click()" title="ပုံတင်ရန် နှိပ်ပါ">
-        <img id="admin-studio-logo-img" src="" alt="" class="w-full h-full object-cover hidden">
-        <i id="admin-studio-logo-icon" class="fa-solid fa-mountain-sun"></i>
+    <div class="mb-5 rounded-xl border border-slate-700/80 bg-slate-900/50 p-3 space-y-2">
+      <div class="flex items-center gap-3">
+        <button type="button" id="admin-studio-logo-wrap" class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 text-xl overflow-hidden border border-emerald-500/40" title="ပုံပြောင်းရန် နှိပ်ပါ" onclick="document.getElementById('admin-studio-logo-file').click()">
+          <img id="admin-studio-logo-img" src="" alt="" class="w-full h-full object-cover hidden">
+          <i id="admin-studio-logo-icon" class="fa-solid fa-mountain-sun"></i>
+          <span class="absolute bottom-0 right-0 w-5 h-5 rounded-md bg-slate-900 text-[10px] text-emerald-300 flex items-center justify-center border border-slate-600"><i class="fa-solid fa-camera"></i></span>
+        </button>
+        <input type="file" id="admin-studio-logo-file" accept="image/*" class="hidden" onchange="onAdminStudioLogo(this)">
+        <div class="min-w-0 flex-1">
+          <label class="label mb-1" for="admin-studio-name">Admin နာမည်</label>
+          <input id="admin-studio-name" type="text" class="field py-1.5 px-2 text-sm font-black" value="HTOO HTET" placeholder="Admin နာမည်">
+        </div>
       </div>
-      <input type="file" id="admin-studio-logo-file" accept="image/*" class="hidden" onchange="onAdminStudioLogo(this)">
-      <div class="min-w-0 flex-1">
-        <input id="admin-studio-name" class="field py-1 px-2 text-sm font-black bg-transparent border-slate-700/80" value="HTOO HTET" onchange="saveAdminStudio()" onblur="saveAdminStudio()">
-        <div class="text-sm font-bold text-emerald-300 px-1">Admin Studio</div>
-      </div>
+      <button type="button" class="btn btn-green text-xs w-full py-2" onclick="saveAdminStudio()"><i class="fa-solid fa-floppy-disk mr-1"></i>နာမည် / ပုံ သိမ်း</button>
+      <div class="text-[11px] text-emerald-400/90 font-semibold text-center">Admin Studio</div>
     </div>
     <p class="mb-2 px-3 text-[10px] font-black uppercase tracking-[.18em] text-slate-500">Workspace</p>
     <nav class="space-y-0.5 flex-1">
@@ -310,7 +315,6 @@ main > div {
       <button class="navbtn" data-view="sponsor" onclick="showView('sponsor',this)"><i class="fa-solid fa-rectangle-ad w-4"></i> Official Sponsor</button>
       <button class="navbtn" data-view="upcoming" onclick="showView('upcoming',this)"><i class="fa-solid fa-map-location-dot w-4"></i> Upcoming</button>
       <button class="navbtn" data-view="gallery" onclick="showView('gallery',this)"><i class="fa-solid fa-images w-4"></i> Photo Gallery</button>
-      <button class="navbtn" data-view="posts" onclick="showView('posts',this)"><i class="fa-regular fa-newspaper w-4"></i> Latest Travel</button>
       <button class="navbtn" data-view="addpost" onclick="showView('addpost',this)"><i class="fa-solid fa-pen-to-square w-4"></i> Add Post</button>
       <button class="navbtn" data-view="postlist" onclick="showView('postlist',this)"><i class="fa-solid fa-list w-4"></i> Post List</button>
       <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
@@ -331,7 +335,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod10</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod11</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -350,7 +354,6 @@ main > div {
         <button class="navbtn" onclick="showView('sponsor')">Official Sponsor</button>
         <button class="navbtn" onclick="showView('upcoming')">Upcoming</button>
         <button class="navbtn" onclick="showView('gallery')">Photo Gallery</button>
-        <button class="navbtn" onclick="showView('posts')">Latest Travel</button>
         <button class="navbtn" onclick="showView('addpost')">Add Post</button>
         <button class="navbtn" onclick="showView('postlist')">Post List</button>
         <button class="navbtn" onclick="showView('sections')">Custom Rows</button>
@@ -6676,17 +6679,28 @@ function applyAdminStudio() {
     if (img) { img.removeAttribute('src'); img.classList.add('hidden'); }
     if (icon) icon.classList.remove('hidden');
   }
-  // login modal title
   var loginH = document.querySelector('#login-modal h1');
   if (loginH) loginH.textContent = name;
+  // header tiny line
+  var tiny = document.querySelector('header .tiny');
+  if (tiny) {
+    var ver = tiny.querySelector('.text-emerald-400');
+    var verText = ver ? ver.textContent : '';
+    tiny.innerHTML = name + ' / ADMIN · <span class="text-emerald-400">' + (verText || 'v2026.10.15-prod11') + '</span>';
+  }
 }
 function saveAdminStudio() {
   var s = getAdminStudio();
   var nameEl = document.getElementById('admin-studio-name');
   s.name = (nameEl && nameEl.value || 'HTOO HTET').trim() || 'HTOO HTET';
-  try { localStorage.setItem('hh_admin_studio', JSON.stringify(s)); } catch (e) {}
+  try {
+    localStorage.setItem('hh_admin_studio', JSON.stringify(s));
+  } catch (e) {
+    toast('သိမ်းမရ — storage ပြည့်နေနိုင်', true);
+    return;
+  }
   applyAdminStudio();
-  toast('Admin နာမည် သိမ်းပြီး');
+  toast('✓ Admin နာမည် သိမ်းပြီး');
 }
 function onAdminStudioLogo(input) {
   var file = input && input.files && input.files[0];
@@ -6698,14 +6712,38 @@ function onAdminStudioLogo(input) {
   }
   var reader = new FileReader();
   reader.onload = function() {
-    var s = getAdminStudio();
-    s.logo = reader.result;
-    try { localStorage.setItem('hh_admin_studio', JSON.stringify(s)); } catch (e) {
-      toast('ပုံကြီးလွန်း — ချုံ့ပြီး ပြန်တင်ပါ', true);
-      return;
+    var dataUrl = reader.result;
+    // shrink for localStorage
+    function finish(url) {
+      var s = getAdminStudio();
+      s.logo = url;
+      try {
+        localStorage.setItem('hh_admin_studio', JSON.stringify(s));
+      } catch (e) {
+        toast('ပုံကြီးလွန်း — ပိုသေးတဲ့ပုံနဲ့ ပြန်တင်ပါ', true);
+        return;
+      }
+      applyAdminStudio();
+      toast('✓ Admin ပုံ သိမ်းပြီး');
     }
-    applyAdminStudio();
-    toast('Admin ပုံ သိမ်းပြီး');
+    try {
+      var im = new Image();
+      im.onload = function() {
+        var max = 160;
+        var w = im.width, h = im.height;
+        var scale = Math.min(1, max / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * scale));
+        var ch = Math.max(1, Math.round(h * scale));
+        var c = document.createElement('canvas');
+        c.width = cw; c.height = ch;
+        c.getContext('2d').drawImage(im, 0, 0, cw, ch);
+        finish(c.toDataURL('image/jpeg', 0.82));
+      };
+      im.onerror = function() { finish(dataUrl); };
+      im.src = dataUrl;
+    } catch (e) {
+      finish(dataUrl);
+    }
   };
   reader.readAsDataURL(file);
   input.value = '';
@@ -6713,6 +6751,9 @@ function onAdminStudioLogo(input) {
 window.saveAdminStudio = saveAdminStudio;
 window.onAdminStudioLogo = onAdminStudioLogo;
 window.applyAdminStudio = applyAdminStudio;
+document.addEventListener('DOMContentLoaded', function() {
+  try { applyAdminStudio(); } catch (e) {}
+});
 try { applyAdminStudio(); } catch (e) {}
 
 function toast(message, isError) {
