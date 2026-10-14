@@ -72,7 +72,8 @@ input[type=color].field-color,input[type=color].h-11{
   min-height:2.75rem;width:100%;padding:2px;cursor:pointer
 }
 #sponsor-live-preview,#up-live-preview{
-  width:100%!important;max-width:100%!important
+  max-width:100%!important;
+  /* width controlled by JS (W% slider) — do not force 100% */
 }
 #hero-live-preview{
   max-width:100%;
@@ -95,9 +96,10 @@ input[type=color].field-color,input[type=color].h-11{
   box-sizing: border-box;
 }
 #sponsor-live-preview {
-  width: 100% !important;
   max-width: 100% !important;
   display: block !important;
+  margin-left: auto;
+  margin-right: auto;
 }
 #hero-live-preview {
   max-width: 100% !important;
@@ -808,6 +810,21 @@ main > div {
             <p class="mt-1 text-sm text-slate-400">Hero လို Preview · ပုံဖိဆွဲ · Sponsor အများကြီး Add လုပ်နိုင်</p>
           </div>
           <button type="button" onclick="addNewSponsor()" class="btn btn-green"><i class="fa-solid fa-plus mr-2"></i>Add Sponsor</button>
+        </div>
+
+        <div class="panel editor-shell p-4 sm:p-5 space-y-3">
+          <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Section Heading · Homepage အပေါ်ခေါင်းစဉ်</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="label">Section Heading</label>
+              <input id="sp-section-heading" class="field" placeholder="Official Sponsors" oninput="">
+            </div>
+            <div>
+              <label class="label">Section Subtitle</label>
+              <input id="sp-section-subtitle" class="field" placeholder="ကျွန်ုပ်တို့၏ မိတ်ဖက်များ" oninput="">
+            </div>
+          </div>
+          <button type="button" onclick="saveSponsorSectionMeta()" class="btn btn-green text-xs"><i class="fa-solid fa-floppy-disk mr-1"></i>Save Section Heading</button>
         </div>
 
         <div id="sponsor-list" class="space-y-2"></div>
@@ -1600,7 +1617,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2624,6 +2641,7 @@ function loadAll() {
   renderPostsList();
   if (typeof fillPostCategorySelect === 'function') fillPostCategorySelect();
   renderOverview();
+  try { if (typeof loadSponsorSectionMeta === 'function') loadSponsorSectionMeta(); } catch(e) {}
   if (typeof updateSponsorPreview === 'function') updateSponsorPreview();
   if (typeof renderPresetList === 'function') renderPresetList();
   const _sh = read('hh_settings', {}).sponsorHeight;
@@ -3018,16 +3036,9 @@ function initHeroLineDrag() {
     'hero-sign': { input: 'hero-sign-fs', min: 8, max: 48 }
   };
 
-  function pt(e) {
-    if (e.touches && e.touches[0]) return e.touches[0];
-    if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
-    return e;
-  }
-
-  // Style every text layer so it can receive pointer events
-  Object.keys(map).forEach(function(id) {
-    const el = $(id);
-    if (!el) return;
+  function bindMove(el, cfg) {
+    if (!el || el._hhBound) return;
+    el._hhBound = true;
     el.style.cursor = 'grab';
     el.style.userSelect = 'none';
     el.style.webkitUserSelect = 'none';
@@ -3035,120 +3046,110 @@ function initHeroLineDrag() {
     el.style.zIndex = '50';
     el.style.pointerEvents = 'auto';
     el.style.position = 'absolute';
-  });
-  box.querySelectorAll('.sp-resize-handle').forEach(function(h) {
-    h.style.pointerEvents = 'auto';
-    h.style.zIndex = '60';
-    h.style.cursor = 'nwse-resize';
-  });
 
-  // Bind once on box (delegation) — but normalize text nodes
-  if (!box._heroDelegatedV2) {
-    box._heroDelegatedV2 = true;
-    // disable old flag so we don't double-bind if both flags somehow set
-    box._heroDelegated = true;
-
-    function findPrevEl(t) {
-      if (!t) return null;
-      // FIX: clicking text hits a Text Node which has no .closest / .id
-      if (t.nodeType === 3) t = t.parentElement;
-      if (!t) return null;
-      if (t.classList && t.classList.contains('sp-resize-handle')) return t;
-      if (t.id && map[t.id]) return t;
-      if (typeof t.closest === 'function') {
-        const h = t.closest('.sp-resize-handle');
-        if (h) return h;
-        const p = t.closest('[id^="hero-prev-"]');
-        if (p && map[p.id]) return p;
-      }
-      return null;
-    }
-
-    function onStart(e) {
-      const t = findPrevEl(e.target);
-      if (!t) return;
-      const p = pt(e);
-      const rect = box.getBoundingClientRect();
-
-      if (t.classList && t.classList.contains('sp-resize-handle')) {
-        const key = t.getAttribute('data-resize');
-        const cfg = sizeMap[key];
-        if (!cfg) return;
-        // if input missing (e.g. hero-sign-fs), skip resize
-        if (!$(cfg.input)) return;
-        _heroDragState = {
-          type: 'resize',
-          input: cfg.input, min: cfg.min, max: cfg.max,
-          sy: p.clientY, ox: parseInt($(cfg.input).value || '12', 10)
-        };
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-
-      const cfg = map[t.id];
-      if (!cfg) return;
-      _heroDragState = {
-        type: 'move',
-        el: t, cfg: cfg,
-        startX: p.clientX, startY: p.clientY,
-        origL: parseFloat(t.style.left) || 0,
-        origT: parseFloat(t.style.top) || 0,
-        rectW: rect.width || 1, rectH: rect.height || 1
-      };
-      t.style.cursor = 'grabbing';
-      t.style.borderColor = 'rgba(52,211,153,0.95)';
+    el.addEventListener('pointerdown', function(e) {
+      // resize handle has its own handler
+      if (e.target && e.target.classList && e.target.classList.contains('sp-resize-handle')) return;
       e.preventDefault();
       e.stopPropagation();
-    }
+      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+      const rect = box.getBoundingClientRect();
+      _heroDragState = {
+        type: 'move',
+        el: el, cfg: cfg,
+        startX: e.clientX, startY: e.clientY,
+        origL: parseFloat(el.style.left) || 0,
+        origT: parseFloat(el.style.top) || 0,
+        rectW: rect.width || 1, rectH: rect.height || 1,
+        pid: e.pointerId
+      };
+      el.style.cursor = 'grabbing';
+      el.style.borderColor = 'rgba(52,211,153,0.95)';
+      el.style.outline = '2px solid rgba(52,211,153,0.5)';
+    });
 
-    function onMove(e) {
-      if (!_heroDragState) return;
-      const p = pt(e);
-      if (_heroDragState.type === 'resize') {
-        const delta = Math.round((_heroDragState.sy - p.clientY) / 2.5);
-        const nv = Math.max(_heroDragState.min, Math.min(_heroDragState.max, _heroDragState.ox + delta));
-        if ($(_heroDragState.input)) $(_heroDragState.input).value = nv;
-        const lfs = parseInt($('hero-label-fs')?.value || '12', 10);
-        const tfs = parseInt($('hero-title-fs')?.value || '28', 10);
-        const dfs = parseInt($('hero-desc-fs')?.value || '14', 10);
-        if ($('hero-prev-label')) $('hero-prev-label').style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
-        if ($('hero-prev-title')) $('hero-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
-        if ($('hero-prev-desc')) $('hero-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
-        if ($('val-hero-label-fs')) $('val-hero-label-fs').textContent = lfs + 'px';
-        if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
-        if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
-        try { updatePhoneHeroPreview(); } catch (err) {}
-      } else if (_heroDragState.type === 'move') {
-        const { el, cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
-        const nx = Math.max(-5, Math.min(105, origL + ((p.clientX - startX) / rectW) * 100));
-        const ny = Math.max(-5, Math.min(105, origT + ((p.clientY - startY) / rectH) * 100));
-        el.style.left = nx + '%';
-        el.style.top = ny + '%';
-        if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
-        if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
-        if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
-        if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
-        try { updatePhoneHeroPreview(); } catch (err) {}
-      }
-      if (e.cancelable) e.preventDefault();
-    }
+    el.addEventListener('pointermove', function(e) {
+      if (!_heroDragState || _heroDragState.type !== 'move' || _heroDragState.el !== el) return;
+      e.preventDefault();
+      const { cfg, startX, startY, origL, origT, rectW, rectH } = _heroDragState;
+      const nx = Math.max(-5, Math.min(105, origL + ((e.clientX - startX) / rectW) * 100));
+      const ny = Math.max(-5, Math.min(105, origT + ((e.clientY - startY) / rectH) * 100));
+      el.style.left = nx + '%';
+      el.style.top = ny + '%';
+      if ($(cfg.xi)) $(cfg.xi).value = Math.round(nx);
+      if ($(cfg.yi)) $(cfg.yi).value = Math.round(ny);
+      if ($(cfg.vx)) $(cfg.vx).textContent = Math.round(nx);
+      if ($(cfg.vy)) $(cfg.vy).textContent = Math.round(ny);
+      try { updatePhoneHeroPreview(); } catch (err) {}
+    });
 
-    function onUp() {
-      if (_heroDragState && _heroDragState.type === 'move' && _heroDragState.el) {
-        _heroDragState.el.style.cursor = 'grab';
-        _heroDragState.el.style.borderColor = '';
-      }
+    function endPtr(e) {
+      if (!_heroDragState || _heroDragState.el !== el) return;
+      el.style.cursor = 'grab';
+      el.style.borderColor = '';
+      el.style.outline = '';
+      try { el.releasePointerCapture(e.pointerId); } catch (err) {}
       _heroDragState = null;
     }
-
-    box.addEventListener('mousedown', onStart, true); // capture phase beats image drag
-    box.addEventListener('touchstart', onStart, { passive: false, capture: true });
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('mouseup', onUp);
-    window.addEventListener('touchend', onUp);
+    el.addEventListener('pointerup', endPtr);
+    el.addEventListener('pointercancel', endPtr);
   }
+
+  function bindResize(handle) {
+    if (!handle || handle._hhResizeBound) return;
+    handle._hhResizeBound = true;
+    handle.style.pointerEvents = 'auto';
+    handle.style.zIndex = '70';
+    handle.style.cursor = 'nwse-resize';
+    handle.addEventListener('pointerdown', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const key = handle.getAttribute('data-resize');
+      const cfg = sizeMap[key];
+      if (!cfg || !$(cfg.input)) return;
+      try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+      _heroDragState = {
+        type: 'resize',
+        input: cfg.input, min: cfg.min, max: cfg.max,
+        sy: e.clientY, ox: parseInt($(cfg.input).value || '12', 10),
+        handle: handle
+      };
+    });
+    handle.addEventListener('pointermove', function(e) {
+      if (!_heroDragState || _heroDragState.type !== 'resize') return;
+      e.preventDefault();
+      const delta = Math.round((_heroDragState.sy - e.clientY) / 2.5);
+      const nv = Math.max(_heroDragState.min, Math.min(_heroDragState.max, _heroDragState.ox + delta));
+      if ($(_heroDragState.input)) $(_heroDragState.input).value = nv;
+      const lfs = parseInt($('hero-label-fs')?.value || '12', 10);
+      const tfs = parseInt($('hero-title-fs')?.value || '28', 10);
+      const dfs = parseInt($('hero-desc-fs')?.value || '14', 10);
+      if ($('hero-prev-label')) $('hero-prev-label').style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
+      if ($('hero-prev-title')) $('hero-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
+      if ($('hero-prev-desc')) $('hero-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
+      if ($('val-hero-label-fs')) $('val-hero-label-fs').textContent = lfs + 'px';
+      if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
+      if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
+      try { updatePhoneHeroPreview(); } catch (err) {}
+    });
+    function endR(e) {
+      if (!_heroDragState || _heroDragState.type !== 'resize') return;
+      try { handle.releasePointerCapture(e.pointerId); } catch (err) {}
+      _heroDragState = null;
+    }
+    handle.addEventListener('pointerup', endR);
+    handle.addEventListener('pointercancel', endR);
+  }
+
+  Object.keys(map).forEach(function(id) {
+    bindMove($(id), map[id]);
+  });
+  // re-bind resize handles every time (handles may be recreated)
+  box.querySelectorAll('.sp-resize-handle').forEach(function(h) {
+    // allow rebind after setHeroPrevText recreates handle
+    h._hhResizeBound = false;
+    bindResize(h);
+  });
 }
 
 
@@ -3521,6 +3522,31 @@ function updatePhoneSponsorPreview() {
   applyLiveLogo(logo, logoIcon, imageFieldValue('admin-sponsor-img'));
 }
 
+
+function getSponsorSectionMeta() {
+  try {
+    var m = read('hh_sponsor_meta', null);
+    if (!m || typeof m !== 'object') m = { heading: 'Official Sponsors', subtitle: '' };
+    return m;
+  } catch (e) {
+    return { heading: 'Official Sponsors', subtitle: '' };
+  }
+}
+function loadSponsorSectionMeta() {
+  var m = getSponsorSectionMeta();
+  if ($('sp-section-heading')) $('sp-section-heading').value = m.heading || '';
+  if ($('sp-section-subtitle')) $('sp-section-subtitle').value = m.subtitle || '';
+}
+function saveSponsorSectionMeta() {
+  var m = {
+    heading: ($('sp-section-heading') && $('sp-section-heading').value || '').trim() || 'Official Sponsors',
+    subtitle: ($('sp-section-subtitle') && $('sp-section-subtitle').value || '').trim()
+  };
+  write('hh_sponsor_meta', m);
+  toast('Section Heading သိမ်းပြီး');
+}
+window.saveSponsorSectionMeta = saveSponsorSectionMeta;
+
 function updateSponsorPreview() {
   const badge = $('sp-prev-badge');
   const title = $('sp-prev-title');
@@ -3625,9 +3651,10 @@ function updateSponsorPreview() {
   if ($('val-sp-h-local')) $('val-sp-h-local').textContent = h + 'px';
   if ($('val-sp-w')) $('val-sp-w').textContent = wPct + '%';
   if (box) {
-    box.style.height = Math.max(60, Math.round(h * 0.85)) + 'px';
-    box.style.minHeight = box.style.height;
-    box.style.width = wPct + '%';
+    box.style.setProperty('height', Math.max(60, Math.round(h * 0.85)) + 'px', 'important');
+    box.style.setProperty('min-height', box.style.height, 'important');
+    box.style.setProperty('width', wPct + '%', 'important');
+    box.style.setProperty('max-width', '100%', 'important');
     box.style.marginLeft = 'auto';
     box.style.marginRight = 'auto';
     const radiusMap = { square: '0px', soft: '16px', rounded: '16px', pill: '9999px', circle: '9999px' };
@@ -3786,9 +3813,9 @@ function updateUpcomingPreview() {
   if ($('val-up-frame-w')) $('val-up-frame-w').textContent = fw + '%';
   if ($('up-preview-dims')) $('up-preview-dims').textContent = fw + '% × ' + fh + 'px';
   if (box) {
-    box.style.height = fh + 'px';
-    box.style.width = fw + '%';
-    box.style.maxWidth = '100%';
+    box.style.setProperty('height', fh + 'px', 'important');
+    box.style.setProperty('width', fw + '%', 'important');
+    box.style.setProperty('max-width', '100%', 'important');
     box.style.marginLeft = 'auto';
     box.style.marginRight = 'auto';
   }
