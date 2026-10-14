@@ -230,7 +230,7 @@ main > div {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod2</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -2454,7 +2454,7 @@ function showView(name, button) {
         var localN = (local && Array.isArray(local.photos)) ? local.photos.length : 0;
         var remoteN = Array.isArray(remote.photos) ? remote.photos.length : 0;
         if (remoteN > localN) {
-          try { originalSetItem('hh_gallery', JSON.stringify(remote)); } catch (e) {}
+          setGalleryData(remote);
           renderGalleryList();
           try { renderOverview(); } catch (e) {}
         }
@@ -5101,16 +5101,35 @@ function deleteProud(i) {
 /* ---- Posts ---- */
 function getPosts() { return asArray(read('hh_posts', [])); }
 
+var _galleryCache = null;
 function getGalleryData() {
-  var g = read('hh_gallery', null);
+  if (_galleryCache && typeof _galleryCache === 'object' && Array.isArray(_galleryCache.photos)) {
+    return _galleryCache;
+  }
+  var g = null;
+  try { g = JSON.parse(localStorage.getItem('hh_gallery') || 'null'); } catch (e) { g = null; }
   if (!g || Array.isArray(g)) {
-    return { active: true, heading: 'Photo Gallery', subtitle: 'ခရီးလမ်းမှ အလှပုံများ', previewCount: 4, categories: ['Road Trip','Mountain','River','Sunset'], photos: Array.isArray(g) ? g : [] };
+    g = { active: true, heading: 'Photo Gallery', subtitle: 'ခရီးလမ်းမှ အလှပုံများ', previewCount: 4, categories: ['Road Trip','Mountain','River','Sunset'], photos: Array.isArray(g) ? g : [] };
   }
   if (!g.photos) g.photos = [];
   if (!g.categories) g.categories = ['Road Trip','Mountain','River','Sunset'];
-  if (g && g.photos) g.photos = asArray(g.photos);
-  return g;
+  g.photos = asArray(g.photos);
+  _galleryCache = g;
+  return _galleryCache;
 }
+function setGalleryData(g) {
+  if (!g || typeof g !== 'object') return;
+  if (!Array.isArray(g.photos)) g.photos = [];
+  _galleryCache = g;
+  try {
+    originalSetItem('hh_gallery', JSON.stringify(g));
+  } catch (e) {
+    try { localStorage.setItem('hh_gallery', JSON.stringify(g)); } catch (e2) {
+      console.warn('gallery localStorage full — UI cache only', e2);
+    }
+  }
+}
+
 function loadGalleryForm() {
   var g = getGalleryData();
   if ($('gal-active')) $('gal-active').checked = g.active !== false;
@@ -5443,18 +5462,16 @@ async function saveOneGalleryImage(url, slotIndex) {
     return false;
   }
 
-  var g = getGalleryData();
-  if (!g || typeof g !== 'object') {
-    g = {
-      active: true,
-      heading: 'Photo Gallery',
-      subtitle: 'ခရီးလမ်းမှ အလှပုံများ',
-      previewCount: 4,
-      categories: ['Road Trip', 'Mountain', 'River', 'Sunset'],
-      photos: []
-    };
-  }
-  if (!Array.isArray(g.photos)) g.photos = [];
+  // Clone so we don't mutate mid-render
+  var prev = getGalleryData();
+  var g = {
+    active: true,
+    heading: (prev && prev.heading) || 'Photo Gallery',
+    subtitle: (prev && prev.subtitle) || 'ခရီးလမ်းမှ အလှပုံများ',
+    previewCount: (prev && prev.previewCount) || 4,
+    categories: (prev && prev.categories && prev.categories.slice()) || ['Road Trip', 'Mountain', 'River', 'Sunset'],
+    photos: (prev && Array.isArray(prev.photos)) ? prev.photos.slice() : []
+  };
 
   var catEl = document.getElementById('gal-default-cat');
   var cat = (catEl && catEl.value || '').trim();
@@ -5470,28 +5487,25 @@ async function saveOneGalleryImage(url, slotIndex) {
   g.photos.forEach(function(p, i) { p.order = i; });
   g.active = true;
 
-  // 1) Local + UI immediately (always visible without tab switch)
-  try {
-    originalSetItem('hh_gallery', JSON.stringify(g));
-  } catch (e) {
-    try { localStorage.setItem('hh_gallery', JSON.stringify(g)); } catch (e2) {
-      toast('localStorage မဆန့်ပါ — ပုံအရေအတွက် လျှော့ပါ သို့မဟုတ် Storage URL သုံးပါ', true);
-      return false;
-    }
-  }
-  try {
-    if (typeof renderGalleryList === 'function') renderGalleryList();
-  } catch (e) { console.warn(e); }
-  try {
-    if (typeof renderOverview === 'function') renderOverview();
-  } catch (e) {}
-  // force reflow if gallery view is active
+  // 1) Memory cache + localStorage + UI RIGHT NOW
+  setGalleryData(g);
+  _galListExpanded = true; // show full list so new photo is visible
+  try { renderGalleryList(); } catch (e) { console.warn('renderGalleryList', e); }
+  try { renderOverview(); } catch (e) {}
   try {
     var list = document.getElementById('gal-list');
-    if (list) list.scrollTop = list.scrollTop;
+    if (list) {
+      list.classList.remove('gal-list-collapsed');
+      list.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    var btn = document.getElementById('gal-view-all-btn');
+    if (btn && g.photos.length > 8) {
+      btn.classList.remove('hidden');
+      btn.textContent = 'Show less';
+    }
   } catch (e) {}
 
-  // 2) Firebase background (does not block UI)
+  // 2) Firebase background
   if (adminDb && adminUser) {
     try {
       await Promise.race([
@@ -5571,9 +5585,13 @@ function toggleGalListExpand() {
 
 function renderGalleryList() {
   var list = document.getElementById('gal-list');
-  if (!list) return;
+  if (!list) {
+    console.warn('[gallery] #gal-list not in DOM');
+    return;
+  }
   var g = getGalleryData();
-  var photos = g.photos || [];
+  var photos = (g && g.photos) ? g.photos : [];
+  if (!Array.isArray(photos)) photos = [];
   var countEl = document.getElementById('gal-count');
   if (countEl) countEl.textContent = photos.length + ' photos';
   var btn = document.getElementById('gal-view-all-btn');
@@ -5583,23 +5601,44 @@ function renderGalleryList() {
       btn.textContent = _galListExpanded ? 'Show less' : 'View all';
     } else {
       btn.classList.add('hidden');
-      _galListExpanded = false;
     }
   }
+  // Always expand when 8 or fewer so latest photo is visible
+  if (photos.length <= 8) _galListExpanded = true;
   list.classList.toggle('gal-list-collapsed', !_galListExpanded && photos.length > 8);
   if (!photos.length) {
     list.innerHTML = '<div class="col-span-full rounded-xl border border-dashed border-slate-700 p-4 text-center text-sm text-slate-400">ပုံမရှိသေးပါ</div>';
     list.classList.remove('gal-list-collapsed');
     return;
   }
-  list.innerHTML = photos.map(function(p, i) {
-    return '<div class="gal-list-card group" title="' + safe(p.caption || p.category || 'Photo') + '">' +
-      '<img src="' + safe(p.img) + '" alt="" loading="lazy">' +
-      '<button type="button" class="gal-del" onclick="deleteGalleryPhoto(' + i + ')" title="Delete"><i class="fa-solid fa-trash"></i></button>' +
-      '<div class="gal-list-meta">' + safe(p.caption || p.category || '') + '</div>' +
-    '</div>';
-  }).join('');
+  // Build DOM safely — avoid safe() on huge data-URLs
+  list.innerHTML = '';
+  photos.forEach(function(p, i) {
+    if (!p) return;
+    var card = document.createElement('div');
+    card.className = 'gal-list-card group';
+    card.title = p.caption || p.category || 'Photo';
+    var img = document.createElement('img');
+    img.alt = '';
+    img.loading = 'lazy';
+    var src = p.img || p.url || '';
+    if (src) img.src = src;
+    card.appendChild(img);
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'gal-del';
+    del.title = 'Delete';
+    del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    del.onclick = (function(idx){ return function(e){ e.stopPropagation(); deleteGalleryPhoto(idx); }; })(i);
+    card.appendChild(del);
+    var meta = document.createElement('div');
+    meta.className = 'gal-list-meta';
+    meta.textContent = p.caption || p.category || '';
+    card.appendChild(meta);
+    list.appendChild(card);
+  });
 }
+
 
 function moveGalleryPhoto(i, d) {
   var g = getGalleryData();
@@ -5607,19 +5646,19 @@ function moveGalleryPhoto(i, d) {
   if (n < 0 || n >= g.photos.length) return;
   var t = g.photos[i]; g.photos[i] = g.photos[n]; g.photos[n] = t;
   g.photos.forEach(function(p, idx){ p.order = idx; });
-  write('hh_gallery', g); renderGalleryList();
+  setGalleryData(g); renderGalleryList();
 }
 function toggleGalleryPhoto(i) {
   var g = getGalleryData();
   if (!g.photos[i]) return;
   g.photos[i].active = g.photos[i].active === false ? true : false;
-  write('hh_gallery', g); renderGalleryList();
+  setGalleryData(g); renderGalleryList();
 }
 function deleteGalleryPhoto(i) {
   if (!confirm('ဒီပုံ ဖျက်မလား?')) return;
   var g = getGalleryData();
   g.photos.splice(i, 1);
-  write('hh_gallery', g); renderGalleryList(); toast('ဖျက်ပြီး');
+  setGalleryData(g); renderGalleryList(); try{renderOverview();}catch(e){} toast('ဖျက်ပြီး');
 }
 
 function getHomeSections() { return asArray(read('hh_home_sections', [])); }
