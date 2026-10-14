@@ -276,6 +276,44 @@
     background: var(--brand-bg, #061510);
   }
 
+
+  /* Banner width: honor % on tablet+ ; full width on phone */
+  #upcoming-banner {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .sp-banner {
+    max-width: 100%;
+  }
+  @media (max-width: 640px) {
+    #upcoming-banner {
+      width: 100% !important;
+      border-radius: 1rem !important;
+    }
+    .sp-banner {
+      width: 100% !important;
+      border-radius: 1rem !important;
+    }
+    .sp-banner .sp-title {
+      font-size: clamp(1rem, 5vw, 1.35rem) !important;
+      max-width: 92% !important;
+    }
+    .sp-banner .sp-desc {
+      max-width: 90% !important;
+      font-size: 12px !important;
+    }
+    .sp-banner .sp-logo {
+      width: 56px !important;
+      height: 56px !important;
+    }
+  }
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .sp-banner .sp-title {
+      font-size: clamp(1.1rem, 2.5vw, 1.6rem) !important;
+    }
+  }
+
   #article-body img { cursor: zoom-in; border-radius: 12px; }
   /* Official Sponsor — responsive */
   .sp-banner {
@@ -494,7 +532,14 @@
   </section>
 
   <!-- OFFICIAL SPONSOR -->
-    <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+  <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+    <div id="sponsor-section-head" class="mb-4 sm:mb-5 hidden">
+      <h2 id="sponsor-section-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+        <span class="w-1 h-6 rounded-full accent-bg"></span>
+        <span id="sponsor-section-heading-text">Official Sponsors</span>
+      </h2>
+      <p id="sponsor-section-subtitle" class="text-sm text-emerald-400/70 mt-1 ml-3 hidden"></p>
+    </div>
     <div id="sponsor-list-public" class="space-y-5"></div>
   </section>
 
@@ -1285,6 +1330,23 @@ function loadBlogData() {
     if (listBox) listBox.innerHTML = '';
   } else {
     if (sc) sc.classList.remove('hidden');
+    // Section heading / subtitle
+    try {
+      var spMeta = read('hh_sponsor_meta', {}) || {};
+      var headWrap = $('sponsor-section-head');
+      var headText = $('sponsor-section-heading-text');
+      var subEl = $('sponsor-section-subtitle');
+      if (headText) headText.textContent = spMeta.heading || 'Official Sponsors';
+      if (subEl) {
+        if (spMeta.subtitle) {
+          subEl.textContent = spMeta.subtitle;
+          subEl.classList.remove('hidden');
+        } else {
+          subEl.classList.add('hidden');
+        }
+      }
+      if (headWrap) headWrap.classList.remove('hidden');
+    } catch (e) {}
     if (listBox) {
       listBox.innerHTML = sponsors.map(function(sponsor) {
         const h = sponsor.height || (siteSettings.sponsorHeight) || 180;
@@ -1377,8 +1439,15 @@ function loadBlogData() {
     upPos('upcoming-desc', up.descX != null ? up.descX : 6, up.descY != null ? up.descY : 72);
     if (up.frameH) {
       setStyle($('upcoming-banner'), 'min-height', up.frameH + 'px');
+      setStyle($('upcoming-banner'), 'height', up.frameH + 'px');
       document.documentElement.style.setProperty('--upcoming-min-h', up.frameH + 'px');
     }
+    // Width % (desktop/tablet); phone CSS forces 100%
+    var upW = (up.frameW != null) ? up.frameW : 100;
+    setStyle($('upcoming-banner'), 'width', upW + '%');
+    setStyle($('upcoming-banner'), 'max-width', '100%');
+    setStyle($('upcoming-banner'), 'margin-left', 'auto');
+    setStyle($('upcoming-banner'), 'margin-right', 'auto');
     if (up.image) $('upcoming-img').src = up.image;
   }
 
