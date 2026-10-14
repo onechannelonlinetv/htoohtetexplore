@@ -495,60 +495,21 @@
 
   #article-body img:hover { opacity: 0.95; }
 
-  /* Compact sticky header on scroll */
+  /* Header: hide on scroll-down / show on scroll-up or idle */
   .site-header {
-    transition: background .25s ease, box-shadow .25s ease, border-color .25s ease, backdrop-filter .25s ease;
+    transition: transform .32s cubic-bezier(.22, 1, .36, 1),
+                background .25s ease,
+                box-shadow .25s ease,
+                border-color .25s ease;
+    will-change: transform;
   }
-  .site-header .header-inner-row {
-    transition: height .25s ease, padding .25s ease;
+  .site-header.is-hidden {
+    transform: translateY(-100%);
+    box-shadow: none;
+    pointer-events: none;
   }
-  .site-header #brand-logo-wrap {
-    transition: width .25s ease, height .25s ease;
-  }
-  .site-header #brand-name {
-    transition: font-size .25s ease;
-  }
-  .site-header.scrolled {
-    background: rgba(6, 21, 16, 0.72) !important;
-    backdrop-filter: blur(14px) saturate(1.1);
-    -webkit-backdrop-filter: blur(14px) saturate(1.1);
-    border-bottom-color: rgba(16, 185, 129, 0.18) !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
-  }
-  body.theme-ocean .site-header.scrolled {
-    background: rgba(10, 22, 40, 0.72) !important;
-    border-bottom-color: rgba(34, 211, 238, 0.18) !important;
-  }
-  body.theme-sunset .site-header.scrolled {
-    background: rgba(26, 18, 11, 0.75) !important;
-    border-bottom-color: rgba(249, 115, 22, 0.2) !important;
-  }
-  body.theme-navy .site-header.scrolled,
-  body.mode-light .site-header.scrolled {
-    background: rgba(255, 255, 255, 0.78) !important;
-    border-bottom-color: rgba(226, 232, 240, 0.9) !important;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
-  }
-  .site-header.scrolled .header-inner-row {
-    height: 3rem; /* 48px — slightly shorter */
-  }
-  .site-header.scrolled #brand-logo-wrap {
-    width: 2rem !important;
-    height: 2rem !important;
-  }
-  .site-header.scrolled #brand-name {
-    font-size: 0.9rem !important;
-  }
-  .site-header.scrolled #mode-toggle,
-  .site-header.scrolled #search-toggle,
-  .site-header.scrolled #lang-toggle {
-    width: 2.15rem;
-    height: 2.15rem;
-    min-width: 2.15rem;
-  }
-  .site-header.scrolled #menu-toggle {
-    width: 2.25rem;
-    height: 2.25rem;
+  .site-header:not(.is-hidden) {
+    pointer-events: auto;
   }
 
 
@@ -2484,13 +2445,59 @@ function tryOpenArticleFromHash() {
 function initCompactHeader() {
   var header = document.getElementById('site-header');
   if (!header) return;
-  var threshold = 24;
-  function update() {
-    if (window.scrollY > threshold) header.classList.add('scrolled');
-    else header.classList.remove('scrolled');
+  var lastY = window.scrollY || 0;
+  var hidden = false;
+  var idleTimer = null;
+  var deltaAcc = 0;
+
+  function show() {
+    if (!hidden && !header.classList.contains('is-hidden')) return;
+    hidden = false;
+    header.classList.remove('is-hidden');
   }
-  update();
-  window.addEventListener('scroll', update, { passive: true });
+  function hide() {
+    if (window.scrollY < 16) { show(); return; }
+    if (hidden) return;
+    hidden = true;
+    header.classList.add('is-hidden');
+  }
+  function onScroll() {
+    var y = window.scrollY || 0;
+    var dy = y - lastY;
+    lastY = y;
+
+    // Always show at very top
+    if (y < 16) {
+      show();
+      deltaAcc = 0;
+      clearTimeout(idleTimer);
+      return;
+    }
+
+    // Accumulate small wheel steps so trackpad feels natural
+    deltaAcc += dy;
+    if (deltaAcc > 8) {
+      hide();
+      deltaAcc = 0;
+    } else if (deltaAcc < -8) {
+      show();
+      deltaAcc = 0;
+    }
+
+    // When user stops scrolling / releases finger → show again
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function() {
+      show();
+      deltaAcc = 0;
+    }, 480);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  // Touch end on mobile: show shortly after finger lifts
+  window.addEventListener('touchend', function() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(show, 220);
+  }, { passive: true });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
