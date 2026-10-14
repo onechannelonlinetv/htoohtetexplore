@@ -703,7 +703,7 @@ main > div {
               <span class="text-[10px] text-slate-500">Add မနှိပ်ခင် staging logo ပါ ချိန်လို့ရ</span>
             </div>
             <div id="proud-live-frame" class="relative w-full rounded-lg border border-slate-600 bg-[#0a1220] overflow-visible select-none" style="height:100px;touch-action:none">
-              <p id="proud-prev-title" class="absolute z-40 text-[12px] font-bold uppercase tracking-[0.12em] text-emerald-400 cursor-grab px-1.5 py-0.5 whitespace-nowrap rounded border border-emerald-700/40 bg-black/40" style="left:3%;top:36%;pointer-events:auto;user-select:none;touch-action:none;" title="Drag to move">Our Proud Sponsors</p>
+              <p id="proud-prev-title" class="absolute z-40 text-[12px] font-bold uppercase tracking-[0.12em] text-emerald-400 cursor-grab px-1.5 py-0.5 whitespace-nowrap rounded border border-emerald-700/40 bg-black/40" style="left:3%;top:36%;pointer-events:auto;user-select:none;touch-action:none;z-index:50;" title="Drag to move">Our Proud Sponsors</p>
               <div id="proud-preview-bar" class="absolute inset-0 z-20"></div>
               <div id="proud-staging" class="absolute inset-0 z-25 pointer-events-none"></div>
             </div>
@@ -4013,6 +4013,8 @@ function updateProudPreview() {
     }
     return '<span class="proud-logo-item absolute text-xs font-bold text-white/90 cursor-grab px-1" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;z-index:20;touch-action:none;">' + safe(p.name) + '</span>';
   }).join('');
+  bar.style.pointerEvents = 'none';
+  bar.querySelectorAll('.proud-logo-item').forEach(function(el){ el.style.pointerEvents = 'auto'; });
   if (typeof updateProudStaging === 'function') updateProudStaging();
   if (typeof initProudDrag === 'function') setTimeout(initProudDrag, 40);
 }
@@ -4273,6 +4275,43 @@ function initProudDrag() {
 }
 
 
+function getProud() {
+  try {
+    var a = read('hh_proud_sponsors', []);
+    return Array.isArray(a) ? a : [];
+  } catch (e) { return []; }
+}
+
+function renderProudList() {
+  var box = $('proud-list');
+  if (!box) return;
+  var items = getProud();
+  if (!items.length) {
+    box.innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-5 text-center text-sm text-slate-400">Proud Sponsor မရှိသေးပါ။ အပေါ်က form ဖြည့်ပြီး Add နှိပ်ပါ။</p>';
+    if (typeof updateProudPreview === 'function') updateProudPreview();
+    return;
+  }
+  box.innerHTML = items.map(function(p, i) {
+    var active = p.active !== false;
+    var logoHtml = p.logo
+      ? '<img src="' + safe(p.logo) + '" alt="" class="h-12 w-12 rounded-lg object-contain bg-white/10 border border-slate-600 p-0.5" onerror="this.style.display=\'none\'">'
+      : '<div class="h-12 w-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 text-xs">—</div>';
+    return '<div class="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-3">' +
+      '<div class="flex items-center gap-3 min-w-0 flex-1">' + logoHtml +
+        '<div class="min-w-0">' +
+          '<p class="font-bold truncate">' + safe(p.name || 'Unnamed') + '</p>' +
+          (p.link ? '<a href="' + safe(p.link) + '" target="_blank" rel="noopener" class="tiny text-emerald-400 hover:underline truncate block">' + safe(p.link) + '</a>' : '<p class="tiny">Link မရှိ</p>') +
+        '</div></div>' +
+      '<div class="flex flex-wrap gap-2">' +
+        '<button type="button" class="btn btn-muted text-xs" onclick="toggleProud(' + i + ')">' + (active ? '✓ Active' : '○ Hidden') + '</button>' +
+        '<button type="button" class="btn btn-muted text-xs" onclick="moveProud(' + i + ',-1)"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button type="button" class="btn btn-muted text-xs" onclick="moveProud(' + i + ',1)"' + (i === items.length - 1 ? ' disabled' : '') + '>↓</button>' +
+        '<button type="button" class="btn btn-red text-xs" onclick="deleteProud(' + i + ')"><i class="fa-regular fa-trash-can"></i></button>' +
+      '</div></div>';
+  }).join('');
+  if (typeof updateProudPreview === 'function') updateProudPreview();
+}
+
 function getProudMeta() {
   try {
     const m = JSON.parse(localStorage.getItem('hh_proud_meta') || '{}');
@@ -4301,35 +4340,57 @@ function loadProudMeta() {
 }
 
 function addProud() {
-  const name = (($('proud-name') && $('proud-name').value) || '').trim();
-  if (!name) return alert('Name ထည့်ပါ။');
-  let logo = (typeof imageFieldValue === 'function') ? imageFieldValue('proud-logo') : '';
-  if (!logo && $('proud-logo')) logo = ($('proud-logo').value || '').trim();
-  if (logo && (logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0)) {
-    return alert('Logo Upload ပြီးသည်အထိ စောင့်ပါ။');
+  try {
+    var nameEl = $('proud-name');
+    var name = (nameEl && nameEl.value || '').trim();
+    if (!name) { alert('Name ထည့်ပါ။'); return; }
+
+    var logo = '';
+    if (typeof imageFieldValue === 'function') logo = imageFieldValue('proud-logo') || '';
+    if (!logo) {
+      var el = $('proud-logo');
+      if (el) {
+        var full = (el.dataset && el.dataset.fullUrl) || '';
+        var raw = (el.value || '').trim();
+        if (full && typeof isRealImageUrl === 'function' && isRealImageUrl(full)) logo = full;
+        else if (typeof isRealImageUrl === 'function' && isRealImageUrl(raw)) logo = raw;
+        else if (raw.indexOf('http') === 0 || raw.indexOf('data:image/') === 0) logo = raw;
+      }
+    }
+    // reject only incomplete placeholder / blob
+    if (logo && (logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0 || logo.indexOf('data:image...') === 0 || logo.indexOf('Preview') !== -1)) {
+      alert('Logo Upload ပြီးသည်အထိ စောင့်ပါ။ (✓ Preview အဆင်သင့် ဖြစ်မှ Add နှိပ်ပါ)');
+      return;
+    }
+
+    var st = window._proudStaging || { x: 55, y: 20, size: 48 };
+    var items = getProud();
+    items.push({
+      id: Date.now(),
+      name: name,
+      logo: logo || '',
+      link: (($('proud-link') && $('proud-link').value) || '').trim(),
+      active: true,
+      x: Math.round(st.x || 55),
+      y: Math.round(st.y || 20),
+      size: Math.round(st.size || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48)
+    });
+    write('hh_proud_sponsors', items);
+
+    if (nameEl) nameEl.value = '';
+    if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
+    else if ($('proud-logo')) { $('proud-logo').value = ''; try { delete $('proud-logo').dataset.fullUrl; } catch (e) {} }
+    if ($('proud-link')) $('proud-link').value = '';
+    var prev = $('proud-logo-preview'); if (prev) prev.innerHTML = '';
+    window._proudStaging = { x: 55, y: 20, size: parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48 };
+    if (typeof updateProudStaging === 'function') updateProudStaging();
+    if (typeof renderProudList === 'function') renderProudList();
+    if (typeof renderOverview === 'function') renderOverview();
+    if (typeof toast === 'function') toast(logo ? 'သိမ်းပြီး — Preview နေရာအတိုင်း' : 'Proud Sponsor ထည့်ပြီး');
+  } catch (err) {
+    console.error('addProud error', err);
+    alert('Add မအောင်မြင်: ' + (err && err.message ? err.message : err));
   }
-  const st = window._proudStaging || { x: 55, y: 20, size: 48 };
-  const items = getProud();
-  items.push({
-    id: Date.now(),
-    name: name,
-    logo: logo,
-    link: (($('proud-link') && $('proud-link').value) || '').trim(),
-    active: true,
-    x: Math.round(st.x),
-    y: Math.round(st.y),
-    size: Math.round(st.size || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48)
-  });
-  write('hh_proud_sponsors', items);
-  if ($('proud-name')) $('proud-name').value = '';
-  if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
-  else if ($('proud-logo')) { $('proud-logo').value = ''; delete $('proud-logo').dataset.fullUrl; }
-  if ($('proud-link')) $('proud-link').value = '';
-  const prev = $('proud-logo-preview'); if (prev) prev.innerHTML = '';
-  window._proudStaging = { x: 55, y: 20, size: parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48 };
-  renderProudList();
-  if (typeof renderOverview === 'function') renderOverview();
-  toast(logo ? 'သိမ်းပြီး — Preview နေရာအတိုင်း' : 'Proud Sponsor ထည့်ပြီး');
 }
 
 function toggleProud(i) {
