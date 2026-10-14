@@ -1154,7 +1154,11 @@ main > div {
                   <button type="button" class="btn btn-green shrink-0" onclick="addCustomCategory()"><i class="fa-solid fa-plus mr-1"></i>Add Category</button>
                 </div>
               </div>
-              <p class="tiny mt-1">မူလ: Travel Story, Guide, Food, Culture, Adventure — အသစ်ရေးပြီး Add နှိပ်ပါ</p>
+              <p class="tiny mt-1">မူလ: Travel Story, Guide, Food, Culture, Adventure — အသစ်ရေးပြီး Add နှိပ်ပါ · အောက်က စာရင်းမှာ Edit / Delete ရပါသည်</p>
+              <div id="categories-manager" class="mt-3 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3">
+                <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-tags mr-1"></i>Categories စီမံ (Add / Edit / Delete)</p>
+                <div id="categories-list" class="space-y-2"></div>
+              </div>
             </div>
             <div><label class="label">Travel Date</label><input id="admin-post-travel-date" type="date" class="field"></div>
             <div><label class="label">Author</label><input id="admin-post-author" class="field" placeholder="Htoo Htet" value="Htoo Htet"></div>
@@ -1335,7 +1339,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_proud_meta'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_proud_meta','hh_categories'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2092,6 +2096,15 @@ function showView(name, button) {
   $('mobile-nav').classList.add('hidden');
   if (name === 'sections') renderHomeSectionsList();
   if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
+  if (name === 'addpost') {
+    try {
+      if (typeof renderPostsList === 'function') renderPostsList();
+      if (typeof refreshCategoryOptions === 'function') refreshCategoryOptions();
+      if (typeof renderCategoriesList === 'function') renderCategoriesList();
+      if (typeof updatePostPreview === 'function') updatePostPreview();
+      if (typeof updateContentPreview === 'function') updateContentPreview();
+    } catch (e) { console.warn(e); }
+  }
   if (name === 'menu') renderMenuList();
   if (name === 'proud') { renderProudList(); if (typeof updateProudPreview === 'function') updateProudPreview(); }
   if (name === 'hero' && typeof updateHeroPreview === 'function') updateHeroPreview();
@@ -4557,6 +4570,86 @@ function refreshCategoryOptions(selected) {
   }).join('');
   if ([].some.call(sel.options, function(o) { return o.value === current; })) sel.value = current;
   else if (sel.options.length) sel.selectedIndex = 0;
+  if (typeof renderCategoriesList === 'function') renderCategoriesList();
+}
+function isDefaultCategory(name) {
+  const key = String(name || '').trim().toLowerCase();
+  return DEFAULT_CATEGORIES.some(function(c) { return c.toLowerCase() === key; });
+}
+function renderCategoriesList() {
+  const box = $('categories-list');
+  if (!box) return;
+  const cats = getCategories();
+  if (!cats.length) {
+    box.innerHTML = '<p class="text-xs text-slate-500">Category မရှိသေးပါ။</p>';
+    return;
+  }
+  box.innerHTML = cats.map(function(c) {
+    const locked = isDefaultCategory(c);
+    return '<div class="flex flex-wrap items-center gap-2 rounded-lg border border-slate-700/80 bg-slate-950/50 px-3 py-2">' +
+      '<span class="flex-1 min-w-[120px] text-sm font-semibold text-white">' + safe(c) +
+      (locked ? ' <span class="text-[10px] text-slate-500 font-normal">(default)</span>' : '') + '</span>' +
+      '<button type="button" class="btn btn-muted text-xs py-1 px-2" onclick="editCategory(' + JSON.stringify(String(c)) + ')"' + (locked ? ' disabled title="Default category ပြင်မရ"' : '') + '><i class="fa-solid fa-pen mr-1"></i>Edit</button>' +
+      '<button type="button" class="btn btn-red text-xs py-1 px-2" onclick="deleteCategory(' + JSON.stringify(String(c)) + ')"' + (locked ? ' disabled title="Default category ဖျက်မရ"' : '') + '><i class="fa-regular fa-trash-can"></i></button>' +
+      '</div>';
+  }).join('');
+}
+function editCategory(oldName) {
+  if (isDefaultCategory(oldName)) { toast('Default category ကို ပြင်မရပါ'); return; }
+  const next = prompt('Category နာမည်အသစ်:', oldName);
+  if (next == null) return;
+  const name = String(next).trim();
+  if (!name) { toast('နာမည် ဗလာမရ'); return; }
+  if (name.toLowerCase() === String(oldName).toLowerCase()) return;
+  const cats = getCategories();
+  if (cats.some(function(c) { return c.toLowerCase() === name.toLowerCase(); })) {
+    toast('Category နာမည် ရှိပြီးသား');
+    return;
+  }
+  // update custom list
+  const custom = [];
+  try { const raw = JSON.parse(localStorage.getItem('hh_categories') || '[]'); if (Array.isArray(raw)) raw.forEach(function(c){ custom.push(c); }); } catch(e) {}
+  const idx = custom.findIndex(function(c) { return String(c).toLowerCase() === String(oldName).toLowerCase(); });
+  if (idx >= 0) custom[idx] = name;
+  else custom.push(name);
+  saveCategories(custom);
+  // rename on posts
+  const posts = getPosts();
+  let changed = 0;
+  posts.forEach(function(p) {
+    if (String(p.category || '').toLowerCase() === String(oldName).toLowerCase()) {
+      p.category = name;
+      changed++;
+    }
+  });
+  if (changed) write('hh_posts', posts);
+  refreshCategoryOptions(name);
+  renderCategoriesList();
+  if (typeof renderPostsList === 'function') renderPostsList();
+  if (typeof updatePostPreview === 'function') updatePostPreview();
+  toast('Category ပြင်ပြီး' + (changed ? ' · Post ' + changed + ' ခု update' : ''));
+}
+function deleteCategory(name) {
+  if (isDefaultCategory(name)) { toast('Default category ကို ဖျက်မရပါ'); return; }
+  if (!confirm('Category "' + name + '" ကို ဖျက်မလား?\n(Post များမှာ ရှိရင် Travel Story သို့ ပြောင်းမယ်)')) return;
+  const custom = [];
+  try { const raw = JSON.parse(localStorage.getItem('hh_categories') || '[]'); if (Array.isArray(raw)) raw.forEach(function(c){ custom.push(c); }); } catch(e) {}
+  const next = custom.filter(function(c) { return String(c).toLowerCase() !== String(name).toLowerCase(); });
+  saveCategories(next);
+  const posts = getPosts();
+  let changed = 0;
+  posts.forEach(function(p) {
+    if (String(p.category || '').toLowerCase() === String(name).toLowerCase()) {
+      p.category = 'Travel Story';
+      changed++;
+    }
+  });
+  if (changed) write('hh_posts', posts);
+  refreshCategoryOptions('Travel Story');
+  renderCategoriesList();
+  if (typeof renderPostsList === 'function') renderPostsList();
+  if (typeof updatePostPreview === 'function') updatePostPreview();
+  toast('Category ဖျက်ပြီး' + (changed ? ' · Post ' + changed + ' ခု ပြင်ပြီး' : ''));
 }
 function addCustomCategory() {
   const input = $('admin-new-category');
@@ -4569,6 +4662,7 @@ function addCustomCategory() {
     saveCategories(cats);
   }
   refreshCategoryOptions(name);
+  if (typeof renderCategoriesList === 'function') renderCategoriesList();
   if (input) input.value = '';
   if (typeof updatePostPreview === 'function') updatePostPreview();
   toast(exists ? 'Category ရှိပြီးသား — ရွေးထားပါပြီ' : 'Category ထည့်ပြီး: ' + name);
@@ -4684,13 +4778,15 @@ function deletePost(id) {
 function renderPostsList() {
   if (typeof refreshCategoryOptions === "function") refreshCategoryOptions();
   const posts = getPosts();
-  $('post-count').textContent = posts.length + ' posts';
-  refreshPostSectionOptions();
+  if ($('post-count')) $('post-count').textContent = posts.length + ' posts';
+  if (typeof refreshPostSectionOptions === 'function') refreshPostSectionOptions();
+  const listEl = $('posts-list');
+  if (!listEl) return;
   if (!posts.length) {
-    $('posts-list').innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Post မရှိသေးပါ။</p>';
+    listEl.innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Post မရှိသေးပါ။</p>';
     return;
   }
-  $('posts-list').innerHTML = posts.map(p => {
+  listEl.innerHTML = posts.map(p => {
     const dateStr = p.publishedDate ? new Date(p.publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
     return `<article class="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-3 sm:flex-row sm:items-center">
       <img src="${safe(p.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=180')}" onerror="this.style.display='none'" class="h-20 w-full rounded-lg object-cover sm:w-28">
