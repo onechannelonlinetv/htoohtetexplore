@@ -1365,23 +1365,28 @@ function formatArticleBody(raw) {
     function cell(u) {
       return '<div style="border-radius:14px;overflow:hidden;min-height:0;"><img src="'+u.replace(/"/g,'&quot;')+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
     }
+    var gridCss = '';
+    var cellHtml = '';
     if (layout === '1-2' && imgs.length >= 3) {
-      return '<div style="display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;">' +
-        '<div style="grid-row:1/3;border-radius:14px;overflow:hidden;">'+cell(imgs[0]).replace(/^<div/, '<div').replace('min-height:0','height:100%')+'</div>' +
-        cell(imgs[1]) + cell(imgs[2]) + '</div>';
-    }
-    if (layout === '2-1' && imgs.length >= 3) {
-      return '<div style="display:grid;grid-template-columns:1fr 1.2fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;">' +
+      gridCss = 'display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;';
+      cellHtml =
+        '<div style="grid-row:1/3;border-radius:14px;overflow:hidden;"><img src="'+imgs[0].replace(/"/g,'&quot;')+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>' +
+        cell(imgs[1]) + cell(imgs[2]);
+    } else if (layout === '2-1' && imgs.length >= 3) {
+      gridCss = 'display:grid;grid-template-columns:1fr 1.2fr;grid-template-rows:1fr 1fr;gap:8px;height:min(440px,55vw);margin:1.25rem 0;';
+      cellHtml =
         cell(imgs[0]) +
-        '<div style="grid-row:1/3;grid-column:2;border-radius:14px;overflow:hidden;"><img src="'+imgs[1].replace(/"/g,'&quot;')+'" style="width:100%;height:100%;object-fit:cover;display:block;"></div>' +
-        cell(imgs[2]) + '</div>';
+        '<div style="grid-row:1/3;grid-column:2;border-radius:14px;overflow:hidden;"><img src="'+imgs[1].replace(/"/g,'&quot;')+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>' +
+        cell(imgs[2]);
+    } else if (layout === '3' || (layout !== '2' && imgs.length >= 3)) {
+      gridCss = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:min(280px,40vw);margin:1.25rem 0;';
+      cellHtml = imgs.slice(0,3).map(cell).join('');
+    } else {
+      // layout "2" or only 2 images — side by side
+      gridCss = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;height:min(300px,42vw);margin:1.25rem 0;';
+      cellHtml = imgs.slice(0,2).map(cell).join('');
     }
-    if (layout === '3' || imgs.length >= 3) {
-      return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:min(280px,40vw);margin:1.25rem 0;">' +
-        imgs.slice(0,3).map(cell).join('') + '</div>';
-    }
-    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;height:min(300px,42vw);margin:1.25rem 0;">' +
-      imgs.slice(0,2).map(cell).join('') + '</div>';
+    return '<div class="article-gallery" style="'+gridCss+'">'+cellHtml+'</div>';
   }
   let t = String(raw);
   // galleries first (before escaping)
