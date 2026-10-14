@@ -662,22 +662,37 @@ main > div {
       <!-- PROUD SPONSORS -->
       <section id="view-proud" class="view space-y-5">
         <div><h2 class="text-xl font-black">Proud Sponsors</h2><p class="mt-1 text-sm text-slate-400">Preview နဲ့ ကြည့် · logo Upload</p></div>
-        <div class="panel editor-shell p-4 sm:p-5 lg:p-6">
-          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 mb-4">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Proud Bar</span>
-            <div id="proud-preview-bar" class="mt-2 flex flex-wrap items-center gap-4 min-h-[40px]"></div>
-          </div>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-4 mb-4">
-            <div><label class="label">Name *</label><input id="proud-name" class="field" placeholder="AYA Bank"></div>
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label class="label">Logo</label>
-              <div class="flex gap-1">
-                <input id="proud-logo" class="field flex-1" placeholder="URL / Upload">
-                <label class="btn btn-muted cursor-pointer px-3"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="uploadImage(this, 'proud-logo')"></label>
+              <label class="label">Section ခေါင်းစဉ် (Live site မှာ ပေါ်မယ်)</label>
+              <input id="proud-section-title" class="field" placeholder="Our Proud Sponsors" value="Our Proud Sponsors" oninput="saveProudMeta(); updateProudPreview();">
+            </div>
+            <div>
+              <label class="label">Logo Frame အမြင့် (px) — ဘယ်ပုံမဆို ဒီ frame ထဲ ဝင်မယ်</label>
+              <div class="flex items-center gap-2">
+                <input id="proud-logo-h" type="range" min="28" max="96" value="48" class="w-full" oninput="if($('val-proud-logo-h'))$('val-proud-logo-h').textContent=this.value+'px'; saveProudMeta(); updateProudPreview();">
+                <span id="val-proud-logo-h" class="range-val">48px</span>
               </div>
             </div>
+          </div>
+          <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Proud Bar</span>
+            <p id="proud-prev-title" class="text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/80 mt-2 mb-2">Our Proud Sponsors</p>
+            <div id="proud-preview-bar" class="flex flex-wrap items-center gap-4 min-h-[48px]"></div>
+          </div>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <div><label class="label">Name *</label><input id="proud-name" class="field" placeholder="AYA Bank"></div>
+            <div>
+              <label class="label">Logo Upload</label>
+              <div class="flex gap-1">
+                <input id="proud-logo" class="field flex-1" placeholder="Upload ခလုတ်နှိပ်ပါ">
+                <label class="btn btn-muted cursor-pointer px-3"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*,image/gif,.gif" class="hidden" onchange="uploadImage(this, 'proud-logo')"></label>
+              </div>
+              <div id="proud-logo-preview" class="mt-2"></div>
+            </div>
             <div><label class="label">Link</label><input id="proud-link" class="field" placeholder="https://..."></div>
-            <div class="flex items-end"><button onclick="addProud()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add</button></div>
+            <div class="flex items-end"><button type="button" onclick="addProud()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add</button></div>
           </div>
           <div id="proud-list" class="space-y-2"></div>
         </div>
@@ -1282,7 +1297,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_proud_meta'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3921,16 +3936,24 @@ function updatePostPreview() {
 function updateProudPreview() {
   const bar = $('proud-preview-bar');
   if (!bar) return;
+  const m = typeof getProudMeta === 'function' ? getProudMeta() : {};
+  const h = m.logoH || parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
+  if ($('proud-prev-title')) {
+    $('proud-prev-title').textContent = (($('proud-section-title') && $('proud-section-title').value) || m.title || 'Our Proud Sponsors');
+  }
   const items = getProud().filter(p => p.active !== false);
   if (!items.length) {
     bar.innerHTML = '<span class="text-xs text-slate-500">Sponsor မရှိသေး</span>';
     return;
   }
   bar.innerHTML = items.map(p => {
-    if (p.logo) return '<img src="'+safe(p.logo)+'" class="h-8 object-contain opacity-90" alt="'+safe(p.name)+'" onerror="this.style.display=\'none\'">';
-    return '<span class="text-white/90 font-bold text-sm">'+safe(p.name)+'</span>';
+    if (p.logo) {
+      return '<a href="' + safe(p.link || '#') + '" class="shrink-0 flex items-center justify-center rounded-lg bg-white/5 border border-slate-700/50 px-3" style="height:' + h + 'px;min-width:' + h + 'px" title="' + safe(p.name) + '"><img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" style="max-height:' + (h - 8) + 'px;max-width:' + (h * 2.5) + 'px;object-fit:contain"></a>';
+    }
+    return '<span class="text-sm font-bold text-white/80 shrink-0">' + safe(p.name) + '</span>';
   }).join('');
 }
+
 function saveSocial() {
   write('hh_social', {
     fb: $('admin-fb').value.trim(),
@@ -3991,6 +4014,7 @@ function deleteMenu(i) {
 /* ---- Proud Sponsors ---- */
 function getProud() { return read('hh_proud_sponsors', []); }
 function renderProudList() {
+  if (typeof loadProudMeta === 'function') loadProudMeta();
   const list = $('proud-list');
   const items = getProud();
   if (typeof updateProudPreview === 'function') updateProudPreview();
@@ -4001,7 +4025,7 @@ function renderProudList() {
   }
   list.innerHTML = items.map((p, i) => `
     <div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-      ${p.logo ? `<img src="${safe(p.logo)}" class="h-8 w-12 object-contain rounded bg-white/10" onerror="this.style.display='none'">` : ''}
+      ${p.logo ? `<span class="flex items-center justify-center rounded-lg bg-white/10 border border-slate-600" style="width:64px;height:40px"><img src="${safe(p.logo)}" class="max-h-8 max-w-[56px] object-contain" onerror="this.parentElement.style.display='none'"></span>` : ''}
       <div class="flex-1 min-w-0"><p class="font-bold">${safe(p.name)}</p><p class="tiny">${p.active === false ? 'Hidden' : 'Visible'}</p></div>
       <button class="btn btn-muted" onclick="toggleProud(${i})">${p.active === false ? 'Show' : 'Hide'}</button>
       <button class="btn btn-muted" onclick="moveProud(${i},-1)" ${i===0?'disabled':''}>↑</button>
@@ -4009,14 +4033,52 @@ function renderProudList() {
       <button class="btn btn-red" onclick="deleteProud(${i})"><i class="fa-regular fa-trash-can"></i></button>
     </div>`).join('');
 }
+function getProudMeta() {
+  try {
+    const m = JSON.parse(localStorage.getItem('hh_proud_meta') || '{}');
+    return m && typeof m === 'object' ? m : {};
+  } catch (e) { return {}; }
+}
+function saveProudMeta() {
+  const title = (($('proud-section-title') && $('proud-section-title').value) || '').trim() || 'Our Proud Sponsors';
+  const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
+  const meta = { title: title, logoH: logoH };
+  if (typeof write === 'function') write('hh_proud_meta', meta);
+  else localStorage.setItem('hh_proud_meta', JSON.stringify(meta));
+}
+function loadProudMeta() {
+  const m = getProudMeta();
+  if ($('proud-section-title')) $('proud-section-title').value = m.title || 'Our Proud Sponsors';
+  if ($('proud-logo-h')) {
+    $('proud-logo-h').value = m.logoH || 48;
+    if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = (m.logoH || 48) + 'px';
+  }
+  if ($('proud-prev-title')) $('proud-prev-title').textContent = m.title || 'Our Proud Sponsors';
+}
 function addProud() {
-  const name = $('proud-name').value.trim();
+  const name = ($('proud-name') && $('proud-name').value || '').trim();
   if (!name) return alert('Name ထည့်ပါ။');
+  const logo = (typeof imageFieldValue === 'function') ? imageFieldValue('proud-logo') : (($('proud-logo') && $('proud-logo').value) || '').trim();
+  if (logo && (logo.indexOf('blob:') === 0 || logo.indexOf('data:image…') === 0)) {
+    return alert('Logo Upload ပြီးသည်အထိ စောင့်ပါ။');
+  }
   const items = getProud();
-  items.push({ id: Date.now(), name, logo: $('proud-logo').value.trim(), link: $('proud-link').value.trim(), active: true });
+  items.push({
+    id: Date.now(),
+    name: name,
+    logo: logo,
+    link: (($('proud-link') && $('proud-link').value) || '').trim(),
+    active: true
+  });
   write('hh_proud_sponsors', items);
-  $('proud-name').value = ''; $('proud-logo').value = ''; $('proud-link').value = '';
-  renderProudList(); renderOverview(); toast('Proud Sponsor ထည့်ပြီးပါပြီ။');
+  if ($('proud-name')) $('proud-name').value = '';
+  if (typeof setImageFieldValue === 'function') setImageFieldValue('proud-logo', '');
+  else if ($('proud-logo')) $('proud-logo').value = '';
+  if ($('proud-link')) $('proud-link').value = '';
+  const prev = $('proud-logo-preview'); if (prev) prev.innerHTML = '';
+  renderProudList();
+  if (typeof renderOverview === 'function') renderOverview();
+  toast(logo ? 'Proud Sponsor ထည့်ပြီး (logo ပါ)' : 'Proud Sponsor ထည့်ပြီးပါပြီ');
 }
 function toggleProud(i) {
   const a = getProud(); a[i].active = a[i].active === false ? true : false;
