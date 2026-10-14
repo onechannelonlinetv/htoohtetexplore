@@ -68,8 +68,7 @@
     backdrop-filter: blur(16px);
   }
   body.theme-ocean #hero-section {
-    /* no angled clip — straight frames */
-    border-radius: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
   }
   body.theme-ocean .card-bg {
     border-radius: 1.5rem;
@@ -193,37 +192,6 @@
   body.mode-light #upcoming-banner .text-white,
   body.mode-light #youtube-section .text-white,
   body.mode-light #article-page .text-white { color: #ffffff !important; }
-
-  /* Light mode — header controls must stay visible */
-  body.mode-light #mode-toggle,
-  body.mode-light #mode-toggle-icon {
-    color: #0f172a !important;
-  }
-  body.mode-light #mode-toggle:hover {
-    background: rgba(15, 23, 42, 0.08) !important;
-  }
-  body.mode-light #lang-en,
-  body.mode-light #lang-mm {
-    color: #334155 !important;
-  }
-  body.mode-light #lang-en.accent-text,
-  body.mode-light #lang-mm.accent-text {
-    color: var(--brand-accent, #0f766e) !important;
-    font-weight: 800;
-  }
-  body.mode-light header a,
-  body.mode-light header button {
-    color: #0f172a;
-  }
-  body.mode-light header .text-white\/90,
-  body.mode-light header .text-white {
-    color: #0f172a !important;
-  }
-  body.mode-light #mode-toggle {
-    border: 1px solid #cbd5e1;
-    background: #f1f5f9;
-  }
-
   #article-body img { cursor: zoom-in; border-radius: 12px; }
   /* Official Sponsor — responsive */
   .sp-banner {
@@ -337,55 +305,7 @@
     }
   }
 
-  
-  #gallery-section:not(.hidden), #upcoming-section:not(.hidden), #sponsor-container:not(.hidden),
-  #youtube-section:not(.hidden), #about-section:not(.hidden), #stories:not(.hidden) { display: block; }
-  .gallery-chip {
-    font-size: 11px; font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 999px;
-    border: 1px solid rgba(16,185,129,0.35); color: rgba(167,243,208,0.85); background: rgba(6,21,16,0.6);
-    transition: all .2s;
-  }
-  .gallery-chip:hover { border-color: rgba(52,211,153,0.6); color: #fff; }
-  .gallery-chip.active { background: rgba(16,185,129,0.25); border-color: #34d399; color: #fff; }
-  .gallery-thumb {
-    position: relative; aspect-ratio: 1; border-radius: 0.9rem; overflow: hidden;
-    border: 1px solid rgba(6,95,70,0.45); cursor: pointer; background: #0a1f18;
-  }
-  .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
-  .gallery-thumb:hover img { transform: scale(1.06); }
-  .gallery-thumb .g-cap {
-    position: absolute; left: 0; right: 0; bottom: 0; padding: 0.4rem 0.55rem;
-    background: linear-gradient(to top, rgba(0,0,0,.75), transparent);
-    font-size: 10px; font-weight: 700; color: rgba(255,255,255,.92);
-  }
-
-
-  /* Mode toggle — always visible shade (dark + light) */
-  .mode-toggle-btn {
-    background: rgba(15, 23, 42, 0.55);
-    border: 1px solid rgba(148, 163, 184, 0.45);
-    color: #f8fafc !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-  }
-  .mode-toggle-btn:hover {
-    background: rgba(30, 41, 59, 0.85);
-    border-color: rgba(52, 211, 153, 0.5);
-  }
-  body.mode-light .mode-toggle-btn {
-    background: #e2e8f0 !important;
-    border: 1px solid #94a3b8 !important;
-    color: #0f172a !important;
-    box-shadow: 0 2px 8px rgba(15,23,42,0.12);
-  }
-  body.mode-light .mode-toggle-btn:hover {
-    background: #cbd5e1 !important;
-    border-color: #64748b !important;
-  }
-  body.mode-light .mode-toggle-btn #mode-toggle-icon {
-    color: #0f172a !important;
-  }
-
-</style>
+  </style>
 </head>
 <body class="min-h-screen antialiased theme-forest mode-dark">
 
@@ -414,7 +334,7 @@
         </div>
         <!-- Social icons (on/off controlled by admin) -->
         <div class="flex items-center gap-0.5 sm:gap-1" id="social-links-header"></div>
-        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="mode-toggle-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition">
+        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
           <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
         </button>
         <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
@@ -502,52 +422,18 @@
       </h2>
       <p id="upcoming-section-title" class="text-sm text-emerald-400/70 mt-1 ml-3 hidden"></p>
     </div>
-    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40 mx-auto" style="min-height: var(--upcoming-min-h); width: 100%;">
+    <div id="upcoming-banner" class="relative rounded-2xl overflow-hidden border border-emerald-800/40" style="min-height: var(--upcoming-min-h);">
       <img id="upcoming-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200" alt="" class="absolute inset-0 w-full h-full object-cover">
-      <div id="upcoming-overlay" class="absolute inset-0" style="background:linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.15))"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
       <div class="absolute inset-0 z-10" style="min-height: var(--upcoming-min-h);">
         <span id="upcoming-label" class="absolute font-bold uppercase tracking-widest accent-text" style="left:6%; top:40%; font-size:10px;">Featured Journey</span>
         <h3 id="upcoming-title" class="absolute text-white font-black" style="left:6%; top:55%; font-size:clamp(1rem,3.5vw,1.35rem); max-width:90%;"></h3>
         <p id="upcoming-desc" class="absolute text-white/80" style="left:6%; top:72%; font-size:13px; max-width:min(90%,28rem);"></p>
-        <div id="upcoming-logo-wrap" class="absolute z-20 hidden overflow-hidden rounded-lg bg-black/20" style="left:88%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%);">
-          <img id="upcoming-logo" src="" alt="" class="w-full h-full object-contain">
-        </div>
       </div>
     </div>
   </section>
 
   <!-- TRAVEL STORIES -->
-  <!-- PHOTO GALLERY -->
-  <section id="gallery-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
-    <div class="flex items-end justify-between gap-3 mb-4">
-      <div>
-        <h2 id="gallery-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-          <span class="w-1 h-6 rounded-full accent-bg"></span><span id="gallery-heading-text">Photo Gallery</span>
-        </h2>
-        <p id="gallery-sub" class="text-xs sm:text-sm text-emerald-400/70 mt-1 ml-3">ခရီးလမ်းမှ အလှပုံများ</p>
-      </div>
-      <button type="button" id="gallery-view-all-btn" onclick="openFullGallery()" class="text-xs sm:text-sm font-bold text-emerald-400 hover:text-emerald-300 transition shrink-0">View all gallery →</button>
-    </div>
-    <div id="gallery-preview-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4"></div>
-  </section>
-
-  <!-- Full gallery overlay -->
-  <div id="gallery-full-page" class="fixed inset-0 z-[70] hidden flex-col bg-[#061510]" style="display:none">
-    <div class="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-emerald-900/50 bg-[#061510]/95 sticky top-0 z-10">
-      <div class="flex items-center gap-3 min-w-0">
-        <button type="button" onclick="closeFullGallery()" class="inline-flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl bg-emerald-900/60 hover:bg-emerald-800 text-white text-sm font-bold border border-emerald-700/50 shrink-0">
-          <i class="fa-solid fa-arrow-left"></i><span class="hidden sm:inline">Back</span>
-        </button>
-        <h3 class="text-lg font-black text-white truncate">Photo Gallery</h3>
-      </div>
-      <button type="button" onclick="closeFullGallery()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="px-4 sm:px-6 py-3 flex flex-wrap gap-2" id="gallery-filter-chips">
-      <button type="button" class="gallery-chip active" data-cat="all" onclick="filterGallery('all',this)">All</button>
-    </div>
-    <div id="gallery-full-grid" class="flex-1 overflow-y-auto px-4 sm:px-6 pb-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 content-start"></div>
-  </div>
-
   <section id="stories" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9">
     <div id="stories-banner-wrap" class="hidden mb-5 overflow-hidden border border-emerald-800/40 shadow-xl">
       <img id="stories-banner-img-public" src="" alt="" class="w-full object-cover">
@@ -556,7 +442,7 @@
       <div>
         <div class="flex items-center gap-2 mb-1">
           <i class="fa-solid fa-camera text-emerald-400 text-sm"></i>
-          <h2 id="stories-heading" class="text-xl sm:text-2xl font-black text-white">Recent Travel</h2>
+          <h2 id="stories-heading" class="text-xl sm:text-2xl font-black text-white">Travel Stories</h2>
         </div>
         <p id="stories-sub" class="text-xs sm:text-sm text-emerald-400/70">မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ</p>
       </div>
@@ -588,16 +474,16 @@
             Visit Channel <i class="fa-solid fa-arrow-right text-xs"></i>
           </a>
         </div>
-        <div class="shrink-0 w-full max-w-md lg:w-80 xl:w-96">
-          <a id="youtube-play-link" href="#" target="_blank" rel="noopener noreferrer" class="block w-full aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative bg-black group">
-            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-90 transition">
+        <div class="shrink-0">
+          <div class="w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative">
+            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70">
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
-              <div class="w-14 h-14 rounded-full bg-red-600 group-hover:bg-red-500 flex items-center justify-center shadow-xl mb-2 transition scale-100 group-hover:scale-110">
-                <i class="fa-solid fa-play text-white text-lg ml-0.5"></i>
+              <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl mb-2">
+                <i class="fa-solid fa-play text-white text-base ml-0.5"></i>
               </div>
-              <span class="text-xs font-bold text-white/90">YouTube မှာ ကြည့်မယ်</span>
+              <span class="text-xs font-bold text-white/90">HTOO HTET</span>
             </div>
-          </a>
+          </div>
         </div>
       </div>
     </div>
@@ -860,16 +746,6 @@ const I18N = {
 };
 let currentLang = localStorage.getItem('hh_lang') || 'mm';
 
-function postLocalized(post, field) {
-  if (!post) return '';
-  if (currentLang === 'en') {
-    var en = post[field + 'En'] || post[field + '_en'];
-    if (en && String(en).trim()) return en;
-  }
-  return post[field] || '';
-}
-
-
 function t(key) {
   return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en[key]) || key;
 }
@@ -1025,7 +901,6 @@ function renderMenu() {
   const menu = siteMenu.length ? siteMenu : [
     { label: 'Home', href: '#home' },
     { label: 'Travel Stories', href: '#stories' },
-    { label: 'Gallery', href: '#gallery-section' },
     { label: 'YouTube', href: '#youtube-section' },
     { label: 'About', href: '#about-section' },
     { label: 'Contact', href: '#contact' }
@@ -1198,14 +1073,19 @@ function loadBlogData() {
   if (social.yt) { const yl = $('youtube-link'); if (yl) yl.href = social.yt; }
 
   const proud = read('hh_proud_sponsors', []);
+  const proudMeta = read('hh_proud_meta', {});
   const proudSec = $('proud-sponsors-section');
+  const proudH = (proudMeta && proudMeta.logoH) ? Number(proudMeta.logoH) : 48;
+  if ($('proud-label')) $('proud-label').textContent = (proudMeta && proudMeta.title) ? proudMeta.title : 'Our Proud Sponsors';
   if (proud.length && proud.some(p => p.active !== false)) {
     proudSec.classList.remove('hidden');
     $('proud-sponsors-list').innerHTML = proud.filter(p => p.active !== false).map(p => {
-      if (p.logo) return `<a href="${safe(p.link || '#')}" target="_blank" class="shrink-0 opacity-80 hover:opacity-100 transition"><img src="${safe(p.logo)}" alt="${safe(p.name)}" class="h-7 sm:h-8 object-contain"></a>`;
-      return `<span class="text-white/90 font-bold text-sm shrink-0 opacity-80">${safe(p.name)}</span>`;
+      if (p.logo) {
+        return `<a href="${safe(p.link || '#')}" target="_blank" rel="noopener" class="shrink-0 opacity-90 hover:opacity-100 transition flex items-center justify-center rounded-lg bg-white/5 border border-emerald-800/30 px-3 py-1" style="height:${proudH}px;min-width:${proudH}px" title="${safe(p.name)}"><img src="${safe(p.logo)}" alt="${safe(p.name)}" style="max-height:${Math.max(20, proudH - 10)}px;max-width:${Math.round(proudH * 2.8)}px;width:auto;object-fit:contain" onerror="this.style.display='none'"></a>`;
+      }
+      return `<span class="text-white/90 font-bold text-sm shrink-0 opacity-80 px-2">${safe(p.name)}</span>`;
     }).join('');
-  } else proudSec.classList.add('hidden');
+  } else if (proudSec) proudSec.classList.add('hidden');
 
   // Official sponsors (array or legacy object)
   let sponsorRaw = read('hh_sponsor', []);
@@ -1265,12 +1145,7 @@ function loadBlogData() {
           : '';
         return '<div class="sp-banner" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;border-radius:' + radiusDesktop + '">' +
           '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
-          (function(){
-            var ov = (sponsor.overlayOpacity != null) ? sponsor.overlayOpacity : 55;
-            var a = (ov/100).toFixed(2);
-            var a2 = (ov/100*0.45).toFixed(2);
-            return '<div class="sp-grad" style="background:linear-gradient(to right, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '), transparent)"></div>';
-          })() +
+          '<div class="sp-grad"></div>' +
           '<span class="sp-badge inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge || 'Official Sponsor') + '</span>' +
           '<h2 class="sp-title font-black text-white tracking-tight" style="' + titleStyle + '">' + safe(sponsor.title || '') + '</h2>' +
           (sponsor.desc ? '<p class="sp-desc text-sm text-emerald-100/80 leading-relaxed" style="' + descStyle + '">' + safe(sponsor.desc) + '</p>' : '') +
@@ -1325,41 +1200,10 @@ function loadBlogData() {
       var iy = up.imgPosY != null ? up.imgPosY : 50;
       var iz = up.imgZoom != null ? up.imgZoom : 100;
       setStyle($('upcoming-img'), 'object-position', ix + '% ' + iy + '%');
-      setStyle($('upcoming-img'), 'transform', 'scale(' + (iz/100) + ')');
-      setStyle($('upcoming-img'), 'transform-origin', ix + '% ' + iy + '%');
-    }
-    (function(){
-      var ov = (up.overlayOpacity != null) ? up.overlayOpacity : 55;
-      var el = $('upcoming-overlay');
-      if (!el) return;
-      var a = (ov/100).toFixed(2);
-      var a2 = (ov/100*0.25).toFixed(2);
-      el.style.background = 'linear-gradient(to top, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '))';
-    })();
-    // Frame width
-    if (up.frameW != null && $('upcoming-banner')) {
-      setStyle($('upcoming-banner'), 'width', up.frameW + '%');
-      setStyle($('upcoming-banner'), 'max-width', '100%');
-    }
-    // Text styles
-    if (up.labelWeight) setStyle($('upcoming-label'), 'font-weight', up.labelWeight);
-    if (up.labelStyle) setStyle($('upcoming-label'), 'font-style', up.labelStyle);
-    if (up.titleStyle) setStyle($('upcoming-title'), 'font-style', up.titleStyle);
-    if (up.descWeight) setStyle($('upcoming-desc'), 'font-weight', up.descWeight);
-    if (up.descStyle) setStyle($('upcoming-desc'), 'font-style', up.descStyle);
-    // Logo
-    var logoWrap = $('upcoming-logo-wrap');
-    var logoImg = $('upcoming-logo');
-    if (logoWrap && logoImg && up.logo) {
-      logoWrap.classList.remove('hidden');
-      logoImg.src = up.logo;
-      setStyle(logoWrap, 'left', (up.logoX != null ? up.logoX : 88) + '%');
-      setStyle(logoWrap, 'top', (up.logoY != null ? up.logoY : 50) + '%');
-      setStyle(logoWrap, 'width', (up.logoW != null ? up.logoW : 72) + 'px');
-      setStyle(logoWrap, 'height', (up.logoH != null ? up.logoH : 72) + 'px');
-      setStyle(logoWrap, 'transform', 'translate(-50%,-50%)');
-    } else if (logoWrap) {
-      logoWrap.classList.add('hidden');
+      if (iz > 100) {
+        setStyle($('upcoming-img'), 'transform', 'scale(' + (iz/100) + ')');
+        setStyle($('upcoming-img'), 'transform-origin', ix + '% ' + iy + '%');
+      }
     }
   }
 
@@ -1376,42 +1220,8 @@ function loadBlogData() {
     if (yt.desc) $('youtube-desc').textContent = yt.desc;
     if (yt.link) $('youtube-link').href = yt.link;
     else if (social.yt) $('youtube-link').href = social.yt;
+    if (yt.thumb) $('youtube-thumb').src = yt.thumb;
     if (yt.bgImage) $('youtube-bg').src = yt.bgImage;
-    (function applyYtThumbLink() {
-      function parseYoutubeUrl(url) {
-        url = String(url || '').trim();
-        if (!url) return null;
-        var pl = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
-        var v = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{6,})/);
-        if (!v) v = url.match(/[?&]v=([a-zA-Z0-9_-]{6,})/);
-        if (pl && !v) return { type: 'playlist', id: pl[1], url: url };
-        if (v && pl) return { type: 'video', id: v[1], list: pl[1], url: url };
-        if (v) return { type: 'video', id: v[1], url: url };
-        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return { type: 'video', id: url, url: 'https://www.youtube.com/watch?v=' + url };
-        return null;
-      }
-      function openUrl(p, fallback) {
-        if (p && p.type === 'playlist') return 'https://www.youtube.com/playlist?list=' + encodeURIComponent(p.id);
-        if (p && p.type === 'video') {
-          var u = 'https://www.youtube.com/watch?v=' + encodeURIComponent(p.id);
-          if (p.list) u += '&list=' + encodeURIComponent(p.list);
-          return u;
-        }
-        return fallback || '#';
-      }
-      var parsed = parseYoutubeUrl(yt.videoUrl || '');
-      var thumb = $('youtube-thumb');
-      var playLink = $('youtube-play-link');
-      var watchUrl = openUrl(parsed, yt.videoUrl || yt.link || (social && social.yt) || '#');
-      if (playLink) playLink.href = watchUrl;
-      if (thumb) {
-        if (yt.thumb) thumb.src = yt.thumb;
-        else if (parsed && parsed.type === 'video') thumb.src = 'https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg';
-        else if (parsed && parsed.type === 'playlist') {
-          /* playlist has no single official still via i.ytimg without video id — keep custom or default */
-        }
-      }
-    })();
   }
 
   const about = read('hh_about', {});
@@ -1447,7 +1257,6 @@ function loadBlogData() {
   if (cats.includes(cur)) sel.value = cur;
 
   renderStoryCards();
-  renderGallerySection();
   renderExtraHomeSections();
   tryOpenArticleFromHash();
 }
@@ -1487,12 +1296,12 @@ function renderStoryCards() {
     return `
     <button type="button" onclick="openArticle(${idx})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
       <div class="relative overflow-hidden bg-emerald-950" style="height: ${imgH}">
-        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600')}" alt="${safe(postLocalized(post,'title'))}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600')}" alt="${safe(post.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
         <span class="absolute top-3 left-3 bg-black/75 backdrop-blur-sm accent-text text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase">${safe(tag)}</span>
       </div>
       <div class="p-4 flex-1 flex flex-col">
-        <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2 group-hover:text-emerald-300 transition">${safe(postLocalized(post,'title'))}</h3>
-        <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2 leading-relaxed flex-1">${safe(postLocalized(post,'desc'))}</p>
+        <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2 group-hover:text-emerald-300 transition">${safe(post.title)}</h3>
+        <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2 leading-relaxed flex-1">${safe(post.desc || '')}</p>
         <div class="mt-3 flex items-center justify-between text-[11px] text-emerald-500/60">
           <span>${dateStr}</span>
           <span class="accent-text font-bold flex items-center gap-1">${t('read')} <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
@@ -1635,7 +1444,7 @@ function openArticle(index) {
   closeMenu();
 
   $('article-image').src = post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000';
-  $('article-title').textContent = postLocalized(post, 'title') || 'Travel Story';
+  $('article-title').textContent = post.title || 'Travel Story';
   $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ').toUpperCase();
   const meta = $('article-meta');
   if (meta) {
@@ -1645,7 +1454,7 @@ function openArticle(index) {
     if (d) parts.push(d);
     meta.textContent = parts.join(' · ');
   }
-  let body = postLocalized(post, 'content') || post.content || post.body || postLocalized(post, 'desc') || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
+  let body = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
   $('article-body').innerHTML = formatArticleBody(body);
 
   // Related: same category first, then others — up to 3
@@ -1671,7 +1480,7 @@ function openArticle(index) {
   }
 
   bindArticleImageZoom();
-  currentPostTitle = postLocalized(post, 'title') || post.title || '';
+  currentPostTitle = post.title || '';
   bindEngagement(post.id != null ? post.id : index);
 
   // Full page: hide home + footer, show only article
@@ -1705,152 +1514,6 @@ function closeArticle() {
   if (stories) stories.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function resolveSectionLink(link) {
-  link = String(link || '').trim();
-  if (!link) return null;
-  if (link.indexOf('http://') === 0 || link.indexOf('https://') === 0 || link.indexOf('//') === 0) return { type: 'url', href: link };
-  if (link.charAt(0) === '#') return { type: 'hash', href: link };
-  // try match post by slug or id
-  if (typeof allStoryPosts !== 'undefined' && allStoryPosts && allStoryPosts.length) {
-    var i = allStoryPosts.findIndex(function(p){ return String(p.slug) === link || String(p.id) === link; });
-    if (i >= 0) return { type: 'article', index: i };
-  }
-  return { type: 'hash', href: link.charAt(0) === '#' ? link : ('#' + link) };
-}
-function goSectionLink(link) {
-  var r = resolveSectionLink(link);
-  if (!r) return;
-  if (r.type === 'article' && typeof openArticle === 'function') { openArticle(r.index); return; }
-  if (r.type === 'url') { window.open(r.href, '_blank', 'noopener'); return; }
-  var href = r.href || '#';
-  try {
-    var el = document.querySelector(href);
-    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
-  } catch (e) {}
-  location.hash = href;
-}
-
-function getGalleryPhotos() {
-  var g = read('hh_gallery', {});
-  if (Array.isArray(g)) return g; // legacy
-  var photos = g.photos || [];
-  return photos.filter(function(p){ return p && p.active !== false && p.img; });
-}
-function getGalleryMeta() {
-  var g = read('hh_gallery', {});
-  if (Array.isArray(g)) return { active: true, heading: 'Photo Gallery', subtitle: 'ခရီးလမ်းမှ အလှပုံများ', previewCount: 4 };
-  return {
-    active: g.active !== false,
-    heading: g.heading || 'Photo Gallery',
-    subtitle: g.subtitle || 'ခရီးလမ်းမှ အလှပုံများ',
-    previewCount: g.previewCount || 4,
-    categories: g.categories || ['Road Trip','Mountain','River','Sunset']
-  };
-}
-var _galleryFilter = 'all';
-function renderGallerySection() {
-  var sec = $('gallery-section');
-  if (!sec) return;
-  var meta = getGalleryMeta();
-  var photos = getGalleryPhotos();
-  if (!meta.active || !photos.length) {
-    sec.classList.add('hidden');
-    return;
-  }
-  sec.classList.remove('hidden');
-  if ($('gallery-heading-text')) $('gallery-heading-text').textContent = meta.heading;
-  if ($('gallery-sub')) {
-    $('gallery-sub').textContent = meta.subtitle || '';
-    $('gallery-sub').style.display = meta.subtitle ? '' : 'none';
-  }
-  var n = Math.min(meta.previewCount || 4, photos.length);
-  var grid = $('gallery-preview-grid');
-  if (!grid) return;
-  // sort by order then date
-  var sorted = photos.slice().sort(function(a,b){ return (a.order||0) - (b.order||0) || (b.id||0) - (a.id||0); });
-  grid.innerHTML = sorted.slice(0, n).map(function(p, i){
-    var tip = (p.caption || p.category || 'Photo').replace(/"/g, '&quot;');
-    return '<button type="button" class="gallery-thumb group" onclick="openGalleryLightbox(' + i + ')">' +
-      '<img loading="lazy" src="' + safe(p.img) + '" alt="' + safe(p.caption || '') + '">' +
-      (p.category || p.caption ? '<span class="g-cap">' + safe(p.category || p.caption || '') + '</span>' : '') +
-    '</button>';
-  }).join('');
-  // store full sorted for lightbox from preview
-  window._galleryPreviewList = sorted;
-}
-function openFullGallery() {
-  var page = $('gallery-full-page');
-  if (!page) return;
-  page.classList.remove('hidden');
-  page.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  try { history.pushState({ gallery: 1 }, '', '#gallery'); } catch(e) {}
-  var meta = getGalleryMeta();
-  var cats = meta.categories || [];
-  var chips = $('gallery-filter-chips');
-  if (chips) {
-    chips.innerHTML = '<button type="button" class="gallery-chip active" data-cat="all" onclick="filterGallery(\'all\',this)">All</button>' +
-      cats.map(function(c){
-        return '<button type="button" class="gallery-chip" data-cat="' + safe(c) + '" onclick="filterGallery(\'' + String(c).replace(/'/g, "\\'") + '\',this)">' + safe(c) + '</button>';
-      }).join('');
-  }
-  _galleryFilter = 'all';
-  renderFullGalleryGrid();
-}
-function closeFullGallery() {
-  var page = $('gallery-full-page');
-  if (!page) return;
-  page.classList.add('hidden');
-  page.style.display = 'none';
-  document.body.style.overflow = '';
-  try {
-    if (location.hash === '#gallery') history.pushState('', '', location.pathname + location.search);
-  } catch(e) {}
-}
-function filterGallery(cat, btn) {
-  _galleryFilter = cat || 'all';
-  document.querySelectorAll('.gallery-chip').forEach(function(b){ b.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  renderFullGalleryGrid();
-}
-function renderFullGalleryGrid() {
-  var grid = $('gallery-full-grid');
-  if (!grid) return;
-  var photos = getGalleryPhotos().slice().sort(function(a,b){ return (a.order||0)-(b.order||0)||(b.id||0)-(a.id||0); });
-  if (_galleryFilter && _galleryFilter !== 'all') {
-    photos = photos.filter(function(p){ return String(p.category||'') === String(_galleryFilter); });
-  }
-  window._galleryFullList = photos;
-  if (!photos.length) {
-    grid.innerHTML = '<div class="col-span-full text-center text-emerald-500/60 py-12 text-sm">ဒီအမျိုးအစားမှာ ပုံမရှိသေးပါ</div>';
-    return;
-  }
-  grid.innerHTML = photos.map(function(p, i){
-    var tip = (p.caption || p.category || '').replace(/"/g, '&quot;');
-    return '<button type="button" class="gallery-thumb" onclick="openGalleryLightbox(' + i + ', true)">' +
-      '<img loading="lazy" src="' + safe(p.img) + '" alt="">' +
-      (p.category || p.caption ? '<span class="g-cap">' + safe(p.category || p.caption || '') + '</span>' : '') +
-    '</button>';
-  }).join('');
-}
-function openGalleryLightbox(index, fromFull) {
-  var list = fromFull ? (window._galleryFullList || []) : (window._galleryPreviewList || getGalleryPhotos());
-  if (!list.length) return;
-  // reuse existing img lightbox if present
-  var lb = $('img-lightbox');
-  if (lb && typeof showImgLightbox === 'function') {
-    showImgLightbox(list[index].img, list[index].caption || list[index].category || '');
-    return;
-  }
-  if (lb) {
-    var img = lb.querySelector('img');
-    if (img) img.src = list[index].img;
-    lb.classList.remove('hidden');
-    lb.style.display = 'flex';
-  }
-}
-
-
 function renderExtraHomeSections() {
   const container = $('extra-home-sections');
   if (!container) return;
@@ -1858,56 +1521,32 @@ function renderExtraHomeSections() {
   const posts = read('hh_posts', []);
   if (!sections.length) { container.innerHTML = ''; return; }
   const imgH = siteSettings.cardImgHeight ? siteSettings.cardImgHeight + 'rem' : '11rem';
-  container.innerHTML = sections.map(function(section) {
-    // Banner layout
-    if (section.layout === 'banner') {
-      var fh = section.frameH || 220;
-      var ov = (section.overlayOpacity != null) ? section.overlayOpacity : 50;
-      var a = (ov/100).toFixed(2);
-      var a2 = (ov/100*0.25).toFixed(2);
-      var bg = section.bannerImg || '';
-      var labelStyle = 'color:' + (section.bannerLabelColor || '#f5c518') + ';font-size:' + (section.bannerLabelFs || 12) + 'px;font-weight:' + (section.bannerLabelWeight || '700') + ';font-style:' + (section.bannerLabelStyle || 'normal') + ';left:6%;top:28%;';
-      var titleStyle = 'color:' + (section.bannerTitleColor || '#fff') + ';font-size:clamp(1.1rem,3.5vw,' + (section.bannerTitleFs || 24) + 'px);font-weight:' + (section.bannerTitleWeight || '900') + ';font-style:' + (section.bannerTitleStyle || 'normal') + ';left:6%;top:42%;max-width:90%;';
-      var descStyle = 'color:' + (section.bannerDescColor || 'rgba(255,255,255,.75)') + ';font-size:' + (section.bannerDescFs || 14) + 'px;font-weight:' + (section.bannerDescWeight || '400') + ';font-style:' + (section.bannerDescStyle || 'normal') + ';left:6%;top:62%;max-width:min(90%,32rem);';
-      var clickAttr = section.link ? (' onclick="goSectionLink(\'' + String(section.link).replace(/'/g, "\\'") + '\')" role="link" tabindex="0"') : '';
-      var cursor = section.link ? 'cursor-pointer' : '';
-      return '<section class="py-3">' +
-        (section.title ? ('<div class="mb-3"><h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2"><span class="w-1 h-6 rounded-full accent-bg"></span>' + safe(section.title) + '</h2>' +
-          (section.subtitle ? '<p class="text-xs text-emerald-400/60 mt-1 ml-3">' + safe(section.subtitle) + '</p>' : '') + '</div>') : '') +
-        '<div class="relative rounded-2xl overflow-hidden border border-emerald-800/40 ' + cursor + '" style="min-height:' + fh + 'px;height:' + fh + 'px;"' + clickAttr + '>' +
-          (bg ? '<img src="' + safe(bg) + '" alt="" class="absolute inset-0 w-full h-full object-cover" loading="lazy">' : '<div class="absolute inset-0 bg-gradient-to-br from-emerald-950 to-slate-900"></div>') +
-          '<div class="absolute inset-0" style="background:linear-gradient(to top, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '))"></div>' +
-          (section.bannerLabel ? '<span class="absolute z-10 uppercase tracking-widest" style="' + labelStyle + '">' + safe(section.bannerLabel) + '</span>' : '') +
-          '<h3 class="absolute z-10" style="' + titleStyle + '">' + safe(section.bannerTitle || section.title || '') + '</h3>' +
-          (section.bannerDesc ? '<p class="absolute z-10 line-clamp-2" style="' + descStyle + '">' + safe(section.bannerDesc) + '</p>' : '') +
-        '</div></section>';
-    }
-
-    const sectionPosts = posts.filter(function(p){ return String(p.sectionId) === String(section.id); });
+  container.innerHTML = sections.map(section => {
+    const sectionPosts = posts.filter(p => String(p.sectionId) === String(section.id));
     const cards = sectionPosts.length
-      ? sectionPosts.map(function(post) {
+      ? sectionPosts.map(post => {
           const idx = allStoryPosts.indexOf(post);
-          return '<button type="button" onclick="openArticle(' + (idx >= 0 ? idx : 0) + ')" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">' +
-            '<div class="relative overflow-hidden" style="height: ' + imgH + '">' +
-              '<img loading="lazy" src="' + safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500') + '" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">' +
-              '<span class="absolute top-2.5 left-2.5 bg-black/75 accent-text text-[10px] font-black px-2 py-0.5 rounded-md uppercase">' + safe(post.location || 'Myanmar') + '</span>' +
-            '</div>' +
-            '<div class="p-4">' +
-              '<h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2">' + safe(postLocalized(post,'title')) + '</h3>' +
-              '<p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2">' + safe(post.desc || '') + '</p>' +
-            '</div></button>';
+          return `<button type="button" onclick="openArticle(${idx >= 0 ? idx : 0})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
+            <div class="relative overflow-hidden" style="height: ${imgH}">
+              <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500')}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              <span class="absolute top-2.5 left-2.5 bg-black/75 accent-text text-[10px] font-black px-2 py-0.5 rounded-md uppercase">${safe(post.location || 'Myanmar')}</span>
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2">${safe(post.title)}</h3>
+              <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2">${safe(post.desc || '')}</p>
+            </div>
+          </button>`;
         }).join('')
       : '<div class="col-span-full rounded-xl border border-dashed border-emerald-800/40 p-6 text-sm text-emerald-500/50 text-center">ဒီ Row အတွက် Post မထည့်ရသေးပါ။</div>';
-    var headClick = section.link ? (' onclick="goSectionLink(\'' + String(section.link).replace(/'/g, "\\'") + '\')" class="cursor-pointer"') : '';
-    return '<section class="py-3">' +
-      '<div class="mb-4"' + headClick + '>' +
-        '<h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">' +
-          '<span class="w-1 h-6 rounded-full accent-bg"></span>' + safe(section.title) +
-        '</h2>' +
-        (section.subtitle ? '<p class="text-xs text-emerald-400/60 mt-1 ml-3">' + safe(section.subtitle) + '</p>' : '') +
-      '</div>' +
-      '<div class="' + (section.layout === 'wide' ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5') + '">' + cards + '</div>' +
-    '</section>';
+    return `<section class="py-3">
+      <div class="mb-4">
+        <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+          <span class="w-1 h-6 rounded-full accent-bg"></span>${safe(section.title)}
+        </h2>
+        ${section.subtitle ? `<p class="text-xs text-emerald-400/60 mt-1 ml-3">${safe(section.subtitle)}</p>` : ''}
+      </div>
+      <div class="${section.layout === 'wide' ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5'}">${cards}</div>
+    </section>`;
   }).join('');
 }
 
@@ -1921,7 +1560,7 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_gallery','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_upcoming','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 let publicFirebaseReady = false;
 let publicDb = null;
 try {
