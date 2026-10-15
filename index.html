@@ -857,7 +857,14 @@
         <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
       </button>
     </div>
-    <nav id="mobile-nav" class="flex flex-col gap-1 text-[15px] font-semibold text-emerald-100 flex-1 overflow-y-auto"></nav>
+    <nav id="mobile-nav" class="flex flex-col gap-1 text-[15px] font-semibold text-white flex-1 overflow-y-auto min-h-[200px]">
+      <a href="#home" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Home</span></a>
+      <a href="#stories" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Travel Stories</span></a>
+      <a href="#photo-gallery-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Photo Gallery</span></a>
+      <a href="#youtube-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>YouTube</span></a>
+      <a href="#about-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>About</span></a>
+      <a href="#contact" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Contact</span></a>
+    </nav>
     <div class="mt-auto pt-5 border-t border-emerald-900/50">
       <div class="flex gap-2 mb-4 flex-wrap" id="social-links-mobile"></div>
       <p id="mobile-tagline" class="text-[11px] text-emerald-500/70">Discover Myanmar, one journey at a time.</p>
@@ -1165,6 +1172,14 @@ let siteMenu = [];
 function toggleMenu() {
   const menu = $('site-menu'), overlay = $('drawer-overlay');
   const open = menu.classList.contains('translate-x-full');
+  // When opening: ensure menu links exist
+  if (open) {
+    try { renderMenu(); } catch (e) {}
+    var nav = $('mobile-nav');
+    if (nav && !nav.querySelector('a')) {
+      try { renderMenu(); } catch (e2) {}
+    }
+  }
   menu.classList.toggle('translate-x-full', !open);
   overlay.classList.toggle('opacity-0', !open);
   overlay.classList.toggle('pointer-events-none', !open);
@@ -1467,15 +1482,29 @@ function defaultMenuItems() {
 }
 function renderMenu() {
   var raw = Array.isArray(siteMenu) ? siteMenu : [];
-  var menu = raw.filter(function(m) { return m && String(m.label || '').trim(); });
+  var menu = raw.filter(function(m) {
+    if (!m) return false;
+    var lab = String(m.label || m.title || m.name || '').trim();
+    return !!lab;
+  }).map(function(m) {
+    return {
+      label: String(m.label || m.title || m.name || '').trim(),
+      href: String(m.href || m.link || m.url || '#').trim() || '#'
+    };
+  });
   if (!menu.length) menu = defaultMenuItems();
   const mob = $('mobile-nav');
   const foot = $('footer-links');
+  var html = menu.map(function(m) {
+    return '<a href="' + safe(m.href || '#') + '" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold">' +
+      '<i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>' + safe(m.label) + '</span></a>';
+  }).join('');
   if (mob) {
-    mob.innerHTML = menu.map(function(m) {
-      return '<a href="' + safe(m.href || '#') + '" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white">' +
-        '<i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>' + safe(m.label) + '</span></a>';
-    }).join('');
+    mob.innerHTML = html;
+    mob.style.display = 'flex';
+    mob.style.visibility = 'visible';
+    mob.style.opacity = '1';
+    mob.style.minHeight = '180px';
   }
   if (foot) {
     foot.innerHTML = menu.map(function(m) {
@@ -1663,6 +1692,11 @@ function loadBlogData() {
   })();
 
   siteMenu = read('hh_menu', []);
+  if (!Array.isArray(siteMenu)) siteMenu = [];
+  // If Firebase/local menu empty → use defaults and keep them
+  if (!siteMenu.filter(function(m){ return m && String(m.label||m.title||m.name||'').trim(); }).length) {
+    siteMenu = defaultMenuItems();
+  }
   renderMenu();
 
   const social = read('hh_social', {});
@@ -2823,4 +2857,3 @@ document.addEventListener('keydown', e => {
 
 </body>
 </html>
- 
