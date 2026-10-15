@@ -3597,7 +3597,8 @@ function renderSponsorList() {
         <div class="font-bold text-white truncate">${title}</div>
         <div class="tiny">${on ? '<span class="text-emerald-400">Active</span>' : '<span class="text-slate-500">Hidden</span>'} · ${safe(s.badge || '')}</div>
       </div>
-      <div class="flex gap-1 shrink-0">
+      <div class="flex gap-1 shrink-0 flex-wrap">
+        <button type="button" class="btn ${on ? 'btn-green' : 'btn-muted'} px-2 text-xs" onclick="toggleSponsorActive(${i})" title="On/Off">${on ? 'ON' : 'OFF'}</button>
         <button type="button" class="btn btn-muted px-2" onclick="editSponsor(${i})" title="Edit"><i class="fa-solid fa-pen"></i></button>
         <button type="button" class="btn btn-muted px-2" onclick="moveSponsor(${i},-1)" title="Up"><i class="fa-solid fa-arrow-up"></i></button>
         <button type="button" class="btn btn-muted px-2" onclick="moveSponsor(${i},1)" title="Down"><i class="fa-solid fa-arrow-down"></i></button>
@@ -3606,6 +3607,23 @@ function renderSponsorList() {
     </div>`;
   }).join('');
 }
+function toggleSponsorActive(i) {
+  const list = getSponsorList();
+  if (!list[i]) return;
+  list[i].active = list[i].active === false ? true : false;
+  writeSponsorList(list);
+  // also keep section on if any active
+  try {
+    var meta = getSponsorSectionMeta();
+    var anyOn = list.some(function(s){ return s && s.active !== false; });
+    meta.active = anyOn;
+    write('hh_sponsor_meta', meta);
+    if ($('sp-section-active')) $('sp-section-active').checked = anyOn;
+  } catch (e) {}
+  toast(list[i].active !== false ? '✓ Sponsor ON' : '✓ Sponsor OFF — ဖုန်း/PC အားလုံး');
+}
+window.toggleSponsorActive = toggleSponsorActive;
+
 function resetSponsorForm() {
   $('admin-sponsor-edit-id').value = '';
   $('admin-sponsor-active').checked = true;
@@ -3845,7 +3863,15 @@ function saveSponsorSectionMeta() {
     subtitle: ($('sp-section-subtitle') && $('sp-section-subtitle').value || '').trim()
   };
   write('hh_sponsor_meta', m);
-  toast(m.active ? '✓ Section On — device အားလုံး ပြမယ်' : '✓ Section Off — device အားလုံး ပိတ်');
+  // Section OFF → force every sponsor inactive so public never shows
+  if (!m.active) {
+    try {
+      var list = getSponsorList();
+      list.forEach(function(s){ if (s) s.active = false; });
+      writeSponsorList(list);
+    } catch (e) {}
+  }
+  toast(m.active ? '✓ Section On — device အားလုံး ပြမယ်' : '✓ Section Off — ဖုန်း/PC အားလုံး ပိတ်');
 }
 function onSponsorActiveToggle() {
   try { updateSponsorPreview(); } catch (e) {}
