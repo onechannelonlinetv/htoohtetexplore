@@ -428,16 +428,22 @@
     min-height: 120px;
     max-width: 100%;
   }
-  /* Desktop: keep admin width/height; never collapse to 0 */
-  @media (min-width: 641px) {
-    .sp-banner {
-      min-height: 140px;
-    }
+  /* Desktop/PC: keep admin sizes exactly — only ensure visibility */
+  @media (min-width: 1025px) {
     #sponsor-container:not(.hidden) {
       display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     #sponsor-list-public:empty {
       display: none;
+    }
+    /* do not override .sp-banner width/height — admin controls PC */
+  }
+  @media (min-width: 641px) and (max-width: 1024px) {
+    #sponsor-container:not(.hidden) {
+      display: block !important;
+      visibility: visible !important;
     }
   }
   .sp-banner img.sp-bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
@@ -490,20 +496,36 @@
       filter: none !important;
     }
     .sp-banner[data-shape="square"] { border-radius: 0.5rem !important; }
+    /* Phone: fit hero — do NOT use full desktop height */
     #hero-section {
       width: 100% !important;
       max-width: 100% !important;
       margin-left: 0 !important;
       margin-right: 0 !important;
-      min-height: var(--hero-min-h, 120px) !important;
-      height: var(--hero-min-h, 120px) !important;
-      max-height: none;
+      min-height: 220px !important;
+      height: min(52vw, 280px) !important;
+      max-height: 280px !important;
     }
-    #hero-section #hero-title { font-size: clamp(1.1rem, 5.5vw, 1.65rem) !important; }
-    #hero-section #hero-desc { font-size: clamp(0.72rem, 3vw, 0.92rem) !important; }
-    #hero-section #hero-label { font-size: clamp(0.62rem, 2.4vw, 0.78rem) !important; }
+    #hero-content-wrap {
+      min-height: 220px !important;
+      height: 100% !important;
+    }
+    #hero-section #hero-title { font-size: clamp(1.05rem, 5vw, 1.5rem) !important; }
+    #hero-section #hero-desc { font-size: clamp(0.7rem, 2.8vw, 0.88rem) !important; }
+    #hero-section #hero-label { font-size: clamp(0.6rem, 2.2vw, 0.75rem) !important; }
     #hero-img {
       object-fit: cover !important;
+      object-position: center center !important;
+    }
+    #upcoming-banner {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 140px !important;
+      min-height: 140px !important;
+      max-height: 160px !important;
+    }
+    #proud-public-frame {
+      max-height: 72px !important;
     }
 
     .sp-banner .sp-badge {
@@ -547,10 +569,24 @@
     }
   }
 
-  /* tablet hero */
+  /* Tablet only — fit banners; desktop (≥1025) untouched */
   @media (min-width: 641px) and (max-width: 1024px) {
     #hero-section {
       max-width: 100% !important;
+      min-height: 300px !important;
+      height: min(42vw, 380px) !important;
+      max-height: 380px !important;
+    }
+    #hero-content-wrap {
+      min-height: 300px !important;
+    }
+    .sp-banner {
+      max-width: 100% !important;
+      min-height: 140px !important;
+    }
+    #upcoming-banner {
+      max-width: 100% !important;
+      min-height: 160px !important;
     }
   }
 
@@ -658,8 +694,10 @@
     width: min(92%, var(--hero-text-maxw, 36rem));
   }
   @media (max-width: 640px) {
+    /* override admin desktop height — phone fit only */
     #hero-section, #hero-content-wrap {
-      min-height: var(--hero-min-h, 420px) !important;
+      min-height: 220px !important;
+      max-height: 280px !important;
     }
     #hero-label, #hero-title, #hero-desc, #hero-sign, #hero-btn-wrap {
       max-width: 92% !important;
@@ -667,14 +705,13 @@
       word-break: break-word;
     }
     #hero-title {
-      font-size: clamp(1.25rem, 6vw, 1.85rem) !important;
+      font-size: clamp(1.05rem, 5vw, 1.5rem) !important;
       line-height: 1.2 !important;
     }
     #hero-desc {
-      font-size: clamp(0.75rem, 3.2vw, 0.95rem) !important;
-      line-height: 1.4 !important;
+      font-size: clamp(0.7rem, 2.8vw, 0.88rem) !important;
+      line-height: 1.35 !important;
     }
-    /* Section titles readable on phone */
     section h2, #upcoming-heading, #sponsor-section-heading {
       font-size: clamp(1.05rem, 4.5vw, 1.35rem) !important;
       line-height: 1.3 !important;
@@ -1607,7 +1644,12 @@ function loadBlogData() {
     if (sc) { sc.classList.add('hidden'); sc.style.display = 'none'; }
     if (listBox) listBox.innerHTML = '';
   } else {
-    if (sc) { sc.classList.remove('hidden'); sc.style.display = ''; }
+    if (sc) {
+      sc.classList.remove('hidden');
+      sc.style.display = 'block';
+      sc.style.visibility = 'visible';
+      sc.style.opacity = '1';
+    }
     // Section heading / subtitle
     try {
       var spMeta = read('hh_sponsor_meta', {}) || {};
