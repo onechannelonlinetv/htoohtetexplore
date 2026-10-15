@@ -817,7 +817,16 @@ main > div {
               <label class="label">Button Link</label>
               <input id="hero-btn-link" class="field" placeholder="#stories">
             </div>
+            <div>
+              <label class="label">Button X (နေရာ ဘယ်→ညာ) <span id="val-btnx" class="range-val">4%</span></label>
+              <input id="hero-btn-x" type="range" min="0" max="90" value="4" class="w-full accent-emerald-500" oninput="if($('val-btnx'))$('val-btnx').textContent=this.value+'%';updateHeroPreview&&updateHeroPreview()">
+            </div>
+            <div>
+              <label class="label">Button Y (နေရာ အပေါ်→အောက်) <span id="val-btny" class="range-val">88%</span></label>
+              <input id="hero-btn-y" type="range" min="40" max="95" value="88" class="w-full accent-emerald-500" oninput="if($('val-btny'))$('val-btny').textContent=this.value+'%';updateHeroPreview&&updateHeroPreview()">
+            </div>
           </div>
+          <p class="tiny">Button ကို အောက်ခြေထောင့် = X 4% · Y 88% ။ Slider နဲ့ ကိုယ်တိုင် ချိန်နိုင်ပါတယ်။</p>
 
           <!-- hidden positions -->
           <input type="hidden" id="hero-label-x" value="8">
@@ -2824,6 +2833,14 @@ function loadAll() {
   if ($('hero-text-y')) $('hero-text-y').value = h.textY != null ? h.textY : 35;
   $('hero-btn-text').value = h.btnText || '';
   $('hero-btn-link').value = h.btnLink || '';
+  if ($('hero-btn-x')) {
+    $('hero-btn-x').value = h.btnX != null ? h.btnX : 4;
+    if ($('val-btnx')) $('val-btnx').textContent = (h.btnX != null ? h.btnX : 4) + '%';
+  }
+  if ($('hero-btn-y')) {
+    $('hero-btn-y').value = h.btnY != null ? h.btnY : 88;
+    if ($('val-btny')) $('val-btny').textContent = (h.btnY != null ? h.btnY : 88) + '%';
+  }
   showPreviewIfUrl('hero-image');
   if (typeof updateHeroPreview === 'function') updateHeroPreview();
 
@@ -3559,7 +3576,9 @@ function saveHero() {
     textX: parseInt($('hero-label-x')?.value || '8', 10),
     textY: parseInt($('hero-title-y')?.value || '32', 10),
     btnText: $('hero-btn-text').value.trim(),
-    btnLink: $('hero-btn-link').value.trim()
+    btnLink: $('hero-btn-link').value.trim(),
+    btnX: parseInt($('hero-btn-x')?.value || '4', 10),
+    btnY: parseInt($('hero-btn-y')?.value || '88', 10)
   });
   updateHeroPreview();
   toast('Hero သိမ်းပြီးပါပြီ။ Live site / ဖုန်းမှာ refresh လုပ်ပါ။');
