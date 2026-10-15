@@ -411,6 +411,21 @@
     margin-right: auto;
     border: 1px solid rgba(6, 78, 59, 0.4);
     box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    display: block;
+    min-height: 120px;
+    max-width: 100%;
+  }
+  /* Desktop: keep admin width/height; never collapse to 0 */
+  @media (min-width: 641px) {
+    .sp-banner {
+      min-height: 140px;
+    }
+    #sponsor-container:not(.hidden) {
+      display: block !important;
+    }
+    #sponsor-list-public:empty {
+      display: none;
+    }
   }
   .sp-banner img.sp-bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .sp-banner .sp-grad { position:absolute; inset:0; background: linear-gradient(to right, rgba(0,0,0,.75), rgba(0,0,0,.4), transparent); }
@@ -423,10 +438,17 @@
     .sp-banner {
       width: 100% !important;
       height: auto !important;
-      min-height: 110px !important;
-      max-height: 150px !important;
-      aspect-ratio: 2 / 1;
+      min-height: 130px !important;
+      max-height: 200px !important;
+      aspect-ratio: 16 / 9;
       border-radius: 0.75rem !important; /* no circle/pill on phone */
+    }
+    #sponsor-container {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    #sponsor-container:not(.hidden) {
+      display: block !important;
     }
     .sp-banner[data-shape="square"] { border-radius: 0.5rem !important; }
     #hero-section {
@@ -1425,7 +1447,8 @@ function loadBlogData() {
   const proudList = $('proud-sponsors-list');
   const proudLabel = $('proud-label');
   const activeProud = (Array.isArray(proud) ? proud : []).filter(function(p) { return p && p.active !== false; });
-  if (activeProud.length) {
+  const proudSectionOn = proudMeta.active !== false;
+  if (activeProud.length && proudSectionOn) {
     if (proudSec) proudSec.classList.remove('hidden');
     const frameH = Number(proudMeta.frameH) || 100;
     const logoH = Number(proudMeta.logoH) || 48;
@@ -1513,8 +1536,10 @@ function loadBlogData() {
     } catch (e) {}
     if (listBox) {
       listBox.innerHTML = sponsors.map(function(sponsor) {
-        const h = sponsor.height || (siteSettings.sponsorHeight) || 180;
-        const wPct = sponsor.widthPct != null ? sponsor.widthPct : 100;
+        const h = Math.max(120, Number(sponsor.height) || Number(siteSettings.sponsorHeight) || 180);
+        let wPct = sponsor.widthPct != null ? Number(sponsor.widthPct) : 100;
+        if (!wPct || wPct < 40) wPct = 100;
+        if (wPct > 100) wPct = 100;
         const shape = sponsor.shape || 'rounded';
         const radiusMap = { square: '0px', soft: '16px', rounded: '1rem', pill: '1.25rem', circle: '1.25rem' };
         // Desktop can still use pill/circle; phone CSS overrides to soft rounded
