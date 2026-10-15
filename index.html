@@ -874,13 +874,9 @@
     <div id="hero-overlay-top" class="absolute inset-0"></div>
     <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
       <div id="hero-text-box" class="absolute inset-0 pointer-events-none" style="z-index:5;">
-        <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%;">Travel Journal</span>
-        <h1 id="hero-title" class="hero-title absolute font-black leading-[1.15] tracking-tight text-white pointer-events-auto" style="left:8%; top:28%; font-size:clamp(1.4rem,5vw,2.5rem); max-width:90%;">
-          New Places.<br><span class="text-emerald-300">Same Curiosity.</span>
-        </h1>
-        <p id="hero-desc" class="absolute text-emerald-100/80 leading-relaxed pointer-events-auto" style="left:8%; top:55%; font-size:14px; max-width:min(90%,36rem);">
-          Traveling is not just about reaching a destination, it's about collecting stories, meeting people, and seeing the world with a different heart.
-        </p>
+        <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%; display:none;"></span>
+        <h1 id="hero-title" class="absolute text-white font-black leading-tight pointer-events-auto" style="left:8%; top:28%; max-width:min(90%,36rem); font-size:clamp(1.4rem,4vw,2.4rem); display:none;"></h1>
+        <p id="hero-desc" class="absolute text-emerald-100/80 leading-relaxed pointer-events-auto" style="left:8%; top:55%; font-size:14px; max-width:min(90%,36rem); display:none;"></p>
         <div id="hero-btn-wrap" class="absolute pointer-events-auto" style="left:8%; top:72%;">
           <a id="hero-btn" href="#stories" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full shadow-lg transition">
             Explore My Journey <i class="fa-solid fa-arrow-right text-xs"></i>
@@ -1537,20 +1533,34 @@ function loadBlogData() {
   const hix = hero.imgPosX != null ? hero.imgPosX : 50;
   const hiy = hero.imgPosY != null ? hero.imgPosY : 50;
   if ($('hero-img')) $('hero-img').style.objectPosition = hix + '% ' + hiy + '%';
-  if (hero.label) $('hero-label').textContent = hero.label;
-  if (hero.labelColor) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
+  // Text only when user typed — no default placeholder text
+  function showHeroText(el, htmlOrText, asHtml) {
+    if (!el) return;
+    var v = (htmlOrText == null ? '' : String(htmlOrText)).trim();
+    if (!v) { el.innerHTML = ''; el.style.display = 'none'; return; }
+    if (asHtml) el.innerHTML = v; else el.textContent = v;
+    el.style.display = '';
+  }
+  showHeroText($('hero-label'), hero.label, false);
+  if (hero.labelColor && $('hero-label')) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
   if (hero.labelFs) setStyle($('hero-label'), 'font-size', hero.labelFs + 'px');
-  if (hero.title) $('hero-title').innerHTML = hero.title;
+  showHeroText($('hero-title'), hero.title, true);
   if (hero.titleColor) setStyle($('hero-title'), 'color', hero.titleColor);
   if (hero.titleFs) setStyle($('hero-title'), 'font-size', 'clamp(1.2rem, 4vw, ' + hero.titleFs + 'px)');
   if (hero.titleWeight) setStyle($('hero-title'), 'font-weight', hero.titleWeight);
   if (hero.titleStyle) setStyle($('hero-title'), 'font-style', hero.titleStyle);
-  if (hero.desc) $('hero-desc').textContent = hero.desc;
+  showHeroText($('hero-desc'), hero.desc, false);
   if (hero.descColor) setStyle($('hero-desc'), 'color', hero.descColor);
   if (hero.descFs) setStyle($('hero-desc'), 'font-size', hero.descFs + 'px');
-  if (hero.sign != null && $('hero-sign')) {
-    $('hero-sign').textContent = hero.sign;
-    if (hero.signColor) setStyle($('hero-sign'), 'color', hero.signColor);
+  if ($('hero-sign')) {
+    if (hero.sign && String(hero.sign).trim()) {
+      $('hero-sign').textContent = hero.sign;
+      $('hero-sign').style.display = '';
+      if (hero.signColor) setStyle($('hero-sign'), 'color', hero.signColor);
+    } else {
+      $('hero-sign').textContent = '';
+      $('hero-sign').style.display = 'none';
+    }
   }
   function posEl(id, x, y) {
     const el = $(id);
@@ -1576,8 +1586,15 @@ function loadBlogData() {
       // mobile CSS uses bottom when data-pos=default
     }
   }
-  if (hero.btnText) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
-  if (hero.btnLink) $('hero-btn').href = hero.btnLink;
+  if ($('hero-btn-wrap')) {
+    if (hero.btnText && String(hero.btnText).trim()) {
+      $('hero-btn-wrap').style.display = '';
+      if ($('hero-btn')) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
+    } else {
+      $('hero-btn-wrap').style.display = 'none';
+    }
+  }
+  if (hero.btnLink && $('hero-btn')) $('hero-btn').href = hero.btnLink;
   if (hero.sign) $('hero-sign').textContent = hero.sign;
   $('hero-section').classList.toggle('hidden', hero.active === false);
 
