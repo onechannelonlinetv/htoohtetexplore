@@ -1107,10 +1107,10 @@
 <section id="article-page" class="hidden min-h-screen">
   <div class="sticky top-0 z-40 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-      <button type="button" onclick="closeArticle()" class="w-10 h-10 rounded-full bg-emerald-900/50 text-emerald-100 flex items-center justify-center hover:bg-emerald-800 transition shrink-0" aria-label="Back">
-        <i class="fa-solid fa-arrow-left"></i>
+      <button type="button" onclick="closeArticle()" class="inline-flex items-center gap-2 rounded-full bg-emerald-900/50 text-emerald-100 hover:bg-emerald-800 transition shrink-0 px-3 py-2" aria-label="Back">
+        <i class="fa-solid fa-arrow-left text-sm"></i>
+        <span id="article-page-label" class="text-sm font-bold">Back</span>
       </button>
-      <span id="article-page-label" class="text-sm font-bold text-emerald-100/90 truncate">ဆောင်းပါး</span>
     </div>
   </div>
 
@@ -1261,7 +1261,7 @@ function toggleUserMode() {
 const I18N = {
   en: {
     searchPlaceholder: 'Search title, place...',
-    article: 'Article',
+    article: 'Back',
     related: 'Related Stories',
     backHome: 'Back to stories',
     quickLinks: 'Quick Links',
@@ -1294,7 +1294,7 @@ const I18N = {
   },
   mm: {
     searchPlaceholder: 'ခေါင်းစဉ်၊ နေရာ ရှာရန်...',
-    article: 'ဆောင်းပါး',
+    article: 'Back',
     related: 'ဆက်စပ်ဆောင်းပါးများ',
     backHome: 'ပြန်သွားမယ်',
     quickLinks: 'အမြန်လင့်ခ်',
@@ -1409,6 +1409,17 @@ function applyLanguageUI() {
   // Re-render cards so "Read" label updates
   if (typeof renderStoryCards === 'function' && typeof allStoryPosts !== 'undefined') {
     try { renderStoryCards(); } catch (e) {}
+  }
+  // If article is open — refresh body/title in new language immediately
+  if (typeof window._openArticleIndex === 'number' && window._openArticleIndex >= 0 && typeof openArticle === 'function') {
+    try { openArticle(window._openArticleIndex); } catch (e) {}
+  }
+  // Stories subtitle
+  var ss = $('stories-sub');
+  if (ss) {
+    ss.textContent = (typeof currentLang !== 'undefined' && currentLang === 'en')
+      ? 'Beautiful places across Myanmar'
+      : 'မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ';
   }
 }
 
@@ -2080,18 +2091,28 @@ function postLocalized(post, field) {
 }
 /** EN content: if no images, append images from Myanmar content so user still sees photos */
 function mergeContentImages(primary, fallback) {
-  primary = primary || '';
-  fallback = fallback || '';
+  primary = String(primary || '');
+  fallback = String(fallback || '');
   if (!fallback) return primary;
-  var hasImg = /!\[[^\]]*\]\([^)]+\)|<img\s/i.test(primary);
-  if (hasImg) return primary;
+  // Strip broken placeholders like [Image Link: xxx]
+  primary = primary.replace(/\[Image\s*Link\s*:\s*[^\]]+\]/gi, '');
+  primary = primary.replace(/\[img\s*link\s*:\s*[^\]]+\]/gi, '');
+  // Already has real image tags?
+  var hasReal = /\[img[^\]]*\][\s\S]*?\[\/img\]|!\[[^\]]*\]\([^)]+\)|<img\s/i.test(primary);
+  if (hasReal) return primary.trim();
+  // Collect images from Myanmar body
   var imgs = [];
+  var re = /\[img((?:\s+\w+=[^\s\]]+)*)\]([\s\S]*?)\[\/img\]/gi;
+  var mm;
+  while ((mm = re.exec(fallback)) !== null) {
+    var u = (mm[2] || '').trim();
+    if (u && u.indexOf('cid:') !== 0) imgs.push('[img' + (mm[1] || '') + ']' + u + '[/img]');
+    else if (u) imgs.push('[img' + (mm[1] || '') + ']' + u + '[/img]');
+  }
   var md = fallback.match(/!\[[^\]]*\]\([^)]+\)/g);
   if (md) imgs = imgs.concat(md);
-  var html = fallback.match(/<img\s[^>]*src=["'][^"']+["'][^>]*>/gi);
-  if (html) imgs = imgs.concat(html);
-  if (!imgs.length) return primary;
-  return (primary ? (primary + '\n\n') : '') + imgs.join('\n\n');
+  if (!imgs.length) return primary.trim();
+  return (primary.trim() ? (primary.trim() + '\n\n') : '') + imgs.join('\n\n');
 }
 
 function renderStoryCards() {
@@ -2171,6 +2192,8 @@ function formatArticleBody(raw) {
       imgs.slice(0,2).map(cell).join('') + '</div>';
   }
   let t = String(raw);
+  // strip broken image placeholders
+  t = t.replace(/\[Image\s*Link\s*:\s*[^\]]+\]/gi, '');
   // galleries first (before escaping)
   t = t.replace(/\[gallery(?:\s+layout=([^\s\]]+))?\]([\s\S]*?)\[\/gallery\]/gi, function(_, layout, inner) {
     return renderImgsInGallery(inner, layout || '1-2');
@@ -2491,9 +2514,11 @@ document.addEventListener('keydown', function(e) {
 
 
 
+window._openArticleIndex = null;
 function openArticle(index) {
   const post = allStoryPosts[index];
   if (!post) return;
+  window._openArticleIndex = index;
   try { closeLightbox(); } catch (e) {}
   closeMenu();
 
@@ -2540,7 +2565,7 @@ function openArticle(index) {
   }
 
   bindArticleImageZoom();
-  currentPostTitle = post.title || '';
+  currentPostTitle = postLocalized(post, 'title') || post.title || '';
   bindEngagement(post.id != null ? post.id : index);
 
   // Full page: hide home + footer, show only article
@@ -2557,6 +2582,7 @@ function openArticle(index) {
   } catch (e) {}
 }
 function closeArticle() {
+  window._openArticleIndex = null;
   try { closeLightbox(); } catch (e) {}
   if (_engageUnsub) { try { _engageUnsub(); } catch (e) {} _engageUnsub = null; }
   currentPostId = null;
