@@ -964,6 +964,7 @@ main > div {
             <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
           </div>
           <div class="fold-body space-y-3">
+            <label class="toggle-row"><input type="checkbox" id="sp-section-active" checked onchange="saveSponsorSectionMeta()"><span class="text-sm font-semibold">Official Sponsor Section ပြမယ် (On/Off · device အားလုံး)</span></label>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label class="label">Section Heading</label>
@@ -984,7 +985,7 @@ main > div {
           <div class="fold-head" onclick="toggleFold(this)">
             <div class="flex items-center gap-3 flex-wrap min-w-0">
               <div class="fold-title" id="sponsor-editor-title">Sponsor တည်းဖြတ်</div>
-              <label class="toggle-row mb-0" onclick="event.stopPropagation()"><input type="checkbox" id="admin-sponsor-active" checked onchange="updateSponsorPreview()"><span class="text-sm font-semibold">ပြမယ်</span></label>
+              <label class="toggle-row mb-0" onclick="event.stopPropagation()"><input type="checkbox" id="admin-sponsor-active" checked onchange="onSponsorActiveToggle()"><span class="text-sm font-semibold">ပြမယ် (On/Off · ချက်ချင်း သိမ်း)</span></label>
             </div>
             <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
           </div>
@@ -3833,17 +3834,35 @@ function getSponsorSectionMeta() {
 }
 function loadSponsorSectionMeta() {
   var m = getSponsorSectionMeta();
+  if ($('sp-section-active')) $('sp-section-active').checked = m.active !== false;
   if ($('sp-section-heading')) $('sp-section-heading').value = m.heading || '';
   if ($('sp-section-subtitle')) $('sp-section-subtitle').value = m.subtitle || '';
 }
 function saveSponsorSectionMeta() {
   var m = {
+    active: $('sp-section-active') ? $('sp-section-active').checked : true,
     heading: ($('sp-section-heading') && $('sp-section-heading').value || '').trim() || 'Official Sponsors',
     subtitle: ($('sp-section-subtitle') && $('sp-section-subtitle').value || '').trim()
   };
   write('hh_sponsor_meta', m);
-  toast('Section Heading သိမ်းပြီး');
+  toast(m.active ? '✓ Section On — device အားလုံး ပြမယ်' : '✓ Section Off — device အားလုံး ပိတ်');
 }
+function onSponsorActiveToggle() {
+  try { updateSponsorPreview(); } catch (e) {}
+  var editId = ($('admin-sponsor-edit-id') && $('admin-sponsor-edit-id').value || '').trim();
+  var list = getSponsorList();
+  var idx = parseInt(editId, 10);
+  var on = $('admin-sponsor-active') ? $('admin-sponsor-active').checked : true;
+  if (!isNaN(idx) && list[idx]) {
+    list[idx].active = on;
+    writeSponsorList(list);
+    toast(on ? '✓ Sponsor On' : '✓ Sponsor Off — ဖုန်း/PC အားလုံး ပိတ်');
+  } else {
+    // no item selected yet — still update preview; user must Save for new items
+    toast(on ? 'On (Save Sponsor နှိပ်ပါ)' : 'Off (Save Sponsor နှိပ်ပါ)');
+  }
+}
+window.onSponsorActiveToggle = onSponsorActiveToggle;
 window.saveSponsorSectionMeta = saveSponsorSectionMeta;
 
 function updateSponsorPreview() {
