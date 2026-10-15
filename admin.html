@@ -564,6 +564,26 @@ main > div {
           </div>
           <div class="fold-body space-y-5">
 
+          <!-- Saved Hero list · Edit / Delete -->
+          <div class="rounded-xl border border-emerald-700/40 bg-emerald-950/20 p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">သိမ်းထားသော Hero · Edit / Delete</p>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" class="btn btn-purple text-xs" onclick="newHeroDraft()"><i class="fa-solid fa-plus mr-1"></i>Hero အသစ်</button>
+                <button type="button" class="btn btn-green text-xs" onclick="saveHeroToList()"><i class="fa-solid fa-floppy-disk mr-1"></i>List ထဲ သိမ်း</button>
+              </div>
+            </div>
+            <input type="hidden" id="hero-edit-list-id" value="">
+            <div class="flex flex-wrap gap-2 items-end">
+              <div class="flex-1 min-w-[160px]">
+                <label class="label">Hero နာမည် (list အတွက်)</label>
+                <input id="hero-list-name" class="field" placeholder="ဥပမာ · Home Hero / Promo Banner">
+              </div>
+            </div>
+            <div id="hero-saved-list" class="space-y-2"></div>
+            <p class="tiny">Live site မှာ ပြနေတာ = လက်ရှိ Save Hero။ List က backup / ပြန်သုံးရန်။</p>
+          </div>
+
           <!-- FULL-BLEED LIVE PREVIEW (website-width) -->
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-2 sm:p-3 space-y-2 w-full">
             <div class="flex flex-wrap items-center gap-3 px-1 mb-2">
@@ -868,6 +888,9 @@ main > div {
             <div id="menu-preview-box" class="mt-2 space-y-1 text-sm text-emerald-100"></div>
           </div>
           <div class="grid grid-cols-1 gap-3 md:grid-cols-3 mb-4">
+            <div class="md:col-span-3 flex flex-wrap gap-2 mb-1">
+              <button type="button" class="btn btn-green text-xs" onclick="fillDefaultMenu()"><i class="fa-solid fa-list mr-1"></i>Default Menu အပြည့်ထည့် (Home · Stories · Gallery · YouTube · About · Contact)</button>
+            </div>
             <div><label class="label">Label</label><input id="menu-label" class="field" placeholder="Travel Stories"></div>
             <div><label class="label">Link (href)</label><input id="menu-href" class="field" placeholder="#stories"></div>
             <div class="flex items-end"><button onclick="addMenuItem()" class="btn btn-purple w-full"><i class="fa-solid fa-plus mr-1"></i>Add Menu</button></div>
@@ -1853,7 +1876,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = 'aEd0gacSLgVgs445C4wfyBuFwBH3';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_hero_list','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2856,6 +2879,7 @@ function loadAll() {
   }
   showPreviewIfUrl('hero-image');
   if (typeof updateHeroPreview === 'function') updateHeroPreview();
+  try { renderHeroSavedList(); } catch (e) {}
 
   // Sponsors (array) — form left empty until edit; list rendered
   try { renderSponsorList(); } catch (e) {}
@@ -2937,6 +2961,11 @@ function loadAll() {
   if ($('social-show-tt')) $('social-show-tt').checked = social.showTt !== false;
   if ($('social-show-vb')) $('social-show-vb').checked = social.showVb !== false;
 
+  try {
+    if (typeof getMenu === 'function' && typeof defaultMenuItemsAdmin === 'function' && !getMenu().length) {
+      write('hh_menu', defaultMenuItemsAdmin());
+    }
+  } catch (e) {}
   renderMenuList();
   try { if (typeof loadProudMeta === 'function') loadProudMeta(); } catch (e) {}
   renderProudList();
@@ -3608,6 +3637,121 @@ function saveHero() {
   } catch (e) {}
   toast('Hero သိမ်းပြီးပါပြီ။ Live site / ဖုန်းမှာ refresh လုပ်ပါ။');
 }
+
+
+/* ---- Hero saved list (Edit / Delete / New) ---- */
+function getHeroList() {
+  try {
+    var v = read('hh_hero_list', []);
+    return Array.isArray(v) ? v : [];
+  } catch (e) { return []; }
+}
+function collectHeroSnapshot() {
+  // reuse saveHero field collection without writing first
+  return {
+    id: Date.now(),
+    name: (($('hero-list-name') && $('hero-list-name').value) || '').trim() || (($('hero-title') && $('hero-title').value) || 'Hero').trim() || 'Hero',
+    savedAt: new Date().toISOString(),
+    data: read('hh_hero', {})
+  };
+}
+function renderHeroSavedList() {
+  var box = $('hero-saved-list');
+  if (!box) return;
+  var list = getHeroList();
+  if (!list.length) {
+    box.innerHTML = '<p class="text-sm text-slate-500 border border-dashed border-slate-700 rounded-xl p-3 text-center">သိမ်းထားသော Hero မရှိသေးပါ။ ပြင်ပြီး "List ထဲ သိမ်း" နှိပ်ပါ။</p>';
+    return;
+  }
+  box.innerHTML = list.map(function(item, i) {
+    var d = item.data || {};
+    var title = safe(item.name || d.title || 'Hero');
+    var sub = safe((d.label || '') + (d.title ? ' · ' + String(d.title).replace(/<[^>]+>/g,'').slice(0,40) : ''));
+    var when = item.savedAt ? new Date(item.savedAt).toLocaleString() : '';
+    return '<div class="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/60 p-3">' +
+      '<div class="flex-1 min-w-0">' +
+        '<p class="font-bold truncate">' + title + '</p>' +
+        '<p class="tiny truncate">' + sub + (when ? ' · ' + when : '') + '</p>' +
+      '</div>' +
+      '<div class="flex gap-2 shrink-0">' +
+        '<button type="button" class="btn btn-green text-xs" onclick="editHeroFromList(\'' + item.id + '\')"><i class="fa-solid fa-pen mr-1"></i>Edit</button>' +
+        '<button type="button" class="btn btn-muted text-xs" onclick="applyHeroFromList(\'' + item.id + '\')"><i class="fa-solid fa-play mr-1"></i>Live သုံး</button>' +
+        '<button type="button" class="btn btn-red text-xs" onclick="deleteHeroFromList(\'' + item.id + '\')"><i class="fa-regular fa-trash-can"></i></button>' +
+      '</div></div>';
+  }).join('');
+}
+function saveHeroToList() {
+  // first save current form to hh_hero
+  try { saveHero(); } catch (e) {}
+  var list = getHeroList();
+  var editId = ($('hero-edit-list-id') && $('hero-edit-list-id').value) || '';
+  var name = (($('hero-list-name') && $('hero-list-name').value) || '').trim();
+  var snap = {
+    id: editId || Date.now(),
+    name: name || (read('hh_hero', {}).title || 'Hero'),
+    savedAt: new Date().toISOString(),
+    data: JSON.parse(JSON.stringify(read('hh_hero', {})))
+  };
+  // strip huge data URLs from list copy if needed — keep reference
+  var idx = list.findIndex(function(x){ return String(x.id) === String(snap.id); });
+  if (idx >= 0) list[idx] = snap;
+  else list.unshift(snap);
+  write('hh_hero_list', list);
+  if ($('hero-edit-list-id')) $('hero-edit-list-id').value = String(snap.id);
+  renderHeroSavedList();
+  toast('✓ Hero list ထဲ သိမ်းပြီး');
+}
+function applyHeroFromList(id) {
+  var item = getHeroList().find(function(x){ return String(x.id) === String(id); });
+  if (!item || !item.data) return toast('Hero မတွေ့', true);
+  write('hh_hero', item.data);
+  try {
+    if (adminDb && adminUser) adminDb.ref('siteData/hh_hero').set(item.data);
+  } catch (e) {}
+  // reload form from hh_hero via loadAll hero section
+  try { loadAll(); } catch (e) {}
+  if ($('hero-list-name')) $('hero-list-name').value = item.name || '';
+  if ($('hero-edit-list-id')) $('hero-edit-list-id').value = String(item.id);
+  renderHeroSavedList();
+  toast('✓ Live Hero သို့ သုံးပြီး');
+}
+function editHeroFromList(id) {
+  applyHeroFromList(id);
+  toast('Edit မုဒ် — ပြင်ပြီး List ထဲ သိမ်း / Save Hero');
+}
+async function deleteHeroFromList(id) {
+  if (!(await confirmDialog('ဒီ Hero ကို list က ဖျက်မလား?', { title: 'Hero ဖျက်မယ်', okText: 'Delete' }))) return;
+  write('hh_hero_list', getHeroList().filter(function(x){ return String(x.id) !== String(id); }));
+  if ($('hero-edit-list-id') && String($('hero-edit-list-id').value) === String(id)) {
+    $('hero-edit-list-id').value = '';
+  }
+  renderHeroSavedList();
+  toast('ဖျက်ပြီး');
+}
+function newHeroDraft() {
+  if ($('hero-edit-list-id')) $('hero-edit-list-id').value = '';
+  if ($('hero-list-name')) $('hero-list-name').value = '';
+  // clear main fields for new draft (keep structure)
+  try {
+    write('hh_hero', {
+      active: true,
+      label: 'Travel Journal',
+      title: 'New Places.<br><span class="text-emerald-300">Same Curiosity.</span>',
+      desc: '',
+      btnText: 'Explore My Journey',
+      btnLink: '#stories',
+      btnX: 4, btnY: 88
+    });
+    loadAll();
+  } catch (e) {}
+  toast('Hero အသစ် — ဖြည့်ပြီး Save Hero / List ထဲ သိမ်း');
+}
+window.saveHeroToList = saveHeroToList;
+window.editHeroFromList = editHeroFromList;
+window.applyHeroFromList = applyHeroFromList;
+window.deleteHeroFromList = deleteHeroFromList;
+window.newHeroDraft = newHeroDraft;
+window.renderHeroSavedList = renderHeroSavedList;
 
 function getSponsorList() {
   let raw = read('hh_sponsor', null);
@@ -4951,17 +5095,33 @@ function saveSocial() {
 }
 
 /* ---- Menu ---- */
+function defaultMenuItemsAdmin() {
+  return [
+    { label: 'Home', href: '#home' },
+    { label: 'Travel Stories', href: '#stories' },
+    { label: 'Photo Gallery', href: '#photo-gallery-section' },
+    { label: 'YouTube', href: '#youtube-section' },
+    { label: 'About', href: '#about-section' },
+    { label: 'Contact', href: '#contact' }
+  ];
+}
+function fillDefaultMenu() {
+  write('hh_menu', defaultMenuItemsAdmin());
+  renderMenuList();
+  toast('✓ Default Menu အပြည့်ထည့်ပြီး');
+}
+window.fillDefaultMenu = fillDefaultMenu;
 function getMenu() { return read('hh_menu', []); }
 function renderMenuList() {
   const list = $('menu-list');
   const items = getMenu();
   const prev = $('menu-preview-box');
   if (prev) {
-    const show = items.length ? items : [{label:'Home'},{label:'Travel Stories'},{label:'YouTube'},{label:'About'},{label:'Contact'}];
+    const show = items.length ? items : defaultMenuItemsAdmin();
     prev.innerHTML = show.map(m => '<div class="rounded-lg px-3 py-2 hover:bg-emerald-900/40">› ' + safe(m.label) + '</div>').join('');
   }
   if (!items.length) {
-    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Menu မရှိသေး — Default menu သုံးနေပါတယ်။</p>';
+    list.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center border border-dashed border-slate-700 rounded-xl">Menu မရှိသေး — "Default Menu အပြည့်ထည့်" နှိပ်ပါ။</p>';
     return;
   }
   list.innerHTML = items.map((m, i) => `
