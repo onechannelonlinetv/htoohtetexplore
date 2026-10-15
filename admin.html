@@ -2732,11 +2732,16 @@ function showView(name, button) {
   if (name === 'addpost') { fillPostCategorySelect(); if (typeof refreshPostSectionOptions === 'function') refreshPostSectionOptions(); }
   if (name === 'menu') {
     try {
-      if (typeof getMenu === 'function' && !getMenu().length && typeof defaultMenuItemsAdmin === 'function') {
-        write('hh_menu', defaultMenuItemsAdmin());
+      if (typeof getMenu === 'function' && typeof defaultMenuItemsAdmin === 'function') {
+        var mm = getMenu();
+        if (!mm || !mm.length) {
+          var items = defaultMenuItemsAdmin();
+          write('hh_menu', items);
+          try { if (adminDb && adminUser) adminDb.ref('siteData/hh_menu').set(items); } catch (e2) {}
+        }
       }
     } catch (e) {}
-    renderMenuList();
+    try { renderMenuList(); } catch (e) {}
   }
   if (name === 'settings') { try { renderHeroSavedList(); } catch (e) {} }
   if (name === 'proud') {
@@ -2970,8 +2975,13 @@ function loadAll() {
   if ($('social-show-vb')) $('social-show-vb').checked = social.showVb !== false;
 
   try {
-    if (typeof getMenu === 'function' && typeof defaultMenuItemsAdmin === 'function' && !getMenu().length) {
-      write('hh_menu', defaultMenuItemsAdmin());
+    if (typeof getMenu === 'function' && typeof defaultMenuItemsAdmin === 'function') {
+      var _m = getMenu();
+      if (!_m || !_m.length) {
+        var _items = defaultMenuItemsAdmin();
+        write('hh_menu', _items);
+        try { if (adminDb && adminUser) adminDb.ref('siteData/hh_menu').set(_items); } catch (e2) {}
+      }
     }
   } catch (e) {}
   renderMenuList();
@@ -3760,11 +3770,8 @@ function saveHeroToList() {
   var editId = ($('hero-edit-list-id') && $('hero-edit-list-id').value) || '';
   var name = (($('hero-list-name') && $('hero-list-name').value) || '').trim();
   if (!name) name = (data.label || data.title || 'Hero').replace(/<[^>]+>/g, ' ').trim() || 'Hero';
-  // avoid storing giant data:image in list if possible — keep http URLs
+  // Keep image always (http URL or data URL). Firebase holds full copy.
   var listData = JSON.parse(JSON.stringify(data));
-  if (listData.image && String(listData.image).indexOf('data:image/') === 0 && String(listData.image).length > 200000) {
-    listData.image = ''; // too large for list storage
-  }
   var snap = {
     id: editId || ('h' + Date.now()),
     name: name,
@@ -3774,11 +3781,31 @@ function saveHeroToList() {
   var idx = list.findIndex(function(x){ return String(x.id) === String(snap.id); });
   if (idx >= 0) list[idx] = snap;
   else list.unshift(snap);
+  // Firebase first (full image)
+  try {
+    if (adminDb && adminUser) {
+      adminDb.ref('siteData/hh_hero_list').set(list);
+    }
+  } catch (e) { console.warn(e); }
+  // localStorage — if quota fail, store without huge base64 but keep http image
   try {
     write('hh_hero_list', list);
   } catch (e) {
-    toast('List သိမ်းမရ — storage ပြည့်နိုင်', true);
-    return;
+    try {
+      var slim = list.map(function(it) {
+        var copy = JSON.parse(JSON.stringify(it));
+        if (copy.data && copy.data.image && String(copy.data.image).indexOf('data:image/') === 0) {
+          copy.data.image = '';
+          copy._imageInFirebase = true;
+        }
+        return copy;
+      });
+      write('hh_hero_list', slim);
+      toast('List သိမ်းပြီး (ပုံ Firebase မှာ)', false);
+    } catch (e2) {
+      toast('List သိမ်းမရ — storage ပြည့်', true);
+      return;
+    }
   }
   if ($('hero-edit-list-id')) $('hero-edit-list-id').value = String(snap.id);
   if ($('hero-list-name')) $('hero-list-name').value = name;
@@ -3795,18 +3822,27 @@ function applyHeroFromList(id) {
     if (adminDb && adminUser) adminDb.ref('siteData/hh_hero').set(d);
   } catch (e) {}
   try { loadAll(); } catch (e) {}
-  // force-fill text fields from saved data (no default leftovers)
+  // force-fill text + IMAGE from saved data
   if ($('hero-label')) $('hero-label').value = d.label || '';
   if ($('hero-title')) $('hero-title').value = d.title || '';
   if ($('hero-desc')) $('hero-desc').value = d.desc || '';
   if ($('hero-sign')) $('hero-sign').value = d.sign || '';
   if ($('hero-btn-text')) $('hero-btn-text').value = d.btnText || '';
   if ($('hero-btn-link')) $('hero-btn-link').value = d.btnLink || '';
+  // Image restore — critical
+  try {
+    if (typeof setImageFieldValue === 'function') setImageFieldValue('hero-image', d.image || '');
+    else if ($('hero-image')) $('hero-image').value = d.image || '';
+    if (typeof showPreviewIfUrl === 'function') showPreviewIfUrl('hero-image');
+  } catch (e) { console.warn('hero image restore', e); }
   if ($('hero-list-name')) $('hero-list-name').value = item.name || '';
   if ($('hero-edit-list-id')) $('hero-edit-list-id').value = String(item.id);
   try { updateHeroPreview(); } catch (e) {}
+  try {
+    if (d.image && typeof applyLiveBg === 'function') applyLiveBg($('hero-live-preview'), d.image, d.imgPosX || 50, d.imgPosY || 50, d.imgZoom || 100);
+  } catch (e) {}
   renderHeroSavedList();
-  toast('✓ Hero ဖွင့်ပြီး — ပြင်ပြီး Save Hero / List ထဲ သိမ်း');
+  toast('✓ Hero ဖွင့်ပြီး (ပုံ+စာ) — ပြင်ပြီး Save Hero / List ထဲ သိမ်း');
 }
 function editHeroFromList(id) {
   applyHeroFromList(id);
@@ -5204,10 +5240,19 @@ function fillDefaultMenu() {
   var items = defaultMenuItemsAdmin();
   write('hh_menu', items);
   try {
-    if (adminDb && adminUser) adminDb.ref('siteData/hh_menu').set(items);
+    if (adminDb && adminUser) {
+      adminDb.ref('siteData/hh_menu').set(items);
+    }
   } catch (e) {}
   renderMenuList();
-  toast('✓ Default Menu အပြည့်ထည့်ပြီး — Live site refresh လုပ်ပါ');
+  // also ensure preview updates
+  var prev = $('menu-preview-box');
+  if (prev) {
+    prev.innerHTML = items.map(function(m) {
+      return '<div class="rounded-lg px-3 py-2 hover:bg-emerald-900/40">› ' + (m.label || '') + '</div>';
+    }).join('');
+  }
+  toast('✓ Menu ၆ ခု ထည့်ပြီး — Home, Stories, Gallery, YouTube, About, Contact');
 }
 window.fillDefaultMenu = fillDefaultMenu;
 function getMenu() { return read('hh_menu', []); }
