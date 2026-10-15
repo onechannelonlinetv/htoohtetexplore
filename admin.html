@@ -1128,8 +1128,25 @@ main > div {
               </div>
             </div>
             <div>
-              <label class="label">Link</label>
+              <label class="label">Link (URL)</label>
               <input id="admin-sponsor-link" class="field" placeholder="https://...">
+            </div>
+            <div class="md:col-span-2 rounded-xl border border-amber-700/40 bg-amber-950/20 p-3">
+              <p class="text-[11px] font-bold text-amber-300 mb-2">Visit Button — စာထည့်မှ UI မှာပေါ်မယ်</p>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div class="sm:col-span-1">
+                  <label class="label">Button Text</label>
+                  <input id="admin-sponsor-btn-text" class="field" placeholder="Visit Sponsor" oninput="updateSponsorPreview()">
+                </div>
+                <div>
+                  <label class="label flex justify-between">Button X <span id="val-sp-btn-x" class="text-emerald-400">4%</span></label>
+                  <input type="range" id="admin-sponsor-btn-x" min="0" max="100" value="4" class="w-full accent-emerald-500" oninput="document.getElementById('val-sp-btn-x').textContent=this.value+'%';updateSponsorPreview()">
+                </div>
+                <div>
+                  <label class="label flex justify-between">Button Y <span id="val-sp-btn-y" class="text-emerald-400">88%</span></label>
+                  <input type="range" id="admin-sponsor-btn-y" min="0" max="100" value="88" class="w-full accent-emerald-500" oninput="document.getElementById('val-sp-btn-y').textContent=this.value+'%';updateSponsorPreview()">
+                </div>
+              </div>
             </div>
 
             <div class="md:col-span-2 rounded-xl border border-sky-700/40 bg-sky-950/30 p-3">
@@ -2796,12 +2813,12 @@ function loadAll() {
   if ($('footer-year')) $('footer-year').textContent = new Date().getFullYear();
 
   const s = read('hh_settings', {});
-  $('set-brand-name').value = s.brandName || 'HTOO HTET';
+  $('set-brand-name').value = s.brandName || '';
   if ($('set-brand-name-color')) $('set-brand-name-color').value = s.brandNameColor || '#e5edf7';
   if ($('set-brand-name-fs')) { $('set-brand-name-fs').value = s.brandNameFs || 18; if ($('val-brand-name-fs')) $('val-brand-name-fs').textContent = (s.brandNameFs || 18) + 'px'; }
   if ($('set-brand-name-weight')) $('set-brand-name-weight').value = s.brandNameWeight || '700';
   if ($('set-brand-name-style')) $('set-brand-name-style').value = s.brandNameStyle || 'normal';
-  $('set-brand-tagline').value = s.brandTagline || 'Travel Journal & Beyond';
+  $('set-brand-tagline').value = s.brandTagline || '';
   if ($('set-brand-tagline-color')) $('set-brand-tagline-color').value = s.brandTaglineColor || '#94a3b8';
   if ($('set-brand-tagline-fs')) { $('set-brand-tagline-fs').value = s.brandTaglineFs || 12; if ($('val-brand-tagline-fs')) $('val-brand-tagline-fs').textContent = (s.brandTaglineFs || 12) + 'px'; }
   if ($('set-brand-tagline-weight')) $('set-brand-tagline-weight').value = s.brandTaglineWeight || '400';
@@ -3961,6 +3978,9 @@ function resetSponsorForm() {
   if ($('admin-sponsor-desc-color')) $('admin-sponsor-desc-color').value = '#cccccc';
   if ($('admin-sponsor-desc-fs')) $('admin-sponsor-desc-fs').value = 12;
   $('admin-sponsor-link').value = '';
+  if ($('admin-sponsor-btn-text')) $('admin-sponsor-btn-text').value = '';
+  if ($('admin-sponsor-btn-x')) { $('admin-sponsor-btn-x').value = 4; if ($('val-sp-btn-x')) $('val-sp-btn-x').textContent = '4%'; }
+  if ($('admin-sponsor-btn-y')) { $('admin-sponsor-btn-y').value = 88; if ($('val-sp-btn-y')) $('val-sp-btn-y').textContent = '88%'; }
   setImageFieldValue('admin-sponsor-img', '');
   setImageFieldValue('admin-sponsor-bg', '');
   if ($('sp-img-x')) $('sp-img-x').value = 50;
@@ -4009,6 +4029,9 @@ function editSponsor(index) {
   if ($('admin-sponsor-desc-color')) $('admin-sponsor-desc-color').value = s.descColor || '#cccccc';
   if ($('admin-sponsor-desc-fs')) $('admin-sponsor-desc-fs').value = s.descFs || 12;
   $('admin-sponsor-link').value = s.link || '';
+  if ($('admin-sponsor-btn-text')) $('admin-sponsor-btn-text').value = s.btnText || '';
+  if ($('admin-sponsor-btn-x')) { $('admin-sponsor-btn-x').value = s.btnX != null ? s.btnX : 4; if ($('val-sp-btn-x')) $('val-sp-btn-x').textContent = (s.btnX != null ? s.btnX : 4) + '%'; }
+  if ($('admin-sponsor-btn-y')) { $('admin-sponsor-btn-y').value = s.btnY != null ? s.btnY : 88; if ($('val-sp-btn-y')) $('val-sp-btn-y').textContent = (s.btnY != null ? s.btnY : 88) + '%'; }
   setImageFieldValue('admin-sponsor-img', s.img || '');
   setImageFieldValue('admin-sponsor-bg', s.bgImage || '');
   showPreviewIfUrl('admin-sponsor-img');
@@ -4051,7 +4074,7 @@ function collectSponsorForm() {
   return {
     id: Date.now(),
     active: $('admin-sponsor-active').checked,
-    badge: $('admin-sponsor-badge')?.value.trim() || 'Official Sponsor',
+    badge: $('admin-sponsor-badge')?.value.trim() || '',
     badgeBg: $('admin-sponsor-badge-bg')?.value || '#f5c518',
     badgeColor: $('admin-sponsor-badge-color')?.value || '#000000',
     badgePad: parseInt($('admin-sponsor-badge-pad')?.value || '8', 10),
@@ -4072,6 +4095,9 @@ function collectSponsorForm() {
     descX: parseInt($('sp-desc-x')?.value || '0', 10),
     descY: parseInt($('sp-desc-y')?.value || '58', 10),
     link: $('admin-sponsor-link').value.trim(),
+    btnText: ($('admin-sponsor-btn-text') && $('admin-sponsor-btn-text').value || '').trim(),
+    btnX: parseInt(($('admin-sponsor-btn-x') && $('admin-sponsor-btn-x').value) || '4', 10),
+    btnY: parseInt(($('admin-sponsor-btn-y') && $('admin-sponsor-btn-y').value) || '88', 10),
     img: imageFieldValue('admin-sponsor-img'),
     bgImage: imageFieldValue('admin-sponsor-bg'),
     imgPosX: parseInt($('sp-img-x')?.value || '50', 10),
@@ -7323,4 +7349,3 @@ function toast(message, isError) {
 
 </body>
 </html>
- 
