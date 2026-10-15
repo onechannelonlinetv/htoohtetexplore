@@ -876,6 +876,8 @@ main > div {
           </div>
           <div class="fold-body space-y-3">
 
+          <label class="toggle-row"><input type="checkbox" id="proud-section-active" checked onchange="saveProudMeta(); updateProudPreview();"><span class="text-sm font-semibold">Proud Sponsors Section ပြမယ် (On/Off)</span></label>
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="md:col-span-2">
               <label class="label">Section ခေါင်းစဉ် (Live site) · Preview မှာ drag နဲ့ ရွှေ့လို့ရ</label>
@@ -1840,8 +1842,8 @@ const firebaseConfig = {
   appId: "1:526326382849:web:be89cbac1e21e9f8d2db00",
   measurementId: "G-2WNFC5MMEJ"
 };
-const FIREBASE_ADMIN_UID = 'aEd0gacSLgVgs445C4wfyBuFwBH3';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
+const FIREBASE_ADMIN_UID = '92VcHQwd6feeMWIYyHUw0T4VjdA2';
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -5105,7 +5107,8 @@ function saveProudMetaFields(extra) {
   const logoH = parseInt(($('proud-logo-h') && $('proud-logo-h').value) || '48', 10) || 48;
   const frameH = parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '100', 10) || 100;
   const titleFs = parseInt(($('proud-title-fs') && $('proud-title-fs').value) || '12', 10) || 12;
-  const next = Object.assign({}, m, { title: title, logoH: logoH, frameH: frameH, titleFs: titleFs }, extra || {});
+  const sectionActive = $('proud-section-active') ? $('proud-section-active').checked : true;
+  const next = Object.assign({}, m, { title: title, logoH: logoH, frameH: frameH, titleFs: titleFs, active: sectionActive }, extra || {});
   if (typeof write === 'function') write('hh_proud_meta', next);
   else localStorage.setItem('hh_proud_meta', JSON.stringify(next));
 }
@@ -5258,6 +5261,7 @@ function saveProudMeta() {
 }
 function loadProudMeta() {
   const m = getProudMeta();
+  if ($('proud-section-active')) $('proud-section-active').checked = m.active !== false;
   if ($('proud-section-title')) $('proud-section-title').value = m.title || 'Our Proud Sponsors';
   if ($('proud-logo-h')) {
     $('proud-logo-h').value = m.logoH || 48;
