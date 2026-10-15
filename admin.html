@@ -2730,7 +2730,15 @@ function showView(name, button) {
   if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
   if (name === 'postlist') { try { renderPostsList(); } catch(e){} }
   if (name === 'addpost') { fillPostCategorySelect(); if (typeof refreshPostSectionOptions === 'function') refreshPostSectionOptions(); }
-  if (name === 'menu') renderMenuList();
+  if (name === 'menu') {
+    try {
+      if (typeof getMenu === 'function' && !getMenu().length && typeof defaultMenuItemsAdmin === 'function') {
+        write('hh_menu', defaultMenuItemsAdmin());
+      }
+    } catch (e) {}
+    renderMenuList();
+  }
+  if (name === 'settings') { try { renderHeroSavedList(); } catch (e) {} }
   if (name === 'proud') {
     try { if (typeof loadProudMeta === 'function') loadProudMeta(); } catch (e) {}
     try { renderProudList(); } catch (e) {}
@@ -3660,46 +3668,118 @@ function renderHeroSavedList() {
   if (!box) return;
   var list = getHeroList();
   if (!list.length) {
-    box.innerHTML = '<p class="text-sm text-slate-500 border border-dashed border-slate-700 rounded-xl p-3 text-center">သိမ်းထားသော Hero မရှိသေးပါ။ ပြင်ပြီး "List ထဲ သိမ်း" နှိပ်ပါ။</p>';
+    box.innerHTML = '<p class="text-sm text-slate-500 border border-dashed border-slate-700 rounded-xl p-4 text-center">သိမ်းထားသော Hero မရှိသေးပါ။ အောက်က preview ပြင်ပြီး <b class="text-emerald-400">List ထဲ သိမ်း</b> နှိပ်ပါ။</p>';
     return;
   }
-  box.innerHTML = list.map(function(item, i) {
+  box.innerHTML = list.map(function(item) {
     var d = item.data || {};
-    var title = safe(item.name || d.title || 'Hero');
-    var sub = safe((d.label || '') + (d.title ? ' · ' + String(d.title).replace(/<[^>]+>/g,'').slice(0,40) : ''));
+    var rawTitle = String(item.name || d.label || d.title || 'Hero').replace(/<[^>]+>/g, ' ');
+    var title = safe(rawTitle).slice(0, 60);
+    var sub = safe(String(d.label || '') + (d.desc ? ' · ' + String(d.desc).slice(0, 36) : ''));
     var when = item.savedAt ? new Date(item.savedAt).toLocaleString() : '';
-    return '<div class="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/60 p-3">' +
-      '<div class="flex-1 min-w-0">' +
-        '<p class="font-bold truncate">' + title + '</p>' +
+    var id = String(item.id);
+    var thumb = '';
+    if (d.image && String(d.image).indexOf('http') === 0) {
+      thumb = '<img src="' + safe(d.image) + '" class="w-14 h-10 rounded-lg object-cover border border-slate-600 shrink-0" alt="">';
+    } else {
+      thumb = '<div class="w-14 h-10 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-image text-slate-500 text-xs"></i></div>';
+    }
+    return '<div class="flex items-center gap-3 rounded-xl border border-emerald-800/40 bg-slate-900/70 p-3 hover:border-emerald-500/50 transition">' +
+      thumb +
+      '<div class="flex-1 min-w-0 cursor-pointer" onclick="editHeroFromList(\'' + id + '\')">' +
+        '<p class="font-bold text-white truncate">' + title + '</p>' +
         '<p class="tiny truncate">' + sub + (when ? ' · ' + when : '') + '</p>' +
       '</div>' +
-      '<div class="flex gap-2 shrink-0">' +
-        '<button type="button" class="btn btn-green text-xs" onclick="editHeroFromList(\'' + item.id + '\')"><i class="fa-solid fa-pen mr-1"></i>Edit</button>' +
-        '<button type="button" class="btn btn-muted text-xs" onclick="applyHeroFromList(\'' + item.id + '\')"><i class="fa-solid fa-play mr-1"></i>Live သုံး</button>' +
-        '<button type="button" class="btn btn-red text-xs" onclick="deleteHeroFromList(\'' + item.id + '\')"><i class="fa-regular fa-trash-can"></i></button>' +
+      '<div class="flex flex-wrap gap-1.5 shrink-0">' +
+        '<button type="button" class="btn btn-green text-xs px-2.5" onclick="event.stopPropagation();editHeroFromList(\'' + id + '\')"><i class="fa-solid fa-pen mr-1"></i>Edit</button>' +
+        '<button type="button" class="btn btn-muted text-xs px-2.5" onclick="event.stopPropagation();applyHeroFromList(\'' + id + '\')"><i class="fa-solid fa-play mr-1"></i>Live</button>' +
+        '<button type="button" class="btn btn-red text-xs px-2.5" onclick="event.stopPropagation();deleteHeroFromList(\'' + id + '\')"><i class="fa-regular fa-trash-can"></i></button>' +
       '</div></div>';
   }).join('');
 }
+function buildHeroDataFromForm() {
+  var heroImg = '';
+  try { heroImg = (typeof imageFieldValue === 'function') ? imageFieldValue('hero-image') : (($('hero-image') && $('hero-image').value) || ''); } catch (e) {}
+  return {
+    active: $('hero-active') ? $('hero-active').checked : true,
+    image: heroImg,
+    imgPosX: parseInt(($('hero-img-x') && $('hero-img-x').value) || '50', 10),
+    imgPosY: parseInt(($('hero-img-y') && $('hero-img-y').value) || '50', 10),
+    frameW: parseInt(($('hero-frame-w') && $('hero-frame-w').value) || '100', 10),
+    frameWUnit: ($('hero-frame-w-unit') && $('hero-frame-w-unit').value) || '%',
+    frameH: parseInt(($('hero-frame-h') && $('hero-frame-h').value) || '360', 10),
+    frameAlign: ($('hero-frame-align') && $('hero-frame-align').value) || 'center',
+    imgZoom: parseInt(($('hero-img-zoom') && $('hero-img-zoom').value) || '100', 10),
+    overlayOpacity: parseInt(($('hero-overlay') && $('hero-overlay').value) || '45', 10),
+    label: ($('hero-label') && $('hero-label').value || '').trim(),
+    labelColor: ($('hero-label-color') && $('hero-label-color').value) || '#f5c518',
+    labelFs: parseInt(($('hero-label-fs') && $('hero-label-fs').value) || '12', 10),
+    labelWeight: ($('hero-label-weight') && $('hero-label-weight').value) || '700',
+    labelStyle: ($('hero-label-style') && $('hero-label-style').value) || 'normal',
+    labelX: parseInt(($('hero-label-x') && $('hero-label-x').value) || '8', 10),
+    labelY: parseInt(($('hero-label-y') && $('hero-label-y').value) || '18', 10),
+    sign: ($('hero-sign') && $('hero-sign').value || '').trim(),
+    signColor: ($('hero-sign-color') && $('hero-sign-color').value) || '#6ee7b7',
+    signWeight: ($('hero-sign-weight') && $('hero-sign-weight').value) || '600',
+    signStyle: ($('hero-sign-style') && $('hero-sign-style').value) || 'normal',
+    signX: parseInt(($('hero-sign-x') && $('hero-sign-x').value) || '8', 10),
+    signY: parseInt(($('hero-sign-y') && $('hero-sign-y').value) || '78', 10),
+    title: ($('hero-title') && $('hero-title').value || '').trim(),
+    titleColor: ($('hero-title-color') && $('hero-title-color').value) || '#ffffff',
+    titleFs: parseInt(($('hero-title-fs') && $('hero-title-fs').value) || '28', 10),
+    titleWeight: ($('hero-title-weight') && $('hero-title-weight').value) || '900',
+    titleStyle: ($('hero-title-style') && $('hero-title-style').value) || 'normal',
+    titleX: parseInt(($('hero-title-x') && $('hero-title-x').value) || '8', 10),
+    titleY: parseInt(($('hero-title-y') && $('hero-title-y').value) || '32', 10),
+    desc: ($('hero-desc') && $('hero-desc').value || '').trim(),
+    descColor: ($('hero-desc-color') && $('hero-desc-color').value) || '#a7f3d0',
+    descFs: parseInt(($('hero-desc-fs') && $('hero-desc-fs').value) || '14', 10),
+    descWeight: ($('hero-desc-weight') && $('hero-desc-weight').value) || '400',
+    descStyle: ($('hero-desc-style') && $('hero-desc-style').value) || 'normal',
+    descX: parseInt(($('hero-desc-x') && $('hero-desc-x').value) || '8', 10),
+    descY: parseInt(($('hero-desc-y') && $('hero-desc-y').value) || '55', 10),
+    btnText: ($('hero-btn-text') && $('hero-btn-text').value || '').trim(),
+    btnLink: ($('hero-btn-link') && $('hero-btn-link').value || '').trim(),
+    btnX: parseInt(($('hero-btn-x') && $('hero-btn-x').value) || '4', 10),
+    btnY: parseInt(($('hero-btn-y') && $('hero-btn-y').value) || '88', 10)
+  };
+}
 function saveHeroToList() {
-  // first save current form to hh_hero
-  try { saveHero(); } catch (e) {}
+  var data = buildHeroDataFromForm();
+  // persist live hero first
+  try { write('hh_hero', data); } catch (e) { toast('သိမ်းမရ: ' + e.message, true); return; }
+  try {
+    if (adminDb && adminUser) adminDb.ref('siteData/hh_hero').set(data);
+  } catch (e) {}
   var list = getHeroList();
   var editId = ($('hero-edit-list-id') && $('hero-edit-list-id').value) || '';
   var name = (($('hero-list-name') && $('hero-list-name').value) || '').trim();
+  if (!name) name = (data.label || data.title || 'Hero').replace(/<[^>]+>/g, ' ').trim() || 'Hero';
+  // avoid storing giant data:image in list if possible — keep http URLs
+  var listData = JSON.parse(JSON.stringify(data));
+  if (listData.image && String(listData.image).indexOf('data:image/') === 0 && String(listData.image).length > 200000) {
+    listData.image = ''; // too large for list storage
+  }
   var snap = {
-    id: editId || Date.now(),
-    name: name || (read('hh_hero', {}).title || 'Hero'),
+    id: editId || ('h' + Date.now()),
+    name: name,
     savedAt: new Date().toISOString(),
-    data: JSON.parse(JSON.stringify(read('hh_hero', {})))
+    data: listData
   };
-  // strip huge data URLs from list copy if needed — keep reference
   var idx = list.findIndex(function(x){ return String(x.id) === String(snap.id); });
   if (idx >= 0) list[idx] = snap;
   else list.unshift(snap);
-  write('hh_hero_list', list);
+  try {
+    write('hh_hero_list', list);
+  } catch (e) {
+    toast('List သိမ်းမရ — storage ပြည့်နိုင်', true);
+    return;
+  }
   if ($('hero-edit-list-id')) $('hero-edit-list-id').value = String(snap.id);
+  if ($('hero-list-name')) $('hero-list-name').value = name;
   renderHeroSavedList();
-  toast('✓ Hero list ထဲ သိမ်းပြီး');
+  try { updateHeroPreview(); } catch (e) {}
+  toast('✓ List ထဲ သိမ်းပြီး — Edit နှိပ်ပြီး ပြင်နိုင်ပါတယ်');
 }
 function applyHeroFromList(id) {
   var item = getHeroList().find(function(x){ return String(x.id) === String(id); });
@@ -5106,9 +5186,13 @@ function defaultMenuItemsAdmin() {
   ];
 }
 function fillDefaultMenu() {
-  write('hh_menu', defaultMenuItemsAdmin());
+  var items = defaultMenuItemsAdmin();
+  write('hh_menu', items);
+  try {
+    if (adminDb && adminUser) adminDb.ref('siteData/hh_menu').set(items);
+  } catch (e) {}
   renderMenuList();
-  toast('✓ Default Menu အပြည့်ထည့်ပြီး');
+  toast('✓ Default Menu အပြည့်ထည့်ပြီး — Live site refresh လုပ်ပါ');
 }
 window.fillDefaultMenu = fillDefaultMenu;
 function getMenu() { return read('hh_menu', []); }
