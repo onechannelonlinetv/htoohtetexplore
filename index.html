@@ -795,7 +795,27 @@
     }
   }
 
-  </style>
+  
+  /* Menu drawer — frosted filter behind items */
+  #site-menu {
+    background: rgba(6, 21, 16, 0.92) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: -8px 0 32px rgba(0,0,0,0.45);
+  }
+  #site-menu .menu-link {
+    background: rgba(15, 46, 36, 0.55);
+    border: 1px solid rgba(16, 185, 129, 0.12);
+    margin-bottom: 4px;
+  }
+  #site-menu .menu-link:hover {
+    background: rgba(16, 185, 129, 0.22);
+  }
+  #drawer-overlay:not(.opacity-0) {
+    background: rgba(0, 0, 0, 0.62) !important;
+    backdrop-filter: blur(3px);
+  }
+</style>
 </head>
 <body class="min-h-screen antialiased theme-forest mode-dark">
 
@@ -810,15 +830,20 @@
           <i id="brand-logo-icon" class="fa-solid fa-mountain-sun text-white text-sm sm:text-base"></i>
         </div>
         <div class="leading-tight min-w-0 overflow-hidden">
-          <div id="brand-name" class="font-black text-white text-[14px] sm:text-lg tracking-tight truncate">HTOO HTET</div>
+          <div id="brand-name" class="font-black text-white text-[14px] sm:text-lg tracking-tight truncate"></div>
           <div id="brand-tagline" class="text-[8px] sm:text-[10px] font-semibold text-emerald-400 tracking-[0.08em] uppercase truncate hidden"></div>
         </div>
       </a>
 
-      <!-- Right: search + menu only (lang / dark mode live inside menu) -->
+      <!-- Right: lang + search + menu -->
       <div class="header-actions flex items-center gap-1 sm:gap-1.5 shrink-0">
         <button type="button" id="lang-en" class="hidden" aria-hidden="true"></button>
         <button type="button" id="lang-mm" class="hidden" aria-hidden="true"></button>
+        <button type="button" id="lang-toggle-header" onclick="toggleLanguage()" aria-label="Language" title="EN / မြန်မာ"
+          class="h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl text-white/95 hover:bg-emerald-900/50 flex items-center justify-center gap-1.5 transition border border-emerald-800/40 text-[11px] sm:text-xs font-black tracking-wide shrink-0">
+          <i class="fa-solid fa-language text-sm opacity-80"></i>
+          <span id="lang-toggle-header-label">EN</span>
+        </button>
         <div class="hidden sm:flex items-center gap-0.5 sm:gap-1" id="social-links-header"></div>
         <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition shrink-0">
           <i class="fa-solid fa-magnifying-glass text-sm"></i>
@@ -844,7 +869,7 @@
   <div id="drawer-overlay" class="drawer-overlay fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
   <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out p-5 sm:p-6 flex flex-col border-l border-emerald-900/50">
     <div class="flex items-center justify-between mb-4">
-      <div id="mobile-brand-name" class="font-black text-white text-base">HTOO HTET</div>
+      <div id="mobile-brand-name" class="font-black text-white text-base"></div>
       <button type="button" onclick="closeMenu()" class="w-9 h-9 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <!-- Lang + Light/Dark at top of menu -->
@@ -1034,8 +1059,8 @@
             <i id="footer-logo-icon" class="fa-solid fa-mountain-sun text-white text-sm"></i>
           </div>
           <div>
-            <div id="footer-brand-name" class="font-black text-white text-sm">HTOO HTET</div>
-            <div id="footer-brand-tagline" class="text-[9px] text-emerald-400 tracking-wider uppercase">Travel Journal & Beyond</div>
+            <div id="footer-brand-name" class="font-black text-white text-sm"></div>
+            <div id="footer-brand-tagline" class="text-[9px] text-emerald-400 tracking-wider uppercase"></div>
           </div>
         </div>
         <div class="flex gap-2 mt-4 flex-wrap" id="footer-social"></div>
@@ -1317,6 +1342,8 @@ function setLanguage(lang) {
   localStorage.setItem('hh_lang', lang);
   const label = $('lang-toggle-label');
   if (label) label.textContent = lang === 'en' ? 'EN' : 'မြန်မာ';
+  const labelH = $('lang-toggle-header-label');
+  if (labelH) labelH.textContent = lang === 'en' ? 'EN' : 'မြန်မာ';
   const btn = $('lang-toggle');
   if (btn) {
     btn.title = lang === 'en' ? 'Switch to Myanmar' : 'Switch to English';
@@ -1518,7 +1545,7 @@ function loadBlogData() {
   siteSettings = read('hh_settings', {});
   applyColors(siteSettings);
 
-  const brand = siteSettings.brandName || 'HTOO HTET';
+  const brand = (siteSettings.brandName || '').trim();
   const brandEl = document.getElementById('brand-name') || document.querySelector('[data-brand-name]');
   if (brandEl) {
     brandEl.textContent = brand;
@@ -1541,12 +1568,19 @@ function loadBlogData() {
     if (siteSettings.footerTaglineWeight) footEl.style.fontWeight = siteSettings.footerTaglineWeight;
     if (siteSettings.footerTaglineStyle) footEl.style.fontStyle = siteSettings.footerTaglineStyle;
   }
-  const tagline = siteSettings.brandTagline || 'Travel Journal & Beyond';
-  ['brand-name', 'footer-brand-name', 'mobile-brand-name', 'footer-copy-name'].forEach(id => { if ($(id)) $(id).textContent = brand; });
-  const showTagline = siteSettings.showBrandTagline === true;
+  const tagline = (siteSettings.brandTagline || '').trim();
+  ['brand-name', 'footer-brand-name', 'mobile-brand-name', 'footer-copy-name'].forEach(id => {
+    if (!$(id)) return;
+    $(id).textContent = brand;
+    $(id).style.display = brand ? '' : 'none';
+  });
+  const showTagline = siteSettings.showBrandTagline === true && !!tagline;
   const bt = $('brand-tagline');
   if (bt) { bt.textContent = tagline; bt.classList.toggle('hidden', !showTagline); }
-  $('footer-brand-tagline').textContent = tagline;
+  if ($('footer-brand-tagline')) {
+    $('footer-brand-tagline').textContent = tagline;
+    $('footer-brand-tagline').style.display = tagline ? '' : 'none';
+  }
   setLogo(siteSettings.logoUrl || '');
   if (siteSettings.contactEmail) {
     const a = $('contact-email');
@@ -1869,13 +1903,16 @@ function loadBlogData() {
         const logoHtml = sponsor.img
           ? '<div class="sp-logo rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="left:' + logoX + '%;top:' + logoY + '%;width:' + logoSize + 'px;height:' + logoSize + 'px"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-1"></div>'
           : '';
-        const linkHtml = sponsor.link
-          ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:4%;bottom:12%">' + t('visitSponsor') + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
+        var btnLabel = (sponsor.btnText || '').trim();
+        var btnX = sponsor.btnX != null ? sponsor.btnX : 4;
+        var btnY = sponsor.btnY != null ? sponsor.btnY : 88;
+        const linkHtml = (sponsor.link && btnLabel)
+          ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:' + btnX + '%;top:' + btnY + '%;bottom:auto">' + safe(btnLabel) + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
           : '';
         return '<div class="sp-banner" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;border-radius:' + radiusDesktop + '">' +
           '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
           '<div class="sp-grad"></div>' +
-          '<span class="sp-badge inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge || 'Official Sponsor') + '</span>' +
+          (sponsor.badge ? ('<span class="sp-badge inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge) + '</span>') : '') +
           '<h2 class="sp-title font-black text-white tracking-tight" style="' + titleStyle + '">' + safe(sponsor.title || '') + '</h2>' +
           (sponsor.desc ? '<p class="sp-desc text-sm text-emerald-100/80 leading-relaxed" style="' + descStyle + '">' + safe(sponsor.desc) + '</p>' : '') +
           linkHtml + logoHtml +
@@ -1890,7 +1927,11 @@ function loadBlogData() {
     if (upSec) { upSec.classList.add('hidden'); upSec.style.display = 'none'; }
   } else {
     if (upSec) { upSec.classList.remove('hidden'); upSec.style.display = ''; }
-    $('upcoming-heading-text').textContent = up.heading || 'Upcoming';
+    if ($('upcoming-heading-text')) {
+      var uh = (up.heading || '').trim();
+      $('upcoming-heading-text').textContent = uh;
+      $('upcoming-heading-text').style.display = uh ? '' : 'none';
+    }
     // Optional section subtitle ABOVE banner (separate from on-image title)
     const secTitle = $('upcoming-section-title');
     if (up.sectionTitle) {
@@ -1899,16 +1940,26 @@ function loadBlogData() {
     } else {
       secTitle.classList.add('hidden');
     }
-    if (up.label) $('upcoming-label').textContent = up.label;
-    if (up.labelColor) { setStyle($('upcoming-label'), 'color', up.labelColor); $('upcoming-label').classList.remove('accent-text'); }
-    if (up.labelFs) setStyle($('upcoming-label'), 'font-size', up.labelFs + 'px');
-    if (up.title) $('upcoming-title').textContent = up.title;
-    if (up.titleColor) setStyle($('upcoming-title'), 'color', up.titleColor);
-    if (up.titleFs) setStyle($('upcoming-title'), 'font-size', 'clamp(1rem, 3.5vw, ' + up.titleFs + 'px)');
-    if (up.titleWeight) setStyle($('upcoming-title'), 'font-weight', up.titleWeight);
-    if (up.desc) $('upcoming-desc').textContent = up.desc;
-    if (up.descColor) setStyle($('upcoming-desc'), 'color', up.descColor);
-    if (up.descFs) setStyle($('upcoming-desc'), 'font-size', up.descFs + 'px');
+    function setUpText(id, text, styleFn) {
+      var el = $(id); if (!el) return;
+      var t = (text || '').trim();
+      el.textContent = t;
+      el.style.display = t ? '' : 'none';
+      if (t && styleFn) styleFn(el);
+    }
+    setUpText('upcoming-label', up.label, function(el) {
+      if (up.labelColor) { setStyle(el, 'color', up.labelColor); el.classList.remove('accent-text'); }
+      if (up.labelFs) setStyle(el, 'font-size', up.labelFs + 'px');
+    });
+    setUpText('upcoming-title', up.title, function(el) {
+      if (up.titleColor) setStyle(el, 'color', up.titleColor);
+      if (up.titleFs) setStyle(el, 'font-size', 'clamp(1rem, 3.5vw, ' + up.titleFs + 'px)');
+      if (up.titleWeight) setStyle(el, 'font-weight', up.titleWeight);
+    });
+    setUpText('upcoming-desc', up.desc, function(el) {
+      if (up.descColor) setStyle(el, 'color', up.descColor);
+      if (up.descFs) setStyle(el, 'font-size', up.descFs + 'px');
+    });
     function upPos(id, x, y) {
       const el = $(id); if (!el) return;
       if (x != null) setStyle(el, 'left', x + '%');
@@ -2418,6 +2469,31 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowRight') lightboxNav(1);
 });
 
+
+function postLocalized(post, field) {
+  if (!post) return '';
+  if (typeof currentLang !== 'undefined' && currentLang === 'en') {
+    var en = post[field + 'En'] || post[field + '_en'];
+    if (en && String(en).trim()) return en;
+  }
+  return post[field] || '';
+}
+/** EN content: if no images, append images from Myanmar content so user still sees photos */
+function mergeContentImages(primary, fallback) {
+  primary = primary || '';
+  fallback = fallback || '';
+  if (!fallback) return primary;
+  var hasImg = /!\[[^\]]*\]\([^)]+\)|<img\s/i.test(primary);
+  if (hasImg) return primary;
+  var imgs = [];
+  var md = fallback.match(/!\[[^\]]*\]\([^)]+\)/g);
+  if (md) imgs = imgs.concat(md);
+  var html = fallback.match(/<img\s[^>]*src=["'][^"']+["'][^>]*>/gi);
+  if (html) imgs = imgs.concat(html);
+  if (!imgs.length) return primary;
+  return (primary ? (primary + '\n\n') : '') + imgs.join('\n\n');
+}
+
 function openArticle(index) {
   const post = allStoryPosts[index];
   if (!post) return;
@@ -2425,7 +2501,7 @@ function openArticle(index) {
   closeMenu();
 
   $('article-image').src = post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1000';
-  $('article-title').textContent = post.title || 'Travel Story';
+  $('article-title').textContent = postLocalized(post, 'title') || post.title || 'Travel Story';
   $('article-location').textContent = [post.location, post.category || post.type].filter(Boolean).join(' · ').toUpperCase();
   const meta = $('article-meta');
   if (meta) {
@@ -2435,7 +2511,13 @@ function openArticle(index) {
     if (d) parts.push(d);
     meta.textContent = parts.join(' · ');
   }
-  let body = post.content || post.body || post.desc || 'အကြောင်းအရာ မထည့်ရသေးပါ။';
+  var mmBody = post.content || post.body || '';
+  var enBody = post.contentEn || post.content_en || '';
+  var primaryBody = (typeof currentLang !== 'undefined' && currentLang === 'en' && enBody.trim()) ? enBody : mmBody;
+  if (typeof currentLang !== 'undefined' && currentLang === 'en') {
+    primaryBody = mergeContentImages(primaryBody, mmBody);
+  }
+  let body = primaryBody || post.desc || '';
   $('article-body').innerHTML = formatArticleBody(body);
 
   // Related: same category first, then others — up to 3
