@@ -704,6 +704,19 @@
       overflow-wrap: break-word;
       word-break: break-word;
     }
+    #hero-btn {
+      font-size: 12px !important;
+      padding: 8px 14px !important;
+      gap: 6px !important;
+      border-radius: 999px !important;
+      line-height: 1.2 !important;
+    }
+    #hero-btn i {
+      font-size: 10px !important;
+    }
+    #hero-btn-wrap {
+      max-width: 90% !important;
+    }
     #hero-title {
       font-size: clamp(1.05rem, 5vw, 1.5rem) !important;
       line-height: 1.2 !important;
@@ -1637,11 +1650,16 @@ function loadBlogData() {
   // Official sponsors (array or legacy object)
   let sponsorRaw = read('hh_sponsor', []);
   let sponsors = Array.isArray(sponsorRaw) ? sponsorRaw : (sponsorRaw && (sponsorRaw.title || sponsorRaw.img || sponsorRaw.bgImage) ? [sponsorRaw] : []);
-  sponsors = sponsors.filter(s => s && s.active !== false && (s.title || s.img || s.bgImage));
+  let spMetaAll = {};
+  try { spMetaAll = read('hh_sponsor_meta', {}) || {}; } catch (e) { spMetaAll = {}; }
+  const sectionOn = spMetaAll.active !== false;
+  sponsors = sectionOn
+    ? sponsors.filter(s => s && s.active !== false && (s.title || s.img || s.bgImage))
+    : [];
   const sc = $('sponsor-container');
   const listBox = $('sponsor-list-public');
   if (!sponsors.length) {
-    if (sc) { sc.classList.add('hidden'); sc.style.display = 'none'; }
+    if (sc) { sc.classList.add('hidden'); sc.style.display = 'none'; sc.style.visibility = 'hidden'; }
     if (listBox) listBox.innerHTML = '';
   } else {
     if (sc) {
