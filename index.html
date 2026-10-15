@@ -662,9 +662,31 @@
   .header-actions {
     flex-shrink: 0;
   }
-  #menu-toggle {
+  #menu-toggle, .menu-toggle-btn {
     flex-shrink: 0 !important;
     min-width: 2.5rem;
+    background: var(--brand-accent) !important;
+    color: #0a0a0a !important;
+    border: 1px solid color-mix(in srgb, var(--brand-accent) 60%, white) !important;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--brand-accent) 35%, transparent);
+  }
+  body.theme-ocean #menu-toggle, body.theme-ocean .menu-toggle-btn {
+    color: #042f2e !important;
+  }
+  body.theme-navy #menu-toggle, body.theme-navy .menu-toggle-btn {
+    color: #fff !important;
+  }
+  body.mode-light #menu-toggle, body.mode-light .menu-toggle-btn {
+    color: #0f172a !important;
+  }
+  /* Menu open: frosted glass filter behind */
+  #drawer-overlay.drawer-overlay {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.45);
+  }
+  #drawer-overlay:not(.opacity-0) {
+    opacity: 1;
   }
   @media (max-width: 380px) {
     #lang-toggle { min-width: 2.25rem; padding-left: 0.4rem; padding-right: 0.4rem; font-size: 10px; }
@@ -714,11 +736,13 @@
     #hero-btn i {
       font-size: 10px !important;
     }
-    /* Pin Explore button near bottom of hero on phone */
+    /* Default pin Explore to bottom-left; admin btnX/btnY override via inline style */
     #hero-btn-wrap {
       max-width: 90% !important;
+    }
+    #hero-btn-wrap[data-pos="default"] {
       top: auto !important;
-      bottom: 10% !important;
+      bottom: 8% !important;
       left: 4% !important;
     }
     #hero-title {
@@ -763,23 +787,15 @@
         </div>
       </a>
 
-      <!-- Right: controls — menu always last & visible on all devices -->
-      <div class="header-actions flex items-center gap-0.5 sm:gap-1.5 shrink-0">
-        <button type="button" id="lang-toggle" onclick="toggleLanguage()" aria-label="Language" title="EN / မြန်မာ" class="h-9 sm:h-10 min-w-[2.5rem] px-2 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition border border-emerald-800/40 text-[11px] sm:text-xs font-black tracking-wide shrink-0">
-          <span id="lang-toggle-label">EN</span>
-        </button>
+      <!-- Right: search + menu only (lang / dark mode live inside menu) -->
+      <div class="header-actions flex items-center gap-1 sm:gap-1.5 shrink-0">
         <button type="button" id="lang-en" class="hidden" aria-hidden="true"></button>
         <button type="button" id="lang-mm" class="hidden" aria-hidden="true"></button>
-        <!-- Social: hidden on small phones, shown tablet+ (also in drawer) -->
         <div class="hidden sm:flex items-center gap-0.5 sm:gap-1" id="social-links-header"></div>
-        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition shrink-0">
-          <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
-        </button>
         <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition shrink-0">
           <i class="fa-solid fa-magnifying-glass text-sm"></i>
         </button>
-        <!-- Hamburger — ALWAYS visible, never shrink -->
-        <button id="menu-toggle" type="button" aria-label="Menu" onclick="toggleMenu()" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md border border-emerald-400/30">
+        <button id="menu-toggle" type="button" aria-label="Menu" onclick="toggleMenu()" class="menu-toggle-btn w-10 h-10 sm:w-11 sm:h-11 rounded-xl text-white flex items-center justify-center shrink-0 shadow-md">
           <i class="fa-solid fa-bars text-lg"></i>
         </button>
       </div>
@@ -797,14 +813,24 @@
   </div>
 
   <!-- Drawer menu (all nav items live here) -->
-  <div id="drawer-overlay" class="fixed inset-0 z-40 bg-black/60 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
-  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out p-6 flex flex-col border-l border-emerald-900/50">
-    <div class="flex items-center justify-between mb-8">
+  <div id="drawer-overlay" class="drawer-overlay fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
+  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out p-5 sm:p-6 flex flex-col border-l border-emerald-900/50">
+    <div class="flex items-center justify-between mb-4">
       <div id="mobile-brand-name" class="font-black text-white text-base">HTOO HTET</div>
       <button type="button" onclick="closeMenu()" class="w-9 h-9 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <nav id="mobile-nav" class="flex flex-col gap-1 text-[15px] font-semibold text-emerald-100"></nav>
-    <div class="mt-auto pt-6 border-t border-emerald-900/50">
+    <!-- Lang + Light/Dark at top of menu -->
+    <div class="menu-top-controls flex items-center gap-2 mb-5 pb-4 border-b border-emerald-900/40">
+      <button type="button" id="lang-toggle" onclick="toggleLanguage()" aria-label="Language" title="EN / မြန်မာ" class="h-10 flex-1 min-w-0 px-3 rounded-xl text-white/95 hover:bg-emerald-900/50 flex items-center justify-center gap-2 transition border border-emerald-800/40 text-xs font-black tracking-wide">
+        <i class="fa-solid fa-language text-sm opacity-80"></i>
+        <span id="lang-toggle-label">EN</span>
+      </button>
+      <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="h-10 w-12 rounded-xl text-white/95 hover:bg-emerald-900/50 flex items-center justify-center transition border border-emerald-800/40 shrink-0">
+        <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
+      </button>
+    </div>
+    <nav id="mobile-nav" class="flex flex-col gap-1 text-[15px] font-semibold text-emerald-100 flex-1 overflow-y-auto"></nav>
+    <div class="mt-auto pt-5 border-t border-emerald-900/50">
       <div class="flex gap-2 mb-4 flex-wrap" id="social-links-mobile"></div>
       <p id="mobile-tagline" class="text-[11px] text-emerald-500/70">Discover Myanmar, one journey at a time.</p>
     </div>
@@ -1494,9 +1520,20 @@ function loadBlogData() {
   posEl('hero-title', hero.titleX != null ? hero.titleX : (hero.textX != null ? hero.textX : 8), hero.titleY != null ? hero.titleY : 28);
   posEl('hero-desc', hero.descX != null ? hero.descX : 8, hero.descY != null ? hero.descY : 55);
   posEl('hero-sign', hero.signX != null ? hero.signX : 8, hero.signY != null ? hero.signY : 85);
-  // button sits under desc
-  const by = hero.descY != null ? Math.min(88, hero.descY + 18) : 72;
-  posEl('hero-btn-wrap', hero.descX != null ? hero.descX : 8, by);
+  // Explore button: admin btnX/btnY, else bottom-left corner
+  const btnWrap = $('hero-btn-wrap');
+  const hasBtnPos = hero.btnX != null || hero.btnY != null;
+  if (btnWrap) {
+    if (hasBtnPos) {
+      btnWrap.removeAttribute('data-pos');
+      posEl('hero-btn-wrap', hero.btnX != null ? hero.btnX : 4, hero.btnY != null ? hero.btnY : 88);
+      btnWrap.style.bottom = '';
+    } else {
+      btnWrap.setAttribute('data-pos', 'default');
+      posEl('hero-btn-wrap', 4, 88);
+      // mobile CSS uses bottom when data-pos=default
+    }
+  }
   if (hero.btnText) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
   if (hero.btnLink) $('hero-btn').href = hero.btnLink;
   if (hero.sign) $('hero-sign').textContent = hero.sign;
