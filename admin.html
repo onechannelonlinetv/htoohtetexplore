@@ -2392,8 +2392,19 @@ async function signInAdmin() {
         if (!seed.hh_settings) seed.hh_settings = { brandName: 'HTOO HTET', brandTagline: 'Travel Journal & Beyond' };
         if (!seed.hh_proud_sponsors) seed.hh_proud_sponsors = [];
         if (!seed.hh_proud_meta) seed.hh_proud_meta = { title: 'Our Proud Sponsors', titleFs: 12, frameH: 100, logoH: 48, titleX: 3, titleY: 36 };
-        if (!seed.hh_menu) seed.hh_menu = [];
-        await adminDb.ref('siteData').set(seed);
+        if (!seed.hh_menu || !Array.isArray(seed.hh_menu) || !seed.hh_menu.length) {
+          seed.hh_menu = [
+            { label: 'Home', href: '#home' },
+            { label: 'Travel Stories', href: '#stories' },
+            { label: 'Photo Gallery', href: '#photo-gallery-section' },
+            { label: 'YouTube', href: '#youtube-section' },
+            { label: 'About', href: '#about-section' },
+            { label: 'Contact', href: '#contact' }
+          ];
+        }
+        if (!seed.hh_hero) seed.hh_hero = {};
+        // Use update so we never wipe existing remote keys accidentally
+        await adminDb.ref('siteData').update(seed);
         Object.keys(seed).forEach(k => originalSetItem(k, JSON.stringify(seed[k])));
       }
       remoteSyncReady = true;
@@ -2443,6 +2454,8 @@ adminAuth?.onAuthStateChanged(async function(user) {
         if (loginModal) loginModal.classList.add('hidden');
         if (app) app.classList.remove('hidden');
         if (typeof loadAll === 'function') try { loadAll(); } catch (e) {}
+        // second pass after DOM settles — hero/menu fields fill from Firebase
+        setTimeout(function(){ try { loadAll(); } catch (e) {} }, 200);
       } catch (e) {
         console.warn('auth restore', e);
         remoteSyncReady = true;
@@ -3581,6 +3594,18 @@ function saveHero() {
     btnY: parseInt($('hero-btn-y')?.value || '88', 10)
   });
   updateHeroPreview();
+  // Force immediate Firebase write for hero (login ပြန်ဝင်ရင် မပျောက်အောင်)
+  try {
+    if (adminDb && adminUser) {
+      var heroData = read('hh_hero', {});
+      adminDb.ref('siteData/hh_hero').set(heroData).then(function() {
+        toast('Hero သိမ်းပြီး · Firebase sync ✓');
+      }).catch(function(err) {
+        toast('Hero local သိမ်းပြီး · Firebase: ' + ((err && err.message) || err), true);
+      });
+      return;
+    }
+  } catch (e) {}
   toast('Hero သိမ်းပြီးပါပြီ။ Live site / ဖုန်းမှာ refresh လုပ်ပါ။');
 }
 
