@@ -377,11 +377,15 @@
   @media (max-width: 640px) {
     #upcoming-banner {
       width: 100% !important;
+      max-width: 100% !important;
       border-radius: 1rem !important;
+      transform: none !important;
     }
     .sp-banner {
       width: 100% !important;
+      max-width: 100% !important;
       border-radius: 1rem !important;
+      transform: none !important;
     }
     .sp-banner .sp-title {
       font-size: clamp(1rem, 5vw, 1.35rem) !important;
@@ -394,6 +398,15 @@
     .sp-banner .sp-logo {
       width: 56px !important;
       height: 56px !important;
+      transform: none !important;
+    }
+    /* stop layout shift from sticky header content jump */
+    body {
+      overflow-x: hidden;
+    }
+    #home, main, .max-w-7xl {
+      max-width: 100vw;
+      overflow-x: hidden;
     }
   }
   @media (min-width: 641px) and (max-width: 1024px) {
@@ -437,18 +450,44 @@
   @media (max-width: 640px) {
     .sp-banner {
       width: 100% !important;
-      height: auto !important;
-      min-height: 130px !important;
-      max-height: 200px !important;
-      aspect-ratio: 16 / 9;
-      border-radius: 0.75rem !important; /* no circle/pill on phone */
+      height: 160px !important;
+      min-height: 160px !important;
+      max-height: 160px !important;
+      aspect-ratio: auto !important;
+      border-radius: 0.75rem !important;
+      transform: none !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
     }
     #sponsor-container {
       padding-left: 1rem !important;
       padding-right: 1rem !important;
     }
+    #sponsor-container.hidden {
+      display: none !important;
+    }
     #sponsor-container:not(.hidden) {
       display: block !important;
+    }
+    #proud-sponsors-section.hidden {
+      display: none !important;
+    }
+    /* Prevent touch hover / layout jump on phone */
+    #upcoming-banner,
+    .sp-banner,
+    #stories-banner-wrap,
+    #gal-public-grid > button,
+    #gal-page-grid > button {
+      transform: none !important;
+      transition: none !important;
+      will-change: auto !important;
+    }
+    #upcoming-banner:hover,
+    .sp-banner:hover,
+    #stories-banner-wrap:hover {
+      transform: none !important;
+      box-shadow: 0 10px 25px rgba(0,0,0,.25) !important;
+      filter: none !important;
     }
     .sp-banner[data-shape="square"] { border-radius: 0.5rem !important; }
     #hero-section {
@@ -695,7 +734,7 @@
   </section>
 
   <!-- PROUD SPONSORS (supports admin drag positions: x/y/size + hh_proud_meta) -->
-  <section id="proud-sponsors-section" class="surface-bg border-y border-emerald-900/40 hidden">
+  <section id="proud-sponsors-section" class="surface-bg border-y border-emerald-900/40 hidden" style="display:none">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
       <div id="proud-public-frame" class="relative w-full overflow-hidden" style="min-height:72px;height:100px;">
         <span id="proud-label" class="absolute z-10 text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400/90 whitespace-nowrap" style="left:3%;top:36%;">Our Proud Sponsors</span>
@@ -705,7 +744,7 @@
   </section>
 
   <!-- OFFICIAL SPONSOR -->
-  <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+  <section id="sponsor-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden" style="display:none">
     <div id="sponsor-section-head" class="mb-4 sm:mb-5 hidden">
       <h2 id="sponsor-section-heading" class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
         <span class="w-1 h-6 rounded-full accent-bg"></span>
@@ -1449,7 +1488,7 @@ function loadBlogData() {
   const activeProud = (Array.isArray(proud) ? proud : []).filter(function(p) { return p && p.active !== false; });
   const proudSectionOn = proudMeta.active !== false;
   if (activeProud.length && proudSectionOn) {
-    if (proudSec) proudSec.classList.remove('hidden');
+    if (proudSec) { proudSec.classList.remove('hidden'); proudSec.style.display = ''; }
     const frameH = Number(proudMeta.frameH) || 100;
     const logoH = Number(proudMeta.logoH) || 48;
     const titleFs = Number(proudMeta.titleFs) || 12;
@@ -1498,6 +1537,8 @@ function loadBlogData() {
     }
   } else if (proudSec) {
     proudSec.classList.add('hidden');
+    proudSec.style.display = 'none';
+    if (proudList) proudList.innerHTML = '';
   }
 
 
@@ -1513,10 +1554,10 @@ function loadBlogData() {
   const sc = $('sponsor-container');
   const listBox = $('sponsor-list-public');
   if (!sponsors.length) {
-    if (sc) sc.classList.add('hidden');
+    if (sc) { sc.classList.add('hidden'); sc.style.display = 'none'; }
     if (listBox) listBox.innerHTML = '';
   } else {
-    if (sc) sc.classList.remove('hidden');
+    if (sc) { sc.classList.remove('hidden'); sc.style.display = ''; }
     // Section heading / subtitle
     try {
       var spMeta = read('hh_sponsor_meta', {}) || {};
@@ -1596,9 +1637,9 @@ function loadBlogData() {
   const up = read('hh_upcoming', {});
   const upSec = $('upcoming-section');
   if (up.active === false || !up.title) {
-    upSec.classList.add('hidden');
+    if (upSec) { upSec.classList.add('hidden'); upSec.style.display = 'none'; }
   } else {
-    upSec.classList.remove('hidden');
+    if (upSec) { upSec.classList.remove('hidden'); upSec.style.display = ''; }
     $('upcoming-heading-text').textContent = up.heading || 'Upcoming';
     // Optional section subtitle ABOVE banner (separate from on-image title)
     const secTitle = $('upcoming-section-title');
@@ -2264,7 +2305,7 @@ function parseYoutubeUrl(url) {
   return null;
 }
 
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_upcoming','hh_gallery','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 let publicFirebaseReady = false;
 let publicDb = null;
 try {
@@ -2273,8 +2314,7 @@ try {
   publicDb.ref('siteData').on('value', snap => {
     const data = snap.val() || {};
     DATA_KEYS.forEach(key => {
-      // Only write keys that exist remotely — do NOT wipe local keys missing from Firebase
-      // (prevents Photo Gallery / posts disappearing when a key was not yet synced)
+      // Prefer remote value; if key missing remotely, leave local cache alone
       if (Object.prototype.hasOwnProperty.call(data, key) && data[key] != null) {
         try { localStorage.setItem(key, JSON.stringify(data[key])); } catch (e) {}
       }
@@ -2282,6 +2322,21 @@ try {
     publicFirebaseReady = true;
     loadBlogData();
   }, err => { console.error(err); loadBlogData(); });
+  // Phone browsers: re-fetch from Firebase when tab/app becomes visible (fixes stale on/off)
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState !== 'visible' || !publicDb) return;
+    publicDb.ref('siteData').once('value').then(function(snap) {
+      var data = snap.val() || {};
+      DATA_KEYS.forEach(function(key) {
+        if (Object.prototype.hasOwnProperty.call(data, key) && data[key] != null) {
+          try { localStorage.setItem(key, JSON.stringify(data[key])); } catch (e) {}
+        }
+      });
+      try { loadBlogData(); } catch (e) {}
+    }).catch(function() {
+      try { loadBlogData(); } catch (e) {}
+    });
+  });
 } catch (e) { console.error(e); }
 
 /* ---- Engagement: Like / Share / Comment ---- */
