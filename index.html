@@ -872,12 +872,8 @@
       <div id="mobile-brand-name" class="font-black text-white text-base"></div>
       <button type="button" onclick="closeMenu()" class="w-9 h-9 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <!-- Lang + Light/Dark at top of menu -->
-    <div class="menu-top-controls flex items-center gap-2 mb-5 pb-4 border-b border-emerald-900/40">
-      <button type="button" id="lang-toggle" onclick="toggleLanguage()" aria-label="Language" title="EN / မြန်မာ" class="h-10 flex-1 min-w-0 px-3 rounded-xl text-white/95 hover:bg-emerald-900/50 flex items-center justify-center gap-2 transition border border-emerald-800/40 text-xs font-black tracking-wide">
-        <i class="fa-solid fa-language text-sm opacity-80"></i>
-        <span id="lang-toggle-label">EN</span>
-      </button>
+    <!-- Light/Dark only (language is in header) -->
+    <div class="menu-top-controls flex items-center justify-end gap-2 mb-5 pb-4 border-b border-emerald-900/40">
       <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="h-10 w-12 rounded-xl text-white/95 hover:bg-emerald-900/50 flex items-center justify-center transition border border-emerald-800/40 shrink-0">
         <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
       </button>
@@ -1341,9 +1337,9 @@ function setLanguage(lang) {
   currentLang = lang;
   localStorage.setItem('hh_lang', lang);
   const label = $('lang-toggle-label');
-  if (label) label.textContent = lang === 'en' ? 'EN' : 'မြန်မာ';
+  if (label) label.textContent = lang === 'en' ? 'EN' : 'MY';
   const labelH = $('lang-toggle-header-label');
-  if (labelH) labelH.textContent = lang === 'en' ? 'EN' : 'မြန်မာ';
+  if (labelH) labelH.textContent = lang === 'en' ? 'EN' : 'MY';
   const btn = $('lang-toggle');
   if (btn) {
     btn.title = lang === 'en' ? 'Switch to Myanmar' : 'Switch to English';
@@ -2074,6 +2070,30 @@ function formatDate(ts) {
   } catch { return ''; }
 }
 
+function postLocalized(post, field) {
+  if (!post) return '';
+  if (typeof currentLang !== 'undefined' && currentLang === 'en') {
+    var en = post[field + 'En'] || post[field + '_en'];
+    if (en && String(en).trim()) return en;
+  }
+  return post[field] || '';
+}
+/** EN content: if no images, append images from Myanmar content so user still sees photos */
+function mergeContentImages(primary, fallback) {
+  primary = primary || '';
+  fallback = fallback || '';
+  if (!fallback) return primary;
+  var hasImg = /!\[[^\]]*\]\([^)]+\)|<img\s/i.test(primary);
+  if (hasImg) return primary;
+  var imgs = [];
+  var md = fallback.match(/!\[[^\]]*\]\([^)]+\)/g);
+  if (md) imgs = imgs.concat(md);
+  var html = fallback.match(/<img\s[^>]*src=["'][^"']+["'][^>]*>/gi);
+  if (html) imgs = imgs.concat(html);
+  if (!imgs.length) return primary;
+  return (primary ? (primary + '\n\n') : '') + imgs.join('\n\n');
+}
+
 function renderStoryCards() {
   const q = (searchInput?.value || '').trim().toLowerCase();
   const category = $('story-category-filter')?.value || '';
@@ -2082,7 +2102,7 @@ function renderStoryCards() {
     if (!isLatest) return false;
     if (category && (p.category || p.type || p.location || '') !== category) return false;
     if (!q) return true;
-    return [p.title, p.desc, p.location, p.category, p.type].some(v => String(v || '').toLowerCase().includes(q));
+    return [p.title, p.titleEn, p.desc, p.descEn, p.location, p.category, p.type].some(v => String(v || '').toLowerCase().includes(q));
   });
   const box = $('blog-posts-container');
   if (!posts.length) {
@@ -2100,12 +2120,12 @@ function renderStoryCards() {
     return `
     <button type="button" onclick="openArticle(${idx})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
       <div class="relative overflow-hidden bg-emerald-950" style="height: ${imgH}">
-        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600')}" alt="${safe(post.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600')}" alt="${safe(postLocalized(post,'title') || post.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
         <span class="absolute top-3 left-3 bg-black/75 backdrop-blur-sm accent-text text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase">${safe(tag)}</span>
       </div>
       <div class="p-4 flex-1 flex flex-col">
-        <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2 group-hover:text-emerald-300 transition">${safe(post.title)}</h3>
-        <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2 leading-relaxed flex-1">${safe(post.desc || '')}</p>
+        <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2 group-hover:text-emerald-300 transition">${safe(postLocalized(post,'title') || post.title)}</h3>
+        <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2 leading-relaxed flex-1">${safe(postLocalized(post,'desc') || post.desc || '')}</p>
         <div class="mt-3 flex items-center justify-between text-[11px] text-emerald-500/60">
           <span>${dateStr}</span>
           <span class="accent-text font-bold flex items-center gap-1">${t('read')} <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
@@ -2470,29 +2490,6 @@ document.addEventListener('keydown', function(e) {
 });
 
 
-function postLocalized(post, field) {
-  if (!post) return '';
-  if (typeof currentLang !== 'undefined' && currentLang === 'en') {
-    var en = post[field + 'En'] || post[field + '_en'];
-    if (en && String(en).trim()) return en;
-  }
-  return post[field] || '';
-}
-/** EN content: if no images, append images from Myanmar content so user still sees photos */
-function mergeContentImages(primary, fallback) {
-  primary = primary || '';
-  fallback = fallback || '';
-  if (!fallback) return primary;
-  var hasImg = /!\[[^\]]*\]\([^)]+\)|<img\s/i.test(primary);
-  if (hasImg) return primary;
-  var imgs = [];
-  var md = fallback.match(/!\[[^\]]*\]\([^)]+\)/g);
-  if (md) imgs = imgs.concat(md);
-  var html = fallback.match(/<img\s[^>]*src=["'][^"']+["'][^>]*>/gi);
-  if (html) imgs = imgs.concat(html);
-  if (!imgs.length) return primary;
-  return (primary ? (primary + '\n\n') : '') + imgs.join('\n\n');
-}
 
 function openArticle(index) {
   const post = allStoryPosts[index];
@@ -2535,7 +2532,7 @@ function openArticle(index) {
             </div>
             <div class="p-3">
               <p class="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wide">${safe(p.location || p.category || '')}</p>
-              <h3 class="text-sm font-bold text-white leading-snug line-clamp-2 mt-0.5 group-hover:text-emerald-300 transition">${safe(p.title)}</h3>
+              <h3 class="text-sm font-bold text-white leading-snug line-clamp-2 mt-0.5 group-hover:text-emerald-300 transition">${safe(postLocalized(p,'title') || p.title)}</h3>
             </div>
           </button>`;
         }).join('')
