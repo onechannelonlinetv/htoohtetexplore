@@ -400,12 +400,12 @@
       height: 56px !important;
       transform: none !important;
     }
-    /* stop layout shift from sticky header content jump */
+    /* Prevent horizontal page scroll without clipping header controls */
     body {
       overflow-x: hidden;
     }
-    #home, main, .max-w-7xl {
-      max-width: 100vw;
+    #home, main {
+      max-width: 100%;
       overflow-x: hidden;
     }
   }
@@ -618,12 +618,40 @@
   }
 
 
+  /* Header — never clip menu / search on any device */
+  .header-inner-row {
+    min-width: 0;
+    width: 100%;
+  }
+  .header-actions {
+    flex-shrink: 0;
+  }
+  #menu-toggle {
+    flex-shrink: 0 !important;
+    min-width: 2.5rem;
+  }
+  @media (max-width: 380px) {
+    #lang-toggle { min-width: 2.25rem; padding-left: 0.4rem; padding-right: 0.4rem; font-size: 10px; }
+    #mode-toggle, #search-toggle { width: 2.15rem; height: 2.15rem; }
+    #menu-toggle { width: 2.35rem; height: 2.35rem; }
+    #brand-name { font-size: 13px; }
+  }
+  /* Section headings fully visible */
+  section h2, #upcoming-heading, #sponsor-section-heading,
+  #stories h2, #photo-gallery-section h2, #youtube-section h2, #about-section h2 {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+  }
+
   /* Custom typography from admin — win over Tailwind on mobile */
   #hero-label, #hero-title, #hero-desc, #hero-sign,
   #sponsor-badge, #sponsor-title, #sponsor-desc,
   #upcoming-label, #upcoming-title, #upcoming-desc,
   #youtube-title, #youtube-desc, #about-title, #about-desc {
     line-height: 1.25;
+    max-width: 100%;
+    overflow-wrap: break-word;
   }
   #hero-text-box {
     z-index: 5;
@@ -635,6 +663,29 @@
     }
     #hero-label, #hero-title, #hero-desc, #hero-sign, #hero-btn-wrap {
       max-width: 92% !important;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    #hero-title {
+      font-size: clamp(1.25rem, 6vw, 1.85rem) !important;
+      line-height: 1.2 !important;
+    }
+    #hero-desc {
+      font-size: clamp(0.75rem, 3.2vw, 0.95rem) !important;
+      line-height: 1.4 !important;
+    }
+    /* Section titles readable on phone */
+    section h2, #upcoming-heading, #sponsor-section-heading {
+      font-size: clamp(1.05rem, 4.5vw, 1.35rem) !important;
+      line-height: 1.3 !important;
+    }
+  }
+  @media (min-width: 641px) and (max-width: 1024px) {
+    #hero-title {
+      font-size: clamp(1.5rem, 3.5vw, 2.25rem) !important;
+    }
+    section h2 {
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem) !important;
     }
   }
 
@@ -647,35 +698,34 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="header-inner-row flex items-center justify-between h-16 gap-3">
       <!-- Logo + Brand name only -->
-      <a href="#home" class="flex items-center gap-2.5 shrink-0">
-        <div id="brand-logo-wrap" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg overflow-hidden">
+      <a href="#home" class="flex items-center gap-2 min-w-0 flex-1 mr-2">
+        <div id="brand-logo-wrap" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg overflow-hidden shrink-0">
           <img id="brand-logo-img" src="" alt="Logo" class="w-full h-full object-cover hidden">
           <i id="brand-logo-icon" class="fa-solid fa-mountain-sun text-white text-sm sm:text-base"></i>
         </div>
-        <div class="leading-none">
-          <div id="brand-name" class="font-black text-white text-[15px] sm:text-lg tracking-tight">HTOO HTET</div>
-          <div id="brand-tagline" class="text-[9px] sm:text-[10px] font-semibold text-emerald-400 tracking-[0.12em] uppercase hidden"></div>
+        <div class="leading-tight min-w-0 overflow-hidden">
+          <div id="brand-name" class="font-black text-white text-[14px] sm:text-lg tracking-tight truncate">HTOO HTET</div>
+          <div id="brand-tagline" class="text-[8px] sm:text-[10px] font-semibold text-emerald-400 tracking-[0.08em] uppercase truncate hidden"></div>
         </div>
       </a>
 
-      <!-- Right: social + search + hamburger (NO desktop nav links) -->
-      <div class="flex items-center gap-1 sm:gap-1.5">
-        <button type="button" id="lang-toggle" onclick="toggleLanguage()" aria-label="Language" title="EN / မြန်မာ" class="h-9 sm:h-10 min-w-[2.75rem] px-2.5 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition border border-emerald-800/40 text-[11px] sm:text-xs font-black tracking-wide">
+      <!-- Right: controls — menu always last & visible on all devices -->
+      <div class="header-actions flex items-center gap-0.5 sm:gap-1.5 shrink-0">
+        <button type="button" id="lang-toggle" onclick="toggleLanguage()" aria-label="Language" title="EN / မြန်မာ" class="h-9 sm:h-10 min-w-[2.5rem] px-2 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition border border-emerald-800/40 text-[11px] sm:text-xs font-black tracking-wide shrink-0">
           <span id="lang-toggle-label">EN</span>
         </button>
-        <!-- legacy ids kept for compatibility (hidden) -->
         <button type="button" id="lang-en" class="hidden" aria-hidden="true"></button>
         <button type="button" id="lang-mm" class="hidden" aria-hidden="true"></button>
-        <!-- Social icons (on/off controlled by admin) -->
-        <div class="flex items-center gap-0.5 sm:gap-1" id="social-links-header"></div>
-        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
+        <!-- Social: hidden on small phones, shown tablet+ (also in drawer) -->
+        <div class="hidden sm:flex items-center gap-0.5 sm:gap-1" id="social-links-header"></div>
+        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition shrink-0">
           <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
         </button>
-        <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition">
+        <button id="search-toggle" type="button" aria-label="Search" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white/90 hover:bg-emerald-900/60 flex items-center justify-center transition shrink-0">
           <i class="fa-solid fa-magnifying-glass text-sm"></i>
         </button>
-        <!-- Hamburger always visible — menu holds Home, Stories, etc. -->
-        <button id="menu-toggle" type="button" aria-label="Menu" onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-emerald-900/50 text-white flex items-center justify-center">
+        <!-- Hamburger — ALWAYS visible, never shrink -->
+        <button id="menu-toggle" type="button" aria-label="Menu" onclick="toggleMenu()" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md border border-emerald-400/30">
           <i class="fa-solid fa-bars text-lg"></i>
         </button>
       </div>
