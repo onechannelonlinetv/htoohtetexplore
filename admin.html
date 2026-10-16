@@ -1013,7 +1013,14 @@ main > div {
           </div>
         </div>
 
-        <div id="sponsor-list" class="space-y-2"></div>
+        <div class="panel editor-shell p-4 sm:p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="font-bold text-white text-sm"><i class="fa-solid fa-list mr-1 text-emerald-400"></i>တင်ပြီးသား Official Sponsors · Edit / Delete</h3>
+            <button type="button" class="btn btn-muted text-xs py-1" onclick="renderSponsorList()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
+          </div>
+          <p class="tiny text-slate-400">Edit နှိပ် → အောက်က form မှာ ပြင် · Delete နှိပ် → ဖျက်</p>
+          <div id="sponsor-list" class="space-y-2"></div>
+        </div>
 
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4 fold-panel open" id="sponsor-editor">
           <div class="fold-head" onclick="toggleFold(this)">
@@ -1248,9 +1255,17 @@ main > div {
       </section>
 
 <section id="view-upcoming" class="view space-y-3">
+        <div class="panel editor-shell p-4 sm:p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="font-bold text-white text-sm"><i class="fa-solid fa-list mr-1 text-emerald-400"></i>တင်ပြီးသား Upcoming · Edit / Delete</h3>
+            <button type="button" class="btn btn-muted text-xs py-1" onclick="renderUpcomingSavedCard()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
+          </div>
+          <p class="tiny text-slate-400">Edit နှိပ် → အောက်က form မှာ ပြင် · Delete နှိပ် → ဖျက်</p>
+          <div id="upcoming-saved-list" class="space-y-2"></div>
+        </div>
 <div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6 space-y-4">
           <div class="fold-head" onclick="toggleFold(this)">
-            <div><div class="fold-title">Upcoming</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <div><div class="fold-title" id="upcoming-editor-title">Upcoming တည်းဖြတ်</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
             <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
           </div>
           <div class="fold-body space-y-3">
@@ -2833,8 +2848,16 @@ function showView(name, button) {
     try { if (typeof updateProudStaging === 'function') updateProudStaging(); } catch (e) {}
   }
   if (name === 'hero' && typeof updateHeroPreview === 'function') updateHeroPreview();
-  if (name === 'sponsor' && typeof updateSponsorPreview === 'function') updateSponsorPreview();
-  if (name === 'upcoming' && typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
+  if (name === 'sponsor') {
+    try { if (typeof loadSponsorSectionMeta === 'function') loadSponsorSectionMeta(); } catch (e) {}
+    try { if (typeof renderSponsorList === 'function') renderSponsorList(); } catch (e) {}
+    try { if (typeof updateSponsorPreview === 'function') updateSponsorPreview(); } catch (e) {}
+  }
+  if (name === 'upcoming') {
+    try { if (typeof loadUpcomingForm === 'function') loadUpcomingForm(); } catch (e) {}
+    try { if (typeof renderUpcomingSavedCard === 'function') renderUpcomingSavedCard(); } catch (e) {}
+    try { if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview(); } catch (e) {}
+  }
   if (name === 'youtube' && typeof updateYoutubePreview === 'function') updateYoutubePreview();
   if (name === 'about' && typeof updateAboutPreview === 'function') updateAboutPreview();
   if (name === 'settings' && typeof updateSizePreview === 'function') updateSizePreview();
@@ -3020,6 +3043,7 @@ function loadAll() {
   else if ($('up-logo')) $('up-logo').value = up.logo || '';
   showPreviewIfUrl('up-image');
   if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
+  try { if (typeof renderUpcomingSavedCard === 'function') renderUpcomingSavedCard(); } catch (e) {}
 
   const yt = read('hh_youtube', {});
   $('yt-active').checked = yt.active !== false;
@@ -4833,12 +4857,114 @@ function saveUpcoming() {
       logoH: gi('up-logo-h', 72)
     });
     if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
+    if (typeof renderUpcomingSavedCard === 'function') renderUpcomingSavedCard();
     toast(_upImg ? 'Upcoming သိမ်းပြီး (ပုံပါ)' : 'Upcoming သိမ်းပြီးပါပြီ');
   } catch (err) {
     console.error(err);
     toast('Upcoming save မရ: ' + (err.message || err));
   }
 }
+
+function loadUpcomingForm() {
+  try {
+    var up = read('hh_upcoming', {});
+    if (!up || typeof up !== 'object') up = {};
+    if ($('up-active')) $('up-active').checked = up.active !== false;
+    if ($('up-heading')) $('up-heading').value = up.heading || '';
+    if ($('up-section-title')) $('up-section-title').value = up.sectionTitle || '';
+    if ($('up-label')) $('up-label').value = up.label || '';
+    if ($('up-label-color')) $('up-label-color').value = up.labelColor || '#f5c518';
+    if ($('up-title')) $('up-title').value = up.title || '';
+    if ($('up-title-color')) $('up-title-color').value = up.titleColor || '#ffffff';
+    if ($('up-title-weight')) $('up-title-weight').value = up.titleWeight || '900';
+    if ($('up-title-fs')) $('up-title-fs').value = up.titleFs || 22;
+    if ($('up-label-fs')) $('up-label-fs').value = up.labelFs || 11;
+    if ($('up-desc-fs')) $('up-desc-fs').value = up.descFs || 13;
+    if ($('up-desc-color')) $('up-desc-color').value = up.descColor || '#cccccc';
+    if ($('up-desc')) $('up-desc').value = up.desc || '';
+    if (typeof setImageFieldValue === 'function') setImageFieldValue('up-image', up.image || '');
+    else if ($('up-image')) $('up-image').value = up.image || '';
+    if ($('up-label-x')) $('up-label-x').value = up.labelX != null ? up.labelX : 6;
+    if ($('up-label-y')) $('up-label-y').value = up.labelY != null ? up.labelY : 40;
+    if ($('up-title-x')) $('up-title-x').value = up.titleX != null ? up.titleX : 6;
+    if ($('up-title-y')) $('up-title-y').value = up.titleY != null ? up.titleY : 55;
+    if ($('up-desc-x')) $('up-desc-x').value = up.descX != null ? up.descX : 6;
+    if ($('up-desc-y')) $('up-desc-y').value = up.descY != null ? up.descY : 72;
+    if ($('up-frame-h')) $('up-frame-h').value = up.frameH || 160;
+    if ($('up-frame-w')) $('up-frame-w').value = up.frameW || 100;
+    if ($('up-overlay')) $('up-overlay').value = up.overlayOpacity != null ? up.overlayOpacity : 55;
+    if ($('up-label-weight')) $('up-label-weight').value = up.labelWeight || '700';
+    if ($('up-label-style')) $('up-label-style').value = up.labelStyle || 'normal';
+    if ($('up-title-style')) $('up-title-style').value = up.titleStyle || 'normal';
+    if ($('up-desc-weight')) $('up-desc-weight').value = up.descWeight || '400';
+    if ($('up-desc-style')) $('up-desc-style').value = up.descStyle || 'normal';
+    if ($('up-img-x')) $('up-img-x').value = up.imgPosX != null ? up.imgPosX : 50;
+    if ($('up-img-y')) $('up-img-y').value = up.imgPosY != null ? up.imgPosY : 50;
+    if ($('up-img-zoom')) $('up-img-zoom').value = up.imgZoom != null ? up.imgZoom : 100;
+    if ($('up-logo-x')) $('up-logo-x').value = up.logoX != null ? up.logoX : 88;
+    if ($('up-logo-y')) $('up-logo-y').value = up.logoY != null ? up.logoY : 50;
+    if ($('up-logo-w')) $('up-logo-w').value = up.logoW != null ? up.logoW : 72;
+    if ($('up-logo-h')) $('up-logo-h').value = up.logoH != null ? up.logoH : 72;
+    if (typeof setImageFieldValue === 'function') setImageFieldValue('up-logo', up.logo || '');
+    else if ($('up-logo')) $('up-logo').value = up.logo || '';
+    if (typeof showPreviewIfUrl === 'function') showPreviewIfUrl('up-image');
+    if ($('upcoming-editor-title')) {
+      var t = (up.title || up.heading || '').trim();
+      $('upcoming-editor-title').textContent = t ? ('တည်းဖြတ် · ' + t) : 'Upcoming တည်းဖြတ်';
+    }
+  } catch (e) { console.warn('loadUpcomingForm', e); }
+}
+
+function renderUpcomingSavedCard() {
+  var box = $('upcoming-saved-list');
+  if (!box) return;
+  var up = {};
+  try { up = read('hh_upcoming', {}) || {}; } catch (e) { up = {}; }
+  var has = !!(up.title || up.image || up.desc || up.heading || up.label);
+  if (!has) {
+    box.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 p-4 text-sm text-slate-500">Upcoming မသိမ်းရသေးပါ။ အောက်က form ဖြည့်ပြီး Save နှိပ်ပါ။</div>';
+    return;
+  }
+  var on = up.active !== false;
+  var title = safe(up.title || up.heading || 'Upcoming');
+  var thumb = up.image ? ('<img src="' + safe(up.image) + '" class="w-full h-full object-cover" alt="">') : '<i class="fa-solid fa-map-location-dot text-slate-500"></i>';
+  box.innerHTML =
+    '<div class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/50 p-3">' +
+      '<div class="w-14 h-14 rounded-lg bg-slate-800 border border-slate-600 overflow-hidden shrink-0 flex items-center justify-center">' + thumb + '</div>' +
+      '<div class="flex-1 min-w-0">' +
+        '<div class="font-bold text-white truncate">' + title + '</div>' +
+        '<div class="tiny">' + (on ? '<span class="text-emerald-400">Active</span>' : '<span class="text-slate-500">Hidden</span>') +
+        (up.label ? (' · ' + safe(up.label)) : '') + '</div>' +
+      '</div>' +
+      '<div class="flex gap-1 shrink-0 flex-wrap">' +
+        '<button type="button" class="btn btn-muted px-2" onclick="editUpcomingSaved()" title="Edit"><i class="fa-solid fa-pen"></i></button>' +
+        '<button type="button" class="btn btn-red px-2" onclick="deleteUpcomingSaved()" title="Delete"><i class="fa-regular fa-trash-can"></i></button>' +
+      '</div>' +
+    '</div>';
+}
+
+function editUpcomingSaved() {
+  loadUpcomingForm();
+  if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
+  var ed = document.querySelector('#view-upcoming .fold-panel');
+  if (ed && !ed.classList.contains('open')) ed.classList.add('open');
+  if (ed) ed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  toast('Upcoming form မှာ ပြင်နိုင်ပါပြီ');
+}
+
+async function deleteUpcomingSaved() {
+  if (!(await confirmDialog('Upcoming ကို ဖျက်မလား?', { title: 'Upcoming ဖျက်မယ်', okText: 'Delete' }))) return;
+  write('hh_upcoming', { active: false });
+  loadUpcomingForm();
+  if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
+  renderUpcomingSavedCard();
+  toast('Upcoming ဖျက်ပြီးပါပြီ');
+}
+window.loadUpcomingForm = loadUpcomingForm;
+window.renderUpcomingSavedCard = renderUpcomingSavedCard;
+window.editUpcomingSaved = editUpcomingSaved;
+window.deleteUpcomingSaved = deleteUpcomingSaved;
+
 function parseYoutubeUrl(url) {
   url = String(url || '').trim();
   if (!url) return null;
