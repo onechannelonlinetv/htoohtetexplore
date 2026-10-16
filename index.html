@@ -1302,6 +1302,7 @@ const I18N = {
     photoGallery: 'Photo Gallery',
     photoGallerySub: 'Photos from the journey',
     viewAll: 'View all',
+    showLess: 'Show less',
     allPhotos: 'All',
     watchYoutube: 'Watch My YouTube Channel',
     visitChannel: 'Visit Channel',
@@ -1358,6 +1359,7 @@ const I18N = {
     photoGallery: 'Photo Gallery',
     photoGallerySub: 'ခရီးလမ်းမှ အလှပုံများ',
     viewAll: 'အားလုံးကြည့်မယ်',
+    showLess: 'လျှော့ပြမယ်',
     allPhotos: 'အားလုံး',
     watchYoutube: 'Watch My YouTube Channel',
     visitChannel: 'Visit Channel',
@@ -1481,14 +1483,18 @@ function applyLanguageUI() {
   var gal = null;
   try { gal = (typeof getPublicGallery === 'function') ? getPublicGallery() : null; } catch (e) { gal = null; }
   if (gh) {
-    if (currentLang === 'en' && gal && gal.headingEn) gh.textContent = gal.headingEn;
-    else if (gal && gal.heading) gh.textContent = gal.heading;
-    else gh.textContent = t('photoGallery');
+    if (currentLang === 'en') {
+      gh.textContent = (gal && gal.headingEn) ? gal.headingEn : (gal && gal.heading && !/[\u1000-\u109F]/.test(gal.heading) ? gal.heading : t('photoGallery'));
+    } else {
+      gh.textContent = (gal && gal.heading) ? gal.heading : t('photoGallery');
+    }
   }
   if (gs) {
-    if (currentLang === 'en' && gal && gal.subtitleEn) gs.textContent = gal.subtitleEn;
-    else if (gal && gal.subtitle) gs.textContent = gal.subtitle;
-    else gs.textContent = t('photoGallerySub');
+    if (currentLang === 'en') {
+      gs.textContent = (gal && gal.subtitleEn) ? gal.subtitleEn : t('photoGallerySub');
+    } else {
+      gs.textContent = (gal && gal.subtitle) ? gal.subtitle : t('photoGallerySub');
+    }
   }
   var va = $('gal-public-view-all');
   if (va && va.textContent && va.textContent.indexOf('View') === 0 || (va && !va.classList.contains('hidden'))) {
@@ -1547,6 +1553,9 @@ function applyLanguageUI() {
 
   // Re-render menu with translated labels
   try { if (typeof renderMenu === 'function') renderMenu(); } catch (e) {}
+  // Re-render gallery so category chips / view-all use current language
+  try { if (typeof renderPublicGallery === 'function') renderPublicGallery(); } catch (e) {}
+  try { if (typeof renderGalleryPage === 'function' && document.getElementById('gallery-page') && !document.getElementById('gallery-page').classList.contains('hidden')) renderGalleryPage(); } catch (e) {}
 }
 
 function applyHeroLayout(s) {
@@ -2601,7 +2610,7 @@ function renderPublicGallery() {
     if (catBox) {
       var html = '<button type="button" class="gal-cat-btn rounded-full px-3 py-1 text-[11px] font-bold border ' +
         (!_galPublicFilter ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-slate-600 text-slate-300 hover:border-emerald-600') +
-        '" onclick="setGalleryFilter(\'\')">အားလုံး</button>';
+        '" onclick="setGalleryFilter(\'\')">' + (typeof t==='function' ? t('allPhotos') : 'All') + '</button>';
       cats.forEach(function(c) {
         if (!c) return;
         var on = _galPublicFilter === c;
@@ -2623,7 +2632,7 @@ function renderPublicGallery() {
     var grid = document.getElementById('gal-public-grid');
     if (grid) {
       if (!show.length) {
-        grid.innerHTML = '<div class="col-span-full text-center text-sm text-slate-400 py-8">ဒီအမျိုးအစားမှာ ပုံမရှိသေးပါ</div>';
+        grid.innerHTML = '<div class="col-span-full text-center text-sm text-slate-400 py-8">' + (typeof currentLang!=='undefined' && currentLang==='en' ? 'No photos in this category' : 'ဒီအမျိုးအစားမှာ ပုံမရှိသေးပါ') + '</div>';
       } else {
         var allSrcs = filtered.map(function(p) { return photoSrc(p); });
         grid.innerHTML = show.map(function(p, i) {
@@ -2642,7 +2651,7 @@ function renderPublicGallery() {
     if (btn) {
       if (filtered.length > previewN) {
         btn.classList.remove('hidden');
-        btn.textContent = _galPublicExpanded ? 'Show less' : ('View all · ' + filtered.length);
+        btn.textContent = _galPublicExpanded ? (typeof t==='function'?t('showLess'):'Show less') : ((typeof t==='function'?t('viewAll'):'View all') + ' · ' + filtered.length);
       } else {
         btn.classList.add('hidden');
         _galPublicExpanded = false;
@@ -2703,7 +2712,7 @@ function renderGalleryPage() {
     if (catBox) {
       var html = '<button type="button" class="gal-cat-btn rounded-full px-3 py-1 text-[11px] font-bold border ' +
         (!_galPublicFilter ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-slate-600 text-slate-300 hover:border-emerald-600') +
-        '" onclick="_galPublicFilter=\'\';renderGalleryPage();renderPublicGallery();">အားလုံး</button>';
+        '" onclick="_galPublicFilter=\'\';renderGalleryPage();renderPublicGallery();">' + (typeof t==='function' ? t('allPhotos') : 'All') + '</button>';
       cats.forEach(function(c) {
         if (!c) return;
         var on = _galPublicFilter === c;
