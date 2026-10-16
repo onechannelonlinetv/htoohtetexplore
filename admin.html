@@ -5290,6 +5290,7 @@ async function loadAdminComments() {
     var posts = [];
     try { posts = JSON.parse(localStorage.getItem('hh_posts') || '[]') || []; } catch (e) { posts = []; }
     if (!Array.isArray(posts)) posts = [];
+    // Prefer /engagement (public path). If rules block it, show rules fix.
     var snap = await adminDb.ref('engagement').once('value');
     var all = snap.val() || {};
     var rows = [];
@@ -5338,7 +5339,30 @@ async function loadAdminComments() {
   } catch (err) {
     console.error(err);
     if (status) status.textContent = 'Error';
-    list.innerHTML = '<p class="text-sm text-rose-300">မဖတ်နိုင်: ' + (err.message || err) + '</p>';
+    var msg = String((err && err.message) || err || '');
+    var help = '';
+    if (/permission|PERMISSION/i.test(msg)) {
+      help = '<div class="mt-3 rounded-xl border border-amber-600/40 bg-amber-950/30 p-3 text-xs text-amber-100 leading-relaxed">' +
+        '<p class="font-bold text-amber-300 mb-1">Firebase Rules ပြင်ရန်</p>' +
+        '<p class="mb-2">Firebase Console → Realtime Database → Rules မှာ အောက်က စာသား ထည့်ပါ:</p>' +
+        '<pre class="overflow-x-auto rounded-lg bg-black/40 p-2 text-[10px] text-emerald-200 whitespace-pre-wrap">' +
+        '"engagement": {\n' +
+        '  ".read": "auth != null",\n' +
+        '  "$postId": {\n' +
+        '    ".read": true,\n' +
+        '    "likes": { ".write": true },\n' +
+        '    "likedBy": { ".write": true },\n' +
+        '    "comments": {\n' +
+        '      ".write": true,\n' +
+        '      "$cid": { ".write": "auth != null || !data.exists()" }\n' +
+        '    }\n' +
+        '  }\n' +
+        '}' +
+        '</pre>' +
+        '<p class="mt-2">Admin (login) ဖတ်/ဖျက်နိုင်အောင် <code class="text-amber-200">auth != null</code> ထည့်ရပါမယ်။</p>' +
+        '</div>';
+    }
+    list.innerHTML = '<p class="text-sm text-rose-300">မဖတ်နိုင်: ' + msg.replace(/</g,'&lt;') + '</p>' + help;
   }
 }
 async function deleteAdminComment(postId, commentId) {
@@ -5910,11 +5934,17 @@ function setGalleryData(g) {
   if (!g || typeof g !== 'object') return;
   if (!Array.isArray(g.photos)) g.photos = [];
   _galleryCache = g;
+  // Always go through write() so Firebase + localStorage stay in sync
+  // (originalSetItem alone skips remote sync — deleted photos would stay on the public site)
   try {
-    originalSetItem('hh_gallery', JSON.stringify(g));
+    write('hh_gallery', g);
   } catch (e) {
-    try { localStorage.setItem('hh_gallery', JSON.stringify(g)); } catch (e2) {
-      console.warn('gallery localStorage full — UI cache only', e2);
+    try {
+      originalSetItem('hh_gallery', JSON.stringify(g));
+    } catch (e2) {
+      try { localStorage.setItem('hh_gallery', JSON.stringify(g)); } catch (e3) {
+        console.warn('gallery localStorage full — UI cache only', e3);
+      }
     }
   }
 }
@@ -6576,7 +6606,21 @@ async function deleteGalleryPhoto(i) {
   if (!(await confirmDialog('ဒီပုံ ဖျက်မလား?', { title: 'Gallery ပုံ ဖျက်မယ်', okText: 'Delete' }))) return;
   var g = getGalleryData();
   g.photos.splice(i, 1);
-  setGalleryData(g); renderGalleryList(); try{renderOverview();}catch(e){} toast('ဖျက်ပြီး');
+  setGalleryData(g);
+  renderGalleryList();
+  try { renderOverview(); } catch(e) {}
+  // Force Firebase push (write already queues; nudge full key set)
+  try {
+    if (adminDb && adminUser && remoteSyncReady) {
+      adminDb.ref('siteData/hh_gallery').set(g).then(function() {
+        toast('✓ ဖျက်ပြီး · Firebase sync ပြီး');
+      }).catch(function(err) {
+        toast('ဖျက်ပြီး (local) · Firebase: ' + ((err && err.message) || err));
+      });
+    } else {
+      toast('✓ ဖျက်ပြီး');
+    }
+  } catch (e) { toast('✓ ဖျက်ပြီး'); }
 }
 
 function getHomeSections() { return asArray(read('hh_home_sections', [])); }
