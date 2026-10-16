@@ -1290,7 +1290,30 @@ const I18N = {
     commentNeedText: 'Please write a comment',
     commentPosted: 'Comment posted!',
     commentFailed: 'Could not post (check Firebase rules)',
-    likeFailed: 'Could not update like'
+    likeFailed: 'Could not update like',
+    menuHome: 'Home',
+    menuStories: 'Travel Stories',
+    menuGallery: 'Photo Gallery',
+    menuYoutube: 'YouTube',
+    menuAbout: 'About',
+    menuContact: 'Contact',
+    storiesHeading: 'Travel Stories',
+    storiesSub: 'Beautiful places across Myanmar',
+    photoGallery: 'Photo Gallery',
+    photoGallerySub: 'Photos from the journey',
+    viewAll: 'View all',
+    allPhotos: 'All',
+    watchYoutube: 'Watch My YouTube Channel',
+    visitChannel: 'Visit Channel',
+    youtubeWatch: 'Watch on YouTube',
+    playlistWatch: 'View Playlist',
+    channelWatch: 'View Channel',
+    aboutTitle: 'About Htoo Htet',
+    aboutDesc: 'Sharing Myanmar roads, people, culture and nature through travel journals.',
+    upcoming: 'Upcoming',
+    officialSponsors: 'Official Sponsors',
+    exploreJourney: 'Explore My Journey',
+    goodVibes: 'Good Vibes<br>Better Journeys'
   },
   mm: {
     searchPlaceholder: 'ခေါင်းစဉ်၊ နေရာ ရှာရန်...',
@@ -1323,7 +1346,30 @@ const I18N = {
     commentNeedText: 'မှတ်ချက် ရေးပါ',
     commentPosted: 'မှတ်ချက် တင်ပြီးပါပြီ!',
     commentFailed: 'မတင်နိုင်ပါ (Firebase Rules စစ်ပါ)',
-    likeFailed: 'Like မရပါ'
+    likeFailed: 'Like မရပါ',
+    menuHome: 'ပင်မ',
+    menuStories: 'ခရီးသွားမှတ်တမ်း',
+    menuGallery: 'ဓာတ်ပုံပြခန်း',
+    menuYoutube: 'YouTube',
+    menuAbout: 'အကြောင်း',
+    menuContact: 'ဆက်သွယ်ရန်',
+    storiesHeading: 'Travel Stories',
+    storiesSub: 'မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ',
+    photoGallery: 'Photo Gallery',
+    photoGallerySub: 'ခရီးလမ်းမှ အလှပုံများ',
+    viewAll: 'အားလုံးကြည့်မယ်',
+    allPhotos: 'အားလုံး',
+    watchYoutube: 'Watch My YouTube Channel',
+    visitChannel: 'Visit Channel',
+    youtubeWatch: 'YouTube မှာ ကြည့်မယ်',
+    playlistWatch: 'Playlist ကြည့်မယ်',
+    channelWatch: 'Channel ကြည့်မယ်',
+    aboutTitle: 'About Htoo Htet',
+    aboutDesc: 'မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။',
+    upcoming: 'Upcoming',
+    officialSponsors: 'Official Sponsors',
+    exploreJourney: 'Explore My Journey',
+    goodVibes: 'Good Vibes<br>Better Journeys'
   }
 };
 let currentLang = localStorage.getItem('hh_lang') || 'mm';
@@ -1414,13 +1460,93 @@ function applyLanguageUI() {
   if (typeof window._openArticleIndex === 'number' && window._openArticleIndex >= 0 && typeof openArticle === 'function') {
     try { openArticle(window._openArticleIndex); } catch (e) {}
   }
-  // Stories subtitle
+  // Stories heading + subtitle
+  var sh = $('stories-heading');
   var ss = $('stories-sub');
-  if (ss) {
-    ss.textContent = (typeof currentLang !== 'undefined' && currentLang === 'en')
-      ? 'Beautiful places across Myanmar'
-      : 'မြန်မာနိုင်ငံရဲ့ လှပသော နေရာများ';
+  var siteSet = (typeof siteSettings !== 'undefined' && siteSettings) ? siteSettings : {};
+  if (sh) {
+    if (currentLang === 'en' && siteSet.storiesHeadingEn) sh.textContent = siteSet.storiesHeadingEn;
+    else if (currentLang === 'mm' && siteSet.storiesHeading) sh.textContent = siteSet.storiesHeading;
+    else if (!siteSet.storiesHeading && !siteSet.storiesHeadingEn) sh.textContent = t('storiesHeading');
   }
+  if (ss) {
+    if (currentLang === 'en' && siteSet.storiesSubEn) ss.textContent = siteSet.storiesSubEn;
+    else if (currentLang === 'mm' && siteSet.storiesSub) ss.textContent = siteSet.storiesSub;
+    else ss.textContent = t('storiesSub');
+  }
+
+  // Photo gallery headings (public)
+  var gh = $('gal-public-heading');
+  var gs = $('gal-public-subtitle');
+  var gal = null;
+  try { gal = (typeof getPublicGallery === 'function') ? getPublicGallery() : null; } catch (e) { gal = null; }
+  if (gh) {
+    if (currentLang === 'en' && gal && gal.headingEn) gh.textContent = gal.headingEn;
+    else if (gal && gal.heading) gh.textContent = gal.heading;
+    else gh.textContent = t('photoGallery');
+  }
+  if (gs) {
+    if (currentLang === 'en' && gal && gal.subtitleEn) gs.textContent = gal.subtitleEn;
+    else if (gal && gal.subtitle) gs.textContent = gal.subtitle;
+    else gs.textContent = t('photoGallerySub');
+  }
+  var va = $('gal-public-view-all');
+  if (va && va.textContent && va.textContent.indexOf('View') === 0 || (va && !va.classList.contains('hidden'))) {
+    // keep count suffix if any
+    try {
+      var raw = va.textContent || '';
+      var m = raw.match(/·\s*(\d+)/);
+      va.textContent = t('viewAll') + (m ? (' · ' + m[1]) : '');
+    } catch (e) {}
+  }
+
+  // YouTube section labels
+  var ytLabel = $('youtube-label');
+  var ytLink = $('youtube-link');
+  var ytCap = $('youtube-thumb-caption');
+  var ytData = null;
+  try { ytData = (typeof read === 'function') ? read('hh_youtube', {}) : {}; } catch (e) { ytData = {}; }
+  if (ytLabel) {
+    if (currentLang === 'en' && ytData.labelEn) ytLabel.textContent = ytData.labelEn;
+    else if (ytData.label) ytLabel.textContent = ytData.label;
+    else ytLabel.textContent = t('watchYoutube');
+  }
+  if (ytLink) {
+    var icon = ytLink.querySelector('i');
+    ytLink.innerHTML = t('visitChannel') + (icon ? ' ' + icon.outerHTML : ' <i class="fa-solid fa-arrow-right text-xs"></i>');
+  }
+  if (ytCap) {
+    // keep dynamic playlist/video status if already set by loadBlogData; only default here
+    if (!ytCap.dataset.locked) ytCap.textContent = t('youtubeWatch');
+  }
+
+  // About
+  var about = null;
+  try { about = (typeof read === 'function') ? read('hh_about', {}) : {}; } catch (e) { about = {}; }
+  if ($('about-title')) {
+    if (currentLang === 'en' && about.titleEn) $('about-title').textContent = about.titleEn;
+    else if (about.title) $('about-title').textContent = about.title;
+    else $('about-title').textContent = t('aboutTitle');
+  }
+  if ($('about-desc')) {
+    if (currentLang === 'en' && about.descEn) $('about-desc').textContent = about.descEn;
+    else if (about.desc) $('about-desc').textContent = about.desc;
+    else $('about-desc').textContent = t('aboutDesc');
+  }
+
+  // Upcoming heading
+  if ($('upcoming-heading-text') && !($('upcoming-heading-text').textContent || '').trim()) {
+    $('upcoming-heading-text').textContent = t('upcoming');
+  }
+
+  // Footer tagline
+  var ft = $('footer-tagline');
+  if (ft && !(siteSet.footerTagline || '').trim()) {
+    ft.innerHTML = t('goodVibes');
+  }
+
+  // Re-render menu with translated labels
+  try { if (typeof renderMenu === 'function') renderMenu(); } catch (e) {}
 }
 
 function applyHeroLayout(s) {
@@ -1487,20 +1613,33 @@ function setLogo(url) {
   });
 }
 
-function renderSocial(containerId, social, flags) {
+function renderSocial(containerId, social, flags, opts) {
   const el = $(containerId);
   if (!el) return;
+  opts = opts || {};
   const items = [
     { key: 'fb', icon: 'fa-facebook-f', hover: 'hover:bg-blue-600', flag: 'showFb' },
     { key: 'yt', icon: 'fa-youtube', hover: 'hover:bg-red-600', flag: 'showYt' },
     { key: 'tt', icon: 'fa-tiktok', hover: 'hover:bg-black', flag: 'showTt' },
     { key: 'vb', icon: 'fa-viber', hover: 'hover:bg-purple-600', flag: 'showVb' }
   ];
-  el.innerHTML = items.map(i => {
+  // Header: show only ONE social icon (admin headerIcon, else first available)
+  var onlyKey = opts.onlyKey || null;
+  if (opts.headerOne) {
+    onlyKey = (social && social.headerIcon) || null;
+    if (!onlyKey) {
+      for (var hi = 0; hi < items.length; hi++) {
+        var it = items[hi];
+        if (flags[it.flag] !== false && social[it.key]) { onlyKey = it.key; break; }
+      }
+    }
+  }
+  el.innerHTML = items.map(function(i) {
+    if (onlyKey && i.key !== onlyKey) return '';
     const url = social[i.key];
     const on = flags[i.flag] !== false && url;
     if (!on) return '';
-    return `<a href="${safe(url)}" target="_blank" rel="noopener" class="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center ${i.hover} hover:text-white transition text-xs"><i class="fa-brands ${i.icon}"></i></a>`;
+    return '<a href="' + safe(url) + '" target="_blank" rel="noopener" class="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center ' + i.hover + ' hover:text-white transition text-xs"><i class="fa-brands ' + i.icon + '"></i></a>';
   }).join('');
 }
 
@@ -1514,6 +1653,24 @@ function defaultMenuItems() {
     { label: 'Contact', href: '#contact' }
   ];
 }
+function translateMenuLabel(lab) {
+  lab = String(lab || '').trim();
+  var map = {
+    'Home': 'menuHome',
+    'ပင်မ': 'menuHome',
+    'Travel Stories': 'menuStories',
+    'ခရီးသွားမှတ်တမ်း': 'menuStories',
+    'Photo Gallery': 'menuGallery',
+    'ဓာတ်ပုံပြခန်း': 'menuGallery',
+    'YouTube': 'menuYoutube',
+    'About': 'menuAbout',
+    'အကြောင်း': 'menuAbout',
+    'Contact': 'menuContact',
+    'ဆက်သွယ်ရန်': 'menuContact'
+  };
+  var key = map[lab];
+  return key ? t(key) : lab;
+}
 function renderMenu() {
   var raw = Array.isArray(siteMenu) ? siteMenu : [];
   var menu = raw.filter(function(m) {
@@ -1521,12 +1678,17 @@ function renderMenu() {
     var lab = String(m.label || m.title || m.name || '').trim();
     return !!lab;
   }).map(function(m) {
+    var base = String(m.label || m.title || m.name || '').trim();
+    var en = String(m.labelEn || m.titleEn || '').trim();
+    var label = (typeof currentLang !== 'undefined' && currentLang === 'en' && en) ? en : translateMenuLabel(base);
     return {
-      label: String(m.label || m.title || m.name || '').trim(),
+      label: label,
       href: String(m.href || m.link || m.url || '#').trim() || '#'
     };
   });
-  if (!menu.length) menu = defaultMenuItems();
+  if (!menu.length) menu = defaultMenuItems().map(function(m) {
+    return { label: translateMenuLabel(m.label), href: m.href };
+  });
   const mob = $('mobile-nav');
   const foot = $('footer-links');
   var html = menu.map(function(m) {
@@ -1747,7 +1909,7 @@ function loadBlogData() {
     showTt: social.showTt !== false,
     showVb: social.showVb !== false
   };
-  renderSocial('social-links-header', social, flags);
+  renderSocial('social-links-header', social, flags, { headerOne: true });
   renderSocial('social-links-mobile', social, flags);
   renderSocial('footer-social', social, flags);
   if (social.yt) { const yl = $('youtube-link'); if (yl) yl.href = social.yt; }
@@ -2026,18 +2188,27 @@ function loadBlogData() {
     }
     var cap = $('youtube-thumb-caption');
     if (cap) {
-      if (parsed && parsed.type === 'playlist') cap.textContent = 'Playlist ကြည့်မယ်';
-      else if (parsed) cap.textContent = 'YouTube မှာ ကြည့်မယ်';
-      else cap.textContent = 'Channel ကြည့်မယ်';
+      if (parsed && parsed.type === 'playlist') cap.textContent = (typeof t === 'function' ? t('playlistWatch') : 'Playlist');
+      else if (parsed) cap.textContent = (typeof t === 'function' ? t('youtubeWatch') : 'YouTube');
+      else cap.textContent = (typeof t === 'function' ? t('channelWatch') : 'Channel');
+      cap.dataset.locked = '1';
     }
   }
 
   const about = read('hh_about', {});
-  if (about.title) $('about-title').textContent = about.title;
+  if ($('about-title')) {
+    if (typeof currentLang !== 'undefined' && currentLang === 'en' && about.titleEn) $('about-title').textContent = about.titleEn;
+    else if (about.title) $('about-title').textContent = about.title;
+    else $('about-title').textContent = (typeof t === 'function' ? t('aboutTitle') : 'About Htoo Htet');
+  }
   if (about.titleColor) setStyle($('about-title'), 'color', about.titleColor);
   if (about.titleFs) setStyle($('about-title'), 'font-size', 'clamp(1.1rem, 3vw, ' + about.titleFs + 'px)');
   if (about.titleWeight) setStyle($('about-title'), 'font-weight', about.titleWeight);
-  if (about.desc) $('about-desc').textContent = about.desc;
+  if ($('about-desc')) {
+    if (typeof currentLang !== 'undefined' && currentLang === 'en' && about.descEn) $('about-desc').textContent = about.descEn;
+    else if (about.desc) $('about-desc').textContent = about.desc;
+    else $('about-desc').textContent = (typeof t === 'function' ? t('aboutDesc') : '');
+  }
   if (about.descColor) $('about-desc').style.color = about.descColor;
   $('about-section').classList.toggle('hidden', about.active === false);
 
@@ -2061,11 +2232,12 @@ function loadBlogData() {
   const cats = [...new Set(allStoryPosts.map(p => p.category || p.type || p.location || '').filter(Boolean))];
   const sel = $('story-category-filter');
   const cur = sel.value;
-  sel.innerHTML = '<option value="">အမျိုးအစားအားလုံး</option>' + cats.map(c => `<option value="${safe(c)}">${safe(c)}</option>`).join('');
+  sel.innerHTML = '<option value="">' + (typeof t === 'function' ? t('allCategories') : 'All') + '</option>' + cats.map(c => `<option value="${safe(c)}">${safe(c)}</option>`).join('');
   if (cats.includes(cur)) sel.value = cur;
 
   renderStoryCards();
   renderExtraHomeSections();
+  try { if (typeof applyLanguageUI === 'function') applyLanguageUI(); } catch (e) {}
   try {
     renderPublicGallery();
   } catch (e) { console.warn('gallery end', e); }
