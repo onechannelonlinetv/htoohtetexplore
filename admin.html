@@ -287,7 +287,7 @@ header.sticky {
   .field { font-size: 16px; /* prevent iOS zoom */ min-height: 44px; }
   .navbtn { min-height: 44px; padding: 12px 14px; }
   #mobile-nav {
-    max-height: min(70vh, 520px);
+    max-height: min(78vh, 640px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -295,6 +295,33 @@ header.sticky {
   main { padding-bottom: 24px; }
   .panel { border-radius: 14px; }
   input[type=range] { min-height: 28px; }
+  header.sticky h1 { font-size: 1.1rem !important; }
+  header.sticky .tiny { font-size: 10px; }
+  .stat { padding: 12px !important; }
+  .stat .text-3xl { font-size: 1.5rem !important; }
+  #page-preview-frame-wrap iframe { height: min(62vh, 520px) !important; }
+  .mobile-nav-label {
+    grid-column: 1 / -1;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+    padding: 8px 4px 2px;
+  }
+  #mobile-nav .navbtn {
+    background: #0f1a2a;
+    border: 1px solid #1e2d45;
+    border-radius: 12px;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 8px;
+    font-size: 12px;
+    min-height: 52px;
+  }
+  #mobile-nav .navbtn i { margin: 0; font-size: 14px; opacity: 0.9; }
 }
 @supports (padding: max(0px)) {
   #login-modal { padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
@@ -309,7 +336,10 @@ header.sticky {
     <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300 text-2xl"><i class="fa-solid fa-mountain-sun"></i></div>
     <h1 class="text-xl font-black">HTOO HTET</h1>
     <p class="mt-1 mb-6 text-sm text-slate-400">Admin Studio · Firebase Login</p>
-    <form onsubmit="event.preventDefault();signInAdmin()">
+    <div id="login-session-check" class="mb-4 text-sm text-emerald-300/90 hidden">
+      <i class="fa-solid fa-spinner fa-spin mr-2"></i>Session စစ်နေသည်…
+    </div>
+    <form id="login-form" onsubmit="event.preventDefault();signInAdmin()">
       <label class="label text-left" for="admin-email">Admin Email</label>
       <input id="admin-email" type="email" autocomplete="username" required placeholder="you@example.com" class="field mb-3">
       <label class="label text-left" for="admin-password">Password</label>
@@ -374,7 +404,7 @@ header.sticky {
         <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
       </div>
       <div class="fold-body space-y-2">
-        <a href="index.html" class="btn btn-muted block text-center text-xs py-2" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
+        <a href="index.html" target="_blank" rel="noopener" class="btn btn-muted block text-center text-xs py-2" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
         <button type="button" class="btn btn-muted text-xs w-full" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
         <button type="button" class="btn btn-muted text-xs w-full" onclick="exportSiteBackup()"><i class="fa-solid fa-download mr-1"></i>Backup Export</button>
         <label class="btn btn-muted text-xs w-full block text-center cursor-pointer"><i class="fa-solid fa-upload mr-1"></i>Backup Restore
@@ -392,30 +422,35 @@ header.sticky {
       </div>
       <div class="flex items-center gap-2">
         <button class="btn btn-muted lg:hidden" onclick="toggleMobileNav()" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
-        <a href="index.html" class="btn btn-green" title="Live Website" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-eye"></i><span class="hidden sm:inline ml-1">Live Website</span></a>
+        <a href="index.html" target="_blank" rel="noopener" class="btn btn-green" title="Live Website" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-eye"></i><span class="hidden sm:inline ml-1">Live Website</span></a>
         <button type="button" class="btn btn-muted text-rose-300" onclick="signOutAdmin()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i><span class="hidden sm:inline ml-1">Logout</span></button>
       </div>
     </header>
 
     <div id="mobile-nav" class="hidden border-b border-slate-800 bg-[#091220] p-3 lg:hidden">
-      <div class="grid grid-cols-2 gap-2">
-        <button class="navbtn" onclick="showView('overview')">Overview</button>
-        <button class="navbtn" onclick="showView('pagepreview')">Page Preview</button>
-        <button class="navbtn" onclick="showView('settings')">Brand & Hero</button>
-        <button class="navbtn" onclick="showView('menu')">Menu</button>
-        <button class="navbtn" onclick="showView('proud')">Proud Sponsors</button>
-        <button class="navbtn" onclick="showView('sponsor')">Official Sponsor</button>
-        <button class="navbtn" onclick="showView('upcoming')">Upcoming</button>
-        <button class="navbtn" onclick="showView('gallery')">Photo Gallery</button>
-        <button class="navbtn" onclick="showView('addpost')">Add Post</button>
-        <button class="navbtn" onclick="showView('postlist')">Post List</button>
-        <button class="navbtn" onclick="showView('sections')">Custom Rows</button>
-        <button class="navbtn" onclick="showView('youtube')">YouTube</button>
-        <button class="navbtn" onclick="showView('about')">About</button>
-        <button class="navbtn" onclick="showView('social')">Social</button>
-        <button class="navbtn" onclick="showView('comments')">Comments</button>
-        <a href="index.html" class="navbtn text-center no-underline" style="display:flex;align-items:center;justify-content:center;" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-eye mr-1"></i> Live Site</a>
-        <button class="navbtn text-rose-300" onclick="signOutAdmin()"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>
+      <div class="grid grid-cols-3 gap-2">
+        <div class="mobile-nav-label">အဓိက</div>
+        <button class="navbtn" onclick="showView('overview')"><i class="fa-solid fa-chart-pie"></i>Overview</button>
+        <button class="navbtn" onclick="showView('addpost')"><i class="fa-solid fa-pen-to-square"></i>Add Post</button>
+        <button class="navbtn" onclick="showView('postlist')"><i class="fa-solid fa-list"></i>Posts</button>
+        <button class="navbtn" onclick="showView('gallery')"><i class="fa-solid fa-images"></i>Gallery</button>
+        <button class="navbtn" onclick="showView('comments')"><i class="fa-solid fa-comments"></i>Comments</button>
+        <a href="index.html" target="_blank" rel="noopener" class="navbtn no-underline" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-eye"></i>Live</a>
+
+        <div class="mobile-nav-label">ဒီဇိုင်း</div>
+        <button class="navbtn" onclick="showView('settings')"><i class="fa-solid fa-palette"></i>Brand</button>
+        <button class="navbtn" onclick="showView('sponsor')"><i class="fa-solid fa-rectangle-ad"></i>Sponsor</button>
+        <button class="navbtn" onclick="showView('upcoming')"><i class="fa-solid fa-map-location-dot"></i>Upcoming</button>
+        <button class="navbtn" onclick="showView('proud')"><i class="fa-solid fa-handshake"></i>Proud</button>
+        <button class="navbtn" onclick="showView('youtube')"><i class="fa-brands fa-youtube"></i>YouTube</button>
+        <button class="navbtn" onclick="showView('pagepreview')"><i class="fa-solid fa-desktop"></i>Preview</button>
+
+        <div class="mobile-nav-label">အခြား</div>
+        <button class="navbtn" onclick="showView('menu')"><i class="fa-solid fa-bars"></i>Menu</button>
+        <button class="navbtn" onclick="showView('sections')"><i class="fa-solid fa-layer-group"></i>Rows</button>
+        <button class="navbtn" onclick="showView('about')"><i class="fa-solid fa-circle-info"></i>About</button>
+        <button class="navbtn" onclick="showView('social')"><i class="fa-solid fa-share-nodes"></i>Social</button>
+        <button class="navbtn text-rose-300" onclick="signOutAdmin()"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
       </div>
     </div>
 
@@ -450,7 +485,7 @@ header.sticky {
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
-            <a href="index.html" class="btn btn-green text-xs" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Live</a>
+            <a href="index.html" target="_blank" rel="noopener" class="btn btn-green text-xs" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Live</a>
         </div>
         <div class="flex flex-wrap gap-2 text-xs">
           <button type="button" class="btn btn-muted" onclick="showView('settings'); setTimeout(function(){var a=document.getElementById('hero-editor-anchor');if(a)a.scrollIntoView({behavior:'smooth'});},80)">✏️ Edit Hero</button>
@@ -2083,8 +2118,8 @@ try {
     firebase.initializeApp(firebaseConfig);
   }
   adminAuth = firebase.auth();
-  // Tab ပိတ်မှ logout · refresh / Live ပြန်လာရင် login ကျန်
-  try { adminAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION); } catch (pe) { console.warn(pe); }
+  // LOCAL: browser ပိတ်မှပဲ logout · Live ပြန်လာ / refresh မှာ login ကျန်
+  try { adminAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (pe) { console.warn(pe); }
   adminDb = firebase.database();
   adminStorage = firebase.storage();
 } catch(e) {
@@ -2609,16 +2644,44 @@ async function signOutAdmin() {
 }
 window.signOutAdmin = signOutAdmin;
 
+(function(){
+  try {
+    var chk = document.getElementById('login-session-check');
+    var form = document.getElementById('login-form');
+    if (chk) chk.classList.remove('hidden');
+    if (form) { form.style.opacity = '0.45'; form.style.pointerEvents = 'none'; }
+  } catch (e) {}
+})();
+
 adminAuth && adminAuth.onAuthStateChanged(async function(user) {
-  if (!user) {
-    adminUser = null;
-    remoteSyncReady = false;
+  function showLoginForm() {
     try {
+      var chk = document.getElementById('login-session-check');
+      var form = document.getElementById('login-form');
+      if (chk) chk.classList.add('hidden');
+      if (form) { form.style.opacity = ''; form.style.pointerEvents = ''; }
       var loginModal = document.getElementById('login-modal');
       var app = document.getElementById('app');
       if (app) app.classList.add('hidden');
       if (loginModal) loginModal.classList.remove('hidden');
     } catch (e0) {}
+  }
+  function showApp() {
+    try {
+      var chk = document.getElementById('login-session-check');
+      var form = document.getElementById('login-form');
+      if (chk) chk.classList.add('hidden');
+      if (form) { form.style.opacity = ''; form.style.pointerEvents = ''; }
+      var loginModal2 = document.getElementById('login-modal');
+      var app2 = document.getElementById('app');
+      if (loginModal2) loginModal2.classList.add('hidden');
+      if (app2) app2.classList.remove('hidden');
+    } catch (e1) {}
+  }
+  if (!user) {
+    adminUser = null;
+    remoteSyncReady = false;
+    showLoginForm();
     return;
   }
   try {
@@ -2626,15 +2689,13 @@ adminAuth && adminAuth.onAuthStateChanged(async function(user) {
       await adminAuth.signOut();
       adminUser = null;
       remoteSyncReady = false;
+      showLoginForm();
       return;
     }
     adminUser = user;
-    // SESSION: Live site ပြန်လာ / refresh မှာ UI ပြန်ဖွင့်
+    // LOCAL: Live site ပြန်လာ / refresh မှာ UI ချက်ချင်း ပြန်ဖွင့်
     try {
-      var loginModal2 = document.getElementById('login-modal');
-      var app2 = document.getElementById('app');
-      if (loginModal2) loginModal2.classList.add('hidden');
-      if (app2) app2.classList.remove('hidden');
+      showApp();
       if (adminDb && !remoteSyncReady) {
         try {
           var snap = await adminDb.ref('siteData').once('value');
