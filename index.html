@@ -2090,11 +2090,25 @@ function postLocalized(post, field) {
   return post[field] || '';
 }
 /**
+ * Fix stored content where newlines were saved as the two characters "\n"
+ * instead of real line breaks (shows as literal \n on the page).
+ */
+function normalizeArticleContent(raw) {
+  return String(raw || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    // literal backslash-n / backslash-r (common when JSON/escape goes wrong)
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '')
+    .replace(/\\t/g, ' ');
+}
+
+/**
  * Parse body into ordered text / media blocks (same order as written in Myanmar).
  * Media keeps original tags: [gallery], [img], markdown image, <img>.
  */
 function parseContentBlocks(raw) {
-  raw = String(raw || '').replace(/\r\n/g, '\n');
+  raw = normalizeArticleContent(raw);
   var blocks = [];
   // Capturing split keeps media tags as their own pieces in order
   var re = /(\[gallery(?:\s+[^\]]*)?\][\s\S]*?\[\/gallery\]|\[img(?:\s+[^\]]*)?\][\s\S]*?\[\/img\]|!\[[^\]]*\]\([^)]+\)|<img\b[^>]*>)/gi;
@@ -2105,6 +2119,7 @@ function parseContentBlocks(raw) {
     if (/^\[gallery(?:\s|[^\]]*\])|^\[img(?:\s|[^\]]*\])|^!\[[^\]]*\]\([^)]+\)|^<img\b/i.test(piece)) {
       blocks.push({ type: 'media', content: piece });
     } else {
+      // Drop whitespace-only text so it does not steal EN paragraph slots
       var text = piece.replace(/^\s+|\s+$/g, '');
       if (text) blocks.push({ type: 'text', content: text });
     }
@@ -2118,12 +2133,12 @@ function parseContentBlocks(raw) {
 /**
  * Build English article using MYANMAR layout as the skeleton:
  * - Every [img] / [gallery] stays in the exact same position & order as Myanmar
- * - Only text slots are filled with English text
+ * - Only real text slots are filled with English text (in order)
  * - Images are ALWAYS taken from Myanmar content (EN field is text-only)
  */
 function mergeContentImages(primary, fallback) {
-  primary = String(primary || '').replace(/\r\n/g, '\n');
-  fallback = String(fallback || '').replace(/\r\n/g, '\n');
+  primary = normalizeArticleContent(primary);
+  fallback = normalizeArticleContent(fallback);
   if (!fallback) return primary.replace(/^\s+|\s+$/g, '');
 
   // Clean broken placeholders
@@ -2164,13 +2179,13 @@ function mergeContentImages(primary, fallback) {
   }
 
   // Rebuild in exact Myanmar order: text → media → text → media …
+  // Keeps every image in the same place as the Myanmar article.
   var enIdx = 0;
   var out = [];
   var textSeen = 0;
   for (var bi = 0; bi < blocks.length; bi++) {
     var b = blocks[bi];
     if (b.type === 'media') {
-      // Always keep media exactly as in Myanmar
       out.push(b.content);
       continue;
     }
@@ -2184,14 +2199,13 @@ function mergeContentImages(primary, fallback) {
       out.push(enParts[enIdx++]);
     }
   }
-  // Leftover EN paragraphs after last media
   if (enIdx < enParts.length) {
     out.push(enParts.slice(enIdx).join('\n\n'));
   }
 
   var merged = out.join('\n\n').replace(/^\s+|\s+$/g, '');
 
-  // Safety: if somehow media was lost, force-append every MM media block
+  // Safety: if somehow media was lost, force-interleave
   var mergedMedia = 0;
   try {
     var check = parseContentBlocks(merged);
@@ -2202,7 +2216,6 @@ function mergeContentImages(primary, fallback) {
     for (var m = 0; m < blocks.length; m++) {
       if (blocks[m].type === 'media') mediaOnly.push(blocks[m].content);
     }
-    // Interleave EN paragraphs with media
     var forced = [];
     var mi = 0;
     for (var pi = 0; pi < enParts.length; pi++) {
@@ -2259,6 +2272,7 @@ function renderStoryCards() {
 
 function formatArticleBody(raw) {
   if (!raw) return '';
+  raw = (typeof normalizeArticleContent === 'function') ? normalizeArticleContent(raw) : String(raw || '').replace(/\r\n/g, '\n').replace(/\\n/g, '\n');
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function renderImgsInGallery(inner, layout) {
     var imgs = [];
@@ -2634,11 +2648,12 @@ function openArticle(index) {
     if (d) parts.push(d);
     meta.textContent = parts.join(' · ');
   }
-  var mmBody = post.content || post.body || '';
-  var enBody = post.contentEn || post.content_en || '';
+  var mmBody = normalizeArticleContent(post.content || post.body || '');
+  var enBody = normalizeArticleContent(post.contentEn || post.content_en || '');
   var primaryBody;
   if (typeof currentLang !== 'undefined' && currentLang === 'en') {
     // Always reuse Myanmar [img]/[gallery] positions; EN field is text-only
+    // so image order/placement matches the Myanmar article exactly
     primaryBody = mergeContentImages(enBody, mmBody);
   } else {
     primaryBody = mmBody;
