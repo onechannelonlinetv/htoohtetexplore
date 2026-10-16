@@ -1053,9 +1053,12 @@
   </section>
 
   <!-- CONTACT PAGE (AdSense requirement) -->
-  <section id="contact-page" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+  <section id="contact-page" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
     <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
-      <h2 id="contact-page-title" class="text-xl sm:text-2xl font-black text-white mb-3">Contact</h2>
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <h2 id="contact-page-title" class="text-xl sm:text-2xl font-black text-white">Contact</h2>
+        <button type="button" onclick="closeLegalPage()" class="text-xs font-bold text-emerald-400 hover:text-emerald-200 px-3 py-1.5 rounded-lg border border-emerald-800/50 hover:bg-emerald-900/40">← Back</button>
+      </div>
       <p id="contact-page-intro" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl mb-6">
         မေးခွန်း၊ အကြံပြုချက် သို့မဟုတ် ပူးပေါင်းဆောင်ရွက်လိုပါက အောက်ပါနည်းလမ်းများဖြင့် ဆက်သွယ်နိုင်ပါသည်။
       </p>
@@ -1082,9 +1085,12 @@
   </section>
 
   <!-- PRIVACY POLICY (AdSense requirement) -->
-  <section id="privacy-policy" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+  <section id="privacy-policy" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
     <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9 prose-privacy">
-      <h2 class="text-xl sm:text-2xl font-black text-white mb-2">Privacy Policy</h2>
+      <div class="flex items-center justify-between gap-3 mb-2">
+        <h2 class="text-xl sm:text-2xl font-black text-white">Privacy Policy</h2>
+        <button type="button" onclick="closeLegalPage()" class="text-xs font-bold text-emerald-400 hover:text-emerald-200 px-3 py-1.5 rounded-lg border border-emerald-800/50 hover:bg-emerald-900/40">← Back</button>
+      </div>
       <p class="text-xs text-emerald-500/70 mb-6">Last updated: October 17, 2026</p>
       <div class="space-y-5 text-sm sm:text-[15px] text-emerald-100/80 leading-relaxed max-w-3xl">
         <p>
@@ -3349,6 +3355,81 @@ function submitComment() {
   });
 }
 
+
+/* ---- Contact / Privacy Policy as separate pages ---- */
+function openLegalPage(which) {
+  var contact = document.getElementById('contact-page');
+  var privacy = document.getElementById('privacy-policy');
+  var home = document.getElementById('home');
+  if (!contact || !privacy) return;
+  try { closeArticle(); } catch (e) {}
+  try { closeGalleryPage(); } catch (e) {}
+  try { closeMenu(); } catch (e) {}
+  // hide main home blocks, show only the selected legal section
+  if (home) {
+    Array.prototype.forEach.call(home.children, function(child) {
+      if (child.id === 'contact-page' || child.id === 'privacy-policy') return;
+      child.setAttribute('data-legal-hidden', '1');
+      child.style.display = 'none';
+    });
+  }
+  if (which === 'privacy') {
+    contact.classList.add('hidden');
+    contact.style.display = 'none';
+    privacy.classList.remove('hidden');
+    privacy.style.display = '';
+    try { privacy.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+  } else {
+    privacy.classList.add('hidden');
+    privacy.style.display = 'none';
+    contact.classList.remove('hidden');
+    contact.style.display = '';
+    try { contact.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+  }
+  document.body.classList.add('legal-page-open');
+}
+function closeLegalPage() {
+  var contact = document.getElementById('contact-page');
+  var privacy = document.getElementById('privacy-policy');
+  var home = document.getElementById('home');
+  if (contact) { contact.classList.add('hidden'); contact.style.display = 'none'; }
+  if (privacy) { privacy.classList.add('hidden'); privacy.style.display = 'none'; }
+  if (home) {
+    Array.prototype.forEach.call(home.children, function(child) {
+      if (child.getAttribute('data-legal-hidden') === '1') {
+        child.removeAttribute('data-legal-hidden');
+        child.style.display = '';
+      }
+    });
+  }
+  document.body.classList.remove('legal-page-open');
+  try {
+    if (location.hash === '#contact-page' || location.hash === '#privacy-policy') {
+      history.pushState('', '', location.pathname + location.search);
+    }
+  } catch (e) {}
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function tryOpenLegalFromHash() {
+  var h = (location.hash || '').toLowerCase();
+  if (h === '#contact-page' || h === '#contact') {
+    openLegalPage('contact');
+    return true;
+  }
+  if (h === '#privacy-policy' || h === '#privacy') {
+    openLegalPage('privacy');
+    return true;
+  }
+  // not a legal hash — ensure legal pages closed if we were on one
+  if (document.body.classList.contains('legal-page-open')) {
+    closeLegalPage();
+  }
+  return false;
+}
+window.openLegalPage = openLegalPage;
+window.closeLegalPage = closeLegalPage;
+window.tryOpenLegalFromHash = tryOpenLegalFromHash;
+
 function tryOpenArticleFromHash() {
   const h = location.hash || '';
   if (h.indexOf('#article/') !== 0) return;
@@ -3417,11 +3498,22 @@ document.addEventListener('DOMContentLoaded', () => {
   if ($('lang-mm')) $('lang-mm').addEventListener('click', function() { setLanguage('mm'); });
   setLanguage(currentLang || 'mm');
   if (!publicFirebaseReady) loadBlogData();
-  setTimeout(tryOpenArticleFromHash, 400);
+  setTimeout(function() {
+    if (!tryOpenLegalFromHash()) tryOpenArticleFromHash();
+  }, 400);
 });
 window.addEventListener('popstate', function() {
+  if (tryOpenLegalFromHash()) return;
   if (location.hash.indexOf('#article/') === 0) tryOpenArticleFromHash();
-  else closeArticle();
+  else {
+    closeArticle();
+    if (document.body.classList.contains('legal-page-open')) closeLegalPage();
+  }
+});
+window.addEventListener('hashchange', function() {
+  if (tryOpenLegalFromHash()) return;
+  if (location.hash.indexOf('#article/') === 0) tryOpenArticleFromHash();
+  else if (document.body.classList.contains('legal-page-open')) closeLegalPage();
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
