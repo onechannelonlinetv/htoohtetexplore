@@ -2025,11 +2025,19 @@ function enableImageFieldEditing(id) {
 
 let adminAuth, adminDb, adminStorage, adminUser = null, remoteSyncReady = false, remoteWriteQueue = Promise.resolve();
 try {
-  firebase.initializeApp(firebaseConfig);
+  if (!firebase.apps || !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
   adminAuth = firebase.auth();
   adminDb = firebase.database();
   adminStorage = firebase.storage();
-} catch(e) { console.error(e); }
+} catch(e) {
+  console.error('Firebase init failed', e);
+  setTimeout(function() {
+    var el = document.getElementById('login-error');
+    if (el) el.textContent = 'Firebase မဖွင့်နိုင်: ' + ((e && e.message) || e);
+  }, 500);
+}
 
 const originalSetItem = localStorage.setItem.bind(localStorage);
 localStorage.setItem = function(key, value) {
@@ -2421,15 +2429,30 @@ function showPreviewIfUrl(inputId) {
 }
 
 async function signInAdmin() {
-  const email = $('admin-email').value.trim(), password = $('admin-password').value;
-  $('login-error').textContent = '';
-  $('login-button').disabled = true;
-  $('login-button').textContent = 'ဝင်နေသည်…';
+  const emailEl = $('admin-email');
+  const passEl = $('admin-password');
+  const errEl = $('login-error');
+  const btn = $('login-button');
+  const email = (emailEl && emailEl.value || '').trim();
+  const password = (passEl && passEl.value) || '';
+  if (errEl) errEl.textContent = '';
+  if (!email || !password) {
+    if (errEl) errEl.textContent = 'Email နှင့် Password ထည့်ပါ';
+    return;
+  }
+  if (!adminAuth) {
+    if (errEl) errEl.textContent = 'Firebase Auth မရသေးပါ — Internet စစ်ပြီး page ပြန်ဖွင့်ပါ';
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'ဝင်နေသည်…'; }
   try {
     const credential = await adminAuth.signInWithEmailAndPassword(email, password);
-    if (credential.user.uid !== FIREBASE_ADMIN_UID) {
-      await adminAuth.signOut();
-      throw new Error('ဒီအကောင့်ကို Admin အဖြစ် ခွင့်မပြုထားပါ။');
+    if (!credential || !credential.user) {
+      throw new Error('Login မအောင်မြင်ပါ (user မရ)');
+    }
+    if (typeof FIREBASE_ADMIN_UID !== 'undefined' && credential.user.uid !== FIREBASE_ADMIN_UID) {
+      try { await adminAuth.signOut(); } catch (e) {}
+      throw new Error('ဒီအကောင့်ကို Admin အဖြစ် ခွင့်မပြုထားပါ။ (UID မကိုက်)');
     }
     adminUser = credential.user;
     // PRODUCTION: show UI immediately from localStorage (no wait for Firebase)
@@ -2488,13 +2511,24 @@ async function signInAdmin() {
       toast('Firebase sync နှောင့်: local ဒေတာ သုံးနေသည်', true);
     }
   } catch (e) {
-    $('login-error').textContent = e.message || 'Login မအောင်မြင်ပါ။';
+    console.error('signInAdmin', e);
+    var code = (e && e.code) || '';
+    var msg = (e && e.message) || 'Login မအောင်မြင်ပါ။';
+    if (code === 'auth/invalid-email') msg = 'Email ပုံစံ မမှန်ပါ';
+    else if (code === 'auth/user-not-found' || code === 'auth/invalid-credential' || code === 'auth/wrong-password') msg = 'Email သို့မဟုတ် Password မှားနေသည်';
+    else if (code === 'auth/too-many-requests') msg = 'ကြိုးစားမှု များလွန်းသည် — ခဏနေမှ ပြန်စမ်းပါ';
+    else if (code === 'auth/network-request-failed') msg = 'Network မရပါ — Internet စစ်ပါ';
+    else if (code === 'auth/invalid-api-key') msg = 'Firebase API key မှားနေသည်';
+    if ($('login-error')) $('login-error').textContent = msg;
   } finally {
-    $('login-button').disabled = false;
-    $('login-button').innerHTML = 'Login ဝင်မယ် <i class="fa-solid fa-arrow-right ml-1"></i>';
+    if ($('login-button')) {
+      $('login-button').disabled = false;
+      $('login-button').innerHTML = 'Login ဝင်မယ် <i class="fa-solid fa-arrow-right ml-1"></i>';
+    }
   }
 }
-adminAuth?.onAuthStateChanged(async function(user) {
+window.signInAdmin = signInAdmin;
+adminAuth && adminAuth.onAuthStateChanged(async function(user) {
   if (!user) {
     adminUser = null;
     remoteSyncReady = false;
