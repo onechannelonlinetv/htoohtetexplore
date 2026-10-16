@@ -2118,8 +2118,8 @@ try {
     firebase.initializeApp(firebaseConfig);
   }
   adminAuth = firebase.auth();
-  // LOCAL: browser ပိတ်မှပဲ logout · Live ပြန်လာ / refresh မှာ login ကျန်
-  try { adminAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (pe) { console.warn(pe); }
+  // SESSION: ဒီ browser session ထဲမှာပဲ login ကျန် · Live↔Admin တူညီ tab မှာ ပြန်လာရင် password မလို · browser အပြည့်ပိတ်ရင် ပြန် login
+  try { adminAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION); } catch (pe) { console.warn(pe); }
   adminDb = firebase.database();
   adminStorage = firebase.storage();
 } catch(e) {
@@ -2628,6 +2628,10 @@ async function signOutAdmin() {
   adminUser = null;
   remoteSyncReady = false;
   try {
+    sessionStorage.removeItem('hh_admin_return_overview');
+    sessionStorage.removeItem('hh_from_admin');
+  } catch (e) {}
+  try {
     var loginModal = document.getElementById('login-modal');
     var app = document.getElementById('app');
     if (app) app.classList.add('hidden');
@@ -2715,7 +2719,7 @@ adminAuth && adminAuth.onAuthStateChanged(async function(user) {
       return;
     }
     adminUser = user;
-    // LOCAL: Live site ပြန်လာ / refresh မှာ UI ချက်ချင်း ပြန်ဖွင့်
+    // SESSION: တူညီ tab မှာ Live ပြန်လာရင် UI ချက်ချင်း ပြန်ဖွင့်
     try {
       showApp();
       if (adminDb && !remoteSyncReady) {
