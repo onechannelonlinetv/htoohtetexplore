@@ -1,0 +1,26 @@
+{
+  "name": "HTOO HTET Admin Studio",
+  "short_name": "HH Admin",
+  "description": "HTOO HTET website admin dashboard",
+  "start_url": "./admin.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070d19",
+  "theme_color": "#070d19",
+  "lang": "my",
+  "icons": [
+    {
+      "src": "./icons/icon-admin-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-admin-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
