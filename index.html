@@ -2600,10 +2600,29 @@ function renderPublicGallery() {
     sec.style.display = '';
     var heading = document.getElementById('gal-public-heading');
     var sub = document.getElementById('gal-public-subtitle');
-    if (heading) heading.textContent = g.heading || 'Photo Gallery';
+    var isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
+    if (heading) {
+      if (isEn) {
+        heading.textContent = (g.headingEn && String(g.headingEn).trim())
+          ? g.headingEn
+          : ((g.heading && !/[\u1000-\u109F]/.test(String(g.heading))) ? g.heading : (typeof t === 'function' ? t('photoGallery') : 'Photo Gallery'));
+      } else {
+        heading.textContent = (g.heading && String(g.heading).trim()) ? g.heading : (typeof t === 'function' ? t('photoGallery') : 'Photo Gallery');
+      }
+    }
     if (sub) {
-      sub.textContent = g.subtitle || '';
-      sub.classList.toggle('hidden', !(g.subtitle || '').trim());
+      var subText = '';
+      if (isEn) {
+        subText = (g.subtitleEn && String(g.subtitleEn).trim())
+          ? g.subtitleEn
+          : (typeof t === 'function' ? t('photoGallerySub') : 'Photos from the journey');
+      } else {
+        subText = (g.subtitle && String(g.subtitle).trim())
+          ? g.subtitle
+          : (typeof t === 'function' ? t('photoGallerySub') : '');
+      }
+      sub.textContent = subText;
+      sub.classList.toggle('hidden', !String(subText || '').trim());
     }
     var cats = g.categories || [];
     var catBox = document.getElementById('gal-public-cats');
@@ -2985,32 +3004,47 @@ let publicDb = null;
 try {
   firebase.initializeApp(firebaseConfig);
   publicDb = firebase.database();
-  publicDb.ref('siteData').on('value', snap => {
-    const data = snap.val() || {};
-    DATA_KEYS.forEach(key => {
+  function applyRemoteSiteData(data) {
+    data = data || {};
+    DATA_KEYS.forEach(function(key) {
       // Prefer remote value; if key missing remotely, leave local cache alone
       if (Object.prototype.hasOwnProperty.call(data, key) && data[key] != null) {
         try { localStorage.setItem(key, JSON.stringify(data[key])); } catch (e) {}
       }
     });
     publicFirebaseReady = true;
-    loadBlogData();
-  }, err => { console.error(err); loadBlogData(); });
-  // Phone browsers: re-fetch from Firebase when tab/app becomes visible (fixes stale on/off)
-  document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState !== 'visible' || !publicDb) return;
+    try { loadBlogData(); } catch (e) { console.error(e); }
+  }
+  function refreshFromFirebase() {
+    if (!publicDb) return;
     publicDb.ref('siteData').once('value').then(function(snap) {
-      var data = snap.val() || {};
-      DATA_KEYS.forEach(function(key) {
-        if (Object.prototype.hasOwnProperty.call(data, key) && data[key] != null) {
-          try { localStorage.setItem(key, JSON.stringify(data[key])); } catch (e) {}
-        }
-      });
-      try { loadBlogData(); } catch (e) {}
-    }).catch(function() {
+      applyRemoteSiteData(snap.val() || {});
+    }).catch(function(err) {
+      console.error(err);
       try { loadBlogData(); } catch (e) {}
     });
+  }
+  publicDb.ref('siteData').on('value', function(snap) {
+    applyRemoteSiteData(snap.val() || {});
+  }, function(err) {
+    console.error(err);
+    try { loadBlogData(); } catch (e) {}
   });
+  // Phone / browser: re-fetch when tab visible, page restored from bfcache, or network back
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') refreshFromFirebase();
+  });
+  window.addEventListener('pageshow', function(ev) {
+    refreshFromFirebase();
+  });
+  window.addEventListener('online', function() {
+    refreshFromFirebase();
+  });
+  // Light keep-alive so mobile browsers less often suspend the websocket
+  setInterval(function() {
+    if (!publicDb || document.visibilityState !== 'visible') return;
+    try { publicDb.ref('.info/connected').once('value'); } catch (e) {}
+  }, 60000);
 } catch (e) { console.error(e); }
 
 /* ---- Engagement: Like / Share / Comment ---- */
