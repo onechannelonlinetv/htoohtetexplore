@@ -3328,6 +3328,20 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<div id="hh-admin-back-bar" class="hidden fixed bottom-4 left-1/2 z-[9999] -translate-x-1/2 rounded-full border border-emerald-500/40 bg-slate-950/95 px-4 py-2 shadow-xl backdrop-blur" style="padding-bottom:max(8px,env(safe-area-inset-bottom))">
+  <a href="admin.html" class="text-sm font-bold text-emerald-300 no-underline"><i class="fa-solid fa-arrow-left mr-1"></i> Admin Dashboard</a>
+</div>
+<script>
+(function(){
+  try {
+    if (sessionStorage.getItem('hh_from_admin') === '1') {
+      var b = document.getElementById('hh-admin-back-bar');
+      if (b) b.classList.remove('hidden');
+    }
+  } catch (e) {}
+})();
+</script>
+
 </body>
 </html>
- 
