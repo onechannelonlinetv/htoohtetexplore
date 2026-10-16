@@ -404,7 +404,7 @@ header.sticky {
         <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
       </div>
       <div class="fold-body space-y-2">
-        <a href="index.html" target="_blank" rel="noopener" class="btn btn-muted block text-center text-xs py-2" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
+        <a href="index.html" class="btn btn-muted block text-center text-xs py-2" onclick="try{sessionStorage.setItem('hh_from_admin','1');sessionStorage.setItem('hh_admin_return_overview','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
         <button type="button" class="btn btn-muted text-xs w-full" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
         <button type="button" class="btn btn-muted text-xs w-full" onclick="exportSiteBackup()"><i class="fa-solid fa-download mr-1"></i>Backup Export</button>
         <label class="btn btn-muted text-xs w-full block text-center cursor-pointer"><i class="fa-solid fa-upload mr-1"></i>Backup Restore
@@ -422,7 +422,7 @@ header.sticky {
       </div>
       <div class="flex items-center gap-2">
         <button class="btn btn-muted lg:hidden" onclick="toggleMobileNav()" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
-        <a href="index.html" target="_blank" rel="noopener" class="btn btn-green" title="Live Website" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-eye"></i><span class="hidden sm:inline ml-1">Live Website</span></a>
+        <a href="index.html" class="btn btn-green" title="Live Website" onclick="try{sessionStorage.setItem('hh_from_admin','1');sessionStorage.setItem('hh_admin_return_overview','1')}catch(e){}"><i class="fa-solid fa-eye"></i><span class="hidden sm:inline ml-1">Live Website</span></a>
         <button type="button" class="btn btn-muted text-rose-300" onclick="signOutAdmin()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i><span class="hidden sm:inline ml-1">Logout</span></button>
       </div>
     </header>
@@ -435,7 +435,7 @@ header.sticky {
         <button class="navbtn" onclick="showView('postlist')"><i class="fa-solid fa-list"></i>Posts</button>
         <button class="navbtn" onclick="showView('gallery')"><i class="fa-solid fa-images"></i>Gallery</button>
         <button class="navbtn" onclick="showView('comments')"><i class="fa-solid fa-comments"></i>Comments</button>
-        <a href="index.html" target="_blank" rel="noopener" class="navbtn no-underline" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-eye"></i>Live</a>
+        <a href="index.html" class="navbtn no-underline" onclick="try{sessionStorage.setItem('hh_from_admin','1');sessionStorage.setItem('hh_admin_return_overview','1')}catch(e){}"><i class="fa-solid fa-eye"></i>Live</a>
 
         <div class="mobile-nav-label">ဒီဇိုင်း</div>
         <button class="navbtn" onclick="showView('settings')"><i class="fa-solid fa-palette"></i>Brand</button>
@@ -485,7 +485,7 @@ header.sticky {
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
-            <a href="index.html" target="_blank" rel="noopener" class="btn btn-green text-xs" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Live</a>
+            <a href="index.html" class="btn btn-green text-xs" onclick="try{sessionStorage.setItem('hh_from_admin','1');sessionStorage.setItem('hh_admin_return_overview','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Live</a>
         </div>
         <div class="flex flex-wrap gap-2 text-xs">
           <button type="button" class="btn btn-muted" onclick="showView('settings'); setTimeout(function(){var a=document.getElementById('hero-editor-anchor');if(a)a.scrollIntoView({behavior:'smooth'});},80)">✏️ Edit Hero</button>
@@ -2676,6 +2676,28 @@ adminAuth && adminAuth.onAuthStateChanged(async function(user) {
       var app2 = document.getElementById('app');
       if (loginModal2) loginModal2.classList.add('hidden');
       if (app2) app2.classList.remove('hidden');
+      // Live ကြည့်ပြီး ပြန်လာ / session restore → Overview သို့
+      try {
+        var goOverview = false;
+        try { goOverview = sessionStorage.getItem('hh_admin_return_overview') === '1'; } catch (e) {}
+        if (goOverview) {
+          try { sessionStorage.removeItem('hh_admin_return_overview'); } catch (e) {}
+        }
+        // Always open Overview after auth restore (Live ပြန်လာရင် login မျက်နှာ မဟုတ်ဘဲ dashboard)
+        setTimeout(function() {
+          try {
+            if (typeof showView === 'function') showView('overview');
+            else {
+              document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+              var ov = document.getElementById('view-overview');
+              if (ov) ov.classList.add('active');
+              var pt = document.getElementById('page-title');
+              if (pt) pt.textContent = 'Overview';
+            }
+            if (typeof renderOverview === 'function') renderOverview();
+          } catch (e3) {}
+        }, 50);
+      } catch (e2) {}
     } catch (e1) {}
   }
   if (!user) {
