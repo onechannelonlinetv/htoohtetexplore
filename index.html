@@ -2089,30 +2089,103 @@ function postLocalized(post, field) {
   }
   return post[field] || '';
 }
-/** EN content: if no images, append images from Myanmar content so user still sees photos */
+/**
+ * Split content into ordered text / media blocks.
+ * Media = [gallery]...[/gallery], [img]...[/img], markdown images, raw <img> tags
+ * So English can reuse Myanmar image positions without re-uploading.
+ */
+function parseContentBlocks(raw) {
+  raw = String(raw || '');
+  var blocks = [];
+  var re = /(\[gallery(?:\s+[^\]]*)?\][\s\S]*?\[\/gallery\])|(\[img(?:\s+[^\]]*)?\][\s\S]*?\[\/img\])|(!\[[^\]]*\]\([^)]+\))|(<img\b[^>]*>)/gi;
+  var last = 0;
+  var m;
+  while ((m = re.exec(raw)) !== null) {
+    if (m.index > last) {
+      var text = raw.slice(last, m.index).replace(/^\s+|\s+$/g, '');
+      if (text) blocks.push({ type: 'text', content: text });
+    }
+    blocks.push({ type: 'media', content: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < raw.length) {
+    var tail = raw.slice(last).replace(/^\s+|\s+$/g, '');
+    if (tail) blocks.push({ type: 'text', content: tail });
+  }
+  if (!blocks.length && raw.replace(/^\s+|\s+$/g, '')) {
+    blocks.push({ type: 'text', content: raw.replace(/^\s+|\s+$/g, '') });
+  }
+  return blocks;
+}
+
+/**
+ * EN content is text-only → keep MM image/gallery blocks in original order,
+ * replace only the text slots with English paragraphs (in order).
+ * If EN already has its own images, leave EN as-is.
+ * Fallback: if structure merge yields no media, append all MM images at end.
+ */
 function mergeContentImages(primary, fallback) {
   primary = String(primary || '');
   fallback = String(fallback || '');
-  if (!fallback) return primary;
-  // Strip broken placeholders like [Image Link: xxx]
+  if (!fallback) return primary.replace(/^\s+|\s+$/g, '');
+
+  // Strip broken placeholders
   primary = primary.replace(/\[Image\s*Link\s*:\s*[^\]]+\]/gi, '');
   primary = primary.replace(/\[img\s*link\s*:\s*[^\]]+\]/gi, '');
-  // Already has real image tags?
-  var hasReal = /\[img[^\]]*\][\s\S]*?\[\/img\]|!\[[^\]]*\]\([^)]+\)|<img\s/i.test(primary);
-  if (hasReal) return primary.trim();
-  // Collect images from Myanmar body
-  var imgs = [];
-  var re = /\[img((?:\s+\w+=[^\s\]]+)*)\]([\s\S]*?)\[\/img\]/gi;
-  var mm;
-  while ((mm = re.exec(fallback)) !== null) {
-    var u = (mm[2] || '').trim();
-    if (u && u.indexOf('cid:') !== 0) imgs.push('[img' + (mm[1] || '') + ']' + u + '[/img]');
-    else if (u) imgs.push('[img' + (mm[1] || '') + ']' + u + '[/img]');
+  fallback = fallback.replace(/\[Image\s*Link\s*:\s*[^\]]+\]/gi, '');
+  fallback = fallback.replace(/\[img\s*link\s*:\s*[^\]]+\]/gi, '');
+
+  // EN already has real media → do not inject
+  var hasReal = /\[img[^\]]*\][\s\S]*?\[\/img\]|\[gallery[\s\S]*?\[\/gallery\]|!\[[^\]]*\]\([^)]+\)|<img\s/i.test(primary);
+  if (hasReal) return primary.replace(/^\s+|\s+$/g, '');
+
+  var blocks = parseContentBlocks(fallback);
+  var mediaBlocks = [];
+  for (var bi = 0; bi < blocks.length; bi++) {
+    if (blocks[bi].type === 'media') mediaBlocks.push(blocks[bi].content);
   }
-  var md = fallback.match(/!\[[^\]]*\]\([^)]+\)/g);
-  if (md) imgs = imgs.concat(md);
-  if (!imgs.length) return primary.trim();
-  return (primary.trim() ? (primary.trim() + '\n\n') : '') + imgs.join('\n\n');
+  if (!mediaBlocks.length) return primary.replace(/^\s+|\s+$/g, '');
+
+  // English → ordered paragraphs
+  var enParts = primary
+    .split(/\n{2,}/)
+    .map(function (s) { return s.replace(/^\s+|\s+$/g, ''); })
+    .filter(Boolean);
+  if (!enParts.length && primary.replace(/^\s+|\s+$/g, '')) {
+    enParts = [primary.replace(/^\s+|\s+$/g, '')];
+  }
+
+  var enIdx = 0;
+  var out = [];
+  for (var i = 0; i < blocks.length; i++) {
+    var b = blocks[i];
+    if (b.type === 'media') {
+      out.push(b.content);
+      continue;
+    }
+    var isLastText = true;
+    for (var j = i + 1; j < blocks.length; j++) {
+      if (blocks[j].type === 'text') { isLastText = false; break; }
+    }
+    if (enIdx < enParts.length) {
+      if (isLastText) {
+        out.push(enParts.slice(enIdx).join('\n\n'));
+        enIdx = enParts.length;
+      } else {
+        out.push(enParts[enIdx++]);
+      }
+    }
+  }
+  if (enIdx < enParts.length) {
+    out.push(enParts.slice(enIdx).join('\n\n'));
+  }
+
+  var merged = out.join('\n\n').replace(/^\s+|\s+$/g, '');
+  // Safety: if somehow no media ended up in output, append all MM media
+  if (!/\[img[^\]]*\][\s\S]*?\[\/img\]|\[gallery[\s\S]*?\[\/gallery\]|!\[[^\]]*\]\([^)]+\)|<img\s/i.test(merged)) {
+    merged = (merged ? merged + '\n\n' : '') + mediaBlocks.join('\n\n');
+  }
+  return merged;
 }
 
 function renderStoryCards() {
@@ -2962,4 +3035,3 @@ document.addEventListener('keydown', e => {
 
 </body>
 </html>
- 
