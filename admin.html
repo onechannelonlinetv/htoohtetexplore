@@ -374,7 +374,7 @@ header.sticky {
         <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
       </div>
       <div class="fold-body space-y-2">
-        <a href="index.html" target="_blank" class="btn btn-muted block text-center text-xs py-2"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
+        <a href="index.html" class="btn btn-muted block text-center text-xs py-2" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>View Live Website</a>
         <button type="button" class="btn btn-muted text-xs w-full" onclick="forceSyncAllToFirebase()"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>ဖုန်းသို့ Sync</button>
         <button type="button" class="btn btn-muted text-xs w-full" onclick="exportSiteBackup()"><i class="fa-solid fa-download mr-1"></i>Backup Export</button>
         <label class="btn btn-muted text-xs w-full block text-center cursor-pointer"><i class="fa-solid fa-upload mr-1"></i>Backup Restore
@@ -392,7 +392,7 @@ header.sticky {
       </div>
       <div class="flex items-center gap-2">
         <button class="btn btn-muted lg:hidden" onclick="toggleMobileNav()" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
-        <a href="index.html" class="btn btn-green" title="Live Website"><i class="fa-solid fa-eye"></i><span class="hidden sm:inline ml-1">Live Website</span></a>
+        <a href="index.html" class="btn btn-green" title="Live Website" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-eye"></i><span class="hidden sm:inline ml-1">Live Website</span></a>
         <button type="button" class="btn btn-muted text-rose-300" onclick="signOutAdmin()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i><span class="hidden sm:inline ml-1">Logout</span></button>
       </div>
     </header>
@@ -414,7 +414,7 @@ header.sticky {
         <button class="navbtn" onclick="showView('about')">About</button>
         <button class="navbtn" onclick="showView('social')">Social</button>
         <button class="navbtn" onclick="showView('comments')">Comments</button>
-        <a href="index.html" class="navbtn text-center no-underline" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-eye mr-1"></i> Live Site</a>
+        <a href="index.html" class="navbtn text-center no-underline" style="display:flex;align-items:center;justify-content:center;" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-eye mr-1"></i> Live Site</a>
         <button class="navbtn text-rose-300" onclick="signOutAdmin()"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>
       </div>
     </div>
@@ -450,7 +450,7 @@ header.sticky {
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
             <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
-            <a href="index.html" target="_blank" class="btn btn-green text-xs"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Tab</a>
+            <a href="index.html" class="btn btn-green text-xs" onclick="try{sessionStorage.setItem('hh_from_admin','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Live</a>
         </div>
         <div class="flex flex-wrap gap-2 text-xs">
           <button type="button" class="btn btn-muted" onclick="showView('settings'); setTimeout(function(){var a=document.getElementById('hero-editor-anchor');if(a)a.scrollIntoView({behavior:'smooth'});},80)">✏️ Edit Hero</button>
@@ -2581,7 +2581,28 @@ async function signInAdmin() {
     }
   }
 }
+
 window.signInAdmin = signInAdmin;
+
+async function signOutAdmin() {
+  try {
+    if (adminAuth) await adminAuth.signOut();
+  } catch (e) { console.warn('signOut', e); }
+  adminUser = null;
+  remoteSyncReady = false;
+  try {
+    var loginModal = document.getElementById('login-modal');
+    var app = document.getElementById('app');
+    if (app) app.classList.add('hidden');
+    if (loginModal) loginModal.classList.remove('hidden');
+    var passEl = document.getElementById('admin-password');
+    if (passEl) passEl.value = '';
+    var errEl = document.getElementById('login-error');
+    if (errEl) errEl.textContent = '';
+  } catch (e2) {}
+}
+window.signOutAdmin = signOutAdmin;
+
 adminAuth && adminAuth.onAuthStateChanged(async function(user) {
   if (!user) {
     adminUser = null;
