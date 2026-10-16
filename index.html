@@ -2090,9 +2090,8 @@ function postLocalized(post, field) {
   return post[field] || '';
 }
 /**
- * Split content into ordered text / media blocks.
- * Media = [gallery]...[/gallery], [img]...[/img], markdown images, raw <img> tags
- * So English can reuse Myanmar image positions without re-uploading.
+ * Parse body into ordered text / media blocks (same order as written in Myanmar).
+ * Media keeps original tags: [gallery], [img], markdown image, <img>.
  */
 function parseContentBlocks(raw) {
   raw = String(raw || '');
@@ -2119,34 +2118,34 @@ function parseContentBlocks(raw) {
 }
 
 /**
- * EN content is text-only → keep MM image/gallery blocks in original order,
- * replace only the text slots with English paragraphs (in order).
- * If EN already has its own images, leave EN as-is.
- * Fallback: if structure merge yields no media, append all MM images at end.
+ * Build English article using MYANMAR layout as the skeleton:
+ * - Every [img] / [gallery] stays in the exact same position as Myanmar
+ * - Only text slots are filled with English text (split by paragraphs, in order)
+ * - If EN already has its own images, leave EN unchanged
  */
 function mergeContentImages(primary, fallback) {
   primary = String(primary || '');
   fallback = String(fallback || '');
   if (!fallback) return primary.replace(/^\s+|\s+$/g, '');
 
-  // Strip broken placeholders
   primary = primary.replace(/\[Image\s*Link\s*:\s*[^\]]+\]/gi, '');
   primary = primary.replace(/\[img\s*link\s*:\s*[^\]]+\]/gi, '');
   fallback = fallback.replace(/\[Image\s*Link\s*:\s*[^\]]+\]/gi, '');
   fallback = fallback.replace(/\[img\s*link\s*:\s*[^\]]+\]/gi, '');
 
-  // EN already has real media → do not inject
-  var hasReal = /\[img[^\]]*\][\s\S]*?\[\/img\]|\[gallery[\s\S]*?\[\/gallery\]|!\[[^\]]*\]\([^)]+\)|<img\s/i.test(primary);
-  if (hasReal) return primary.replace(/^\s+|\s+$/g, '');
+  // EN already has media → do not reshape
+  if (/\[img[^\]]*\][\s\S]*?\[\/img\]|\[gallery[\s\S]*?\[\/gallery\]|!\[[^\]]*\]\([^)]+\)|<img\s/i.test(primary)) {
+    return primary.replace(/^\s+|\s+$/g, '');
+  }
 
   var blocks = parseContentBlocks(fallback);
-  var mediaBlocks = [];
-  for (var bi = 0; bi < blocks.length; bi++) {
-    if (blocks[bi].type === 'media') mediaBlocks.push(blocks[bi].content);
+  var hasMedia = false;
+  for (var i = 0; i < blocks.length; i++) {
+    if (blocks[i].type === 'media') { hasMedia = true; break; }
   }
-  if (!mediaBlocks.length) return primary.replace(/^\s+|\s+$/g, '');
+  if (!hasMedia) return primary.replace(/^\s+|\s+$/g, '');
 
-  // English → ordered paragraphs
+  // English paragraphs in writing order
   var enParts = primary
     .split(/\n{2,}/)
     .map(function (s) { return s.replace(/^\s+|\s+$/g, ''); })
@@ -2155,37 +2154,41 @@ function mergeContentImages(primary, fallback) {
     enParts = [primary.replace(/^\s+|\s+$/g, '')];
   }
 
+  // How many text slots in Myanmar skeleton?
+  var textSlotCount = 0;
+  for (var t = 0; t < blocks.length; t++) {
+    if (blocks[t].type === 'text') textSlotCount++;
+  }
+
+  // Map EN paragraphs onto MM text slots (in order).
+  // Extra EN paragraphs go into the last text slot so image positions stay fixed.
   var enIdx = 0;
   var out = [];
-  for (var i = 0; i < blocks.length; i++) {
-    var b = blocks[i];
+  var textSeen = 0;
+  for (var bi = 0; bi < blocks.length; bi++) {
+    var b = blocks[bi];
     if (b.type === 'media') {
       out.push(b.content);
       continue;
     }
-    var isLastText = true;
-    for (var j = i + 1; j < blocks.length; j++) {
-      if (blocks[j].type === 'text') { isLastText = false; break; }
+    textSeen++;
+    var isLastText = (textSeen === textSlotCount);
+    if (enIdx >= enParts.length) {
+      // no more EN text for this slot — leave empty so layout stays tight
+      continue;
     }
-    if (enIdx < enParts.length) {
-      if (isLastText) {
-        out.push(enParts.slice(enIdx).join('\n\n'));
-        enIdx = enParts.length;
-      } else {
-        out.push(enParts[enIdx++]);
-      }
+    if (isLastText) {
+      out.push(enParts.slice(enIdx).join('\n\n'));
+      enIdx = enParts.length;
+    } else {
+      out.push(enParts[enIdx++]);
     }
   }
   if (enIdx < enParts.length) {
     out.push(enParts.slice(enIdx).join('\n\n'));
   }
 
-  var merged = out.join('\n\n').replace(/^\s+|\s+$/g, '');
-  // Safety: if somehow no media ended up in output, append all MM media
-  if (!/\[img[^\]]*\][\s\S]*?\[\/img\]|\[gallery[\s\S]*?\[\/gallery\]|!\[[^\]]*\]\([^)]+\)|<img\s/i.test(merged)) {
-    merged = (merged ? merged + '\n\n' : '') + mediaBlocks.join('\n\n');
-  }
-  return merged;
+  return out.join('\n\n').replace(/^\s+|\s+$/g, '');
 }
 
 function renderStoryCards() {
