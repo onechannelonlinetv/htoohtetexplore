@@ -391,8 +391,9 @@ header.sticky {
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
-        <button class="btn btn-muted lg:hidden" onclick="toggleMobileNav()"><i class="fa-solid fa-bars"></i></button>
-        <a href="index.html" target="_blank" class="btn btn-green"><i class="fa-solid fa-eye mr-1"></i><span class="hidden sm:inline">Live Website</span></a>
+        <button class="btn btn-muted lg:hidden" onclick="toggleMobileNav()" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+        <a href="index.html" class="btn btn-green" title="Live Website"><i class="fa-solid fa-eye"></i><span class="hidden sm:inline ml-1">Live Website</span></a>
+        <button type="button" class="btn btn-muted text-rose-300" onclick="signOutAdmin()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i><span class="hidden sm:inline ml-1">Logout</span></button>
       </div>
     </header>
 
@@ -413,6 +414,8 @@ header.sticky {
         <button class="navbtn" onclick="showView('about')">About</button>
         <button class="navbtn" onclick="showView('social')">Social</button>
         <button class="navbtn" onclick="showView('comments')">Comments</button>
+        <a href="index.html" class="navbtn text-center no-underline" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-eye mr-1"></i> Live Site</a>
+        <button class="navbtn text-rose-300" onclick="signOutAdmin()"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>
       </div>
     </div>
 
