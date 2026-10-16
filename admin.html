@@ -2083,8 +2083,8 @@ try {
     firebase.initializeApp(firebaseConfig);
   }
   adminAuth = firebase.auth();
-  // Refresh / tab close ပြီး password ပြန်တောင်း (auto-login ပိတ်)
-  try { adminAuth.setPersistence(firebase.auth.Auth.Persistence.NONE); } catch (pe) { console.warn(pe); }
+  // Tab ပိတ်မှ logout · refresh / Live ပြန်လာရင် login ကျန်
+  try { adminAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION); } catch (pe) { console.warn(pe); }
   adminDb = firebase.database();
   adminStorage = firebase.storage();
 } catch(e) {
@@ -2588,10 +2588,7 @@ window.signInAdmin = signInAdmin;
 
 async function signOutAdmin() {
   try {
-    if (adminAuth) {
-      try { await adminAuth.setPersistence(firebase.auth.Auth.Persistence.NONE); } catch (pe) {}
-      await adminAuth.signOut();
-    }
+    if (adminAuth) await adminAuth.signOut();
   } catch (e) { console.warn('signOut', e); }
   adminUser = null;
   remoteSyncReady = false;
@@ -2613,7 +2610,6 @@ async function signOutAdmin() {
 window.signOutAdmin = signOutAdmin;
 
 adminAuth && adminAuth.onAuthStateChanged(async function(user) {
-  // Auto-login ပိတ်: UI ဖွင့်တာ signInAdmin() ကပဲ လုပ်မယ်
   if (!user) {
     adminUser = null;
     remoteSyncReady = false;
@@ -2633,6 +2629,32 @@ adminAuth && adminAuth.onAuthStateChanged(async function(user) {
       return;
     }
     adminUser = user;
+    // SESSION: Live site ပြန်လာ / refresh မှာ UI ပြန်ဖွင့်
+    try {
+      var loginModal2 = document.getElementById('login-modal');
+      var app2 = document.getElementById('app');
+      if (loginModal2) loginModal2.classList.add('hidden');
+      if (app2) app2.classList.remove('hidden');
+      if (adminDb && !remoteSyncReady) {
+        try {
+          var snap = await adminDb.ref('siteData').once('value');
+          var data = snap.val();
+          if (data) {
+            Object.keys(data).forEach(function(k) {
+              if (DATA_KEYS.includes(k)) originalSetItem(k, JSON.stringify(data[k]));
+            });
+          }
+          remoteSyncReady = true;
+          if (typeof loadAll === 'function') try { loadAll(); } catch (e) {}
+          setTimeout(function(){ try { loadAll(); } catch (e) {} }, 200);
+        } catch (e) {
+          console.warn('auth restore', e);
+          remoteSyncReady = true;
+        }
+      } else if (typeof loadAll === 'function') {
+        try { loadAll(); } catch (e3) {}
+      }
+    } catch (e2) { console.warn(e2); }
   } catch (e) {
     console.warn(e);
   }
