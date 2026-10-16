@@ -2141,22 +2141,20 @@ function mergeContentImages(primary, fallback) {
   fallback = normalizeArticleContent(fallback);
   if (!fallback) return primary.replace(/^\s+|\s+$/g, '');
 
-  // Clean broken placeholders
   primary = primary.replace(/\[Image\s*Link\s*:\s*[^\]]+\]/gi, '').replace(/\[img\s*link\s*:\s*[^\]]+\]/gi, '');
   fallback = fallback.replace(/\[Image\s*Link\s*:\s*[^\]]+\]/gi, '').replace(/\[img\s*link\s*:\s*[^\]]+\]/gi, '');
 
   var blocks = parseContentBlocks(fallback);
   var mediaCount = 0;
-  var textSlotCount = 0;
+  var textSlots = []; // indices into blocks that are text
   for (var i = 0; i < blocks.length; i++) {
     if (blocks[i].type === 'media') mediaCount++;
-    else textSlotCount++;
+    else textSlots.push(i);
   }
+  var textSlotCount = textSlots.length;
 
-  // No images in Myanmar → English text only
   if (!mediaCount) return primary.replace(/^\s+|\s+$/g, '');
 
-  // EN text only (strip any accidental media)
   var enTextOnly = primary
     .replace(/\[gallery(?:\s+[^\]]*)?\][\s\S]*?\[\/gallery\]/gi, '')
     .replace(/\[img(?:\s+[^\]]*)?\][\s\S]*?\[\/img\]/gi, '')
@@ -2164,48 +2162,69 @@ function mergeContentImages(primary, fallback) {
     .replace(/<img\b[^>]*>/gi, '')
     .replace(/^\s+|\s+$/g, '');
 
-  // No EN text → show full Myanmar (text + images) so article is never empty
   if (!enTextOnly) return fallback.replace(/^\s+|\s+$/g, '');
 
-  // Split EN into paragraphs (blank lines first; then single lines if needed)
-  var enParts = enTextOnly
+  // --- Split EN into pieces, then distribute across MM text slots by weight ---
+  var enParas = enTextOnly
     .split(/\n{2,}/)
     .map(function (s) { return s.replace(/^\s+|\s+$/g, ''); })
     .filter(Boolean);
-  if (!enParts.length) enParts = [enTextOnly];
-  if (enParts.length === 1 && textSlotCount > 1) {
+  if (!enParas.length) enParas = [enTextOnly];
+
+  // If EN is one blob (or single newlines only), split on single newlines
+  if (enParas.length === 1) {
     var byLine = enTextOnly.split(/\n+/).map(function (s) { return s.replace(/^\s+|\s+$/g, ''); }).filter(Boolean);
-    if (byLine.length > 1) enParts = byLine;
+    if (byLine.length > 1) enParas = byLine;
   }
 
-  // Rebuild in exact Myanmar order: text → media → text → media …
-  // Keeps every image in the same place as the Myanmar article.
+  // MM text lengths → weights for proportional distribution
+  var mmLens = textSlots.map(function (idx) { return Math.max(1, (blocks[idx].content || '').length); });
+  var totalMm = 0;
+  for (var t = 0; t < mmLens.length; t++) totalMm += mmLens[t];
+
+  // Group EN paragraphs into exactly textSlotCount buckets (proportional to MM text size)
+  var enParts = [];
+  if (enParas.length <= textSlotCount) {
+    // fewer EN pieces than slots — one per slot, extras empty
+    for (var s = 0; s < textSlotCount; s++) {
+      enParts.push(enParas[s] || '');
+    }
+  } else {
+    // more EN pieces than slots — pack proportionally
+    var idx = 0;
+    for (var s = 0; s < textSlotCount; s++) {
+      if (s === textSlotCount - 1) {
+        enParts.push(enParas.slice(idx).join('\n\n'));
+        break;
+      }
+      var share = mmLens[s] / totalMm;
+      var nTake = Math.max(1, Math.round(share * enParas.length));
+      var remaining = enParas.length - idx;
+      var slotsLeft = textSlotCount - s;
+      // leave at least 1 para for each remaining slot
+      nTake = Math.min(nTake, remaining - (slotsLeft - 1));
+      nTake = Math.max(1, nTake);
+      enParts.push(enParas.slice(idx, idx + nTake).join('\n\n'));
+      idx += nTake;
+    }
+  }
+
+  // Rebuild in exact Myanmar order
   var enIdx = 0;
   var out = [];
-  var textSeen = 0;
   for (var bi = 0; bi < blocks.length; bi++) {
     var b = blocks[bi];
     if (b.type === 'media') {
       out.push(b.content);
       continue;
     }
-    textSeen++;
-    var isLastText = (textSeen === textSlotCount);
-    if (enIdx >= enParts.length) continue;
-    if (isLastText) {
-      out.push(enParts.slice(enIdx).join('\n\n'));
-      enIdx = enParts.length;
-    } else {
-      out.push(enParts[enIdx++]);
-    }
-  }
-  if (enIdx < enParts.length) {
-    out.push(enParts.slice(enIdx).join('\n\n'));
+    var piece = enParts[enIdx++] || '';
+    if (piece) out.push(piece);
   }
 
   var merged = out.join('\n\n').replace(/^\s+|\s+$/g, '');
 
-  // Safety: if somehow media was lost, force-interleave
+  // Safety: if media lost, force-interleave
   var mergedMedia = 0;
   try {
     var check = parseContentBlocks(merged);
@@ -2219,7 +2238,7 @@ function mergeContentImages(primary, fallback) {
     var forced = [];
     var mi = 0;
     for (var pi = 0; pi < enParts.length; pi++) {
-      forced.push(enParts[pi]);
+      if (enParts[pi]) forced.push(enParts[pi]);
       if (mi < mediaOnly.length) forced.push(mediaOnly[mi++]);
     }
     while (mi < mediaOnly.length) forced.push(mediaOnly[mi++]);
