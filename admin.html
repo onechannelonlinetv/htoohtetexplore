@@ -325,6 +325,7 @@ main > div {
           <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
           <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
           <button class="navbtn" data-view="social" onclick="showView('social',this)"><i class="fa-solid fa-share-nodes w-4"></i> Social Links</button>
+          <button class="navbtn" data-view="comments" onclick="showView('comments',this)"><i class="fa-solid fa-comments w-4"></i> Comments</button>
         </nav>
       </div>
     </div>
@@ -375,6 +376,7 @@ main > div {
         <button class="navbtn" onclick="showView('youtube')">YouTube</button>
         <button class="navbtn" onclick="showView('about')">About</button>
         <button class="navbtn" onclick="showView('social')">Social</button>
+        <button class="navbtn" onclick="showView('comments')">Comments</button>
       </div>
     </div>
 
@@ -1828,7 +1830,8 @@ main > div {
               <p id="about-prev-desc" class="mt-2 text-sm text-slate-300 leading-relaxed">Description…</p>
             </div>
           </div>
-          <div><label class="label">Title</label><input id="about-title" class="field" placeholder="About Htoo Htet" oninput="updateAboutPreview()"></div>
+          <div><label class="label">Title (မြန်မာ)</label><input id="about-title" class="field" placeholder="About Htoo Htet" oninput="updateAboutPreview()"></div>
+          <div><label class="label">Title (English)</label><input id="about-title-en" class="field" placeholder="About Htoo Htet"></div>
           <div class="grid grid-cols-2 gap-3">
             <div><label class="label">Title အရောင်</label><input id="about-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateAboutPreview()"></div>
             <div><label class="label flex justify-between">Title Size <span class="range-val" id="val-about-fs">24px</span></label>
@@ -1840,7 +1843,8 @@ main > div {
               </select>
             </div>
           </div>
-          <div><label class="label">Description</label><textarea id="about-desc" class="field min-h-28" oninput="updateAboutPreview()"></textarea></div>
+          <div><label class="label">Description (မြန်မာ)</label><textarea id="about-desc" class="field min-h-28" oninput="updateAboutPreview()"></textarea></div>
+          <div><label class="label">Description (English)</label><textarea id="about-desc-en" class="field min-h-24" placeholder="English about text..."></textarea></div>
           <div><label class="label">Description အရောင်</label><input id="about-desc-color" type="color" value="#a7f3d0" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateAboutPreview()"></div>
           <button onclick="saveAbout()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save About</button>
         </div>
@@ -1854,6 +1858,17 @@ main > div {
           </div>
           <div class="fold-body space-y-3">
 
+          <div class="rounded-xl border border-emerald-700/40 bg-emerald-950/20 p-3 mb-2">
+            <label class="label">Header မှာ ပြမယ့် Social Icon (တစ်ခုသာ)</label>
+            <select id="social-header-icon" class="field">
+              <option value="">အလိုအလျောက် (ပထမဆုံး ရှိသော)</option>
+              <option value="fb">Facebook</option>
+              <option value="yt">YouTube</option>
+              <option value="tt">TikTok</option>
+              <option value="vb">Viber</option>
+            </select>
+            <p class="tiny mt-1">Header မှာ icon တစ်ခုသာ ပြမယ် · Footer / Menu မှာ အားလုံး ပြနိုင်</p>
+          </div>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label class="toggle-row mb-1"><input type="checkbox" id="social-show-fb" checked><span class="text-sm font-semibold">Facebook ပြမယ်</span></label>
@@ -1873,6 +1888,21 @@ main > div {
             </div>
           </div>
           <button onclick="saveSocial()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Social Links</button>
+        </div>
+      </section>
+
+      <!-- COMMENTS MODERATION -->
+      <section id="view-comments" class="view space-y-3">
+        <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-base font-black text-white">Post Comments</h2>
+              <p class="tiny mt-0.5">Firebase engagement · ဖျက်ချင်တာ ဖျက်နိုင်ပါတယ်</p>
+            </div>
+            <button type="button" class="btn btn-muted text-xs" onclick="loadAdminComments()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
+          </div>
+          <p id="comments-admin-status" class="text-xs text-slate-400">Login ပြီး Refresh နှိပ်ပါ</p>
+          <div id="comments-admin-list" class="space-y-3"></div>
         </div>
       </section>
 
@@ -2511,7 +2541,7 @@ function toggleMobileNav() { $('mobile-nav').classList.toggle('hidden'); }
 const titles = {
   overview: 'Overview', pagepreview: 'Page Preview', settings: 'Brand & Hero', hero: 'Brand & Hero', menu: 'Menu Items',
   proud: 'Proud Sponsors', sponsor: 'Official Sponsor', upcoming: 'Upcoming', gallery: 'Photo Gallery', posts: 'Latest Travel', addpost: 'Add Post', postlist: 'Post List',
-  sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links'
+  sections: 'Custom Rows', youtube: 'YouTube Section', about: 'About', social: 'Social Links', comments: 'Comments'
 };
 
 function getPublicSiteUrl() {
@@ -2747,6 +2777,7 @@ function showView(name, button) {
   if (name === 'posts') { renderPostsList(); if (typeof updatePostPreview === 'function') updatePostPreview(); }
   if (name === 'postlist') { try { renderPostsList(); } catch(e){} }
   if (name === 'addpost') { fillPostCategorySelect(); if (typeof refreshPostSectionOptions === 'function') refreshPostSectionOptions(); }
+  if (name === 'comments') { try { loadAdminComments(); } catch (e) {} }
   if (name === 'menu') {
     try {
       if (typeof getMenu === 'function' && typeof defaultMenuItemsAdmin === 'function') {
@@ -2975,9 +3006,11 @@ function loadAll() {
   const ab = read('hh_about', {});
   $('about-active').checked = ab.active !== false;
   $('about-title').value = ab.title || '';
+  if ($('about-title-en')) $('about-title-en').value = ab.titleEn || '';
   if ($('about-title-color')) $('about-title-color').value = ab.titleColor || '#ffffff';
   if ($('about-title-weight')) $('about-title-weight').value = ab.titleWeight || '700';
   $('about-desc').value = ab.desc || '';
+  if ($('about-desc-en')) $('about-desc-en').value = ab.descEn || '';
   if ($('about-desc-color')) $('about-desc-color').value = ab.descColor || '#a7f3d0';
   if (typeof updateAboutPreview === 'function') updateAboutPreview();
 
@@ -2990,6 +3023,7 @@ function loadAll() {
   if ($('social-show-yt')) $('social-show-yt').checked = social.showYt !== false;
   if ($('social-show-tt')) $('social-show-tt').checked = social.showTt !== false;
   if ($('social-show-vb')) $('social-show-vb').checked = social.showVb !== false;
+  if ($('social-header-icon')) $('social-header-icon').value = social.headerIcon || '';
 
   try {
     if (typeof getMenu === 'function' && typeof defaultMenuItemsAdmin === 'function') {
@@ -4851,10 +4885,12 @@ function saveAbout() {
   write('hh_about', {
     active: $('about-active').checked,
     title: $('about-title').value.trim(),
+    titleEn: ($('about-title-en') && $('about-title-en').value || '').trim(),
     titleColor: $('about-title-color')?.value || '#ffffff',
     titleFs: parseInt($('about-title-fs')?.value || '24', 10),
     titleWeight: $('about-title-weight')?.value || '700',
     desc: $('about-desc').value.trim(),
+    descEn: ($('about-desc-en') && $('about-desc-en').value || '').trim(),
     descColor: $('about-desc-color')?.value || '#a7f3d0'
   });
   updateAboutPreview();
@@ -5237,6 +5273,90 @@ function updatePostPreview() {
   if (typeof updateContentPreview === 'function') updateContentPreview();
 }
 
+
+/* ---- Admin Comments Moderation ---- */
+async function loadAdminComments() {
+  var status = document.getElementById('comments-admin-status');
+  var list = document.getElementById('comments-admin-list');
+  if (!list) return;
+  if (!adminUser || !adminDb) {
+    if (status) status.textContent = 'Admin Login လိုအပ်သည်';
+    list.innerHTML = '<p class="text-sm text-rose-300">Login ဝင်ပြီးမှ Comments ကြည့်/ဖျက်နိုင်သည်</p>';
+    return;
+  }
+  if (status) status.textContent = 'Loading…';
+  list.innerHTML = '<p class="text-sm text-slate-400">ဖတ်နေသည်…</p>';
+  try {
+    var posts = [];
+    try { posts = JSON.parse(localStorage.getItem('hh_posts') || '[]') || []; } catch (e) { posts = []; }
+    if (!Array.isArray(posts)) posts = [];
+    var snap = await adminDb.ref('engagement').once('value');
+    var all = snap.val() || {};
+    var rows = [];
+    Object.keys(all).forEach(function(postId) {
+      var eng = all[postId] || {};
+      var comments = eng.comments || {};
+      var post = posts.find(function(p) { return String(p.id) === String(postId); });
+      var title = (post && (post.title || post.slug)) || ('Post #' + postId);
+      Object.keys(comments).forEach(function(cid) {
+        var c = comments[cid];
+        if (!c || !c.text) return;
+        rows.push({
+          postId: postId,
+          commentId: cid,
+          title: title,
+          name: c.name || 'Guest',
+          text: c.text || '',
+          at: c.at || 0
+        });
+      });
+    });
+    rows.sort(function(a, b) { return (b.at || 0) - (a.at || 0); });
+    if (status) status.textContent = rows.length ? (rows.length + ' comments') : 'Comment မရှိသေး';
+    if (!rows.length) {
+      list.innerHTML = '<p class="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">Comment မရှိသေးပါ</p>';
+      return;
+    }
+    list.innerHTML = rows.map(function(r) {
+      var when = r.at ? new Date(r.at).toLocaleString() : '';
+      var safeTitle = String(r.title || '').replace(/</g, '&lt;');
+      var safeName = String(r.name || '').replace(/</g, '&lt;');
+      var safeText = String(r.text || '').replace(/</g, '&lt;').replace(/\n/g, '<br>');
+      var pid = String(r.postId).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      var cid = String(r.commentId).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return '<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-3 sm:p-4">' +
+        '<div class="flex flex-wrap items-start justify-between gap-2">' +
+          '<div class="min-w-0 flex-1">' +
+            '<p class="text-[11px] font-bold text-emerald-400 truncate">' + safeTitle + '</p>' +
+            '<p class="text-sm font-bold text-white mt-0.5">' + safeName + '</p>' +
+            '<p class="text-sm text-slate-300 mt-1 leading-relaxed">' + safeText + '</p>' +
+            (when ? '<p class="tiny mt-1">' + when + '</p>' : '') +
+          '</div>' +
+          '<button type="button" class="btn btn-red text-xs shrink-0" onclick="deleteAdminComment(\'' + pid + '\',\'' + cid + '\')"><i class="fa-regular fa-trash-can mr-1"></i>Delete</button>' +
+        '</div></div>';
+    }).join('');
+  } catch (err) {
+    console.error(err);
+    if (status) status.textContent = 'Error';
+    list.innerHTML = '<p class="text-sm text-rose-300">မဖတ်နိုင်: ' + (err.message || err) + '</p>';
+  }
+}
+async function deleteAdminComment(postId, commentId) {
+  if (!adminUser || !adminDb) { toast('Login လိုအပ်သည်', true); return; }
+  if (!(await confirmDialog('ဒီ comment ကို ဖျက်မလား?', { title: 'Comment ဖျက်မယ်', okText: 'Delete' }))) return;
+  try {
+    await adminDb.ref('engagement/' + postId + '/comments/' + commentId).remove();
+    toast('✓ Comment ဖျက်ပြီး');
+    loadAdminComments();
+  } catch (err) {
+    console.error(err);
+    toast('ဖျက်မရ: ' + (err.message || err), true);
+  }
+}
+window.loadAdminComments = loadAdminComments;
+window.deleteAdminComment = deleteAdminComment;
+
+
 function saveSocial() {
   write('hh_social', {
     fb: $('admin-fb').value.trim(),
@@ -5246,7 +5366,8 @@ function saveSocial() {
     showFb: $('social-show-fb')?.checked !== false,
     showYt: $('social-show-yt')?.checked !== false,
     showTt: $('social-show-tt')?.checked !== false,
-    showVb: $('social-show-vb')?.checked !== false
+    showVb: $('social-show-vb')?.checked !== false,
+    headerIcon: ($('social-header-icon') && $('social-header-icon').value) || ''
   });
   toast('Social Links သိမ်းပြီးပါပြီ။');
 }
