@@ -2083,6 +2083,8 @@ try {
     firebase.initializeApp(firebaseConfig);
   }
   adminAuth = firebase.auth();
+  // Refresh / tab close ပြီး password ပြန်တောင်း (auto-login ပိတ်)
+  try { adminAuth.setPersistence(firebase.auth.Auth.Persistence.NONE); } catch (pe) { console.warn(pe); }
   adminDb = firebase.database();
   adminStorage = firebase.storage();
 } catch(e) {
@@ -2586,7 +2588,10 @@ window.signInAdmin = signInAdmin;
 
 async function signOutAdmin() {
   try {
-    if (adminAuth) await adminAuth.signOut();
+    if (adminAuth) {
+      try { await adminAuth.setPersistence(firebase.auth.Auth.Persistence.NONE); } catch (pe) {}
+      await adminAuth.signOut();
+    }
   } catch (e) { console.warn('signOut', e); }
   adminUser = null;
   remoteSyncReady = false;
@@ -2597,16 +2602,27 @@ async function signOutAdmin() {
     if (loginModal) loginModal.classList.remove('hidden');
     var passEl = document.getElementById('admin-password');
     if (passEl) passEl.value = '';
+    var emailEl = document.getElementById('admin-email');
+    // email ကို ထားခဲ့လို့ရ — password ရှင်း
     var errEl = document.getElementById('login-error');
     if (errEl) errEl.textContent = '';
+    var btn = document.getElementById('login-button');
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Login ဝင်မယ် <i class="fa-solid fa-arrow-right ml-1"></i>'; }
   } catch (e2) {}
 }
 window.signOutAdmin = signOutAdmin;
 
 adminAuth && adminAuth.onAuthStateChanged(async function(user) {
+  // Auto-login ပိတ်: UI ဖွင့်တာ signInAdmin() ကပဲ လုပ်မယ်
   if (!user) {
     adminUser = null;
     remoteSyncReady = false;
+    try {
+      var loginModal = document.getElementById('login-modal');
+      var app = document.getElementById('app');
+      if (app) app.classList.add('hidden');
+      if (loginModal) loginModal.classList.remove('hidden');
+    } catch (e0) {}
     return;
   }
   try {
@@ -2617,29 +2633,6 @@ adminAuth && adminAuth.onAuthStateChanged(async function(user) {
       return;
     }
     adminUser = user;
-    // If app already open after refresh, mark sync ready when DB available
-    if (adminDb && !remoteSyncReady) {
-      try {
-        var snap = await adminDb.ref('siteData').once('value');
-        var data = snap.val();
-        if (data) {
-          Object.keys(data).forEach(function(k) {
-            if (DATA_KEYS.includes(k)) originalSetItem(k, JSON.stringify(data[k]));
-          });
-        }
-        remoteSyncReady = true;
-        var loginModal = document.getElementById('login-modal');
-        var app = document.getElementById('app');
-        if (loginModal) loginModal.classList.add('hidden');
-        if (app) app.classList.remove('hidden');
-        if (typeof loadAll === 'function') try { loadAll(); } catch (e) {}
-        // second pass after DOM settles — hero/menu fields fill from Firebase
-        setTimeout(function(){ try { loadAll(); } catch (e) {} }, 200);
-      } catch (e) {
-        console.warn('auth restore', e);
-        remoteSyncReady = true;
-      }
-    }
   } catch (e) {
     console.warn(e);
   }
