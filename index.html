@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HTOO HTET | Travel Journal & Beyond</title>
 <meta name="description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet.">
+<meta name="hh-build" content="2026.10.19-rt1">
 <meta name="theme-color" content="#061510">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -634,6 +635,67 @@
     transition: transform .5s cubic-bezier(.25, .8, .25, 1);
     will-change: transform;
   }
+
+  /* Mobile header: clear of status bar / notch */
+  .site-header {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .header-inner-row {
+    min-height: 56px;
+    height: auto !important;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  @media (max-width: 640px) {
+    .header-inner-row {
+      min-height: 52px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      gap: 10px !important;
+    }
+    #brand-logo-wrap {
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 12px !important;
+    }
+    #brand-name {
+      font-size: 15px !important;
+      line-height: 1.25 !important;
+    }
+    #brand-tagline {
+      font-size: 9px !important;
+      margin-top: 2px;
+    }
+    .header-actions button,
+    .menu-toggle-btn {
+      min-width: 44px !important;
+      min-height: 44px !important;
+    }
+    #lang-toggle-header {
+      min-height: 44px !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+    /* section headings — breathing room under sticky header */
+    main section h2,
+    #home > section > .mb-4,
+    #home > section > div.mb-4 {
+      scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 72px);
+    }
+    #home {
+      padding-top: 0;
+    }
+    /* first content block after hero */
+    #sponsor-container,
+    #upcoming-section,
+    #photo-gallery-section,
+    #stories {
+      padding-top: 1.25rem;
+    }
+  }
+
   .site-header.is-hidden {
     transform: translateY(-100%);
     box-shadow: none;
@@ -3142,47 +3204,82 @@ let publicDb = null;
 try {
   firebase.initializeApp(firebaseConfig);
   publicDb = firebase.database();
-  function applyRemoteSiteData(data) {
+  var _lastRemoteHash = '';
+  var _remoteApplyTimer = null;
+  function applyRemoteSiteData(data, force) {
     data = data || {};
+    var changed = false;
     DATA_KEYS.forEach(function(key) {
-      // Prefer remote value; if key missing remotely, leave local cache alone
-      if (Object.prototype.hasOwnProperty.call(data, key) && data[key] != null) {
-        try { localStorage.setItem(key, JSON.stringify(data[key])); } catch (e) {}
+      if (!Object.prototype.hasOwnProperty.call(data, key) || data[key] == null) return;
+      var next = '';
+      try { next = JSON.stringify(data[key]); } catch (e) { return; }
+      var prev = null;
+      try { prev = localStorage.getItem(key); } catch (e) {}
+      if (force || prev !== next) {
+        try { localStorage.setItem(key, next); changed = true; } catch (e) {}
       }
     });
     publicFirebaseReady = true;
-    try { loadBlogData(); } catch (e) { console.error(e); }
+    if (changed || force) {
+      try { loadBlogData(); } catch (e) { console.error(e); }
+    }
+  }
+  function scheduleRemoteApply(data) {
+    clearTimeout(_remoteApplyTimer);
+    _remoteApplyTimer = setTimeout(function() {
+      applyRemoteSiteData(data || {}, false);
+    }, 80);
   }
   function refreshFromFirebase() {
     if (!publicDb) return;
     publicDb.ref('siteData').once('value').then(function(snap) {
-      applyRemoteSiteData(snap.val() || {});
+      applyRemoteSiteData(snap.val() || {}, true);
     }).catch(function(err) {
       console.error(err);
       try { loadBlogData(); } catch (e) {}
     });
   }
   publicDb.ref('siteData').on('value', function(snap) {
-    applyRemoteSiteData(snap.val() || {});
+    scheduleRemoteApply(snap.val() || {});
   }, function(err) {
     console.error(err);
     try { loadBlogData(); } catch (e) {}
   });
-  // Phone / browser: re-fetch when tab visible, page restored from bfcache, or network back
+  // Also listen per-key so partial updates never get missed on mobile
+  DATA_KEYS.forEach(function(key) {
+    try {
+      publicDb.ref('siteData/' + key).on('value', function(snap) {
+        var val = snap.val();
+        if (val == null) return;
+        try {
+          var next = JSON.stringify(val);
+          var prev = localStorage.getItem(key);
+          if (prev !== next) {
+            localStorage.setItem(key, next);
+            clearTimeout(window._hhKeyReload);
+            window._hhKeyReload = setTimeout(function() {
+              try { loadBlogData(); } catch (e) {}
+            }, 100);
+          }
+        } catch (e) {}
+      });
+    } catch (e) {}
+  });
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible') refreshFromFirebase();
   });
-  window.addEventListener('pageshow', function(ev) {
+  window.addEventListener('pageshow', function() {
     refreshFromFirebase();
   });
   window.addEventListener('online', function() {
     refreshFromFirebase();
   });
-  // Light keep-alive so mobile browsers less often suspend the websocket
+  // Mobile browsers often drop the websocket — poll while visible
   setInterval(function() {
     if (!publicDb || document.visibilityState !== 'visible') return;
     try { publicDb.ref('.info/connected').once('value'); } catch (e) {}
-  }, 60000);
+    try { refreshFromFirebase(); } catch (e) {}
+  }, 20000);
 } catch (e) { console.error(e); }
 
 /* ---- Engagement: Like / Share / Comment ---- */
