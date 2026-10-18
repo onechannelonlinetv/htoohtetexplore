@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HTOO HTET | Travel Journal & Beyond</title>
 <meta name="description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet.">
-<meta name="hh-build" content="2026.10.19-menu1">
+<meta name="hh-build" content="2026.10.19-menu-theme">
 <meta name="theme-color" content="#061510">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -867,12 +867,20 @@
   }
 
   
-  /* Menu drawer — frosted filter + safe area (notch / status bar) */
+  /* Menu drawer — follows active theme (forest / ocean / sunset / navy) + safe area */
   #site-menu {
-    background: rgba(6, 21, 16, 0.92) !important;
+    --menu-bg: color-mix(in srgb, var(--brand-bg) 92%, black);
+    --menu-link-bg: color-mix(in srgb, var(--brand-card) 80%, transparent);
+    --menu-link-border: color-mix(in srgb, var(--brand-accent) 22%, transparent);
+    --menu-link-hover: color-mix(in srgb, var(--brand-accent) 28%, transparent);
+    --menu-border: color-mix(in srgb, var(--brand-muted, #6ee7b7) 25%, transparent);
+    --menu-text: var(--brand-text, #ffffff);
+    background: var(--menu-bg) !important;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     box-shadow: -8px 0 32px rgba(0,0,0,0.45);
+    border-left-color: var(--menu-border) !important;
+    color: var(--menu-text);
     top: 0;
     height: 100%;
     height: 100dvh;
@@ -883,27 +891,107 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+  body.theme-forest #site-menu {
+    --menu-bg: rgba(6, 21, 16, 0.94);
+    --menu-link-bg: rgba(15, 46, 36, 0.55);
+    --menu-link-border: rgba(16, 185, 129, 0.18);
+    --menu-link-hover: rgba(16, 185, 129, 0.28);
+    --menu-border: rgba(16, 185, 129, 0.28);
+  }
+  body.theme-ocean #site-menu {
+    --menu-bg: rgba(8, 30, 48, 0.95);
+    --menu-link-bg: rgba(14, 40, 64, 0.65);
+    --menu-link-border: rgba(34, 211, 238, 0.22);
+    --menu-link-hover: rgba(34, 211, 238, 0.28);
+    --menu-border: rgba(34, 211, 238, 0.3);
+  }
+  body.theme-sunset #site-menu {
+    --menu-bg: rgba(28, 16, 10, 0.95);
+    --menu-link-bg: rgba(55, 28, 14, 0.6);
+    --menu-link-border: rgba(249, 115, 22, 0.22);
+    --menu-link-hover: rgba(249, 115, 22, 0.3);
+    --menu-border: rgba(249, 115, 22, 0.32);
+  }
+  body.theme-navy #site-menu {
+    --menu-bg: rgba(248, 250, 252, 0.97);
+    --menu-link-bg: rgba(241, 245, 249, 0.95);
+    --menu-link-border: rgba(148, 163, 184, 0.35);
+    --menu-link-hover: rgba(226, 232, 240, 1);
+    --menu-border: rgba(226, 232, 240, 1);
+    --menu-text: #0f172a;
+    color: #0f172a !important;
+  }
+  body.mode-light #site-menu {
+    --menu-bg: rgba(255, 255, 255, 0.97);
+    --menu-link-bg: rgba(241, 245, 249, 0.95);
+    --menu-link-border: rgba(148, 163, 184, 0.4);
+    --menu-link-hover: rgba(226, 232, 240, 1);
+    --menu-border: #e2e8f0;
+    --menu-text: #0f172a;
+    color: #0f172a !important;
+    box-shadow: -8px 0 32px rgba(15, 23, 42, 0.12);
+  }
+  body.theme-navy #site-menu .menu-link,
+  body.mode-light #site-menu .menu-link {
+    color: #0f172a !important;
+  }
+  body.theme-navy #site-menu #mobile-brand-name,
+  body.mode-light #site-menu #mobile-brand-name {
+    color: #0f172a !important;
+  }
+  body.theme-navy #site-menu #mobile-tagline,
+  body.mode-light #site-menu #mobile-tagline {
+    color: #64748b !important;
+  }
+  body.theme-navy #site-menu .menu-top-controls,
+  body.mode-light #site-menu .menu-top-controls,
+  body.theme-navy #site-menu .mt-auto,
+  body.mode-light #site-menu .mt-auto {
+    border-color: #e2e8f0 !important;
+  }
+  body.theme-navy #site-menu button[onclick="closeMenu()"],
+  body.mode-light #site-menu button[onclick="closeMenu()"] {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+  }
   #site-menu .menu-top-row {
     min-height: 44px;
     margin-bottom: 12px;
   }
   #site-menu .menu-top-controls {
     margin-bottom: 16px;
+    border-color: var(--menu-border) !important;
+  }
+  #site-menu .mt-auto {
+    border-color: var(--menu-border) !important;
   }
   #site-menu .menu-link {
     min-height: 48px;
-  }
-  #site-menu .menu-link {
-    background: rgba(15, 46, 36, 0.55);
-    border: 1px solid rgba(16, 185, 129, 0.12);
+    background: var(--menu-link-bg) !important;
+    border: 1px solid var(--menu-link-border) !important;
     margin-bottom: 4px;
+    color: inherit;
   }
-  #site-menu .menu-link:hover {
-    background: rgba(16, 185, 129, 0.22);
+  #site-menu .menu-link:hover,
+  #site-menu .menu-link:active {
+    background: var(--menu-link-hover) !important;
+  }
+  #site-menu #mode-toggle {
+    border-color: var(--menu-link-border) !important;
+  }
+  body.theme-ocean #site-menu #mode-toggle {
+    border-color: rgba(34, 211, 238, 0.35) !important;
+  }
+  body.theme-sunset #site-menu #mode-toggle {
+    border-color: rgba(249, 115, 22, 0.35) !important;
   }
   #drawer-overlay:not(.opacity-0) {
     background: rgba(0, 0, 0, 0.62) !important;
     backdrop-filter: blur(3px);
+  }
+  body.theme-navy #drawer-overlay:not(.opacity-0),
+  body.mode-light #drawer-overlay:not(.opacity-0) {
+    background: rgba(15, 23, 42, 0.45) !important;
   }
 </style>
 </head>
