@@ -417,7 +417,7 @@ header.sticky {
   <main class="min-h-screen lg:ml-64">
     <header class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#070d19]/90 px-4 py-4 backdrop-blur-xl sm:px-8">
       <div>
-        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.15-prod15</span></p>
+        <p class="tiny">HTOO HTET / ADMIN · <span class="text-emerald-400">v2026.10.19-rt1</span></p>
         <h1 id="page-title" class="mt-1 text-xl font-black sm:text-2xl">Overview</h1>
       </div>
       <div class="flex items-center gap-2">
@@ -2134,20 +2134,20 @@ const originalSetItem = localStorage.setItem.bind(localStorage);
 localStorage.setItem = function(key, value) {
   originalSetItem(key, value);
   if (remoteSyncReady && adminUser && DATA_KEYS.includes(key)) {
-    let parsed; try { parsed = JSON.parse(value); } catch { parsed = value; }
+    var parsed; try { parsed = JSON.parse(value); } catch (e) { parsed = value; }
     remoteWriteQueue = remoteWriteQueue.then(function() {
       return adminDb.ref('siteData/' + key).set(parsed);
     }).then(function() {
-      // quiet success for routine saves
+      try { adminDb.ref('siteData/_updatedAt').set(Date.now()); } catch (e) {}
     }).catch(function(err) {
       console.error(err);
       var msg = (err && err.message) || String(err);
       if (/PERMISSION_DENIED|permission/i.test(msg)) {
-        toast('Firebase Rules က ပိတ်ထားသည် — Realtime Database Rules စစ်ပါ');
+        toast('Firebase Rules က ပိတ်ထားသည် — Realtime Database Rules စစ်ပါ', true);
       } else if (/too large|size|Payload/i.test(msg)) {
-        toast('ဒေတာ ကြီးလွန်းသည် (ပုံ data URL) — ပုံအရေအတွက် လျှော့ပါ');
+        toast('ဒေတာ ကြီးလွန်းသည် (ပုံ data URL) — ပုံအရေအတွက် လျှော့ပါ', true);
       } else {
-        toast('Firebase သိမ်းမရပါ: ' + msg);
+        toast('Firebase သိမ်းမရပါ: ' + msg, true);
       }
     });
   }
