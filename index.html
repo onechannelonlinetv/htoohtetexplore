@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HTOO HTET | Travel Journal & Beyond</title>
 <meta name="description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet.">
-<meta name="hh-build" content="2026.10.19-rt1">
+<meta name="hh-build" content="2026.10.19-menu1">
 <meta name="theme-color" content="#061510">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -867,12 +867,31 @@
   }
 
   
-  /* Menu drawer — frosted filter behind items */
+  /* Menu drawer — frosted filter + safe area (notch / status bar) */
   #site-menu {
     background: rgba(6, 21, 16, 0.92) !important;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     box-shadow: -8px 0 32px rgba(0,0,0,0.45);
+    top: 0;
+    height: 100%;
+    height: 100dvh;
+    padding-top: max(16px, calc(env(safe-area-inset-top, 0px) + 12px)) !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+    padding-right: max(16px, env(safe-area-inset-right, 0px)) !important;
+    box-sizing: border-box;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #site-menu .menu-top-row {
+    min-height: 44px;
+    margin-bottom: 12px;
+  }
+  #site-menu .menu-top-controls {
+    margin-bottom: 16px;
+  }
+  #site-menu .menu-link {
+    min-height: 48px;
   }
   #site-menu .menu-link {
     background: rgba(15, 46, 36, 0.55);
@@ -937,10 +956,10 @@
 
   <!-- Drawer menu (all nav items live here) -->
   <div id="drawer-overlay" class="drawer-overlay fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
-  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out p-5 sm:p-6 flex flex-col border-l border-emerald-900/50">
-    <div class="flex items-center justify-between mb-4">
-      <div id="mobile-brand-name" class="font-black text-white text-base"></div>
-      <button type="button" onclick="closeMenu()" class="w-9 h-9 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out px-5 sm:px-6 pb-5 sm:pb-6 flex flex-col border-l border-emerald-900/50">
+    <div class="menu-top-row flex items-center justify-between gap-3">
+      <div id="mobile-brand-name" class="font-black text-white text-base leading-tight truncate pr-2"></div>
+      <button type="button" onclick="closeMenu()" class="w-11 h-11 shrink-0 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center" aria-label="Close menu"><i class="fa-solid fa-xmark text-lg"></i></button>
     </div>
     <!-- Light/Dark only (language is in header) -->
     <div class="menu-top-controls flex items-center justify-end gap-2 mb-5 pb-4 border-b border-emerald-900/40">
