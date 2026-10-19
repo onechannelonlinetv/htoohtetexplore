@@ -1122,6 +1122,14 @@ header.sticky {
           </div>
           <div class="fold-body space-y-4">
           <input type="hidden" id="admin-sponsor-edit-id" value="">
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Device layout</span>
+            <span class="text-[10px] font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-700/40" id="sp-device-badge">PC</span>
+            <button type="button" data-sp-device="pc" class="btn btn-muted text-[10px] py-1 px-2 ring-2 ring-emerald-400" onclick="setSponsorEditDevice('pc')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
+            <button type="button" data-sp-device="tablet" class="btn btn-muted text-[10px] py-1 px-2" onclick="setSponsorEditDevice('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
+            <button type="button" data-sp-device="phone" class="btn btn-muted text-[10px] py-1 px-2" onclick="setSponsorEditDevice('phone')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
+            <span class="tiny">Phone/Tablet သီးခြား အမြင့်/စာအရွယ် သိမ်းနိုင်</span>
+          </div>
 
           <!-- Live Preview · Desktop + Phone -->
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3 space-y-3">
@@ -1361,6 +1369,14 @@ header.sticky {
           </div>
           <div class="fold-body space-y-3">
 
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Device layout</span>
+            <span class="text-[10px] font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-700/40" id="up-device-badge">PC</span>
+            <button type="button" data-up-device="pc" class="btn btn-muted text-[10px] py-1 px-2 ring-2 ring-emerald-400" onclick="setUpcomingEditDevice('pc')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
+            <button type="button" data-up-device="tablet" class="btn btn-muted text-[10px] py-1 px-2" onclick="setUpcomingEditDevice('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
+            <button type="button" data-up-device="phone" class="btn btn-muted text-[10px] py-1 px-2" onclick="setUpcomingEditDevice('phone')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
+            <span class="tiny">Phone/Tablet ကို သီးခြား ချိန် · မချိန်ရင် PC ကနေ အလိုအလျောက် ချုံ့ပြမယ်</span>
+          </div>
           <label class="toggle-row"><input type="checkbox" id="up-active" checked onchange="updateUpcomingPreview()"><span class="text-sm font-semibold">Upcoming ပြမယ်</span></label>
 
           <!-- Live Preview -->
@@ -5171,7 +5187,8 @@ function saveCurrentSponsor() {
   write('hh_settings', s);
   writeSponsorList(list);
   updateSponsorPreview();
-  toast('Sponsor သိမ်းပြီးပါပြီ');
+  try { stashSponsorDeviceLayout(window._spEditDevice || 'pc'); } catch (e) {}
+  toast('Sponsor သိမ်းပြီး · ' + ((window._spEditDevice==='phone')?'Phone':(window._spEditDevice==='tablet')?'Tablet':'PC'));
 }
 function saveSponsor() { saveCurrentSponsor(); }
 
@@ -5844,6 +5861,249 @@ function initUpcomingDrag() {
   }
 }
 
+
+/* ---- Upcoming / Sponsor per-device layout editors ---- */
+window._upEditDevice = window._upEditDevice || 'pc';
+window._spEditDevice = window._spEditDevice || 'pc';
+function setUpcomingEditDevice(mode) {
+  if (mode === 'mobile') mode = 'phone';
+  if (mode !== 'pc' && mode !== 'tablet' && mode !== 'phone') mode = 'pc';
+  // stash current form into previous device
+  try { stashUpcomingDeviceLayout(window._upEditDevice || 'pc'); } catch (e) {}
+  window._upEditDevice = mode;
+  try { applyUpcomingDeviceToForm(mode); } catch (e) {}
+  try {
+    document.querySelectorAll('[data-up-device]').forEach(function(b) {
+      var on = b.getAttribute('data-up-device') === mode;
+      b.classList.toggle('ring-2', on);
+      b.classList.toggle('ring-emerald-400', on);
+    });
+    var badge = document.getElementById('up-device-badge');
+    if (badge) badge.textContent = mode === 'phone' ? 'Phone' : (mode === 'tablet' ? 'Tablet' : 'PC');
+  } catch (e) {}
+  try { if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview(); } catch (e) {}
+  // shrink live preview box for phone/tablet
+  try {
+    var box = document.getElementById('up-live-preview');
+    if (box) {
+      if (mode === 'phone') { box.style.maxWidth = '390px'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto'; }
+      else if (mode === 'tablet') { box.style.maxWidth = '768px'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto'; }
+      else { box.style.maxWidth = '100%'; box.style.marginLeft = ''; box.style.marginRight = ''; }
+    }
+  } catch (e) {}
+}
+function stashUpcomingDeviceLayout(dev) {
+  if (!dev) dev = 'pc';
+  var up = {};
+  try { up = (typeof read === 'function' ? read('hh_upcoming', {}) : JSON.parse(localStorage.getItem('hh_upcoming') || '{}')) || {}; } catch (e) { up = {}; }
+  if (!up.layout || typeof up.layout !== 'object') up.layout = {};
+  function gi(id, d) {
+    var el = document.getElementById(id);
+    if (!el) return d;
+    var n = parseInt(el.value, 10);
+    return isNaN(n) ? d : n;
+  }
+  up.layout[dev] = {
+    labelX: gi('up-label-x', 6), labelY: gi('up-label-y', 40), labelFs: gi('up-label-fs', 11),
+    titleX: gi('up-title-x', 6), titleY: gi('up-title-y', 55), titleFs: gi('up-title-fs', 22),
+    descX: gi('up-desc-x', 6), descY: gi('up-desc-y', 72), descFs: gi('up-desc-fs', 13),
+    frameH: gi('up-frame-h', 160), frameW: gi('up-frame-w', 100),
+    imgPosX: gi('up-img-x', 50), imgPosY: gi('up-img-y', 50), imgZoom: gi('up-img-zoom', 100),
+    logoX: gi('up-logo-x', 88), logoY: gi('up-logo-y', 50), logoW: gi('up-logo-w', 72), logoH: gi('up-logo-h', 72)
+  };
+  // seed phone defaults from PC if first time
+  if (dev === 'pc' && !up.layout.phone) {
+    var P = up.layout.pc;
+    up.layout.phone = {
+      labelX: P.labelX, labelY: P.labelY, labelFs: Math.max(8, Math.round((P.labelFs||11)*0.7)),
+      titleX: P.titleX, titleY: Math.min(50, P.titleY||55), titleFs: Math.max(14, Math.round((P.titleFs||22)*0.55)),
+      descX: P.descX, descY: Math.min(72, (P.descY||72)), descFs: Math.max(10, Math.round((P.descFs||13)*0.7)),
+      frameH: Math.min(160, Math.max(110, Math.round((P.frameH||160)*0.55))),
+      frameW: 100,
+      imgPosX: P.imgPosX, imgPosY: P.imgPosY, imgZoom: P.imgZoom,
+      logoX: P.logoX, logoY: P.logoY,
+      logoW: Math.max(40, Math.round((P.logoW||72)*0.55)), logoH: Math.max(40, Math.round((P.logoH||72)*0.55))
+    };
+  }
+  if (dev === 'pc' && !up.layout.tablet) {
+    var T = up.layout.pc;
+    up.layout.tablet = {
+      labelX: T.labelX, labelY: T.labelY, labelFs: Math.max(9, Math.round((T.labelFs||11)*0.85)),
+      titleX: T.titleX, titleY: T.titleY, titleFs: Math.max(16, Math.round((T.titleFs||22)*0.8)),
+      descX: T.descX, descY: T.descY, descFs: Math.max(11, Math.round((T.descFs||13)*0.85)),
+      frameH: Math.min(220, Math.max(140, Math.round((T.frameH||160)*0.78))),
+      frameW: T.frameW || 100,
+      imgPosX: T.imgPosX, imgPosY: T.imgPosY, imgZoom: T.imgZoom,
+      logoX: T.logoX, logoY: T.logoY,
+      logoW: Math.max(48, Math.round((T.logoW||72)*0.8)), logoH: Math.max(48, Math.round((T.logoH||72)*0.8))
+    };
+  }
+  if (dev === 'pc') {
+    var L = up.layout.pc;
+    ['labelX','labelY','labelFs','titleX','titleY','titleFs','descX','descY','descFs','frameH','frameW','imgPosX','imgPosY','imgZoom','logoX','logoY','logoW','logoH'].forEach(function(k) {
+      if (L[k] != null) up[k] = L[k];
+    });
+  }
+  try {
+    if (typeof write === 'function') write('hh_upcoming', up);
+    else localStorage.setItem('hh_upcoming', JSON.stringify(up));
+  } catch (e) {}
+}
+function applyUpcomingDeviceToForm(mode) {
+  var up = {};
+  try { up = (typeof read === 'function' ? read('hh_upcoming', {}) : JSON.parse(localStorage.getItem('hh_upcoming') || '{}')) || {}; } catch (e) { up = {}; }
+  var L = (up.layout && up.layout[mode]) ? up.layout[mode] : null;
+  if (!L && mode !== 'pc' && up.layout && up.layout.pc) L = up.layout.pc;
+  if (!L) L = up;
+  function set(id, v) { var el = document.getElementById(id); if (el && v != null) el.value = v; }
+  set('up-label-x', L.labelX != null ? L.labelX : 6);
+  set('up-label-y', L.labelY != null ? L.labelY : 40);
+  set('up-label-fs', L.labelFs != null ? L.labelFs : 11);
+  set('up-title-x', L.titleX != null ? L.titleX : 6);
+  set('up-title-y', L.titleY != null ? L.titleY : 55);
+  set('up-title-fs', L.titleFs != null ? L.titleFs : 22);
+  set('up-desc-x', L.descX != null ? L.descX : 6);
+  set('up-desc-y', L.descY != null ? L.descY : 72);
+  set('up-desc-fs', L.descFs != null ? L.descFs : 13);
+  set('up-frame-h', L.frameH != null ? L.frameH : 160);
+  set('up-frame-w', L.frameW != null ? L.frameW : 100);
+  set('up-img-x', L.imgPosX != null ? L.imgPosX : 50);
+  set('up-img-y', L.imgPosY != null ? L.imgPosY : 50);
+  set('up-img-zoom', L.imgZoom != null ? L.imgZoom : 100);
+  set('up-logo-x', L.logoX != null ? L.logoX : 88);
+  set('up-logo-y', L.logoY != null ? L.logoY : 50);
+  set('up-logo-w', L.logoW != null ? L.logoW : 72);
+  set('up-logo-h', L.logoH != null ? L.logoH : 72);
+  if ($('val-up-frame-h')) $('val-up-frame-h').textContent = (L.frameH || 160) + 'px';
+  if ($('val-up-frame-w')) $('val-up-frame-w').textContent = (L.frameW || 100) + '%';
+  if ($('val-up-title-fs')) $('val-up-title-fs').textContent = (L.titleFs || 22) + 'px';
+  if ($('val-up-desc-fs')) $('val-up-desc-fs').textContent = (L.descFs || 13) + 'px';
+}
+function setSponsorEditDevice(mode) {
+  if (mode === 'mobile') mode = 'phone';
+  if (mode !== 'pc' && mode !== 'tablet' && mode !== 'phone') mode = 'pc';
+  try { stashSponsorDeviceLayout(window._spEditDevice || 'pc'); } catch (e) {}
+  window._spEditDevice = mode;
+  try { applySponsorDeviceToForm(mode); } catch (e) {}
+  try {
+    document.querySelectorAll('[data-sp-device]').forEach(function(b) {
+      var on = b.getAttribute('data-sp-device') === mode;
+      b.classList.toggle('ring-2', on);
+      b.classList.toggle('ring-emerald-400', on);
+    });
+    var badge = document.getElementById('sp-device-badge');
+    if (badge) badge.textContent = mode === 'phone' ? 'Phone' : (mode === 'tablet' ? 'Tablet' : 'PC');
+  } catch (e) {}
+  try { if (typeof updateSponsorPreview === 'function') updateSponsorPreview(); } catch (e) {}
+  try {
+    var box = document.getElementById('sponsor-live-preview');
+    if (box) {
+      if (mode === 'phone') { box.style.maxWidth = '390px'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto'; }
+      else if (mode === 'tablet') { box.style.maxWidth = '768px'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto'; }
+      else { box.style.maxWidth = '100%'; }
+    }
+  } catch (e) {}
+}
+function stashSponsorDeviceLayout(dev) {
+  if (!dev) dev = 'pc';
+  var list = [];
+  try { list = (typeof getSponsorList === 'function') ? getSponsorList() : JSON.parse(localStorage.getItem('hh_sponsor') || '[]'); } catch (e) { list = []; }
+  if (!Array.isArray(list) || !list.length) return;
+  var editId = ($('admin-sponsor-edit-id') && $('admin-sponsor-edit-id').value) || '';
+  var idx = (editId !== '' && editId !== 'new') ? parseInt(editId, 10) : -1;
+  var s = (!isNaN(idx) && list[idx]) ? list[idx] : (list.find(function(x){ return x && x.active !== false; }) || list[0]);
+  if (!s) return;
+  if (!s.layout || typeof s.layout !== 'object') s.layout = {};
+  function gi(id, d) {
+    var el = document.getElementById(id);
+    if (!el) return d;
+    var n = parseInt(el.value, 10);
+    return isNaN(n) ? d : n;
+  }
+  s.layout[dev] = {
+    height: gi('admin-sponsor-height-local', 180),
+    widthPct: gi('admin-sponsor-width', 100),
+    titleFs: gi('admin-sponsor-title-fs', 22),
+    descFs: gi('admin-sponsor-desc-fs', 12),
+    badgeFs: gi('admin-sponsor-badge-fs', 10),
+    logoSize: gi('sp-logo-size', 80),
+    badgeX: gi('sp-badge-x', 0), badgeY: gi('sp-badge-y', 8),
+    titleX: gi('sp-title-x', 0), titleY: gi('sp-title-y', 32),
+    descX: gi('sp-desc-x', 0), descY: gi('sp-desc-y', 58),
+    logoX: gi('sp-logo-x', 88), logoY: gi('sp-logo-y', 40)
+  };
+  if (dev === 'pc' && !s.layout.phone) {
+    var P = s.layout.pc;
+    s.layout.phone = {
+      height: Math.min(150, Math.max(110, Math.round((P.height||180)*0.5))),
+      widthPct: 100,
+      titleFs: Math.max(14, Math.round((P.titleFs||22)*0.55)),
+      descFs: Math.max(10, Math.round((P.descFs||12)*0.7)),
+      badgeFs: Math.max(8, Math.round((P.badgeFs||10)*0.75)),
+      logoSize: Math.max(40, Math.round((P.logoSize||80)*0.55)),
+      badgeX: P.badgeX, badgeY: P.badgeY, titleX: P.titleX, titleY: P.titleY,
+      descX: P.descX, descY: P.descY, logoX: P.logoX, logoY: P.logoY
+    };
+  }
+  if (dev === 'pc' && !s.layout.tablet) {
+    var T = s.layout.pc;
+    s.layout.tablet = {
+      height: Math.min(220, Math.max(140, Math.round((T.height||180)*0.75))),
+      widthPct: T.widthPct || 100,
+      titleFs: Math.max(16, Math.round((T.titleFs||22)*0.8)),
+      descFs: Math.max(11, Math.round((T.descFs||12)*0.85)),
+      badgeFs: Math.max(9, Math.round((T.badgeFs||10)*0.9)),
+      logoSize: Math.max(48, Math.round((T.logoSize||80)*0.8)),
+      badgeX: T.badgeX, badgeY: T.badgeY, titleX: T.titleX, titleY: T.titleY,
+      descX: T.descX, descY: T.descY, logoX: T.logoX, logoY: T.logoY
+    };
+  }
+  if (dev === 'pc') {
+    var L = s.layout.pc;
+    if (L.height != null) s.height = L.height;
+    if (L.widthPct != null) s.widthPct = L.widthPct;
+    if (L.titleFs != null) s.titleFs = L.titleFs;
+    if (L.descFs != null) s.descFs = L.descFs;
+    if (L.logoSize != null) s.logoSize = L.logoSize;
+  }
+  try {
+    if (typeof writeSponsorList === 'function') writeSponsorList(list);
+    else if (typeof write === 'function') write('hh_sponsor', list);
+    else localStorage.setItem('hh_sponsor', JSON.stringify(list));
+  } catch (e) {}
+}
+function applySponsorDeviceToForm(mode) {
+  var list = [];
+  try { list = (typeof getSponsorList === 'function') ? getSponsorList() : JSON.parse(localStorage.getItem('hh_sponsor') || '[]'); } catch (e) { list = []; }
+  if (!Array.isArray(list) || !list.length) return;
+  var editId = ($('admin-sponsor-edit-id') && $('admin-sponsor-edit-id').value) || '';
+  var idx = (editId !== '' && editId !== 'new') ? parseInt(editId, 10) : -1;
+  var s = (!isNaN(idx) && list[idx]) ? list[idx] : (list.find(function(x){ return x && x.active !== false; }) || list[0]);
+  if (!s) return;
+  var L = (s.layout && s.layout[mode]) ? s.layout[mode] : null;
+  if (!L && mode !== 'pc' && s.layout && s.layout.pc) L = s.layout.pc;
+  if (!L) L = s;
+  function set(id, v) { var el = document.getElementById(id); if (el && v != null) el.value = v; }
+  set('admin-sponsor-height-local', L.height != null ? L.height : 180);
+  set('admin-sponsor-width', L.widthPct != null ? L.widthPct : 100);
+  set('admin-sponsor-title-fs', L.titleFs != null ? L.titleFs : 22);
+  set('admin-sponsor-desc-fs', L.descFs != null ? L.descFs : 12);
+  set('admin-sponsor-badge-fs', L.badgeFs != null ? L.badgeFs : 10);
+  set('sp-logo-size', L.logoSize != null ? L.logoSize : 80);
+  set('sp-badge-x', L.badgeX != null ? L.badgeX : 0);
+  set('sp-badge-y', L.badgeY != null ? L.badgeY : 8);
+  set('sp-title-x', L.titleX != null ? L.titleX : 0);
+  set('sp-title-y', L.titleY != null ? L.titleY : 32);
+  set('sp-desc-x', L.descX != null ? L.descX : 0);
+  set('sp-desc-y', L.descY != null ? L.descY : 58);
+  set('sp-logo-x', L.logoX != null ? L.logoX : 88);
+  set('sp-logo-y', L.logoY != null ? L.logoY : 40);
+}
+window.setUpcomingEditDevice = setUpcomingEditDevice;
+window.setSponsorEditDevice = setSponsorEditDevice;
+window.stashUpcomingDeviceLayout = stashUpcomingDeviceLayout;
+window.stashSponsorDeviceLayout = stashSponsorDeviceLayout;
+
 function saveUpcoming() {
   function gv(id, def) {
     var el = $(id);
@@ -5906,7 +6166,7 @@ function saveUpcoming() {
     };
     // Also stamp current device layout snapshot
     try {
-      var dev = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
+      var dev = window._upEditDevice || (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
       if (dev === 'mobile') dev = 'phone';
       payload.layout[dev] = {
         labelX: payload.labelX, labelY: payload.labelY, labelFs: payload.labelFs,
@@ -5916,6 +6176,10 @@ function saveUpcoming() {
         imgPosX: payload.imgPosX, imgPosY: payload.imgPosY, imgZoom: payload.imgZoom,
         logoX: payload.logoX, logoY: payload.logoY, logoW: payload.logoW, logoH: payload.logoH
       };
+      // keep seeding phone/tablet defaults when saving PC
+      if (dev === 'pc') {
+        try { stashUpcomingDeviceLayout('pc'); } catch (e2) {}
+      }
     } catch (e) {}
     write('hh_upcoming', payload);
     try { localStorage.setItem('hh_upcoming', JSON.stringify(payload)); } catch (e) {}
