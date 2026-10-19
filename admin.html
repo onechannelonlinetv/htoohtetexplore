@@ -1506,7 +1506,7 @@ header.sticky {
             </div>
           </div>
 
-          <button onclick="saveUpcoming()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
+          <button onclick="saveUpcoming()" title="လက်ရှိ device layout သီးသန့် သိမ်းမယ်" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Upcoming</button>
         </div>
       </section>
 
@@ -5608,37 +5608,34 @@ function updateUpcomingPreview() {
     var wLabel = (dev === 'phone') ? 'Phone 390px' : (dev === 'tablet' ? 'Tablet 768px' : (fw + '%'));
     $('up-preview-dims').textContent = wLabel + ' × ' + fh + 'px · ' + (dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC'));
   }
+  // Phone chrome bar
+  var chromeBar = $('up-chrome-bar');
+  var chromeLabel = $('up-device-frame-label');
+  if (!chromeBar && shell) {
+    chromeBar = document.createElement('div');
+    chromeBar.id = 'up-chrome-bar';
+    chromeBar.innerHTML = '<div style="height:22px;display:flex;align-items:center;justify-content:center;background:#0f172a;border-bottom:1px solid #1e293b;"><div style="width:72px;height:10px;border-radius:999px;background:#1e293b;"></div></div>';
+    shell.insertBefore(chromeBar, shell.firstChild);
+  }
+  if (!chromeLabel && shell) {
+    chromeLabel = document.createElement('div');
+    chromeLabel.id = 'up-device-frame-label';
+    chromeLabel.style.cssText = 'text-align:center;font-size:10px;font-weight:700;letter-spacing:.06em;color:#94a3b8;margin-bottom:6px;';
+    shell.insertBefore(chromeLabel, shell.firstChild);
+  }
   if (shell) {
     if (dev === 'phone') {
-      shell.style.maxWidth = '390px';
-      shell.style.width = '100%';
-      shell.style.marginLeft = 'auto';
-      shell.style.marginRight = 'auto';
-      shell.style.borderRadius = '28px';
-      shell.style.border = '3px solid #334155';
-      shell.style.padding = '10px 8px';
-      shell.style.background = '#0f172a';
-      shell.style.boxShadow = '0 12px 40px rgba(0,0,0,.45)';
+      shell.style.cssText = 'width:100%;max-width:390px;margin:0 auto;border-radius:28px;border:3px solid #475569;padding:0;background:#0f172a;box-shadow:0 16px 48px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.05);overflow:hidden;';
+      if (chromeBar) chromeBar.style.display = 'block';
+      if (chromeLabel) { chromeLabel.style.display = 'block'; chromeLabel.textContent = '📱 PHONE · 390×' + fh + ' · ဒီအတိုင်း ဖုန်းမှာ ပေါ်မယ်'; }
     } else if (dev === 'tablet') {
-      shell.style.maxWidth = '768px';
-      shell.style.width = '100%';
-      shell.style.marginLeft = 'auto';
-      shell.style.marginRight = 'auto';
-      shell.style.borderRadius = '16px';
-      shell.style.border = '2px solid #334155';
-      shell.style.padding = '8px';
-      shell.style.background = '#0f172a';
-      shell.style.boxShadow = '0 10px 32px rgba(0,0,0,.35)';
+      shell.style.cssText = 'width:100%;max-width:768px;margin:0 auto;border-radius:18px;border:2px solid #475569;padding:0;background:#0f172a;box-shadow:0 12px 36px rgba(0,0,0,.4);overflow:hidden;';
+      if (chromeBar) chromeBar.style.display = 'none';
+      if (chromeLabel) { chromeLabel.style.display = 'block'; chromeLabel.textContent = '📟 TABLET · 768×' + fh + ' · ဒီအတိုင်း တက်ဘလက်မှာ ပေါ်မယ်'; }
     } else {
-      shell.style.maxWidth = '100%';
-      shell.style.width = '100%';
-      shell.style.marginLeft = '';
-      shell.style.marginRight = '';
-      shell.style.borderRadius = '0';
-      shell.style.border = 'none';
-      shell.style.padding = '0';
-      shell.style.background = 'transparent';
-      shell.style.boxShadow = 'none';
+      shell.style.cssText = 'width:100%;max-width:100%;margin:0;border-radius:0;border:none;padding:0;background:transparent;box-shadow:none;overflow:visible;';
+      if (chromeBar) chromeBar.style.display = 'none';
+      if (chromeLabel) { chromeLabel.style.display = 'block'; chromeLabel.textContent = '🖥️ PC · ' + fw + '% × ' + fh + 'px'; }
     }
   }
   if (box) {
@@ -6189,77 +6186,125 @@ function saveUpcoming() {
     return isNaN(n) ? def : n;
   }
   try {
+    var prevUp = {};
+    try { prevUp = (typeof read === 'function' ? read('hh_upcoming', {}) : JSON.parse(localStorage.getItem('hh_upcoming') || '{}')) || {}; } catch (e) { prevUp = {}; }
+    if (!prevUp || typeof prevUp !== 'object') prevUp = {};
+    if (!prevUp.layout || typeof prevUp.layout !== 'object') prevUp.layout = {};
+
     var _upImg = (typeof imageFieldValue === 'function' ? imageFieldValue('up-image') : gv('up-image', ''));
     var _upLogo = (typeof imageFieldValue === 'function' ? imageFieldValue('up-logo') : gv('up-logo', ''));
     var _upTitle = gv('up-title', '');
     var _upActive = $('up-active') ? !!$('up-active').checked : true;
-    if (_upImg || _upTitle || gv('up-desc', '')) _upActive = true;
-    var prevUp = {};
-    try { prevUp = (typeof read === 'function' ? read('hh_upcoming', {}) : JSON.parse(localStorage.getItem('hh_upcoming') || '{}')) || {}; } catch (e) { prevUp = {}; }
-    var _titleFinal = _upTitle || gv('up-heading', '') || (prevUp.title || '');
-    if (!_titleFinal && _upImg) _titleFinal = 'Upcoming';
-    if (_upImg || _titleFinal || gv('up-desc', '') || gv('up-label', '')) _upActive = true;
+    if (!_upTitle) _upTitle = gv('up-heading', '') || (prevUp.title || '');
+    if (!_upTitle && _upImg) _upTitle = 'Upcoming';
+    if (_upImg || _upTitle || gv('up-desc', '') || gv('up-label', '')) _upActive = true;
+
+    var dev = window._upEditDevice || 'pc';
+    if (dev === 'mobile') dev = 'phone';
+    if (dev !== 'pc' && dev !== 'tablet' && dev !== 'phone') dev = 'pc';
+
+    // Layout metrics from form — ONLY for current device
+    var metrics = {
+      labelX: gi('up-label-x', 6), labelY: gi('up-label-y', 40), labelFs: gi('up-label-fs', 11),
+      titleX: gi('up-title-x', 6), titleY: gi('up-title-y', 55), titleFs: gi('up-title-fs', 22),
+      descX: gi('up-desc-x', 6), descY: gi('up-desc-y', 72), descFs: gi('up-desc-fs', 13),
+      frameH: gi('up-frame-h', 160), frameW: gi('up-frame-w', 100),
+      imgPosX: gi('up-img-x', 50), imgPosY: gi('up-img-y', 50), imgZoom: gi('up-img-zoom', 100),
+      logoX: gi('up-logo-x', 88), logoY: gi('up-logo-y', 50), logoW: gi('up-logo-w', 72), logoH: gi('up-logo-h', 72)
+    };
+    if (dev === 'phone') metrics.frameW = 100;
+
+    // Preserve other devices' layouts
+    var layout = Object.assign({}, prevUp.layout);
+    layout[dev] = Object.assign({}, layout[dev] || {}, metrics);
+
+    // Seed phone/tablet from PC only if missing (first time PC save)
+    if (dev === 'pc') {
+      if (!layout.phone) {
+        layout.phone = {
+          labelX: metrics.labelX, labelY: metrics.labelY, labelFs: Math.max(8, Math.round(metrics.labelFs * 0.7)),
+          titleX: metrics.titleX, titleY: Math.min(52, metrics.titleY), titleFs: Math.max(14, Math.round(metrics.titleFs * 0.55)),
+          descX: metrics.descX, descY: metrics.descY, descFs: Math.max(10, Math.round(metrics.descFs * 0.7)),
+          frameH: Math.min(160, Math.max(110, Math.round(metrics.frameH * 0.55))),
+          frameW: 100,
+          imgPosX: metrics.imgPosX, imgPosY: metrics.imgPosY, imgZoom: metrics.imgZoom,
+          logoX: metrics.logoX, logoY: metrics.logoY,
+          logoW: Math.max(40, Math.round(metrics.logoW * 0.55)), logoH: Math.max(40, Math.round(metrics.logoH * 0.55))
+        };
+      }
+      if (!layout.tablet) {
+        layout.tablet = {
+          labelX: metrics.labelX, labelY: metrics.labelY, labelFs: Math.max(9, Math.round(metrics.labelFs * 0.85)),
+          titleX: metrics.titleX, titleY: metrics.titleY, titleFs: Math.max(16, Math.round(metrics.titleFs * 0.8)),
+          descX: metrics.descX, descY: metrics.descY, descFs: Math.max(11, Math.round(metrics.descFs * 0.85)),
+          frameH: Math.min(220, Math.max(140, Math.round(metrics.frameH * 0.78))),
+          frameW: metrics.frameW,
+          imgPosX: metrics.imgPosX, imgPosY: metrics.imgPosY, imgZoom: metrics.imgZoom,
+          logoX: metrics.logoX, logoY: metrics.logoY,
+          logoW: Math.max(48, Math.round(metrics.logoW * 0.8)), logoH: Math.max(48, Math.round(metrics.logoH * 0.8))
+        };
+      }
+    }
+
+    // Base payload: content always shared; TOP-LEVEL metrics = PC only (never overwrite PC with phone values)
+    var pcMetrics = (dev === 'pc') ? metrics : (layout.pc || {
+      labelX: prevUp.labelX != null ? prevUp.labelX : 6,
+      labelY: prevUp.labelY != null ? prevUp.labelY : 40,
+      labelFs: prevUp.labelFs != null ? prevUp.labelFs : 11,
+      titleX: prevUp.titleX != null ? prevUp.titleX : 6,
+      titleY: prevUp.titleY != null ? prevUp.titleY : 55,
+      titleFs: prevUp.titleFs != null ? prevUp.titleFs : 22,
+      descX: prevUp.descX != null ? prevUp.descX : 6,
+      descY: prevUp.descY != null ? prevUp.descY : 72,
+      descFs: prevUp.descFs != null ? prevUp.descFs : 13,
+      frameH: prevUp.frameH != null ? prevUp.frameH : 160,
+      frameW: prevUp.frameW != null ? prevUp.frameW : 100,
+      imgPosX: prevUp.imgPosX != null ? prevUp.imgPosX : 50,
+      imgPosY: prevUp.imgPosY != null ? prevUp.imgPosY : 50,
+      imgZoom: prevUp.imgZoom != null ? prevUp.imgZoom : 100,
+      logoX: prevUp.logoX != null ? prevUp.logoX : 88,
+      logoY: prevUp.logoY != null ? prevUp.logoY : 50,
+      logoW: prevUp.logoW != null ? prevUp.logoW : 72,
+      logoH: prevUp.logoH != null ? prevUp.logoH : 72
+    });
+    // Ensure layout.pc always exists
+    if (!layout.pc) layout.pc = Object.assign({}, pcMetrics);
+
     var payload = {
       active: _upActive,
       heading: gv('up-heading', 'Upcoming') || 'Upcoming',
       sectionTitle: gv('up-section-title', ''),
       label: gv('up-label', ''),
       labelColor: gv('up-label-color', '#f5c518'),
-      labelFs: gi('up-label-fs', 11),
       labelWeight: gv('up-label-weight', '700'),
       labelStyle: gv('up-label-style', 'normal'),
-      labelX: gi('up-label-x', 6),
-      labelY: gi('up-label-y', 40),
-      title: _titleFinal,
+      title: _upTitle,
       titleColor: gv('up-title-color', '#ffffff'),
-      titleFs: gi('up-title-fs', 22),
       titleWeight: gv('up-title-weight', '900'),
       titleStyle: gv('up-title-style', 'normal'),
-      titleX: gi('up-title-x', 6),
-      titleY: gi('up-title-y', 55),
       desc: gv('up-desc', ''),
       descColor: gv('up-desc-color', '#cccccc'),
-      descFs: gi('up-desc-fs', 13),
       descWeight: gv('up-desc-weight', '400'),
       descStyle: gv('up-desc-style', 'normal'),
-      descX: gi('up-desc-x', 6),
-      descY: gi('up-desc-y', 72),
-      frameH: gi('up-frame-h', 160),
-      frameW: gi('up-frame-w', 100),
       overlayOpacity: gi('up-overlay', 55),
       image: _upImg || prevUp.image || '',
-      imgPosX: gi('up-img-x', 50),
-      imgPosY: gi('up-img-y', 50),
-      imgZoom: gi('up-img-zoom', 100),
       logo: _upLogo || prevUp.logo || '',
-      logoX: gi('up-logo-x', 88),
-      logoY: gi('up-logo-y', 50),
-      logoW: gi('up-logo-w', 72),
-      logoH: gi('up-logo-h', 72),
-      layout: (prevUp.layout && typeof prevUp.layout === 'object') ? prevUp.layout : {}
+      // TOP-LEVEL metrics stay PC (so other devices never inherit phone sizes)
+      labelX: pcMetrics.labelX, labelY: pcMetrics.labelY, labelFs: pcMetrics.labelFs,
+      titleX: pcMetrics.titleX, titleY: pcMetrics.titleY, titleFs: pcMetrics.titleFs,
+      descX: pcMetrics.descX, descY: pcMetrics.descY, descFs: pcMetrics.descFs,
+      frameH: pcMetrics.frameH, frameW: pcMetrics.frameW,
+      imgPosX: pcMetrics.imgPosX, imgPosY: pcMetrics.imgPosY, imgZoom: pcMetrics.imgZoom,
+      logoX: pcMetrics.logoX, logoY: pcMetrics.logoY, logoW: pcMetrics.logoW, logoH: pcMetrics.logoH,
+      layout: layout
     };
-    // Also stamp current device layout snapshot
-    try {
-      var dev = window._upEditDevice || (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
-      if (dev === 'mobile') dev = 'phone';
-      payload.layout[dev] = {
-        labelX: payload.labelX, labelY: payload.labelY, labelFs: payload.labelFs,
-        titleX: payload.titleX, titleY: payload.titleY, titleFs: payload.titleFs,
-        descX: payload.descX, descY: payload.descY, descFs: payload.descFs,
-        frameH: payload.frameH, frameW: payload.frameW,
-        imgPosX: payload.imgPosX, imgPosY: payload.imgPosY, imgZoom: payload.imgZoom,
-        logoX: payload.logoX, logoY: payload.logoY, logoW: payload.logoW, logoH: payload.logoH
-      };
-      // keep seeding phone/tablet defaults when saving PC
-      if (dev === 'pc') {
-        try { stashUpcomingDeviceLayout('pc'); } catch (e2) {}
-      }
-    } catch (e) {}
+
     write('hh_upcoming', payload);
     try { localStorage.setItem('hh_upcoming', JSON.stringify(payload)); } catch (e) {}
     if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
     if (typeof renderUpcomingSavedCard === 'function') renderUpcomingSavedCard();
-    toast(_upImg ? 'Upcoming သိမ်းပြီး (ပုံပါ)' : 'Upcoming သိမ်းပြီးပါပြီ');
+    var dLabel = dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC');
+    toast('Upcoming သိမ်းပြီး · ' + dLabel + ' layout သီးသန့်');
   } catch (err) {
     console.error(err);
     toast('Upcoming save မရ: ' + (err.message || err));
@@ -6313,6 +6358,12 @@ function loadUpcomingForm() {
       var t = (up.title || up.heading || '').trim();
       $('upcoming-editor-title').textContent = t ? ('တည်းဖြတ် · ' + t) : 'Upcoming တည်းဖြတ်';
     }
+    // Apply metrics for active device so form matches isolated layout
+    try {
+      var _dev = window._upEditDevice || 'pc';
+      if (typeof applyUpcomingDeviceToForm === 'function') applyUpcomingDeviceToForm(_dev);
+    } catch (e2) {}
+    try { if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview(); } catch (e3) {}
   } catch (e) { console.warn('loadUpcomingForm', e); }
 }
 
