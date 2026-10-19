@@ -3574,8 +3574,14 @@ function closeArticle() {
   try {
     if (location.hash.indexOf('#article') === 0) history.pushState(null, '', location.pathname + location.search);
   } catch (e) {}
-  const stories = $('stories');
-  if (stories) stories.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Always return to main home top (not stories row)
+  try {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    var hero = document.getElementById('hero-section') || document.getElementById('home');
+    if (hero) hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    try { window.scrollTo(0, 0); } catch (e2) {}
+  }
 }
 
 function renderExtraHomeSections() {
@@ -3610,16 +3616,16 @@ function renderExtraHomeSections() {
       }
       var bg = sec.bannerImg || '';
       var ov = (sec.overlayOpacity != null ? sec.overlayOpacity : 50) / 100;
-      var label = sec.bannerLabel || '';
-      var title = sec.bannerTitle || sec.title || '';
-      var desc = sec.bannerDesc || '';
+      var label = (sec.bannerLabel || '').trim();
+      var title = (sec.bannerTitle || '').trim(); // never fall back to row title — only typed cover text
+      var desc = (sec.bannerDesc || '').trim();
       var href = sec.link || '';
       var inner = '<div class="relative w-full overflow-hidden rounded-2xl border border-emerald-800/40" data-sized="1" style="height:' + fh + 'px;min-height:' + fh + 'px;max-height:none;">' +
         (bg ? '<img src="' + safe(bg) + '" alt="" class="absolute inset-0 w-full h-full object-cover" loading="lazy">' : '<div class="absolute inset-0 bg-emerald-950"></div>') +
         '<div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,' + ov + '),rgba(0,0,0,' + (ov*0.35).toFixed(2) + '),transparent)"></div>' +
         '<div class="absolute inset-0 z-10 p-4 sm:p-6 flex flex-col justify-end">' +
         (label ? '<span class="text-[10px] font-bold uppercase tracking-widest accent-text mb-1" style="font-size:' + lfs + 'px;color:' + safe(sec.bannerLabelColor || '') + '">' + safe(label) + '</span>' : '') +
-        '<h3 class="font-black text-white leading-tight" style="font-size:' + tfs + 'px;color:' + safe(sec.bannerTitleColor || '#fff') + ';max-width:95%;white-space:pre-wrap">' + safe(title) + '</h3>' +
+        (title ? '<h3 class="font-black text-white leading-tight" style="font-size:' + tfs + 'px;color:' + safe(sec.bannerTitleColor || '#fff') + ';max-width:95%;white-space:pre-wrap">' + safe(title) + '</h3>' : '') +
         (desc ? '<p class="mt-1 text-white/80" style="font-size:' + dfs + 'px;color:' + safe(sec.bannerDescColor || '') + ';max-width:95%;white-space:pre-wrap">' + safe(desc) + '</p>' : '') +
         '</div></div>';
       if (href) inner = '<a href="' + safe(href) + '" class="block no-underline">' + inner + '</a>';
