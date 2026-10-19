@@ -475,14 +475,19 @@
   @media (max-width: 640px) {
     .sp-banner {
       width: 100% !important;
-      height: 160px !important;
-      min-height: 160px !important;
-      max-height: 160px !important;
       aspect-ratio: auto !important;
       border-radius: 0.75rem !important;
       transform: none !important;
       margin-left: 0 !important;
       margin-right: 0 !important;
+    }
+    .sp-banner:not([data-sized="1"]) {
+      height: 140px !important;
+      min-height: 140px !important;
+      max-height: 170px !important;
+    }
+    .sp-banner[data-sized="1"] {
+      max-height: none !important;
     }
     #sponsor-container {
       padding-left: 1rem !important;
@@ -561,9 +566,14 @@
     #upcoming-banner {
       width: 100% !important;
       max-width: 100% !important;
+    }
+    #upcoming-banner:not([data-sized="1"]) {
       height: 140px !important;
       min-height: 140px !important;
-      max-height: 160px !important;
+      max-height: 180px !important;
+    }
+    #upcoming-banner[data-sized="1"] {
+      max-height: none !important;
     }
     #proud-public-frame {
       max-height: 72px !important;
@@ -1742,6 +1752,62 @@ function getPreviewDeviceMode() {
   } catch (e) {}
   return 'pc';
 }
+
+/** Merge layout[phone|tablet|pc] onto object; scale PC sizes when device layout missing */
+function pickDeviceLayout(obj) {
+  obj = obj || {};
+  var out = Object.assign({}, obj);
+  var mode = (typeof getPreviewDeviceMode === 'function') ? getPreviewDeviceMode() : 'pc';
+  try {
+    if (obj.layout && typeof obj.layout === 'object') {
+      var L = obj.layout[mode] || (mode !== 'pc' ? obj.layout.pc : null);
+      if (L && typeof L === 'object') {
+        Object.keys(L).forEach(function(k) {
+          if (L[k] != null && L[k] !== '') out[k] = L[k];
+        });
+        out._hasDeviceLayout = !!(obj.layout[mode]);
+      }
+    }
+  } catch (e) {}
+  out._deviceMode = mode;
+  return out;
+}
+/** Scale numeric size fields when only PC layout exists */
+function scaleBannerMetrics(vals, mode) {
+  vals = vals || {};
+  if (mode === 'pc' || vals._hasDeviceLayout) return vals;
+  var factor = mode === 'phone' ? 0.52 : 0.78; // tablet
+  var fontF = mode === 'phone' ? 0.58 : 0.82;
+  function sc(n, minV, maxV) {
+    if (n == null || isNaN(Number(n))) return n;
+    var v = Math.round(Number(n) * factor);
+    if (minV != null) v = Math.max(minV, v);
+    if (maxV != null) v = Math.min(maxV, v);
+    return v;
+  }
+  function scF(n, minV, maxV) {
+    if (n == null || isNaN(Number(n))) return n;
+    var v = Math.round(Number(n) * fontF);
+    if (minV != null) v = Math.max(minV, v);
+    if (maxV != null) v = Math.min(maxV, v);
+    return v;
+  }
+  var o = Object.assign({}, vals);
+  if (o.frameH != null) o.frameH = sc(o.frameH, mode === 'phone' ? 100 : 140, mode === 'phone' ? 180 : 280);
+  if (o.height != null) o.height = sc(o.height, mode === 'phone' ? 100 : 130, mode === 'phone' ? 170 : 260);
+  if (o.titleFs != null) o.titleFs = scF(o.titleFs, 12, mode === 'phone' ? 20 : 28);
+  if (o.descFs != null) o.descFs = scF(o.descFs, 10, mode === 'phone' ? 14 : 18);
+  if (o.labelFs != null) o.labelFs = scF(o.labelFs, 8, mode === 'phone' ? 12 : 14);
+  if (o.badgeFs != null) o.badgeFs = scF(o.badgeFs, 8, mode === 'phone' ? 12 : 14);
+  if (o.logoSize != null) o.logoSize = sc(o.logoSize, 36, mode === 'phone' ? 64 : 90);
+  if (o.logoW != null) o.logoW = sc(o.logoW, 36, mode === 'phone' ? 64 : 90);
+  if (o.logoH != null) o.logoH = sc(o.logoH, 36, mode === 'phone' ? 64 : 90);
+  // phone always full width
+  if (mode === 'phone' && o.frameW != null) o.frameW = 100;
+  if (mode === 'phone' && o.widthPct != null) o.widthPct = 100;
+  return o;
+}
+
 let currentLang = localStorage.getItem('hh_lang') || 'mm';
 
 function t(key) {
@@ -2481,9 +2547,16 @@ function loadBlogData() {
       if (headWrap) headWrap.classList.remove('hidden');
     } catch (e) {}
     if (listBox) {
+      var _spMode = (typeof getPreviewDeviceMode === 'function') ? getPreviewDeviceMode() : 'pc';
       listBox.innerHTML = sponsors.map(function(sponsor) {
-        const h = Math.max(120, Number(sponsor.height) || Number(siteSettings.sponsorHeight) || 180);
+        var sp = (typeof pickDeviceLayout === 'function') ? pickDeviceLayout(sponsor) : Object.assign({}, sponsor);
+        sp = (typeof scaleBannerMetrics === 'function') ? scaleBannerMetrics(sp, _spMode) : sp;
+        // copy scaled metrics back for style builders
+        sponsor = Object.assign({}, sponsor, sp);
+        var _baseH = Number(sponsor.height) || Number(siteSettings.sponsorHeight) || 180;
+        const h = Math.max(_spMode === 'phone' ? 100 : 120, _baseH);
         let wPct = sponsor.widthPct != null ? Number(sponsor.widthPct) : 100;
+        if (_spMode === 'phone') wPct = 100;
         if (!wPct || wPct < 40) wPct = 100;
         if (wPct > 100) wPct = 100;
         const shape = sponsor.shape || 'rounded';
@@ -2505,7 +2578,7 @@ function loadBlogData() {
         ].filter(Boolean).join(';');
         const titleStyle = [
           sponsor.titleColor ? 'color:' + sponsor.titleColor : '',
-          sponsor.titleFs ? 'font-size:clamp(1rem, 3.2vw, ' + sponsor.titleFs + 'px)' : '',
+          sponsor.titleFs ? 'font-size:' + sponsor.titleFs + 'px' : '',
           sponsor.titleWeight ? 'font-weight:' + sponsor.titleWeight : '',
           'left:' + (sponsor.titleX != null ? sponsor.titleX : 4) + '%',
           'top:' + (sponsor.titleY != null ? sponsor.titleY : 38) + '%'
@@ -2530,7 +2603,7 @@ function loadBlogData() {
         const linkHtml = (sponsor.link && btnLabel)
           ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:' + btnX + '%;top:' + btnY + '%;bottom:auto">' + safe(btnLabel) + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
           : '';
-        return '<div class="sp-banner" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;border-radius:' + radiusDesktop + '">' +
+        return '<div class="sp-banner" data-sized="1" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;max-height:none;border-radius:' + radiusDesktop + '">' +
           '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
           '<div class="sp-grad"></div>' +
           (sponsor.badge ? ('<span class="sp-badge inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge) + '</span>') : '') +
@@ -2543,20 +2616,13 @@ function loadBlogData() {
   }
 
   const up = read('hh_upcoming', {});
-  // Merge device-specific layout for Upcoming (same pattern as Hero)
-  (function mergeUpDeviceLayout() {
-    try {
-      if (!up.layout || typeof up.layout !== 'object') return;
-      var _pdm = (typeof getPreviewDeviceMode === 'function') ? getPreviewDeviceMode() : 'pc';
-      var key = _pdm === 'phone' ? 'phone' : (_pdm === 'tablet' ? 'tablet' : 'pc');
-      var L = up.layout[key];
-      if (!L && key !== 'pc') L = up.layout.pc;
-      if (!L || typeof L !== 'object') return;
-      Object.keys(L).forEach(function(k) {
-        if (L[k] != null && L[k] !== '') up[k] = L[k];
-      });
-    } catch (e) {}
-  })();
+  // Device layout + auto-scale PC sizes for phone/tablet
+  var _upDev = (typeof pickDeviceLayout === 'function') ? pickDeviceLayout(up) : up;
+  _upDev = (typeof scaleBannerMetrics === 'function') ? scaleBannerMetrics(_upDev, _upDev._deviceMode || 'pc') : _upDev;
+  Object.keys(_upDev).forEach(function(k) {
+    if (k.charAt(0) === '_') return;
+    if (_upDev[k] != null && _upDev[k] !== '') up[k] = _upDev[k];
+  });
   const upSec = $('upcoming-section');
   var upHasContent = !!(up.title || up.image || up.desc || up.label || up.heading);
   if (up.active === false || !upHasContent) {
@@ -2618,8 +2684,11 @@ function loadBlogData() {
     upPos('upcoming-title', up.titleX != null ? up.titleX : 6, up.titleY != null ? up.titleY : 55);
     upPos('upcoming-desc', up.descX != null ? up.descX : 6, up.descY != null ? up.descY : 72);
     if (up.frameH) {
+      var ub = $('upcoming-banner');
+      if (ub) ub.setAttribute('data-sized', '1');
       setStyle($('upcoming-banner'), 'min-height', up.frameH + 'px');
       setStyle($('upcoming-banner'), 'height', up.frameH + 'px');
+      setStyle($('upcoming-banner'), 'max-height', 'none');
       document.documentElement.style.setProperty('--upcoming-min-h', up.frameH + 'px');
     }
     // Width % (desktop/tablet); phone CSS forces 100%
@@ -3448,32 +3517,73 @@ function renderExtraHomeSections() {
   const posts = read('hh_posts', []);
   if (!sections.length) { container.innerHTML = ''; return; }
   const imgH = siteSettings.cardImgHeight ? siteSettings.cardImgHeight + 'rem' : '11rem';
-  container.innerHTML = sections.map(section => {
-    const sectionPosts = posts.filter(p => String(p.sectionId) === String(section.id));
+  var _mode = (typeof getPreviewDeviceMode === 'function') ? getPreviewDeviceMode() : 'pc';
+  container.innerHTML = sections.map(function(section) {
+    // Banner row
+    if (section.layout === 'banner') {
+      var sec = (typeof pickDeviceLayout === 'function') ? pickDeviceLayout(section) : Object.assign({}, section);
+      sec = (typeof scaleBannerMetrics === 'function') ? scaleBannerMetrics(sec, _mode) : sec;
+      var fh = Math.max(_mode === 'phone' ? 100 : 120, Number(sec.frameH) || 220);
+      if (_mode === 'phone') fh = Math.min(fh, 180);
+      if (_mode === 'tablet') fh = Math.min(fh, 260);
+      var tfs = Number(sec.bannerTitleFs || sec.titleFs) || 24;
+      var dfs = Number(sec.bannerDescFs || sec.descFs) || 14;
+      var lfs = Number(sec.bannerLabelFs || 12);
+      if (!_mode || true) {
+        // already scaled via scaleBannerMetrics if keys match; also scale banner* keys
+        if (!_mode || (sec._hasDeviceLayout !== true && _mode !== 'pc')) {
+          var ff = _mode === 'phone' ? 0.58 : (_mode === 'tablet' ? 0.82 : 1);
+          if (!sec._hasDeviceLayout && _mode !== 'pc') {
+            tfs = Math.max(12, Math.round(tfs * ff));
+            dfs = Math.max(10, Math.round(dfs * ff));
+            lfs = Math.max(8, Math.round(lfs * ff));
+          }
+        }
+      }
+      var bg = sec.bannerImg || '';
+      var ov = (sec.overlayOpacity != null ? sec.overlayOpacity : 50) / 100;
+      var label = sec.bannerLabel || '';
+      var title = sec.bannerTitle || sec.title || '';
+      var desc = sec.bannerDesc || '';
+      var href = sec.link || '';
+      var inner = '<div class="relative w-full overflow-hidden rounded-2xl border border-emerald-800/40" data-sized="1" style="height:' + fh + 'px;min-height:' + fh + 'px;max-height:none;">' +
+        (bg ? '<img src="' + safe(bg) + '" alt="" class="absolute inset-0 w-full h-full object-cover" loading="lazy">' : '<div class="absolute inset-0 bg-emerald-950"></div>') +
+        '<div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,' + ov + '),rgba(0,0,0,' + (ov*0.35).toFixed(2) + '),transparent)"></div>' +
+        '<div class="absolute inset-0 z-10 p-4 sm:p-6 flex flex-col justify-end">' +
+        (label ? '<span class="text-[10px] font-bold uppercase tracking-widest accent-text mb-1" style="font-size:' + lfs + 'px;color:' + safe(sec.bannerLabelColor || '') + '">' + safe(label) + '</span>' : '') +
+        '<h3 class="font-black text-white leading-tight" style="font-size:' + tfs + 'px;color:' + safe(sec.bannerTitleColor || '#fff') + ';max-width:95%;white-space:pre-wrap">' + safe(title) + '</h3>' +
+        (desc ? '<p class="mt-1 text-white/80" style="font-size:' + dfs + 'px;color:' + safe(sec.bannerDescColor || '') + ';max-width:95%;white-space:pre-wrap">' + safe(desc) + '</p>' : '') +
+        '</div></div>';
+      if (href) inner = '<a href="' + safe(href) + '" class="block no-underline">' + inner + '</a>';
+      return '<section class="py-3">' +
+        (section.title ? '<div class="mb-3"><h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2"><span class="w-1 h-6 rounded-full accent-bg"></span>' + safe(section.title) + '</h2>' +
+        (section.subtitle ? '<p class="text-xs text-emerald-400/60 mt-1 ml-3">' + safe(section.subtitle) + '</p>' : '') + '</div>' : '') +
+        inner + '</section>';
+    }
+    const sectionPosts = posts.filter(function(p) { return String(p.sectionId) === String(section.id); });
     const cards = sectionPosts.length
-      ? sectionPosts.map(post => {
+      ? sectionPosts.map(function(post) {
           const idx = allStoryPosts.indexOf(post);
-          return `<button type="button" onclick="openArticle(${idx >= 0 ? idx : 0})" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">
-            <div class="relative overflow-hidden" style="height: ${imgH}">
-              <img loading="lazy" src="${safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500')}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-              <span class="absolute top-2.5 left-2.5 bg-black/75 accent-text text-[10px] font-black px-2 py-0.5 rounded-md uppercase">${safe(post.location || 'Myanmar')}</span>
-            </div>
-            <div class="p-4">
-              <h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2">${safe(post.title)}</h3>
-              <p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2">${safe(post.desc || '')}</p>
-            </div>
-          </button>`;
+          return '<button type="button" onclick="openArticle(' + (idx >= 0 ? idx : 0) + ')" class="card-hover text-left card-bg rounded-2xl overflow-hidden border border-emerald-800/40 flex flex-col group">' +
+            '<div class="relative overflow-hidden" style="height: ' + imgH + '">' +
+              '<img loading="lazy" src="' + safe(post.img || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500') + '" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">' +
+              '<span class="absolute top-2.5 left-2.5 bg-black/75 accent-text text-[10px] font-black px-2 py-0.5 rounded-md uppercase">' + safe(post.location || 'Myanmar') + '</span>' +
+            '</div>' +
+            '<div class="p-4">' +
+              '<h3 class="font-bold text-white text-[15px] leading-snug line-clamp-2">' + safe(post.title) + '</h3>' +
+              '<p class="text-xs text-emerald-400/60 mt-1.5 line-clamp-2">' + safe(post.desc || '') + '</p>' +
+            '</div></button>';
         }).join('')
       : '<div class="col-span-full rounded-xl border border-dashed border-emerald-800/40 p-6 text-sm text-emerald-500/50 text-center">ဒီ Row အတွက် Post မထည့်ရသေးပါ။</div>';
-    return `<section class="py-3">
-      <div class="mb-4">
-        <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-          <span class="w-1 h-6 rounded-full accent-bg"></span>${safe(section.title)}
-        </h2>
-        ${section.subtitle ? `<p class="text-xs text-emerald-400/60 mt-1 ml-3">${safe(section.subtitle)}</p>` : ''}
-      </div>
-      <div class="${section.layout === 'wide' ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5'}">${cards}</div>
-    </section>`;
+    return '<section class="py-3">' +
+      '<div class="mb-4">' +
+        '<h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">' +
+          '<span class="w-1 h-6 rounded-full accent-bg"></span>' + safe(section.title) +
+        '</h2>' +
+        (section.subtitle ? '<p class="text-xs text-emerald-400/60 mt-1 ml-3">' + safe(section.subtitle) + '</p>' : '') +
+      '</div>' +
+      '<div class="' + (section.layout === 'wide' ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5') + '">' + cards + '</div>' +
+    '</section>';
   }).join('');
 }
 
