@@ -1002,6 +1002,51 @@
   body.mode-light #drawer-overlay:not(.opacity-0) {
     background: rgba(15, 23, 42, 0.45) !important;
   }
+
+  /* PC/Tablet: no forced line-clamp on hero / upcoming / banners — full text */
+  @media (min-width: 641px) {
+    #hero-section #hero-title,
+    #hero-section #hero-desc,
+    #hero-section #hero-label,
+    #hero-section #hero-sign {
+      -webkit-line-clamp: unset !important;
+      display: block !important;
+      overflow: visible !important;
+      white-space: pre-wrap !important;
+      max-width: 95% !important;
+      word-break: break-word;
+    }
+    #upcoming-title,
+    #upcoming-desc,
+    #upcoming-label {
+      -webkit-line-clamp: unset !important;
+      display: block !important;
+      overflow: visible !important;
+      white-space: pre-wrap !important;
+      max-width: 95% !important;
+      word-break: break-word;
+    }
+    .sp-banner .sp-title,
+    .sp-banner .sp-desc,
+    .sp-banner .sp-badge {
+      -webkit-line-clamp: unset !important;
+      display: block !important;
+      overflow: visible !important;
+      white-space: pre-wrap !important;
+      max-width: 92% !important;
+      word-break: break-word;
+    }
+  }
+  /* Preview edit mode: allow full text + selection */
+  body.preview-device-pc #hero-desc,
+  body.preview-device-pc #hero-title,
+  body.preview-device-tablet #hero-desc,
+  body.preview-device-tablet #hero-title {
+    -webkit-line-clamp: unset !important;
+    max-width: 95% !important;
+    white-space: pre-wrap !important;
+  }
+
 </style>
 </head>
 <body class="min-h-screen antialiased theme-forest mode-dark">
@@ -2124,10 +2169,14 @@ function loadBlogData() {
   // Text only when user typed — no default placeholder text
   function showHeroText(el, htmlOrText, asHtml) {
     if (!el) return;
-    var v = (htmlOrText == null ? '' : String(htmlOrText)).trim();
+    var raw = (htmlOrText == null ? '' : String(htmlOrText));
+    var v = raw.trim();
     if (!v) { el.innerHTML = ''; el.style.display = 'none'; return; }
-    if (asHtml) el.innerHTML = v; else el.textContent = v;
     el.style.display = '';
+    el.style.whiteSpace = 'pre-wrap';
+    el.style.overflow = 'visible';
+    el.style.webkitLineClamp = 'unset';
+    if (asHtml) el.innerHTML = raw; else el.textContent = raw;
   }
   showHeroText($('hero-label'), hero.label, false);
   if (hero.labelColor && $('hero-label')) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
@@ -2168,8 +2217,17 @@ function loadBlogData() {
     setStyle($('hero-title'), 'max-width', _isPhone ? '90%' : 'min(90%, 36rem)');
     setStyle($('hero-title'), 'line-height', '1.15');
   }
-  if ($('hero-label')) setStyle($('hero-label'), 'max-width', _isPhone ? '92%' : 'min(90%, 36rem)');
-  if ($('hero-desc')) setStyle($('hero-desc'), 'max-width', _isPhone ? '90%' : 'min(90%, 36rem)');
+  if ($('hero-label')) setStyle($('hero-label'), 'max-width', _isPhone ? '92%' : '95%');
+  if ($('hero-desc')) {
+    setStyle($('hero-desc'), 'max-width', _isPhone ? '90%' : '95%');
+    setStyle($('hero-desc'), 'white-space', 'pre-wrap');
+    setStyle($('hero-desc'), 'overflow', 'visible');
+    setStyle($('hero-desc'), '-webkit-line-clamp', 'unset');
+  }
+  if ($('hero-title')) {
+    setStyle($('hero-title'), 'max-width', _isPhone ? '90%' : '95%');
+    setStyle($('hero-title'), 'white-space', 'pre-wrap');
+  }
   showHeroText($('hero-desc'), hero.desc, false);
   if (hero.descColor) setStyle($('hero-desc'), 'color', hero.descColor);
   if (hero.descFs) {
@@ -2485,8 +2543,23 @@ function loadBlogData() {
   }
 
   const up = read('hh_upcoming', {});
+  // Merge device-specific layout for Upcoming (same pattern as Hero)
+  (function mergeUpDeviceLayout() {
+    try {
+      if (!up.layout || typeof up.layout !== 'object') return;
+      var _pdm = (typeof getPreviewDeviceMode === 'function') ? getPreviewDeviceMode() : 'pc';
+      var key = _pdm === 'phone' ? 'phone' : (_pdm === 'tablet' ? 'tablet' : 'pc');
+      var L = up.layout[key];
+      if (!L && key !== 'pc') L = up.layout.pc;
+      if (!L || typeof L !== 'object') return;
+      Object.keys(L).forEach(function(k) {
+        if (L[k] != null && L[k] !== '') up[k] = L[k];
+      });
+    } catch (e) {}
+  })();
   const upSec = $('upcoming-section');
-  if (up.active === false || !up.title) {
+  var upHasContent = !!(up.title || up.image || up.desc || up.label || up.heading);
+  if (up.active === false || !upHasContent) {
     if (upSec) { upSec.classList.add('hidden'); upSec.style.display = 'none'; }
   } else {
     if (upSec) { upSec.classList.remove('hidden'); upSec.style.display = ''; }
@@ -2505,10 +2578,16 @@ function loadBlogData() {
     }
     function setUpText(id, text, styleFn) {
       var el = $(id); if (!el) return;
-      var t = (text || '').trim();
-      el.textContent = t;
-      el.style.display = t ? '' : 'none';
-      if (t && styleFn) styleFn(el);
+      var t = (text == null ? '' : String(text));
+      var has = !!String(t).trim();
+      el.style.display = has ? '' : 'none';
+      if (!has) { el.textContent = ''; return; }
+      el.style.whiteSpace = 'pre-wrap';
+      el.style.overflow = 'visible';
+      el.style.webkitLineClamp = 'unset';
+      el.style.maxWidth = el.style.maxWidth || '95%';
+      el.textContent = t; // pre-wrap keeps newlines / long lines
+      if (styleFn) styleFn(el);
     }
     setUpText('upcoming-label', up.label, function(el) {
       if (up.labelColor) { setStyle(el, 'color', up.labelColor); el.classList.remove('accent-text'); }
@@ -2516,8 +2595,15 @@ function loadBlogData() {
     });
     setUpText('upcoming-title', up.title, function(el) {
       if (up.titleColor) setStyle(el, 'color', up.titleColor);
-      if (up.titleFs) setStyle(el, 'font-size', 'clamp(1rem, 3.5vw, ' + up.titleFs + 'px)');
+      if (up.titleFs) {
+        var tfs = parseInt(up.titleFs, 10) || 22;
+        var _pdm2 = (typeof getPreviewDeviceMode === 'function') ? getPreviewDeviceMode() : 'pc';
+        if (_pdm2 === 'phone') setStyle(el, 'font-size', Math.min(tfs, 18) + 'px');
+        else setStyle(el, 'font-size', tfs + 'px');
+      }
       if (up.titleWeight) setStyle(el, 'font-weight', up.titleWeight);
+      if (up.titleStyle) setStyle(el, 'font-style', up.titleStyle);
+      setStyle(el, 'max-width', '95%');
     });
     setUpText('upcoming-desc', up.desc, function(el) {
       if (up.descColor) setStyle(el, 'color', up.descColor);
@@ -2542,7 +2628,39 @@ function loadBlogData() {
     setStyle($('upcoming-banner'), 'max-width', '100%');
     setStyle($('upcoming-banner'), 'margin-left', 'auto');
     setStyle($('upcoming-banner'), 'margin-right', 'auto');
-    if (up.image) $('upcoming-img').src = up.image;
+    if (up.image && (String(up.image).indexOf('http') === 0 || String(up.image).indexOf('data:image/') === 0)) {
+      if ($('upcoming-img')) $('upcoming-img').src = up.image;
+    }
+    if ($('upcoming-img')) {
+      var uix = up.imgPosX != null ? up.imgPosX : 50;
+      var uiy = up.imgPosY != null ? up.imgPosY : 50;
+      $('upcoming-img').style.objectPosition = uix + '% ' + uiy + '%';
+      if (up.imgZoom) {
+        var z = parseInt(up.imgZoom, 10) || 100;
+        $('upcoming-img').style.transform = z !== 100 ? ('scale(' + (z/100) + ')') : '';
+      }
+    }
+    // Logo on upcoming banner if present
+    var upLogoEl = $('upcoming-logo');
+    if (up.logo && (String(up.logo).indexOf('http') === 0 || String(up.logo).indexOf('data:image/') === 0)) {
+      if (!upLogoEl) {
+        upLogoEl = document.createElement('img');
+        upLogoEl.id = 'upcoming-logo';
+        upLogoEl.alt = '';
+        upLogoEl.className = 'absolute z-20 object-contain';
+        var banner = $('upcoming-banner');
+        if (banner) banner.appendChild(upLogoEl);
+      }
+      upLogoEl.src = up.logo;
+      upLogoEl.style.display = '';
+      upLogoEl.style.left = (up.logoX != null ? up.logoX : 88) + '%';
+      upLogoEl.style.top = (up.logoY != null ? up.logoY : 50) + '%';
+      upLogoEl.style.width = (up.logoW != null ? up.logoW : 72) + 'px';
+      upLogoEl.style.height = (up.logoH != null ? up.logoH : 72) + 'px';
+      upLogoEl.style.transform = 'translate(-50%, -50%)';
+    } else if (upLogoEl) {
+      upLogoEl.style.display = 'none';
+    }
   }
 
   const yt = read('hh_youtube', {});
