@@ -2085,6 +2085,21 @@ function loadBlogData() {
   if (siteSettings.footerTagline) $('footer-tagline').innerHTML = siteSettings.footerTagline.replace(/\n/g, '<br>');
 
   const hero = read('hh_hero', {});
+  // Merge device-specific layout (phone / tablet / pc) if admin saved per-device positions
+  (function mergeHeroDeviceLayout() {
+    try {
+      if (!hero.layout || typeof hero.layout !== 'object') return;
+      var isPhone = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+      var isTablet = window.matchMedia && window.matchMedia('(min-width: 641px) and (max-width: 1024px)').matches;
+      var key = isPhone ? 'phone' : (isTablet ? 'tablet' : 'pc');
+      var L = hero.layout[key];
+      if (!L && key !== 'pc') L = hero.layout.pc; // fallback
+      if (!L || typeof L !== 'object') return;
+      Object.keys(L).forEach(function(k) {
+        if (L[k] != null && L[k] !== '') hero[k] = L[k];
+      });
+    } catch (e) {}
+  })();
   if (hero.image && (String(hero.image).indexOf('http') === 0 || String(hero.image).indexOf('data:image/') === 0) && String(hero.image).indexOf('Preview') === -1) {
     $('hero-img').src = hero.image;
   }
@@ -2101,12 +2116,17 @@ function loadBlogData() {
   }
   showHeroText($('hero-label'), hero.label, false);
   if (hero.labelColor && $('hero-label')) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
-  // PC/Tablet: exact admin px (WYSIWYG with Live Preview).
-  // Phone: same layout % ; font scaled by height ratio so text stays neat in short banner.
+  // PC/Tablet: exact admin px. Phone: use layout.phone exact sizes if set; else scale.
   var _isPhone = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+  var _hasPhoneLayout = !!(hero.layout && hero.layout.phone);
   var _deskH = parseInt(hero.frameH, 10) || 480;
   var _phoneScale = Math.min(0.65, Math.max(0.42, 260 / _deskH));
   function phoneFs(adminPx, minPx, maxPx) {
+    // If admin saved a dedicated phone layout, trust the px values
+    if (_hasPhoneLayout) {
+      var exact = parseInt(adminPx, 10);
+      if (!isNaN(exact)) return Math.max(minPx, Math.min(maxPx * 2, exact));
+    }
     var n = Math.round((parseInt(adminPx, 10) || minPx) * _phoneScale);
     return Math.max(minPx, Math.min(maxPx, n));
   }
