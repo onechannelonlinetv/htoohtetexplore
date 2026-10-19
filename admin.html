@@ -1427,7 +1427,7 @@ header.sticky {
             <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none mx-auto" style="width:100%;height:160px;background:#1a1a1a;cursor:grab;">
               <span class="sp-resize-handle" data-resize="up-frame" title="Banner height" style="right:4px;bottom:4px;width:18px;height:18px;z-index:80;cursor:ns-resize;"></span>
               <div id="up-prev-overlay" class="absolute inset-0 pointer-events-none" style="z-index:1;background:linear-gradient(to top,rgba(0,0,0,.55),rgba(0,0,0,.15));"></div>
-              <div id="up-prev-logo-wrap" class="absolute z-20 border border-dashed border-sky-400/50 rounded-lg overflow-hidden bg-black/30 cursor-move hidden" style="left:88%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%);touch-action:none;">
+              <div id="up-prev-logo-wrap" class="absolute z-20 border border-dashed border-sky-400/50 rounded-lg overflow-hidden bg-black/30 cursor-move hidden" style="left:80%;top:35%;width:72px;height:72px;transform:none;touch-action:none;">
                 <img id="up-prev-logo" src="" alt="" class="w-full h-full object-contain">
                 <span class="sp-resize-handle" data-resize="up-logo" title="ဆိုဒ်"></span>
               </div>
@@ -2872,7 +2872,7 @@ function enablePreviewDrag(iframe) {
     + '.pv-drag.pv-selected{outline:2px solid #fbbf24!important;box-shadow:0 0 0 3px rgba(251,191,36,.35);}'
     + '.pv-resize{position:absolute;right:-7px;bottom:-7px;width:18px;height:18px;background:#10b981;border:2px solid #fff;border-radius:4px;cursor:nwse-resize;z-index:90;box-shadow:0 1px 4px rgba(0,0,0,.45);pointer-events:auto!important;}'
     + '.pv-img-drag{outline:2px dashed rgba(56,189,248,.9)!important;cursor:grab!important;pointer-events:auto!important;}'
-    + '.pv-img-drag:active{cursor:grabbing!important;}.sp-banner .sp-badge,.sp-banner .sp-title,.sp-banner .sp-desc,.sp-banner .sp-logo,.sp-banner .sp-link{pointer-events:auto!important;z-index:20!important;}.sp-banner .sp-bg{pointer-events:auto!important;cursor:grab!important;}#upcoming-label,#upcoming-title,#upcoming-desc,#upcoming-logo,#upcoming-img{pointer-events:auto!important;}.sp-banner{position:relative!important;}.pv-banner-resize{z-index:100!important;}'
+    + '.pv-img-drag:active{cursor:grabbing!important;}.sp-banner .sp-badge,.sp-banner .sp-title,.sp-banner .sp-desc,.sp-banner .sp-logo,.sp-banner .sp-link{pointer-events:auto!important;z-index:20!important;}.sp-banner .sp-bg{pointer-events:auto!important;cursor:grab!important;}#upcoming-label,#upcoming-title,#upcoming-desc,#upcoming-logo,#upcoming-img{pointer-events:auto!important;}.sp-banner{position:relative!important;}.pv-banner-resize{z-index:100!important;}body.preview-device-phone .sp-banner .sp-logo,body.preview-device-phone .sp-banner .sp-link,body.preview-device-phone .sp-banner .sp-title,body.preview-device-phone .sp-banner .sp-desc,body.preview-device-phone .sp-banner .sp-badge,body.preview-device-phone #upcoming-logo,body.preview-device-phone #upcoming-title,body.preview-device-phone #upcoming-desc,body.preview-device-phone #upcoming-label{pointer-events:auto!important;z-index:60!important;}body.preview-device-phone .sp-banner .sp-logo.pv-drag,body.preview-device-phone .sp-banner .sp-link.pv-drag{right:auto!important;bottom:auto!important;}'
     + '#hero-text-box{pointer-events:none!important;}'
     + '#hero-text-box .pv-drag,#hero-btn-wrap.pv-drag{pointer-events:auto!important;}'
     + '#hero-section,#upcoming-banner,.sp-banner{position:relative!important;}'
@@ -2917,12 +2917,13 @@ function enablePreviewDrag(iframe) {
         if (state.isImg) {
           var nw = Math.max(36, Math.min(1200, state.bw + (p.clientX - state.sx)));
           var nh = Math.max(36, Math.min(900, state.bh + (p.clientY - state.sy)));
-          state.el.style.width = nw + 'px';
-          state.el.style.height = nh + 'px';
-          state.el.style.maxWidth = 'none';
+          state.el.style.setProperty('width', nw + 'px', 'important');
+          state.el.style.setProperty('height', nh + 'px', 'important');
+          state.el.style.setProperty('max-width', 'none', 'important');
+          state.el.style.setProperty('max-height', 'none', 'important');
         } else {
           var dy = p.clientY - state.sy;
-          state.el.style.fontSize = Math.max(8, Math.min(120, state.fs + dy * 0.4)) + 'px';
+          state.el.style.setProperty('font-size', Math.max(8, Math.min(120, state.fs + dy * 0.4)) + 'px', 'important');
         }
         e.preventDefault();
         return;
@@ -2932,11 +2933,12 @@ function enablePreviewDrag(iframe) {
       var ny = state.oy + ((p.clientY - state.sy) / Math.max(1, pr.height)) * 100;
       nx = Math.max(0, Math.min(96, nx));
       ny = Math.max(0, Math.min(96, ny));
-      state.el.style.left = nx + '%';
-      state.el.style.top = ny + '%';
-      state.el.style.right = 'auto';
-      state.el.style.bottom = 'auto';
-      state.el.style.transform = 'none';
+      state.el.style.setProperty('left', nx + '%', 'important');
+      state.el.style.setProperty('top', ny + '%', 'important');
+      state.el.style.setProperty('right', 'auto', 'important');
+      state.el.style.setProperty('bottom', 'auto', 'important');
+      state.el.style.setProperty('transform', 'none', 'important');
+      state.el.style.setProperty('position', 'absolute', 'important');
       e.preventDefault();
     }
     function onUp() {
@@ -3020,11 +3022,12 @@ function enablePreviewDrag(iframe) {
         var pct = pctFromRect(el, parent);
         ox = pct.x; oy = pct.y;
       }
-      el.style.left = ox + '%';
-      el.style.top = oy + '%';
-      el.style.right = 'auto';
-      el.style.bottom = 'auto';
-      el.style.transform = 'none';
+      el.style.setProperty('left', ox + '%', 'important');
+      el.style.setProperty('top', oy + '%', 'important');
+      el.style.setProperty('right', 'auto', 'important');
+      el.style.setProperty('bottom', 'auto', 'important');
+      el.style.setProperty('transform', 'none', 'important');
+      el.style.setProperty('position', 'absolute', 'important');
       el.style.margin = '0';
 
       win._hhPvDrag.state = {
@@ -5825,8 +5828,10 @@ function updateSponsorPreview() {
 let _spDrag = null;
 function initSponsorDrag() {
   const box = $('sponsor-live-preview');
-  if (!box || box._spDragReady) return;
-  box._spDragReady = true;
+  if (!box) return;
+  // allow rebind when re-entering tab
+  if (box._spDragReady && box._spDragV2) return;
+  box._spDragReady = true; box._spDragV2 = true;
   function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
   const textIds = { 'sp-prev-badge': ['sp-badge-x','sp-badge-y'], 'sp-prev-title': ['sp-title-x','sp-title-y'], 'sp-prev-desc': ['sp-desc-x','sp-desc-y'] };
   const sizeMap = {
@@ -6146,7 +6151,7 @@ function updateUpcomingPreview() {
       logoWrap.style.height = lh + 'px';
       logoWrap.style.left = lox + '%';
       logoWrap.style.top = loy + '%';
-      logoWrap.style.transform = 'translate(-50%,-50%)';
+      logoWrap.style.transform = 'none';
     } else {
       logoWrap.classList.add('hidden');
     }
@@ -6357,7 +6362,7 @@ function setUpcomingEditDevice(mode) {
   // Force drag rebind after frame resize
   try {
     var box = document.getElementById('up-live-preview');
-    if (box) box._upDragV2 = false;
+    if (box) { box._upDragV2 = false; }
   } catch (e) {}
   try { if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview(); } catch (e) {}
   try { if (typeof initUpcomingDrag === 'function') initUpcomingDrag(); } catch (e) {}
@@ -6472,9 +6477,10 @@ function setSponsorEditDevice(mode) {
   } catch (e) {}
   try {
     var box = document.getElementById('sponsor-live-preview');
-    if (box) box._spDragReady = false;
+    if (box) { box._spDragReady = false; box._spDragV2 = false; }
   } catch (e) {}
   try { if (typeof updateSponsorPreview === 'function') updateSponsorPreview(); } catch (e) {}
+  try { if (typeof initSponsorDrag === 'function') setTimeout(initSponsorDrag, 100); } catch (e) {}
   try {
     var shell = document.getElementById('sp-device-shell');
     if (shell) shell.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
