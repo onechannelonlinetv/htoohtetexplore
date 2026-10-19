@@ -2801,7 +2801,7 @@ function loadBlogData() {
       upLogoEl.style.top = (up.logoY != null ? up.logoY : 50) + '%';
       upLogoEl.style.width = (up.logoW != null ? up.logoW : 72) + 'px';
       upLogoEl.style.height = (up.logoH != null ? up.logoH : 72) + 'px';
-      upLogoEl.style.transform = 'translate(-50%, -50%)';
+      upLogoEl.style.transform = 'none'; // top-left % for editor compatibility
     } else if (upLogoEl) {
       upLogoEl.style.display = 'none';
     }
@@ -4215,4 +4215,3 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
- 
