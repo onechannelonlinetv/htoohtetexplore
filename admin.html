@@ -1437,7 +1437,7 @@ header.sticky {
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Label</p>
             <div class="form-row form-row-typo w-full">
-              <div><label class="label">စာသား</label><input id="up-label" class="field" placeholder="Featured Journey" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label">စာသား</label><input id="up-label" class="field" placeholder="Label (optional)" oninput="updateUpcomingPreview()"></div>
               <div><label class="label">Color</label><input id="up-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()"></div>
               <div><label class="label flex justify-between">Size <span id="val-up-label-fs" class="range-val">11px</span></label>
                 <input type="range" id="up-label-fs" min="8" max="40" value="11" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()"></div>
@@ -1450,7 +1450,7 @@ header.sticky {
           <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
             <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Title</p>
             <div class="form-row form-row-typo w-full">
-              <div><label class="label">စာသား *</label><input id="up-title" class="field" placeholder="Roads of Ayeyarwaddy" oninput="updateUpcomingPreview()"></div>
+              <div><label class="label">စာသား *</label><input id="up-title" class="field" placeholder="Title" oninput="updateUpcomingPreview()"></div>
               <div><label class="label">Color</label><input id="up-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateUpcomingPreview()"></div>
               <div><label class="label flex justify-between">Size <span id="val-up-title-fs" class="range-val">22px</span></label>
                 <input type="range" id="up-title-fs" min="12" max="80" value="22" class="w-full accent-emerald-500" oninput="updateUpcomingPreview()"></div>
@@ -3203,7 +3203,7 @@ function applyDeviceLayoutToForm(mode) {
   setTimeout(function() {
     try {
       var box = document.getElementById('hero-live-preview');
-      if (box) box._heroLineDragV3 = false; // allow rebind
+      if (box) box._heroLineDragV4 = false;
       initHeroLineDrag();
     } catch (e) {}
   }, 50);
@@ -3749,9 +3749,9 @@ function setHeroFrameAlign(align) {
 function setHeroPrevText(el, text, resizeKey) {
   if (!el) return;
   let handle = el.querySelector('.sp-resize-handle');
-  // keep only handle, replace text via first text nodes / clear and rebuild
   while (el.firstChild) el.removeChild(el.firstChild);
-  const parts = String(text || '').split('\n');
+  const raw = String(text == null ? '' : text);
+  const parts = raw.split('\n');
   parts.forEach(function(line, i) {
     if (i) el.appendChild(document.createElement('br'));
     el.appendChild(document.createTextNode(line));
@@ -3759,10 +3759,14 @@ function setHeroPrevText(el, text, resizeKey) {
   if (!handle) {
     handle = document.createElement('span');
     handle.className = 'sp-resize-handle';
-    handle.setAttribute('data-resize', resizeKey);
+    handle.setAttribute('data-resize', resizeKey || '');
     handle.title = 'ဆိုဒ်';
   }
+  handle.style.pointerEvents = 'auto';
+  handle.style.zIndex = '80';
   el.appendChild(handle);
+  var has = raw.replace(/^\s+|\s+$/g, '').length > 0;
+  el.style.display = has ? '' : 'none';
 }
 
 function updateHeroPreview() {
@@ -3989,10 +3993,10 @@ function initHeroLineDrag() {
   if (!box) return;
 
   const map = {
-    'hero-prev-label': { xi: 'hero-label-x', yi: 'hero-label-y', vx: 'val-hlx', vy: 'val-hly' },
-    'hero-prev-title': { xi: 'hero-title-x', yi: 'hero-title-y', vx: 'val-htx', vy: 'val-hty' },
-    'hero-prev-desc':  { xi: 'hero-desc-x',  yi: 'hero-desc-y',  vx: 'val-hdx', vy: 'val-hdy' },
-    'hero-prev-sign':  { xi: 'hero-sign-x',  yi: 'hero-sign-y',  vx: 'val-hsx', vy: 'val-hsy' }
+    'hero-prev-label': { xi: 'hero-label-x', yi: 'hero-label-y', vx: 'val-hlx', vy: 'val-hly', input: 'hero-label', multiline: false },
+    'hero-prev-title': { xi: 'hero-title-x', yi: 'hero-title-y', vx: 'val-htx', vy: 'val-hty', input: 'hero-title', multiline: true },
+    'hero-prev-desc':  { xi: 'hero-desc-x',  yi: 'hero-desc-y',  vx: 'val-hdx', vy: 'val-hdy', input: 'hero-desc', multiline: true },
+    'hero-prev-sign':  { xi: 'hero-sign-x',  yi: 'hero-sign-y',  vx: 'val-hsx', vy: 'val-hsy', input: 'hero-sign', multiline: false }
   };
   const sizeMap = {
     'hero-label': { input: 'hero-label-fs', min: 8, max: 72 },
@@ -4002,27 +4006,187 @@ function initHeroLineDrag() {
     'hero-frame': { input: 'hero-frame-h', min: 80, max: 900, frame: true }
   };
 
-  // Always refresh styles so layers stay clickable
   Object.keys(map).forEach(function(id) {
     const el = $(id);
     if (!el) return;
     el.style.cursor = 'grab';
-    el.style.userSelect = 'none';
-    el.style.webkitUserSelect = 'none';
     el.style.touchAction = 'none';
     el.style.zIndex = '50';
     el.style.pointerEvents = 'auto';
     el.style.position = 'absolute';
+    el.style.minWidth = '24px';
+    el.style.minHeight = '1em';
+    // allow select when editing
+    if (!el._hhEditBound) {
+      el._hhEditBound = true;
+      el.addEventListener('dblclick', function(ev) {
+        if (ev.target && ev.target.classList && ev.target.classList.contains('sp-resize-handle')) return;
+        startInlineEdit(el, map[id]);
+        ev.preventDefault();
+        ev.stopPropagation();
+      });
+    }
   });
   box.querySelectorAll('.sp-resize-handle').forEach(function(h) {
     h.style.pointerEvents = 'auto';
-    h.style.zIndex = '70';
+    h.style.zIndex = '80';
     h.style.cursor = 'nwse-resize';
   });
 
-  // Bind delegated listeners once on the preview box
-  if (box._heroLineDragV3) return;
-  box._heroLineDragV3 = true;
+  function startInlineEdit(el, cfg) {
+    if (!el || !cfg) return;
+    // stop any drag
+    window._heroDragState = null;
+    el.contentEditable = 'true';
+    el.style.cursor = 'text';
+    el.style.outline = '2px solid rgba(52,211,153,0.85)';
+    el.style.userSelect = 'text';
+    el.style.webkitUserSelect = 'text';
+    el.style.caretColor = '#6ee7b7';
+    // focus at end
+    try {
+      el.focus();
+      var range = document.createRange();
+      range.selectNodeContents(el);
+      // exclude resize handle from selection
+      var handle = el.querySelector('.sp-resize-handle');
+      if (handle && el.lastChild === handle) {
+        range.setStart(el, 0);
+        range.setEnd(el, el.childNodes.length - 1);
+      }
+      range.collapse(false);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } catch (e) { try { el.focus(); } catch (e2) {} }
+    function finish() {
+      el.contentEditable = 'false';
+      el.style.cursor = 'grab';
+      el.style.outline = '';
+      el.style.userSelect = 'none';
+      el.style.webkitUserSelect = 'none';
+      // extract text (skip handle)
+      var clone = el.cloneNode(true);
+      var h2 = clone.querySelector('.sp-resize-handle');
+      if (h2) h2.remove();
+      var raw = (clone.innerText || clone.textContent || '').replace(/\u00a0/g, ' ').trim();
+      // keep internal newlines
+      raw = (clone.innerText || '').replace(/\u00a0/g, ' ');
+      // trim only ends
+      raw = raw.replace(/^\s+|\s+$/g, '');
+      if (cfg.input && $(cfg.input)) {
+        $(cfg.input).value = raw;
+        try { $(cfg.input).dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+      }
+      // restore handle if wiped
+      if (!el.querySelector('.sp-resize-handle')) {
+        var key = (cfg.input || '').replace('hero-', 'hero-');
+        var rk = cfg.input === 'hero-label' ? 'hero-label' : (cfg.input === 'hero-title' ? 'hero-title' : (cfg.input === 'hero-desc' ? 'hero-desc' : 'hero-sign'));
+        var span = document.createElement('span');
+        span.className = 'sp-resize-handle';
+        span.setAttribute('data-resize', rk);
+        span.title = 'ဆိုဒ်';
+        span.style.pointerEvents = 'auto';
+        span.style.zIndex = '80';
+        el.appendChild(span);
+      }
+      try { stashCurrentDeviceLayout(); } catch (e) {}
+      el.removeEventListener('blur', finish);
+      el.removeEventListener('keydown', onKey);
+    }
+    function onKey(ev) {
+      if (ev.key === 'Escape') { el.blur(); return; }
+      // Enter allowed for multiline; for single-line prevent
+      if (ev.key === 'Enter' && !cfg.multiline) {
+        ev.preventDefault();
+        el.blur();
+      }
+    }
+    el.addEventListener('blur', finish);
+    el.addEventListener('keydown', onKey);
+  }
+
+  // Always (re)bind document-level listeners once globally
+  if (!window._heroDragGlobalsBound) {
+    window._heroDragGlobalsBound = true;
+    window._heroDragState = null;
+
+    function pt(e) {
+      if (e.touches && e.touches[0]) return e.touches[0];
+      if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
+      return e;
+    }
+    function clearDrag() {
+      var st = window._heroDragState;
+      if (st && st.type === 'move' && st.el) {
+        st.el.style.cursor = 'grab';
+        st.el.style.outline = '';
+      }
+      if (st) {
+        try { stashCurrentDeviceLayout(); } catch (e) {}
+      }
+      window._heroDragState = null;
+    }
+
+    function onMove(e) {
+      var st = window._heroDragState;
+      if (!st) return;
+      var p = pt(e);
+      if (st.type === 'resize') {
+        var scale = st.frame ? 1 : 0.45;
+        var delta = Math.round((p.clientY - st.sy) * scale);
+        var nv = Math.max(st.min, Math.min(st.max, st.ox + delta));
+        if ($(st.input)) $(st.input).value = nv;
+        if (st.frame) {
+          var b = $('hero-live-preview');
+          if (b) b.style.height = nv + 'px';
+          if ($('val-hero-frame')) $('val-hero-frame').textContent = nv + 'px';
+          if ($('hero-preview-dims')) {
+            var fw = ($('hero-frame-w') && $('hero-frame-w').value) || '100';
+            var u = ($('hero-frame-w-unit') && $('hero-frame-w-unit').value) || '%';
+            $('hero-preview-dims').textContent = fw + u + ' × ' + nv + 'px';
+          }
+        } else {
+          // update ONLY this element's font
+          if (st.prevEl) st.prevEl.style.fontSize = nv + 'px';
+          var valId = st.input.replace('hero-', 'val-hero-') ;
+          // map: hero-label-fs -> val-hero-label-fs
+          var vmap = {
+            'hero-label-fs': 'val-hero-label-fs',
+            'hero-title-fs': 'val-hero-title-fs',
+            'hero-desc-fs': 'val-hero-desc-fs'
+          };
+          if (vmap[st.input] && $(vmap[st.input])) $(vmap[st.input]).textContent = nv + 'px';
+        }
+        try { updatePhoneHeroPreview(); } catch (err) {}
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
+      if (st.type === 'move') {
+        var nx = Math.max(-5, Math.min(105, st.origL + ((p.clientX - st.startX) / st.rectW) * 100));
+        var ny = Math.max(-5, Math.min(105, st.origT + ((p.clientY - st.startY) / st.rectH) * 100));
+        st.el.style.left = nx + '%';
+        st.el.style.top = ny + '%';
+        if ($(st.cfg.xi)) $(st.cfg.xi).value = Math.round(nx);
+        if ($(st.cfg.yi)) $(st.cfg.yi).value = Math.round(ny);
+        if ($(st.cfg.vx)) $(st.cfg.vx).textContent = Math.round(nx);
+        if ($(st.cfg.vy)) $(st.cfg.vy).textContent = Math.round(ny);
+        try { updatePhoneHeroPreview(); } catch (err) {}
+        if (e.cancelable) e.preventDefault();
+      }
+    }
+
+    window.addEventListener('mousemove', onMove, true);
+    window.addEventListener('touchmove', onMove, { passive: false, capture: true });
+    window.addEventListener('mouseup', clearDrag, true);
+    window.addEventListener('touchend', clearDrag, true);
+    window.addEventListener('pointerup', clearDrag, true);
+    window.addEventListener('pointercancel', clearDrag, true);
+  }
+
+  // Bind box mousedown (rebindable)
+  if (box._heroLineDragV4) return;
+  box._heroLineDragV4 = true;
 
   function pt(e) {
     if (e.touches && e.touches[0]) return e.touches[0];
@@ -4033,8 +4197,10 @@ function initHeroLineDrag() {
   function resolveTarget(raw) {
     var t = raw;
     if (!t) return null;
-    if (t.nodeType === 3) t = t.parentElement; // text node
+    if (t.nodeType === 3) t = t.parentElement;
     if (!t || !t.closest) return null;
+    // don't start drag while editing
+    if (t.isContentEditable || (t.closest && t.closest('[contenteditable="true"]'))) return null;
     var handle = t.classList && t.classList.contains('sp-resize-handle') ? t : t.closest('.sp-resize-handle');
     if (handle && box.contains(handle)) return { kind: 'resize', el: handle };
     var layer = (t.id && map[t.id]) ? t : t.closest('[id^="hero-prev-"]');
@@ -4043,6 +4209,8 @@ function initHeroLineDrag() {
   }
 
   function onDown(e) {
+    // ignore right click
+    if (e.button != null && e.button !== 0) return;
     var hit = resolveTarget(e.target);
     if (!hit) return;
     var p = pt(e);
@@ -4052,7 +4220,6 @@ function initHeroLineDrag() {
       var key = hit.el.getAttribute('data-resize');
       var cfg = sizeMap[key];
       if (!cfg) return;
-      // create missing size input fallback so resize always works
       if (!$(cfg.input)) {
         var hidden = document.createElement('input');
         hidden.type = 'hidden';
@@ -4060,12 +4227,15 @@ function initHeroLineDrag() {
         hidden.value = key === 'hero-title' ? '28' : (key === 'hero-desc' ? '14' : '12');
         document.body.appendChild(hidden);
       }
-      _heroDragState = {
+      // find parent text layer for live font update
+      var prevEl = hit.el.parentElement;
+      window._heroDragState = {
         type: 'resize',
         input: cfg.input,
         min: cfg.min,
         max: cfg.max,
         frame: !!cfg.frame,
+        prevEl: cfg.frame ? null : prevEl,
         sy: p.clientY,
         ox: parseInt($(cfg.input).value || (cfg.frame ? '360' : '12'), 10)
       };
@@ -4077,7 +4247,7 @@ function initHeroLineDrag() {
     var el = hit.el;
     var cfg = map[el.id];
     if (!cfg) return;
-    _heroDragState = {
+    window._heroDragState = {
       type: 'move',
       el: el,
       cfg: cfg,
@@ -4094,80 +4264,8 @@ function initHeroLineDrag() {
     e.stopPropagation();
   }
 
-  function onMove(e) {
-    if (!_heroDragState) return;
-    var p = pt(e);
-    if (_heroDragState.type === 'resize') {
-      // drag DOWN = bigger, UP = smaller (1px font per ~2px mouse for smooth control)
-      var scale = _heroDragState.frame ? 1 : 0.5;
-      var delta = Math.round((p.clientY - _heroDragState.sy) * scale);
-      var nv = Math.max(_heroDragState.min, Math.min(_heroDragState.max, _heroDragState.ox + delta));
-      if ($(_heroDragState.input)) $(_heroDragState.input).value = nv;
-      // live update range label if any
-      try {
-        var lab = document.querySelector('[id^="val-"][id*="' + (_heroDragState.input || '').replace('hero-','') + '"]');
-      } catch (e) {}
-      if (_heroDragState.frame) {
-        // Banner frame height drag
-        var box = $('hero-live-preview');
-        if (box) box.style.height = nv + 'px';
-        if ($('val-hero-frame')) $('val-hero-frame').textContent = nv + 'px';
-        if ($('hero-preview-dims')) {
-          var fw = ($('hero-frame-w') && $('hero-frame-w').value) || '100';
-          var u = ($('hero-frame-w-unit') && $('hero-frame-w-unit').value) || '%';
-          $('hero-preview-dims').textContent = fw + u + ' × ' + nv + 'px';
-        }
-        try { updatePhoneHeroPreview(); } catch (err) {}
-      } else {
-        // Only update the one element being resized (not all texts)
-        var prevMap = {
-          'hero-label-fs': { el: 'hero-prev-label', scale: 0.75, min: 8, val: 'val-hero-label-fs' },
-          'hero-title-fs': { el: 'hero-prev-title', scale: 0.55, min: 12, val: 'val-hero-title-fs' },
-          'hero-desc-fs':  { el: 'hero-prev-desc',  scale: 0.75, min: 9,  val: 'val-hero-desc-fs' },
-          'hero-sign-fs':  { el: 'hero-prev-sign',  scale: 0.75, min: 8,  val: null }
-        };
-        var pm = prevMap[_heroDragState.input];
-        if (pm) {
-          // WYSIWYG: show real font size in preview (not scaled down)
-          if ($(pm.el)) $(pm.el).style.fontSize = nv + 'px';
-          if (pm.val && $(pm.val)) $(pm.val).textContent = nv + 'px';
-        }
-        try { updatePhoneHeroPreview(); } catch (err) {}
-      }
-    } else if (_heroDragState.type === 'move') {
-      var st = _heroDragState;
-      var nx = Math.max(-5, Math.min(105, st.origL + ((p.clientX - st.startX) / st.rectW) * 100));
-      var ny = Math.max(-5, Math.min(105, st.origT + ((p.clientY - st.startY) / st.rectH) * 100));
-      st.el.style.left = nx + '%';
-      st.el.style.top = ny + '%';
-      if ($(st.cfg.xi)) $(st.cfg.xi).value = Math.round(nx);
-      if ($(st.cfg.yi)) $(st.cfg.yi).value = Math.round(ny);
-      if ($(st.cfg.vx)) $(st.cfg.vx).textContent = Math.round(nx);
-      if ($(st.cfg.vy)) $(st.cfg.vy).textContent = Math.round(ny);
-      try { updatePhoneHeroPreview(); } catch (err) {}
-    }
-    if (e.cancelable) e.preventDefault();
-  }
-
-  function onUp() {
-    if (_heroDragState && _heroDragState.type === 'move' && _heroDragState.el) {
-      _heroDragState.el.style.cursor = 'grab';
-      _heroDragState.el.style.outline = '';
-    }
-    if (_heroDragState) {
-      // Persist this device's layout immediately after drag/resize
-      try { stashCurrentDeviceLayout(); } catch (e) {}
-    }
-    _heroDragState = null;
-  }
-
-  // Capture phase so we beat image-drag mousedown
   box.addEventListener('mousedown', onDown, true);
   box.addEventListener('touchstart', onDown, { passive: false, capture: true });
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('touchmove', onMove, { passive: false });
-  window.addEventListener('mouseup', onUp);
-  window.addEventListener('touchend', onUp);
 }
 
 
@@ -5032,6 +5130,39 @@ function initSponsorDrag() {
     logo: { input: 'sp-logo-size', min: 40, max: 280 },
     'sp-frame': { input: 'admin-sponsor-height-local', min: 80, max: 800, frame: true }
   };
+  // Double-click to type
+  const inputMap = { 'sp-prev-badge': 'admin-sponsor-badge', 'sp-prev-title': 'admin-sponsor-title', 'sp-prev-desc': 'admin-sponsor-desc' };
+  Object.keys(textIds).forEach(function(id) {
+    var el = $(id);
+    if (!el || el._hhEditBound) return;
+    el._hhEditBound = true;
+    el.addEventListener('dblclick', function(ev) {
+      if (ev.target && ev.target.classList && ev.target.classList.contains('sp-resize-handle')) return;
+      window._spDrag = null;
+      el.contentEditable = 'true';
+      el.style.cursor = 'text';
+      el.style.outline = '2px solid rgba(52,211,153,0.85)';
+      try { el.focus(); } catch (e) {}
+      function finish() {
+        el.contentEditable = 'false';
+        el.style.cursor = 'grab';
+        el.style.outline = '';
+        var clone = el.cloneNode(true);
+        var h = clone.querySelector('.sp-resize-handle');
+        if (h) h.remove();
+        var raw = (clone.innerText || '').replace(/\u00a0/g, ' ').replace(/^\s+|\s+$/g, '');
+        var iid = inputMap[id];
+        if (iid && $(iid)) {
+          $(iid).value = raw;
+          try { $(iid).dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+        }
+        el.removeEventListener('blur', finish);
+      }
+      el.addEventListener('blur', finish);
+      ev.preventDefault();
+      ev.stopPropagation();
+    });
+  });
   function onStart(e) {
     const t = e.target;
     const r = box.getBoundingClientRect();
@@ -5041,7 +5172,7 @@ function initSponsorDrag() {
       const key = t.getAttribute('data-resize');
       const cfg = sizeMap[key];
       if (cfg) {
-        _spDrag = { type: 'resize', input: cfg.input, min: cfg.min, max: cfg.max, sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10) };
+        _spDrag = { type: 'resize', input: cfg.input, min: cfg.min, max: cfg.max, sy: p.clientY, ox: parseInt($(cfg.input)?.value || '12', 10), prevEl: t.closest('[id^="sp-prev-"]') || null };
         e.preventDefault();
         e.stopPropagation();
         return;
@@ -5187,7 +5318,7 @@ function updateUpcomingPreview() {
     ovUpEl.style.background = 'linear-gradient(to top, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '))';
   }
 
-  if ($('up-prev-heading')) $('up-prev-heading').textContent = $('up-heading')?.value || 'Upcoming';
+  if ($('up-prev-heading')) $('up-prev-heading').textContent = $('up-heading')?.value || '';
   const st = $('up-section-title')?.value || '';
   if ($('up-prev-section-title')) {
     $('up-prev-section-title').textContent = st;
@@ -5273,26 +5404,77 @@ let _upDrag = null;
 
 function initUpcomingDrag() {
   const box = $('up-live-preview');
-  if (!box || box._upDragReady) return;
-  box._upDragReady = true;
+  if (!box) return;
+  // allow re-init after preview rebuild
+  if (box._upDragV2) return;
+  box._upDragV2 = true;
+
   function pt(e){ return e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e); }
 
+  // Inline edit on double-click
+  ['up-prev-label','up-prev-title','up-prev-desc'].forEach(function(id) {
+    var el = $(id);
+    if (!el || el._hhEditBound) return;
+    el._hhEditBound = true;
+    var inputMap = { 'up-prev-label': 'up-label', 'up-prev-title': 'up-title', 'up-prev-desc': 'up-desc' };
+    var multi = { 'up-prev-desc': true, 'up-prev-title': true };
+    el.addEventListener('dblclick', function(ev) {
+      if (ev.target && ev.target.classList && ev.target.classList.contains('sp-resize-handle')) return;
+      window._upDrag = null;
+      el.contentEditable = 'true';
+      el.style.cursor = 'text';
+      el.style.outline = '2px solid rgba(52,211,153,0.85)';
+      el.style.userSelect = 'text';
+      try { el.focus(); } catch (e) {}
+      function finish() {
+        el.contentEditable = 'false';
+        el.style.cursor = 'grab';
+        el.style.outline = '';
+        el.style.userSelect = 'none';
+        var clone = el.cloneNode(true);
+        var h = clone.querySelector('.sp-resize-handle');
+        if (h) h.remove();
+        var raw = (clone.innerText || '').replace(/\u00a0/g, ' ').replace(/^\s+|\s+$/g, '');
+        var iid = inputMap[id];
+        if (iid && $(iid)) {
+          $(iid).value = raw;
+          try { $(iid).dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+        }
+        if (!el.querySelector('.sp-resize-handle')) {
+          var span = document.createElement('span');
+          span.className = 'sp-resize-handle';
+          span.setAttribute('data-resize', id.replace('up-prev-', 'up-'));
+          span.title = 'ဆိုဒ်';
+          el.appendChild(span);
+        }
+        el.removeEventListener('blur', finish);
+      }
+      el.addEventListener('blur', finish);
+      ev.preventDefault();
+      ev.stopPropagation();
+    });
+  });
+
   box.addEventListener('mousedown', function(e) {
+    if (e.button != null && e.button !== 0) return;
     const t = e.target;
+    if (t && (t.isContentEditable || (t.closest && t.closest('[contenteditable="true"]')))) return;
     if (t.closest && t.closest('.sp-resize-handle')) {
       const key = t.getAttribute('data-resize') || t.closest('.sp-resize-handle').getAttribute('data-resize');
       const p = pt(e);
-      _upDrag = { type: 'resize', key: key, sx: p.clientX, sy: p.clientY };
-      if (key === 'up-label') _upDrag.ofs = parseInt($('up-label-fs')?.value || '11', 10);
-      if (key === 'up-title') _upDrag.ofs = parseInt($('up-title-fs')?.value || '22', 10);
-      if (key === 'up-desc') _upDrag.ofs = parseInt($('up-desc-fs')?.value || '13', 10);
+      window._upDrag = { type: 'resize', key: key, sx: p.clientX, sy: p.clientY };
+      if (key === 'up-label') window._upDrag.ofs = parseInt($('up-label-fs')?.value || '11', 10);
+      if (key === 'up-title') window._upDrag.ofs = parseInt($('up-title-fs')?.value || '22', 10);
+      if (key === 'up-desc') window._upDrag.ofs = parseInt($('up-desc-fs')?.value || '13', 10);
       if (key === 'up-logo') {
-        _upDrag.ow = parseInt($('up-logo-w')?.value || '72', 10);
-        _upDrag.oh = parseInt($('up-logo-h')?.value || '72', 10);
+        window._upDrag.ow = parseInt($('up-logo-w')?.value || '72', 10);
+        window._upDrag.oh = parseInt($('up-logo-h')?.value || '72', 10);
       }
       if (key === 'up-frame') {
-        _upDrag.ofs = parseInt($('up-frame-h')?.value || '160', 10);
+        window._upDrag.ofs = parseInt($('up-frame-h')?.value || '160', 10);
       }
+      // track which prev element to update
+      window._upDrag.prevEl = t.closest('[id^="up-prev-"]') || null;
       e.preventDefault(); e.stopPropagation();
       return;
     }
@@ -5307,7 +5489,7 @@ function initUpcomingDrag() {
       if (!c) return;
       const p = pt(e);
       const r = box.getBoundingClientRect();
-      _upDrag = { type: 'text', el: textEl, c: c, sx: p.clientX, sy: p.clientY, ol: parseFloat(textEl.style.left)||0, ot: parseFloat(textEl.style.top)||0, rw: r.width, rh: r.height };
+      window._upDrag = { type: 'text', el: textEl, c: c, sx: p.clientX, sy: p.clientY, ol: parseFloat(textEl.style.left)||0, ot: parseFloat(textEl.style.top)||0, rw: r.width, rh: r.height };
       e.preventDefault(); e.stopPropagation();
       return;
     }
@@ -5315,81 +5497,78 @@ function initUpcomingDrag() {
     if (logoWrap) {
       const p = pt(e);
       const r = box.getBoundingClientRect();
-      _upDrag = { type: 'logo', sx: p.clientX, sy: p.clientY, ol: parseFloat($('up-logo-x')?.value||'88'), ot: parseFloat($('up-logo-y')?.value||'50'), rw: r.width, rh: r.height };
+      window._upDrag = { type: 'logo', sx: p.clientX, sy: p.clientY, ol: parseFloat($('up-logo-x')?.value||'88'), ot: parseFloat($('up-logo-y')?.value||'50'), rw: r.width, rh: r.height };
       e.preventDefault(); e.stopPropagation();
       return;
     }
-    // background image drag
-    if (t === box || t.classList.contains('live-bg-img') || t.id === 'up-prev-overlay') {
+    if (t === box || (t.classList && t.classList.contains('live-bg-img')) || t.id === 'up-prev-overlay') {
       const p = pt(e);
-      _upDrag = { type: 'img', sx: p.clientX, sy: p.clientY, ox: parseInt($('up-img-x')?.value||'50',10), oy: parseInt($('up-img-y')?.value||'50',10) };
-      box.style.cursor = 'grabbing';
+      window._upDrag = { type: 'img', sx: p.clientX, sy: p.clientY, ox: parseInt($('up-img-x')?.value||'50',10), oy: parseInt($('up-img-y')?.value||'50',10), rw: box.getBoundingClientRect().width, rh: box.getBoundingClientRect().height };
       e.preventDefault();
     }
-  });
+  }, true);
 
-  if (!window._upDragWin) {
-    window._upDragWin = true;
-    window.addEventListener('mousemove', function(e){
-      if (!_upDrag) return;
+  if (!window._upDragWinV2) {
+    window._upDragWinV2 = true;
+    window.addEventListener('mousemove', function(e) {
+      if (!window._upDrag) return;
       const p = pt(e);
-      const dx = p.clientX - _upDrag.sx;
-      const dy = p.clientY - _upDrag.sy;
-      if (_upDrag.type === 'text') {
-        const nl = Math.max(0, Math.min(95, _upDrag.ol + (dx / _upDrag.rw) * 100));
-        const nt = Math.max(0, Math.min(95, _upDrag.ot + (dy / _upDrag.rh) * 100));
-        _upDrag.el.style.left = nl + '%';
-        _upDrag.el.style.top = nt + '%';
-        if ($(_upDrag.c.xi)) $(_upDrag.c.xi).value = Math.round(nl);
-        if ($(_upDrag.c.yi)) $(_upDrag.c.yi).value = Math.round(nt);
-      } else if (_upDrag.type === 'logo') {
-        const nl = Math.max(5, Math.min(95, _upDrag.ol + (dx / _upDrag.rw) * 100));
-        const nt = Math.max(5, Math.min(95, _upDrag.ot + (dy / _upDrag.rh) * 100));
+      const dx = p.clientX - window._upDrag.sx;
+      const dy = p.clientY - window._upDrag.sy;
+      if (window._upDrag.type === 'text') {
+        const nx = Math.max(-5, Math.min(105, window._upDrag.ol + (dx / window._upDrag.rw) * 100));
+        const ny = Math.max(-5, Math.min(105, window._upDrag.ot + (dy / window._upDrag.rh) * 100));
+        window._upDrag.el.style.left = nx + '%';
+        window._upDrag.el.style.top = ny + '%';
+        if ($(window._upDrag.c.xi)) $(window._upDrag.c.xi).value = Math.round(nx);
+        if ($(window._upDrag.c.yi)) $(window._upDrag.c.yi).value = Math.round(ny);
+      } else if (window._upDrag.type === 'logo') {
+        const nl = Math.max(0, Math.min(100, window._upDrag.ol + (dx / window._upDrag.rw) * 100));
+        const nt = Math.max(0, Math.min(100, window._upDrag.ot + (dy / window._upDrag.rh) * 100));
         if ($('up-logo-x')) $('up-logo-x').value = Math.round(nl);
         if ($('up-logo-y')) $('up-logo-y').value = Math.round(nt);
         const lw = $('up-prev-logo-wrap');
         if (lw) { lw.style.left = Math.round(nl) + '%'; lw.style.top = Math.round(nt) + '%'; }
-      } else if (_upDrag.type === 'img') {
-        const nx = Math.max(0, Math.min(100, _upDrag.ox - dx * 0.15));
-        const ny = Math.max(0, Math.min(100, _upDrag.oy - dy * 0.15));
+      } else if (window._upDrag.type === 'img') {
+        const nx = Math.max(0, Math.min(100, window._upDrag.ox - dx * 0.15));
+        const ny = Math.max(0, Math.min(100, window._upDrag.oy - dy * 0.15));
         if ($('up-img-x')) $('up-img-x').value = Math.round(nx);
         if ($('up-img-y')) $('up-img-y').value = Math.round(ny);
-        const box = $('up-live-preview');
-        const uimg = box && box.querySelector('.live-bg-img');
+        const uimg = box.querySelector('.live-bg-img');
         if (uimg) uimg.style.objectPosition = Math.round(nx) + '% ' + Math.round(ny) + '%';
-      } else if (_upDrag.type === 'resize') {
-        if (_upDrag.key === 'up-logo') {
-          const nw = Math.max(32, Math.min(240, _upDrag.ow + dx));
-          const nh = Math.max(32, Math.min(240, _upDrag.oh + dy));
+      } else if (window._upDrag.type === 'resize') {
+        if (window._upDrag.key === 'up-logo') {
+          const nw = Math.max(32, Math.min(240, window._upDrag.ow + dx));
+          const nh = Math.max(32, Math.min(240, window._upDrag.oh + dy));
           if ($('up-logo-w')) $('up-logo-w').value = Math.round(nw);
           if ($('up-logo-h')) $('up-logo-h').value = Math.round(nh);
           const lw = $('up-prev-logo-wrap');
           if (lw) { lw.style.width = Math.round(nw) + 'px'; lw.style.height = Math.round(nh) + 'px'; }
-        } else if (_upDrag.key === 'up-frame') {
-          const nh = Math.max(80, Math.min(800, _upDrag.ofs + dy));
+        } else if (window._upDrag.key === 'up-frame') {
+          const nh = Math.max(80, Math.min(800, window._upDrag.ofs + dy));
           if ($('up-frame-h')) $('up-frame-h').value = Math.round(nh);
           if ($('val-up-frame-h')) $('val-up-frame-h').textContent = Math.round(nh) + 'px';
-          const box = $('up-live-preview');
           if (box) box.style.height = Math.round(nh) + 'px';
         } else {
-          // drag DOWN = bigger (dy positive)
-          const nfs = Math.max(8, Math.min(80, _upDrag.ofs + dy * 0.25));
+          // only update THIS text size
+          const nfs = Math.max(8, Math.min(80, window._upDrag.ofs + dy * 0.35));
           const idMap = { 'up-label': 'up-label-fs', 'up-title': 'up-title-fs', 'up-desc': 'up-desc-fs' };
-          const fid = idMap[_upDrag.key];
+          const fid = idMap[window._upDrag.key];
           if (fid && $(fid)) $(fid).value = Math.round(nfs);
-          updateUpcomingPreview();
+          if (window._upDrag.prevEl) window._upDrag.prevEl.style.fontSize = Math.round(nfs) + 'px';
+          var valMap = { 'up-label': 'val-up-label-fs', 'up-title': 'val-up-title-fs', 'up-desc': 'val-up-desc-fs' };
+          if (valMap[window._upDrag.key] && $(valMap[window._upDrag.key])) {
+            $(valMap[window._upDrag.key]).textContent = Math.round(nfs) + 'px';
+          }
         }
       }
-    });
-    window.addEventListener('mouseup', function(){
-      if (_upDrag) {
-        const box = $('up-live-preview');
-        if (box) box.style.cursor = 'grab';
-        _upDrag = null;
-      }
-    });
+      if (e.cancelable) e.preventDefault();
+    }, true);
+    window.addEventListener('mouseup', function(){ window._upDrag = null; }, true);
+    window.addEventListener('touchend', function(){ window._upDrag = null; }, true);
   }
 }
+
 function saveUpcoming() {
   function gv(id, def) {
     var el = $(id);
@@ -5417,7 +5596,7 @@ function saveUpcoming() {
       labelStyle: gv('up-label-style', 'normal'),
       labelX: gi('up-label-x', 6),
       labelY: gi('up-label-y', 40),
-      title: _upTitle || gv('up-heading', 'Upcoming') || 'Upcoming',
+      title: _upTitle,
       titleColor: gv('up-title-color', '#ffffff'),
       titleFs: gi('up-title-fs', 22),
       titleWeight: gv('up-title-weight', '900'),
