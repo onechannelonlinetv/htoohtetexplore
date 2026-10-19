@@ -563,17 +563,17 @@
       object-fit: cover !important;
       object-position: center center !important;
     }
-    #upcoming-banner {
+    #upcoming-banner:not([data-sized="1"]) {
       width: 100% !important;
       max-width: 100% !important;
-    }
-    #upcoming-banner:not([data-sized="1"]) {
       height: 140px !important;
       min-height: 140px !important;
       max-height: 180px !important;
     }
     #upcoming-banner[data-sized="1"] {
       max-height: none !important;
+      /* width comes from admin frameW % — do not force 100% */
+      max-width: 100% !important;
     }
     #proud-public-frame {
       max-height: 72px !important;
@@ -1803,8 +1803,7 @@ function scaleBannerMetrics(vals, mode) {
   if (o.logoW != null) o.logoW = sc(o.logoW, 36, mode === 'phone' ? 64 : 90);
   if (o.logoH != null) o.logoH = sc(o.logoH, 36, mode === 'phone' ? 64 : 90);
   // phone always full width
-  if (mode === 'phone' && o.frameW != null) o.frameW = 100;
-  if (mode === 'phone' && o.widthPct != null) o.widthPct = 100;
+  // frameW / widthPct kept as admin set (phone & tablet) — do not force 100
   return o;
 }
 
@@ -2655,11 +2654,16 @@ function loadBlogData() {
       el.textContent = t; // pre-wrap keeps newlines / long lines
       if (styleFn) styleFn(el);
     }
-    setUpText('upcoming-label', up.label, function(el) {
+    // On-image title: hide if empty or only the generic word "Upcoming" (section heading is separate)
+    var _upTitleShow = (up.title || '').trim();
+    if (/^upcoming$/i.test(_upTitleShow)) _upTitleShow = '';
+    var _upLabelShow = (up.label || '').trim();
+    if (/^upcoming$/i.test(_upLabelShow)) _upLabelShow = '';
+    setUpText('upcoming-label', _upLabelShow, function(el) {
       if (up.labelColor) { setStyle(el, 'color', up.labelColor); el.classList.remove('accent-text'); }
       if (up.labelFs) setStyle(el, 'font-size', up.labelFs + 'px');
     });
-    setUpText('upcoming-title', up.title, function(el) {
+    setUpText('upcoming-title', _upTitleShow, function(el) {
       if (up.titleColor) setStyle(el, 'color', up.titleColor);
       if (up.titleFs) {
         var tfs = parseInt(up.titleFs, 10) || 22;
@@ -2691,12 +2695,18 @@ function loadBlogData() {
       setStyle($('upcoming-banner'), 'max-height', 'none');
       document.documentElement.style.setProperty('--upcoming-min-h', up.frameH + 'px');
     }
-    // Width % (desktop/tablet); phone CSS forces 100%
-    var upW = (up.frameW != null) ? up.frameW : 100;
-    setStyle($('upcoming-banner'), 'width', upW + '%');
-    setStyle($('upcoming-banner'), 'max-width', '100%');
-    setStyle($('upcoming-banner'), 'margin-left', 'auto');
-    setStyle($('upcoming-banner'), 'margin-right', 'auto');
+    // Width % works on PC / Tablet / Phone (admin Frame W)
+    var upW = (up.frameW != null) ? Number(up.frameW) : 100;
+    if (isNaN(upW) || upW < 20) upW = 100;
+    if (upW > 100) upW = 100;
+    var ubEl = $('upcoming-banner');
+    if (ubEl) {
+      ubEl.setAttribute('data-sized', '1');
+      ubEl.style.setProperty('width', upW + '%', 'important');
+      ubEl.style.setProperty('max-width', '100%', 'important');
+      ubEl.style.setProperty('margin-left', 'auto', 'important');
+      ubEl.style.setProperty('margin-right', 'auto', 'important');
+    }
     if (up.image && (String(up.image).indexOf('http') === 0 || String(up.image).indexOf('data:image/') === 0)) {
       if ($('upcoming-img')) $('upcoming-img').src = up.image;
     }
