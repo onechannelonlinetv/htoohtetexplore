@@ -1814,7 +1814,7 @@ header.sticky {
             <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
               <p class="text-[11px] font-bold text-emerald-400 uppercase">Label (cover ပေါ်)</p>
               <div class="form-row form-row-typo w-full">
-                <div><label class="label">စာသား</label><input id="section-banner-label" class="field" placeholder="FEATURED" oninput="updateSectionPreview()"></div>
+                <div><label class="label">စာသား</label><input id="section-banner-label" class="field" placeholder="(optional — ဗလာ = မပြ)" oninput="updateSectionPreview()"></div>
                 <div><label class="label">Color</label><input id="section-banner-label-color" type="color" value="#f5c518" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSectionPreview()"></div>
                 <div><label class="label flex justify-between">Size <span id="val-sec-label-fs" class="range-val">12px</span></label>
                   <input type="range" id="section-banner-label-fs" min="10" max="28" value="12" class="w-full accent-emerald-500" oninput="updateSectionPreview()"></div>
@@ -1827,7 +1827,7 @@ header.sticky {
             <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
               <p class="text-[11px] font-bold text-emerald-400 uppercase">Title (cover ပေါ်)</p>
               <div class="form-row form-row-typo w-full">
-                <div><label class="label">စာသား</label><input id="section-banner-title" class="field" placeholder="Cover Title" oninput="updateSectionPreview()"></div>
+                <div><label class="label">စာသား</label><input id="section-banner-title" class="field" placeholder="(optional)" oninput="updateSectionPreview()"></div>
                 <div><label class="label">Color</label><input id="section-banner-title-color" type="color" value="#ffffff" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSectionPreview()"></div>
                 <div><label class="label flex justify-between">Size <span id="val-sec-title-fs" class="range-val">24px</span></label>
                   <input type="range" id="section-banner-title-fs" min="14" max="64" value="24" class="w-full accent-emerald-500" oninput="updateSectionPreview()"></div>
@@ -1840,7 +1840,7 @@ header.sticky {
             <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 space-y-2">
               <p class="text-[11px] font-bold text-emerald-400 uppercase">Description (cover ပေါ်)</p>
               <div class="form-row form-row-typo w-full">
-                <div><label class="label">စာသား</label><textarea id="section-banner-desc" class="field min-h-14" placeholder="Short description…" oninput="updateSectionPreview()"></textarea></div>
+                <div><label class="label">စာသား</label><textarea id="section-banner-desc" class="field min-h-14" placeholder="(optional — ရေးမှ ပေါ်မယ်)" oninput="updateSectionPreview()"></textarea></div>
                 <div><label class="label">Color</label><input id="section-banner-desc-color" type="color" value="#cccccc" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateSectionPreview()"></div>
                 <div><label class="label flex justify-between">Size <span id="val-sec-desc-fs" class="range-val">14px</span></label>
                   <input type="range" id="section-banner-desc-fs" min="11" max="28" value="14" class="w-full accent-emerald-500" oninput="updateSectionPreview()"></div>
@@ -1854,9 +1854,9 @@ header.sticky {
               <span class="text-[11px] font-bold text-violet-300 uppercase">Live Preview · Banner</span>
               <div id="section-live-preview" class="relative mt-2 overflow-hidden rounded-xl border border-slate-700" style="height:220px;background:#111;">
                 <div id="sec-prev-overlay" class="absolute inset-0 z-[1] pointer-events-none" style="background:linear-gradient(to top,rgba(0,0,0,.55),rgba(0,0,0,.15))"></div>
-                <div id="sec-prev-label" class="absolute z-10 font-bold uppercase tracking-widest" style="left:6%;top:28%;color:#f5c518;font-size:12px;">FEATURED</div>
-                <div id="sec-prev-title" class="absolute z-10 font-black text-white" style="left:6%;top:42%;font-size:22px;">Cover Title</div>
-                <div id="sec-prev-desc" class="absolute z-10 text-white/70" style="left:6%;top:62%;font-size:13px;max-width:80%;">Description…</div>
+                <div id="sec-prev-label" class="absolute z-10 font-bold uppercase tracking-widest" style="left:6%;top:28%;color:#f5c518;font-size:12px;display:none;"></div>
+                <div id="sec-prev-title" style="display:none" class="absolute z-10 font-black text-white" style="left:6%;top:42%;font-size:22px;"></div>
+                <div id="sec-prev-desc" style="display:none" class="absolute z-10 text-white/70" style="left:6%;top:62%;font-size:13px;max-width:80%;"></div>
               </div>
             </div>
           </div>
@@ -8708,7 +8708,7 @@ function collectSectionForm() {
     data.bannerLabelFs = parseInt($('section-banner-label-fs')?.value || '12', 10);
     data.bannerLabelWeight = $('section-banner-label-weight')?.value || '700';
     data.bannerLabelStyle = $('section-banner-label-style')?.value || 'normal';
-    data.bannerTitle = ($('section-banner-title')?.value || '').trim() || data.title;
+    data.bannerTitle = ($('section-banner-title')?.value || '').trim();
     data.bannerTitleColor = $('section-banner-title-color')?.value || '#ffffff';
     data.bannerTitleFs = parseInt($('section-banner-title-fs')?.value || '24', 10);
     data.bannerTitleWeight = $('section-banner-title-weight')?.value || '900';
@@ -8753,9 +8753,26 @@ function updateSectionPreview() {
     if (weight) el.style.fontWeight = weight;
     if (style) el.style.fontStyle = style;
   }
-  put('sec-prev-label', $('section-banner-label')?.value || 'FEATURED', $('section-banner-label-color')?.value, $('section-banner-label-fs')?.value, $('section-banner-label-weight')?.value, $('section-banner-label-style')?.value);
-  put('sec-prev-title', $('section-banner-title')?.value || $('section-title')?.value || 'Cover Title', $('section-banner-title-color')?.value, Math.max(12, Math.round(($('section-banner-title-fs')?.value||24)*0.85)), $('section-banner-title-weight')?.value, $('section-banner-title-style')?.value);
-  put('sec-prev-desc', $('section-banner-desc')?.value || 'Description…', $('section-banner-desc-color')?.value, $('section-banner-desc-fs')?.value, $('section-banner-desc-weight')?.value, $('section-banner-desc-style')?.value);
+  // No default placeholder text on cover — only show what user typed
+  function putHide(id, text, color, fs, weight, style) {
+    const el = $(id); if (!el) return;
+    var t = (text || '').trim();
+    if (!t) {
+      el.textContent = '';
+      el.style.display = 'none';
+      return;
+    }
+    el.style.display = '';
+    el.textContent = t;
+    if (color) el.style.color = color;
+    if (fs) el.style.fontSize = fs + 'px';
+    if (weight) el.style.fontWeight = weight;
+    if (style) el.style.fontStyle = style;
+    el.style.whiteSpace = 'pre-wrap';
+  }
+  putHide('sec-prev-label', $('section-banner-label')?.value || '', $('section-banner-label-color')?.value, $('section-banner-label-fs')?.value, $('section-banner-label-weight')?.value, $('section-banner-label-style')?.value);
+  putHide('sec-prev-title', $('section-banner-title')?.value || '', $('section-banner-title-color')?.value, $('section-banner-title-fs')?.value || 24, $('section-banner-title-weight')?.value, $('section-banner-title-style')?.value);
+  putHide('sec-prev-desc', $('section-banner-desc')?.value || '', $('section-banner-desc-color')?.value, $('section-banner-desc-fs')?.value, $('section-banner-desc-weight')?.value, $('section-banner-desc-style')?.value);
 }
 function resetSectionForm() {
   if ($('section-edit-id')) $('section-edit-id').value = '';
