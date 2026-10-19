@@ -583,44 +583,35 @@
       max-height: 72px !important;
     }
 
+    /* Phone: do NOT force left/top — admin layout + drag must win */
     .sp-banner .sp-badge {
-      font-size: clamp(9px, 2.8vw, 12px) !important;
-      left: 4% !important;
-      top: 10% !important;
       max-width: 92%;
     }
     .sp-banner .sp-title {
-      font-size: clamp(14px, 4.5vw, 22px) !important;
-      left: 4% !important;
-      top: 32% !important;
-      max-width: 75% !important;
+      max-width: 90% !important;
       line-height: 1.2;
-      white-space: normal !important;
+      white-space: pre-wrap !important;
     }
     .sp-banner .sp-desc {
-      font-size: clamp(11px, 3.2vw, 14px) !important;
-      left: 4% !important;
-      top: 58% !important;
-      max-width: 70% !important;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      max-width: 90% !important;
+      white-space: pre-wrap !important;
+      -webkit-line-clamp: unset !important;
+      display: block !important;
+      overflow: visible !important;
     }
     .sp-banner .sp-logo {
-      width: clamp(48px, 14vw, 72px) !important;
-      height: clamp(48px, 14vw, 72px) !important;
-      left: auto !important;
-      right: 3% !important;
-      top: 50% !important;
-      transform: translateY(-50%);
+      /* size/position from admin inline styles only */
+      max-width: 45vw;
+      max-height: 45vw;
     }
     .sp-banner .sp-link {
-      left: 4% !important;
-      bottom: 8% !important;
-      top: auto !important;
-      font-size: 12px !important;
-      padding: 6px 12px !important;
+      font-size: inherit;
+      padding: inherit;
+    }
+    body.preview-device-phone .sp-banner .pv-drag,
+    body.preview-device-tablet .sp-banner .pv-drag {
+      pointer-events: auto !important;
+      z-index: 50 !important;
     }
   }
 
@@ -2637,21 +2628,21 @@ function loadBlogData() {
           sponsor.badgeFs ? 'font-size:' + sponsor.badgeFs + 'px' : '',
           sponsor.badgeRadius != null ? ('border-radius:' + (sponsor.badgeRadius >= 24 ? '9999px' : sponsor.badgeRadius + 'px')) : '',
           sponsor.badgeWeight ? 'font-weight:' + sponsor.badgeWeight : '',
-          'left:' + (sponsor.badgeX != null ? sponsor.badgeX : 4) + '%',
-          'top:' + (sponsor.badgeY != null ? sponsor.badgeY : 12) + '%'
+          'left:' + (sponsor.badgeX != null ? sponsor.badgeX : 4) + '% !important;right:auto !important;bottom:auto !important',
+          'top:' + (sponsor.badgeY != null ? sponsor.badgeY : 12) + '% !important'
         ].filter(Boolean).join(';');
         const titleStyle = [
           sponsor.titleColor ? 'color:' + sponsor.titleColor : '',
           sponsor.titleFs ? 'font-size:' + sponsor.titleFs + 'px' : '',
           sponsor.titleWeight ? 'font-weight:' + sponsor.titleWeight : '',
-          'left:' + (sponsor.titleX != null ? sponsor.titleX : 4) + '%',
-          'top:' + (sponsor.titleY != null ? sponsor.titleY : 38) + '%'
+          'left:' + (sponsor.titleX != null ? sponsor.titleX : 4) + '% !important;right:auto !important;bottom:auto !important',
+          'top:' + (sponsor.titleY != null ? sponsor.titleY : 38) + '% !important'
         ].filter(Boolean).join(';');
         const descStyle = [
           sponsor.descColor ? 'color:' + sponsor.descColor : '',
           sponsor.descFs ? 'font-size:' + sponsor.descFs + 'px' : '',
-          'left:' + (sponsor.descX != null ? sponsor.descX : 4) + '%',
-          'top:' + (sponsor.descY != null ? sponsor.descY : 62) + '%'
+          'left:' + (sponsor.descX != null ? sponsor.descX : 4) + '% !important;right:auto !important;bottom:auto !important',
+          'top:' + (sponsor.descY != null ? sponsor.descY : 62) + '% !important'
         ].filter(Boolean).join(';');
         const bgPos = (sponsor.imgPosX != null ? sponsor.imgPosX : 50) + '% ' + (sponsor.imgPosY != null ? sponsor.imgPosY : 50) + '%';
         const bgSrc = sponsor.bgImage || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1400&q=80';
@@ -2659,13 +2650,13 @@ function loadBlogData() {
         const logoX = sponsor.logoX != null ? sponsor.logoX : 88;
         const logoY = sponsor.logoY != null ? sponsor.logoY : 40;
         const logoHtml = sponsor.img
-          ? '<div class="sp-logo rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="left:' + logoX + '%;top:' + logoY + '%;width:' + logoSize + 'px;height:' + logoSize + 'px"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-1"></div>'
+          ? '<div class="sp-logo rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden" style="left:' + logoX + '% !important;top:' + logoY + '% !important;right:auto !important;bottom:auto !important;transform:none !important;width:' + logoSize + 'px !important;height:' + logoSize + 'px !important;position:absolute !important;"><img src="' + safe(sponsor.img) + '" alt="" class="w-full h-full object-contain p-1"></div>'
           : '';
         var btnLabel = (sponsor.btnText || '').trim();
         var btnX = sponsor.btnX != null ? sponsor.btnX : 4;
         var btnY = sponsor.btnY != null ? sponsor.btnY : 88;
         const linkHtml = (sponsor.link && btnLabel)
-          ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:' + btnX + '%;top:' + btnY + '%;bottom:auto">' + safe(btnLabel) + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
+          ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:' + btnX + '% !important;top:' + btnY + '% !important;right:auto !important;bottom:auto !important;position:absolute !important;transform:none !important;">' + safe(btnLabel) + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
           : '';
         return '<div class="sp-banner" data-sized="1" data-shape="' + safe(shape) + '" style="width:' + wPct + '% !important;max-width:100%;margin-left:auto;margin-right:auto;height:' + h + 'px;min-height:' + h + 'px;max-height:none;border-radius:' + radiusDesktop + '">' +
           '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
