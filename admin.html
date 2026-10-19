@@ -8379,7 +8379,14 @@ async function deleteGalleryPhoto(i) {
   } catch (e) { toast('✓ ဖျက်ပြီး'); }
 }
 
-function getHomeSections() { return asArray(read('hh_home_sections', [])); }
+function getHomeSections() {
+  var raw = read('hh_home_sections', []);
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === 'object') {
+    try { return Object.keys(raw).sort().map(function(k){ return raw[k]; }).filter(Boolean); } catch (e) {}
+  }
+  return [];
+}
 function refreshPostSectionOptions() {
   const sel = $('admin-post-section'), current = sel.value || 'latest';
   sel.innerHTML = '<option value="latest">Latest Travel Posts (default)</option>' +
@@ -8790,40 +8797,64 @@ function addHomeSection() {
   toast(editId ? 'Row ပြင်ပြီးပါပြီ။' : 'Row ထည့်ပြီးပါပြီ။');
 }
 function editHomeSection(i) {
-  const sections = getHomeSections();
-  const s = sections[i];
-  if (!s) return;
-  if ($('section-edit-id')) $('section-edit-id').value = s.id;
-  if ($('section-title')) $('section-title').value = s.title || '';
-  if ($('section-subtitle')) $('section-subtitle').value = s.subtitle || '';
-  if ($('section-layout')) $('section-layout').value = s.layout || 'grid';
-  if ($('section-link')) $('section-link').value = s.link || '';
-  if ($('section-frame-h')) $('section-frame-h').value = s.frameH || 220;
-  if ($('section-overlay')) $('section-overlay').value = s.overlayOpacity != null ? s.overlayOpacity : 50;
-  if (typeof setImageFieldValue === 'function') setImageFieldValue('section-banner-img', s.bannerImg || '');
-  else if ($('section-banner-img')) $('section-banner-img').value = s.bannerImg || '';
-  if ($('section-banner-label')) $('section-banner-label').value = s.bannerLabel || '';
-  if ($('section-banner-label-color')) $('section-banner-label-color').value = s.bannerLabelColor || '#f5c518';
-  if ($('section-banner-label-fs')) $('section-banner-label-fs').value = s.bannerLabelFs || 12;
-  if ($('section-banner-label-weight')) $('section-banner-label-weight').value = s.bannerLabelWeight || '700';
-  if ($('section-banner-label-style')) $('section-banner-label-style').value = s.bannerLabelStyle || 'normal';
-  if ($('section-banner-title')) $('section-banner-title').value = s.bannerTitle || s.title || '';
-  if ($('section-banner-title-color')) $('section-banner-title-color').value = s.bannerTitleColor || '#ffffff';
-  if ($('section-banner-title-fs')) $('section-banner-title-fs').value = s.bannerTitleFs || 24;
-  if ($('section-banner-title-weight')) $('section-banner-title-weight').value = s.bannerTitleWeight || '900';
-  if ($('section-banner-title-style')) $('section-banner-title-style').value = s.bannerTitleStyle || 'normal';
-  if ($('section-banner-desc')) $('section-banner-desc').value = s.bannerDesc || '';
-  if ($('section-banner-desc-color')) $('section-banner-desc-color').value = s.bannerDescColor || '#cccccc';
-  if ($('section-banner-desc-fs')) $('section-banner-desc-fs').value = s.bannerDescFs || 14;
-  if ($('section-banner-desc-weight')) $('section-banner-desc-weight').value = s.bannerDescWeight || '400';
-  if ($('section-banner-desc-style')) $('section-banner-desc-style').value = s.bannerDescStyle || 'normal';
-  if ($('section-save-btn')) $('section-save-btn').innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Save Row';
-  toggleSectionBannerFields();
-  if (typeof showPreviewIfUrl === 'function') showPreviewIfUrl('section-banner-img');
-  updateSectionPreview();
-  showView('sections');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try {
+    const sections = getHomeSections();
+    const s = sections[i];
+    if (!s) {
+      toast('Row မတွေ့ပါ', true);
+      return;
+    }
+    if ($('section-edit-id')) $('section-edit-id').value = s.id || '';
+    if ($('section-title')) $('section-title').value = s.title || '';
+    if ($('section-subtitle')) $('section-subtitle').value = s.subtitle || '';
+    if ($('section-layout')) $('section-layout').value = s.layout || 'grid';
+    if ($('section-link')) $('section-link').value = s.link || '';
+    if ($('section-frame-h')) $('section-frame-h').value = s.frameH || 220;
+    if ($('section-overlay')) $('section-overlay').value = s.overlayOpacity != null ? s.overlayOpacity : 50;
+    if (typeof setImageFieldValue === 'function') setImageFieldValue('section-banner-img', s.bannerImg || '');
+    else if ($('section-banner-img')) $('section-banner-img').value = s.bannerImg || '';
+    if ($('section-banner-label')) $('section-banner-label').value = s.bannerLabel || '';
+    if ($('section-banner-label-color')) $('section-banner-label-color').value = s.bannerLabelColor || '#f5c518';
+    if ($('section-banner-label-fs')) $('section-banner-label-fs').value = s.bannerLabelFs || 12;
+    if ($('section-banner-label-weight')) $('section-banner-label-weight').value = s.bannerLabelWeight || '700';
+    if ($('section-banner-label-style')) $('section-banner-label-style').value = s.bannerLabelStyle || 'normal';
+    if ($('section-banner-title')) $('section-banner-title').value = s.bannerTitle || s.title || '';
+    if ($('section-banner-title-color')) $('section-banner-title-color').value = s.bannerTitleColor || '#ffffff';
+    if ($('section-banner-title-fs')) $('section-banner-title-fs').value = s.bannerTitleFs || 24;
+    if ($('section-banner-title-weight')) $('section-banner-title-weight').value = s.bannerTitleWeight || '900';
+    if ($('section-banner-title-style')) $('section-banner-title-style').value = s.bannerTitleStyle || 'normal';
+    if ($('section-banner-desc')) $('section-banner-desc').value = s.bannerDesc || '';
+    if ($('section-banner-desc-color')) $('section-banner-desc-color').value = s.bannerDescColor || '#cccccc';
+    if ($('section-banner-desc-fs')) $('section-banner-desc-fs').value = s.bannerDescFs || 14;
+    if ($('section-banner-desc-weight')) $('section-banner-desc-weight').value = s.bannerDescWeight || '400';
+    if ($('section-banner-desc-style')) $('section-banner-desc-style').value = s.bannerDescStyle || 'normal';
+    if ($('section-save-btn')) $('section-save-btn').innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Save Row';
+    try { toggleSectionBannerFields(); } catch (e) {}
+    try { if (typeof showPreviewIfUrl === 'function') showPreviewIfUrl('section-banner-img'); } catch (e) {}
+    try { updateSectionPreview(); } catch (e) {}
+    // Open sections view + expand form panels
+    try { if (typeof showView === 'function') showView('sections'); } catch (e) {}
+    try {
+      document.querySelectorAll('#view-sections .fold-panel').forEach(function(p) {
+        p.classList.add('open');
+      });
+    } catch (e) {}
+    try {
+      var formBox = $('section-title') || document.querySelector('#view-sections .panel');
+      if (formBox) formBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if ($('section-title')) $('section-title').focus();
+    } catch (e) {}
+    toast('Row တည်းဖြတ် · ' + (s.title || ''));
+  } catch (err) {
+    console.error(err);
+    toast('Edit မရ: ' + (err.message || err), true);
+  }
 }
+window.editHomeSection = editHomeSection;
+window.addHomeSection = addHomeSection;
+window.deleteHomeSection = deleteHomeSection;
+window.moveHomeSection = moveHomeSection;
+window.renderHomeSectionsList = renderHomeSectionsList;
 function renderHomeSectionsList() {
   const list = $('home-sections-list'), sections = getHomeSections();
   if ($('section-count')) $('section-count').textContent = sections.length + ' rows';
