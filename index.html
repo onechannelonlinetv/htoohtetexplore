@@ -3380,6 +3380,61 @@ function openLightbox(src, list) {
   box.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
   updateLightboxCounter();
+  try { initLightboxSwipe(); } catch (e) {}
+}
+var _lbSwipe = null;
+function initLightboxSwipe() {
+  var box = $('img-lightbox');
+  var img = $('lightbox-img');
+  if (!box || box._lbSwipeBound) return;
+  box._lbSwipeBound = true;
+  function pt(e) {
+    if (e.touches && e.touches[0]) return e.touches[0];
+    if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
+    return e;
+  }
+  box.addEventListener('touchstart', function(e) {
+    if (e.target && (e.target.closest && e.target.closest('button'))) return;
+    var p = pt(e);
+    _lbSwipe = { x: p.clientX, y: p.clientY, t: Date.now() };
+  }, { passive: true });
+  box.addEventListener('touchend', function(e) {
+    if (!_lbSwipe) return;
+    var p = pt(e);
+    var dx = p.clientX - _lbSwipe.x;
+    var dy = p.clientY - _lbSwipe.y;
+    var dt = Date.now() - _lbSwipe.t;
+    _lbSwipe = null;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dt > 800) return;
+    if (dx < 0) lightboxNav(1);
+    else lightboxNav(-1);
+  }, { passive: true });
+  // Mouse drag on desktop too
+  var md = null;
+  box.addEventListener('mousedown', function(e) {
+    if (e.target && e.target.closest && e.target.closest('button')) return;
+    if (e.target === img || e.target === box) md = { x: e.clientX, y: e.clientY };
+  });
+  window.addEventListener('mouseup', function(e) {
+    if (!md) return;
+    var dx = e.clientX - md.x;
+    md = null;
+    if (Math.abs(dx) < 50) return;
+    if (dx < 0) lightboxNav(1);
+    else lightboxNav(-1);
+  });
+  // Keyboard
+  if (!window._lbKeyBound) {
+    window._lbKeyBound = true;
+    document.addEventListener('keydown', function(e) {
+      var b = $('img-lightbox');
+      if (!b || b.style.display === 'none' || b.classList.contains('hidden')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') lightboxNav(-1);
+      if (e.key === 'ArrowRight') lightboxNav(1);
+    });
+  }
 }
 function updateLightboxCounter() {
   const c = $('lightbox-counter');
@@ -3397,6 +3452,7 @@ function closeLightbox() {
   box.style.display = 'none';
   box.classList.add('hidden');
   document.body.style.overflow = '';
+  try { var img = $('lightbox-img'); if (img) img.src = ''; } catch (e) {}
 }
 function openLightboxFromArticle(el) {
   const src = el && el.src;
@@ -4051,12 +4107,19 @@ document.addEventListener('keydown', e => {
 });
 </script>
 
-<div id="img-lightbox" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/95" style="display:none">
-  <button type="button" onclick="closeLightbox()" class="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/10 text-white text-xl flex items-center justify-center hover:bg-white/20 z-10"><i class="fa-solid fa-xmark"></i></button>
-  <button type="button" onclick="lightboxNav(-1)" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 z-10"><i class="fa-solid fa-chevron-left"></i></button>
-  <button type="button" onclick="lightboxNav(1)" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 z-10"><i class="fa-solid fa-chevron-right"></i></button>
-  <img id="lightbox-img" src="" alt="" class="max-w-[96vw] max-h-[88vh] object-contain rounded-lg shadow-2xl" onclick="event.stopPropagation()">
-  <p id="lightbox-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm"></p>
+<div id="img-lightbox" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/95" style="display:none;touch-action:none;" onclick="if(event.target===this)closeLightbox()">
+  <!-- Top close: below notch / status bar -->
+  <button type="button" id="lightbox-close-top" onclick="event.stopPropagation();closeLightbox()" aria-label="Close"
+    class="absolute right-3 w-12 h-12 rounded-full bg-white/20 text-white text-2xl flex items-center justify-center hover:bg-white/30 z-20 shadow-lg"
+    style="top:max(12px, env(safe-area-inset-top, 0px) + 10px);"><i class="fa-solid fa-xmark"></i></button>
+  <!-- Bottom close: easy thumb reach on phone -->
+  <button type="button" id="lightbox-close-bottom" onclick="event.stopPropagation();closeLightbox()" aria-label="Close"
+    class="absolute left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-white/20 text-white text-sm font-bold flex items-center gap-2 hover:bg-white/30 z-20 shadow-lg"
+    style="bottom:max(16px, env(safe-area-inset-bottom, 0px) + 12px);"><i class="fa-solid fa-xmark"></i> ပိတ်မယ်</button>
+  <button type="button" onclick="event.stopPropagation();lightboxNav(-1)" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25 z-20"><i class="fa-solid fa-chevron-left"></i></button>
+  <button type="button" onclick="event.stopPropagation();lightboxNav(1)" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25 z-20"><i class="fa-solid fa-chevron-right"></i></button>
+  <img id="lightbox-img" src="" alt="" class="max-w-[96vw] max-h-[75vh] object-contain rounded-lg shadow-2xl select-none" style="touch-action:pan-y;" onclick="event.stopPropagation()" draggable="false">
+  <p id="lightbox-counter" class="absolute left-1/2 -translate-x-1/2 text-white/80 text-sm font-bold z-20" style="bottom:max(72px, env(safe-area-inset-bottom, 0px) + 56px);"></p>
 </div>
 
 <script>
