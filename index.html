@@ -530,17 +530,22 @@
       min-height: 220px !important;
       height: 100% !important;
     }
-    #hero-section #hero-title { font-size: clamp(1.05rem, 5vw, 1.5rem) !important; }
+    /* Font sizes from admin (inline clamp) — only constrain overflow on phone */
     #hero-section #hero-desc {
-      font-size: clamp(0.68rem, 2.6vw, 0.82rem) !important;
       line-height: 1.35 !important;
       max-width: 88% !important;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    #hero-section #hero-label { font-size: clamp(0.6rem, 2.2vw, 0.75rem) !important; }
+    #hero-section #hero-title {
+      line-height: 1.2 !important;
+      max-width: 92% !important;
+    }
+    #hero-section #hero-label {
+      max-width: 92% !important;
+    }
     #hero-img {
       object-fit: cover !important;
       object-position: center center !important;
@@ -610,10 +615,9 @@
       min-height: 300px !important;
     }
     #hero-section #hero-desc {
-      font-size: clamp(0.8rem, 1.8vw, 0.95rem) !important;
       line-height: 1.4 !important;
       max-width: 70% !important;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 4;
       display: -webkit-box;
       -webkit-box-orient: vertical;
       overflow: hidden;
@@ -845,11 +849,9 @@
       left: 4% !important;
     }
     #hero-title {
-      font-size: clamp(1.05rem, 5vw, 1.5rem) !important;
       line-height: 1.2 !important;
     }
     #hero-desc {
-      font-size: clamp(0.7rem, 2.8vw, 0.88rem) !important;
       line-height: 1.35 !important;
     }
     section h2, #upcoming-heading, #sponsor-section-heading {
@@ -858,9 +860,6 @@
     }
   }
   @media (min-width: 641px) and (max-width: 1024px) {
-    #hero-title {
-      font-size: clamp(1.5rem, 3.5vw, 2.25rem) !important;
-    }
     section h2 {
       font-size: clamp(1.2rem, 2.5vw, 1.6rem) !important;
     }
@@ -1127,7 +1126,7 @@
       <img id="upcoming-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200" alt="" class="absolute inset-0 w-full h-full object-cover">
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
       <div class="absolute inset-0 z-10" style="min-height: var(--upcoming-min-h);">
-        <span id="upcoming-label" class="absolute font-bold uppercase tracking-widest accent-text" style="left:6%; top:40%; font-size:10px;">Featured Journey</span>
+        <span id="upcoming-label" class="absolute font-bold uppercase tracking-widest accent-text" style="left:6%; top:40%; font-size:10px; display:none;"></span>
         <h3 id="upcoming-title" class="absolute text-white font-black" style="left:6%; top:55%; font-size:clamp(1rem,3.5vw,1.35rem); max-width:90%;"></h3>
         <p id="upcoming-desc" class="absolute text-white/80" style="left:6%; top:72%; font-size:13px; max-width:min(90%,28rem);"></p>
       </div>
@@ -2091,15 +2090,25 @@ function loadBlogData() {
   }
   showHeroText($('hero-label'), hero.label, false);
   if (hero.labelColor && $('hero-label')) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
-  if (hero.labelFs) setStyle($('hero-label'), 'font-size', hero.labelFs + 'px');
+  // Responsive: admin desktop size = max; phone scales smoothly (no hard CSS override)
+  if (hero.labelFs) {
+    var lfs = parseInt(hero.labelFs, 10) || 12;
+    setStyle($('hero-label'), 'font-size', 'clamp(' + Math.max(9, Math.round(lfs * 0.65)) + 'px, 2.4vw, ' + lfs + 'px)');
+  }
   showHeroText($('hero-title'), hero.title, true);
   if (hero.titleColor) setStyle($('hero-title'), 'color', hero.titleColor);
-  if (hero.titleFs) setStyle($('hero-title'), 'font-size', 'clamp(1.2rem, 4vw, ' + hero.titleFs + 'px)');
+  if (hero.titleFs) {
+    var tfs = parseInt(hero.titleFs, 10) || 28;
+    setStyle($('hero-title'), 'font-size', 'clamp(' + Math.max(14, Math.round(tfs * 0.48)) + 'px, 4.2vw, ' + tfs + 'px)');
+  }
   if (hero.titleWeight) setStyle($('hero-title'), 'font-weight', hero.titleWeight);
   if (hero.titleStyle) setStyle($('hero-title'), 'font-style', hero.titleStyle);
   showHeroText($('hero-desc'), hero.desc, false);
   if (hero.descColor) setStyle($('hero-desc'), 'color', hero.descColor);
-  if (hero.descFs) setStyle($('hero-desc'), 'font-size', hero.descFs + 'px');
+  if (hero.descFs) {
+    var dfs = parseInt(hero.descFs, 10) || 14;
+    setStyle($('hero-desc'), 'font-size', 'clamp(' + Math.max(11, Math.round(dfs * 0.72)) + 'px, 2.8vw, ' + dfs + 'px)');
+  }
   if ($('hero-sign')) {
     if (hero.sign && String(hero.sign).trim()) {
       $('hero-sign').textContent = hero.sign;
