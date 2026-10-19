@@ -482,10 +482,12 @@ header.sticky {
         <div class="flex flex-wrap items-center gap-2">
 
             <button type="button" class="btn btn-muted text-xs" onclick="refreshPagePreviewIframe()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
-            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
-            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
-            <button type="button" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
-            <a href="index.html" class="btn btn-green text-xs" onclick="try{sessionStorage.setItem('hh_from_admin','1');sessionStorage.setItem('hh_admin_return_overview','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Live</a>
+            <button type="button" id="pv-btn-phone" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('mobile')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
+            <button type="button" id="pv-btn-tablet" class="btn btn-muted text-xs" onclick="setPagePreviewWidth('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
+            <button type="button" id="pv-btn-pc" class="btn btn-muted text-xs ring-2 ring-emerald-400" onclick="setPagePreviewWidth('desktop')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
+            <button type="button" class="btn btn-green text-xs" onclick="savePagePreviewLayout()"><i class="fa-solid fa-floppy-disk mr-1"></i>Save <span id="pv-save-device-label">PC</span></button>
+            <a href="index.html" class="btn btn-muted text-xs" onclick="try{sessionStorage.setItem('hh_from_admin','1');sessionStorage.setItem('hh_admin_return_overview','1')}catch(e){}"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Open Live</a>
+            <span class="text-[11px] text-emerald-400/80 font-semibold" id="pv-edit-status">✏️ Preview ထဲ ဖိဆွဲရွှေ့ · ထောင့်အစိမ်း = ဆိုဒ် · Save နှိပ်ပါ</span>
         </div>
         <div class="flex flex-wrap gap-2 text-xs">
           <button type="button" class="btn btn-muted" onclick="showView('settings'); setTimeout(function(){var a=document.getElementById('hero-editor-anchor');if(a)a.scrollIntoView({behavior:'smooth'});},80)">✏️ Edit Hero</button>
@@ -1098,7 +1100,16 @@ header.sticky {
             <button type="button" class="btn btn-muted text-xs py-1" onclick="renderSponsorList()"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
           </div>
           <p class="tiny text-slate-400">Edit နှိပ် → အောက်က form မှာ ပြင် · Delete နှိပ် → ဖျက်</p>
+          <div class="panel editor-shell p-4 sm:p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">သိမ်းထားသော Official Sponsors · Edit / Delete</p>
+              <p class="tiny mt-0.5">တင်ပြီးသားကို Edit / Delete / ON-OFF လုပ်နိုင်သည်</p>
+            </div>
+            <button type="button" onclick="addNewSponsor()" class="btn btn-purple text-xs"><i class="fa-solid fa-plus mr-1"></i>Sponsor အသစ်</button>
+          </div>
           <div id="sponsor-list" class="space-y-2"></div>
+        </div>
         </div>
 
         <div class="panel editor-shell p-4 sm:p-5 lg:p-6 space-y-4 fold-panel open" id="sponsor-editor">
@@ -2805,28 +2816,55 @@ function enablePreviewDrag(iframe) {
   try {
     doc = iframe.contentDocument || iframe.contentWindow.document;
     win = iframe.contentWindow;
-  } catch (e) { return; }
+  } catch (e) {
+    try { toast('Preview drag မရ — same-origin လိုအပ် (index.html ကို admin နဲ့ တစ် folder ထဲထားပါ)', true); } catch (e2) {}
+    return;
+  }
   if (!doc || !doc.body) return;
 
-  // Always refresh styles (idempotent)
+  // Force viewport class on public page so device layouts apply inside iframe
+  try {
+    var dev = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
+    doc.documentElement.setAttribute('data-preview-device', dev);
+    doc.body.classList.remove('preview-device-pc', 'preview-device-tablet', 'preview-device-phone');
+    doc.body.classList.add('preview-device-' + (dev === 'mobile' ? 'phone' : dev));
+    // Help matchMedia: set visual viewport width via meta if needed
+    var mw = doc.querySelector('meta[name="viewport"]');
+    if (!mw) {
+      mw = doc.createElement('meta');
+      mw.setAttribute('name', 'viewport');
+      doc.head.appendChild(mw);
+    }
+    if (dev === 'phone') mw.setAttribute('content', 'width=390, initial-scale=1');
+    else if (dev === 'tablet') mw.setAttribute('content', 'width=768, initial-scale=1');
+    else mw.setAttribute('content', 'width=device-width, initial-scale=1');
+  } catch (e) {}
+
   var st = doc.getElementById('pv-edit-style');
   if (!st) { st = doc.createElement('style'); st.id = 'pv-edit-style'; doc.head.appendChild(st); }
   st.textContent = ''
-    + '.pv-drag{outline:2px dashed rgba(16,185,129,.9)!important;cursor:move!important;pointer-events:auto!important;z-index:60!important;touch-action:none!important;}'
-    + '.pv-drag:hover{outline-color:#34d399!important;background:rgba(16,185,129,.1)!important;}'
-    + '.pv-resize{position:absolute;right:-6px;bottom:-6px;width:16px;height:16px;background:#10b981;border:2px solid #fff;border-radius:4px;cursor:nwse-resize;z-index:70;box-shadow:0 1px 4px rgba(0,0,0,.4);}'
+    + 'html,body{cursor:default;}'
+    + '.pv-drag{outline:2px dashed rgba(16,185,129,.95)!important;cursor:move!important;pointer-events:auto!important;z-index:80!important;touch-action:none!important;position:absolute!important;}'
+    + '.pv-drag:hover{outline-color:#34d399!important;background:rgba(16,185,129,.12)!important;}'
+    + '.pv-drag.pv-selected{outline:2px solid #fbbf24!important;box-shadow:0 0 0 3px rgba(251,191,36,.35);}'
+    + '.pv-resize{position:absolute;right:-7px;bottom:-7px;width:18px;height:18px;background:#10b981;border:2px solid #fff;border-radius:4px;cursor:nwse-resize;z-index:90;box-shadow:0 1px 4px rgba(0,0,0,.45);pointer-events:auto!important;}'
     + '.pv-img-drag{outline:2px dashed rgba(56,189,248,.9)!important;cursor:grab!important;pointer-events:auto!important;}'
     + '.pv-img-drag:active{cursor:grabbing!important;}'
     + '#hero-text-box{pointer-events:none!important;}'
     + '#hero-text-box .pv-drag,#hero-btn-wrap.pv-drag{pointer-events:auto!important;}'
-    + '#pv-edit-hint{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(6,21,16,.95);color:#6ee7b7;font-size:11px;font-weight:700;padding:8px 14px;border-radius:999px;border:1px solid #10b98155;z-index:99999;pointer-events:none;white-space:nowrap;}';
+    + '#hero-section,#upcoming-banner,.sp-banner{position:relative!important;}'
+    + '#pv-edit-hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(6,21,16,.96);color:#6ee7b7;font-size:12px;font-weight:700;padding:10px 16px;border-radius:999px;border:1px solid #10b98166;z-index:99999;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4);}'
+    + '#pv-edit-bar{position:fixed;top:10px;right:10px;z-index:99999;display:flex;gap:6px;}'
+    + '#pv-edit-bar button{background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35);}';
+
   var hint = doc.getElementById('pv-edit-hint');
   if (!hint) {
     hint = doc.createElement('div');
     hint.id = 'pv-edit-hint';
     doc.body.appendChild(hint);
   }
-  hint.textContent = '✏️ စာ=ဖိဆွဲရွှေ့ · ထောင့်အစိမ်း=ဆိုဒ် · ပုံ=ဖိဆွဲရွှေ့';
+  var devLabel = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
+  hint.textContent = '✏️ ' + (devLabel === 'phone' ? 'Phone' : (devLabel === 'tablet' ? 'Tablet' : 'PC')) + ' · စာ=ဖိဆွဲ · ထောင့်အစိမ်း=ဆိုဒ် · Admin မှာ Save နှိပ်ပါ';
 
   function pctFromRect(el, parent) {
     var er = el.getBoundingClientRect();
@@ -2836,27 +2874,46 @@ function enablePreviewDrag(iframe) {
     return { x: Math.max(0, Math.min(95, x)), y: Math.max(0, Math.min(95, y)) };
   }
 
+  function selectOnly(el) {
+    try {
+      doc.querySelectorAll('.pv-selected').forEach(function(n) { n.classList.remove('pv-selected'); });
+      if (el) el.classList.add('pv-selected');
+    } catch (e) {}
+  }
+
   function makeDrag(el, parentSel, onDone, opts) {
     if (!el) return;
     opts = opts || {};
-    // allow re-bind after refresh
-    if (el._pvDragBound) {
-      el.classList.add('pv-drag');
-      return;
-    }
+    // Always re-bind: public page may re-render from Firebase
     el._pvDragBound = true;
     el.classList.add('pv-drag');
     var cs = win.getComputedStyle(el);
-    if (cs.position === 'static') el.style.position = 'absolute';
-    if (!opts.noResize && !el.querySelector(':scope > .pv-resize')) {
-      var h = doc.createElement('span');
-      h.className = 'pv-resize';
-      h.title = 'ဆိုဒ်';
-      el.appendChild(h);
+    if (cs.position === 'static' || cs.position === 'relative') {
+      // keep absolute for free move inside banner/hero
+      el.style.position = 'absolute';
     }
+    var existing = el.querySelector('.pv-resize');
+    if (!opts.noResize) {
+      if (!existing) {
+        var h = doc.createElement('span');
+        h.className = 'pv-resize';
+        h.title = 'ဆိုဒ်';
+        el.appendChild(h);
+      }
+    } else if (existing) {
+      try { existing.remove(); } catch (e) {}
+    }
+
+    // Remove old listeners by cloning if already had handlers (avoid double-fire)
+    if (el._pvDownHandler) {
+      try { el.removeEventListener('mousedown', el._pvDownHandler, true); } catch (e) {}
+      try { el.removeEventListener('touchstart', el._pvDownHandler, true); } catch (e) {}
+    }
+
     var state = null;
     function down(e) {
       var t = e.target;
+      selectOnly(el);
       var parent = parentSel ? doc.querySelector(parentSel) : (el.offsetParent || doc.body);
       if (!parent) parent = doc.body;
       var p = e.touches ? e.touches[0] : e;
@@ -2865,7 +2922,7 @@ function enablePreviewDrag(iframe) {
           type: 'resize', el: el, sy: p.clientY, sx: p.clientX,
           fs: parseFloat(win.getComputedStyle(el).fontSize) || 14,
           bw: el.offsetWidth, bh: el.offsetHeight,
-          isImg: opts.imageSize || false
+          isImg: !!opts.imageSize
         };
         e.preventDefault(); e.stopPropagation(); return;
       }
@@ -2879,6 +2936,7 @@ function enablePreviewDrag(iframe) {
         el.style.top = oy + '%';
         el.style.right = 'auto';
         el.style.bottom = 'auto';
+        el.style.transform = 'none';
       }
       state = { type: 'move', el: el, parent: parent, sx: p.clientX, sy: p.clientY, ox: ox, oy: oy };
       e.preventDefault(); e.stopPropagation();
@@ -2896,73 +2954,108 @@ function enablePreviewDrag(iframe) {
           state.el.style.maxWidth = 'none';
         } else {
           var dy = p.clientY - state.sy;
-          state.el.style.fontSize = Math.max(8, Math.min(120, state.fs + dy * 0.3)) + 'px';
+          state.el.style.fontSize = Math.max(8, Math.min(120, state.fs + dy * 0.35)) + 'px';
         }
         e.preventDefault(); return;
       }
       var pr = state.parent.getBoundingClientRect();
-      if (!pr.width || !pr.height) return;
-      var nx = Math.max(0, Math.min(95, state.ox + ((p.clientX - state.sx) / pr.width) * 100));
-      var ny = Math.max(0, Math.min(95, state.oy + ((p.clientY - state.sy) / pr.height) * 100));
+      var nx = state.ox + ((p.clientX - state.sx) / (pr.width || 1)) * 100;
+      var ny = state.oy + ((p.clientY - state.sy) / (pr.height || 1)) * 100;
+      nx = Math.max(0, Math.min(95, nx));
+      ny = Math.max(0, Math.min(95, ny));
       state.el.style.left = nx + '%';
       state.el.style.top = ny + '%';
       state.el.style.right = 'auto';
       state.el.style.bottom = 'auto';
+      state.el.style.transform = 'none';
       e.preventDefault();
     }
     function up() {
       if (!state) return;
-      var el2 = state.el; state = null;
-      if (typeof onDone === 'function') onDone(el2);
+      state = null;
+      try { if (typeof onDone === 'function') onDone(); } catch (err) { console.warn(err); }
     }
+    el._pvDownHandler = down;
     el.addEventListener('mousedown', down, true);
-    el.addEventListener('touchstart', down, { passive: false, capture: true });
-    doc.addEventListener('mousemove', move, true);
-    doc.addEventListener('touchmove', move, { passive: false, capture: true });
-    doc.addEventListener('mouseup', up, true);
-    doc.addEventListener('touchend', up, true);
-  }
-
-  function syncHeroForm(hero) {
-    function set(id, v) { var el = $(id); if (el && v != null && !isNaN(v)) el.value = v; }
-    set('hero-label-x', hero.labelX); set('hero-label-y', hero.labelY); set('hero-label-fs', hero.labelFs);
-    set('hero-title-x', hero.titleX); set('hero-title-y', hero.titleY); set('hero-title-fs', hero.titleFs);
-    set('hero-desc-x', hero.descX); set('hero-desc-y', hero.descY); set('hero-desc-fs', hero.descFs);
-    set('hero-sign-x', hero.signX); set('hero-sign-y', hero.signY);
-    set('hero-btn-x', hero.btnX); set('hero-btn-y', hero.btnY);
-    set('hero-img-x', hero.imgPosX); set('hero-img-y', hero.imgPosY);
-    if (typeof updateHeroPreview === 'function') try { updateHeroPreview(); } catch (e) {}
+    el.addEventListener('touchstart', down, { capture: true, passive: false });
+    if (!doc._pvMoveBound) {
+      doc._pvMoveBound = true;
+      doc.addEventListener('mousemove', function(e) {
+        if (window._pvActiveMove) window._pvActiveMove(e);
+      }, true);
+      doc.addEventListener('touchmove', function(e) {
+        if (window._pvActiveMove) window._pvActiveMove(e);
+      }, { capture: true, passive: false });
+      doc.addEventListener('mouseup', function() {
+        if (window._pvActiveUp) window._pvActiveUp();
+      }, true);
+      doc.addEventListener('touchend', function() {
+        if (window._pvActiveUp) window._pvActiveUp();
+      }, true);
+    }
+    // route through shared handlers for this element while dragging
+    var prevDown = down;
+    el._pvDownHandler = function(e) {
+      window._pvActiveMove = move;
+      window._pvActiveUp = function() {
+        up();
+        window._pvActiveMove = null;
+        window._pvActiveUp = null;
+      };
+      prevDown(e);
+    };
+    el.removeEventListener('mousedown', down, true);
+    el.addEventListener('mousedown', el._pvDownHandler, true);
+    el.removeEventListener('touchstart', down, true);
+    el.addEventListener('touchstart', el._pvDownHandler, { capture: true, passive: false });
   }
 
   function saveHeroFromDom() {
     var hero = {};
-    try { hero = JSON.parse(localStorage.getItem('hh_hero') || '{}') || {}; } catch (e) {}
-    function readPos(id, xk, yk, fsk) {
+    try { hero = JSON.parse(localStorage.getItem('hh_hero') || '{}') || {}; } catch (e) { hero = {}; }
+    if (!hero.layout || typeof hero.layout !== 'object') hero.layout = {};
+    var dev = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
+    if (dev === 'mobile') dev = 'phone';
+    var L = hero.layout[dev] ? Object.assign({}, hero.layout[dev]) : {};
+    function grab(id, xk, yk, fsk) {
       var el = doc.getElementById(id); if (!el) return;
-      if (el.style.left) hero[xk] = Math.round(parseFloat(el.style.left));
-      if (el.style.top) hero[yk] = Math.round(parseFloat(el.style.top));
-      if (fsk && el.style.fontSize) hero[fsk] = Math.round(parseFloat(el.style.fontSize));
+      if (el.style.left) L[xk] = Math.round(parseFloat(el.style.left));
+      if (el.style.top) L[yk] = Math.round(parseFloat(el.style.top));
+      if (fsk && el.style.fontSize) L[fsk] = Math.round(parseFloat(el.style.fontSize));
+      // also top-level for PC backward compat
+      if (dev === 'pc') {
+        if (el.style.left) hero[xk] = L[xk];
+        if (el.style.top) hero[yk] = L[yk];
+        if (fsk && el.style.fontSize) hero[fsk] = L[fsk];
+      }
     }
-    readPos('hero-label', 'labelX', 'labelY', 'labelFs');
-    readPos('hero-title', 'titleX', 'titleY', 'titleFs');
-    readPos('hero-desc', 'descX', 'descY', 'descFs');
-    readPos('hero-sign', 'signX', 'signY', null);
+    grab('hero-label', 'labelX', 'labelY', 'labelFs');
+    grab('hero-title', 'titleX', 'titleY', 'titleFs');
+    grab('hero-desc', 'descX', 'descY', 'descFs');
+    grab('hero-sign', 'signX', 'signY', 'signFs');
     var btn = doc.getElementById('hero-btn-wrap');
     if (btn) {
-      if (btn.style.left) hero.btnX = Math.round(parseFloat(btn.style.left));
-      if (btn.style.top) hero.btnY = Math.round(parseFloat(btn.style.top));
+      if (btn.style.left) { L.btnX = Math.round(parseFloat(btn.style.left)); if (dev === 'pc') hero.btnX = L.btnX; }
+      if (btn.style.top) { L.btnY = Math.round(parseFloat(btn.style.top)); if (dev === 'pc') hero.btnY = L.btnY; }
     }
     var img = doc.getElementById('hero-img');
     if (img && img.style.objectPosition) {
       var parts = String(img.style.objectPosition).replace(/%/g, '').split(/\s+/);
       if (parts.length >= 2) {
-        hero.imgPosX = Math.round(parseFloat(parts[0]));
-        hero.imgPosY = Math.round(parseFloat(parts[1]));
+        L.imgPosX = Math.round(parseFloat(parts[0]));
+        L.imgPosY = Math.round(parseFloat(parts[1]));
+        if (dev === 'pc') { hero.imgPosX = L.imgPosX; hero.imgPosY = L.imgPosY; }
       }
     }
-    localStorage.setItem('hh_hero', JSON.stringify(hero));
+    hero.layout[dev] = L;
+    try { localStorage.setItem('hh_hero', JSON.stringify(hero)); } catch (e) {}
     if (typeof write === 'function') write('hh_hero', hero);
-    syncHeroForm(hero);
+    try { if (typeof syncHeroForm === 'function') syncHeroForm(hero); } catch (e) {}
+    try { if (typeof applyDeviceLayoutToForm === 'function') applyDeviceLayoutToForm(dev); } catch (e) {}
+    try {
+      var stEl = document.getElementById('pv-edit-status');
+      if (stEl) stEl.textContent = '✓ ' + (dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC')) + ' layout ယသိမ်း (Save နှိပ်ပြီး Firebase sync)';
+    } catch (e) {}
   }
 
   function saveSponsorFromDom() {
@@ -2971,36 +3064,66 @@ function enablePreviewDrag(iframe) {
     if (!Array.isArray(list)) list = list && list.title ? [list] : [];
     if (!list.length) return;
     var s = list.find(function(x){ return x && x.active !== false; }) || list[0];
+    if (!s.layout || typeof s.layout !== 'object') s.layout = {};
+    var dev = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
+    if (dev === 'mobile') dev = 'phone';
+    var L = s.layout[dev] ? Object.assign({}, s.layout[dev]) : {};
     function grab(el, xk, yk, fsk) {
       if (!el || !el.style) return;
-      if (el.style.left) s[xk] = Math.round(parseFloat(el.style.left));
-      if (el.style.top) s[yk] = Math.round(parseFloat(el.style.top));
-      if (fsk && el.style.fontSize) s[fsk] = Math.round(parseFloat(el.style.fontSize));
+      if (el.style.left) L[xk] = Math.round(parseFloat(el.style.left));
+      if (el.style.top) L[yk] = Math.round(parseFloat(el.style.top));
+      if (fsk && el.style.fontSize) L[fsk] = Math.round(parseFloat(el.style.fontSize));
+      if (dev === 'pc') {
+        if (el.style.left) s[xk] = L[xk];
+        if (el.style.top) s[yk] = L[yk];
+        if (fsk && el.style.fontSize) s[fsk] = L[fsk];
+      }
     }
     grab(doc.querySelector('.sp-badge'), 'badgeX', 'badgeY', 'badgeFs');
     grab(doc.querySelector('.sp-title'), 'titleX', 'titleY', 'titleFs');
     grab(doc.querySelector('.sp-desc'), 'descX', 'descY', 'descFs');
-    localStorage.setItem('hh_sponsor', JSON.stringify(list));
+    var logo = doc.querySelector('.sp-logo');
+    if (logo) {
+      if (logo.style.left) L.logoX = Math.round(parseFloat(logo.style.left));
+      if (logo.style.top) L.logoY = Math.round(parseFloat(logo.style.top));
+      if (logo.style.width) L.logoSize = Math.round(parseFloat(logo.style.width));
+      if (dev === 'pc') {
+        if (L.logoX != null) s.logoX = L.logoX;
+        if (L.logoY != null) s.logoY = L.logoY;
+        if (L.logoSize != null) s.logoSize = L.logoSize;
+      }
+    }
+    s.layout[dev] = L;
+    try { localStorage.setItem('hh_sponsor', JSON.stringify(list)); } catch (e) {}
     if (typeof write === 'function') write('hh_sponsor', list);
   }
 
   function saveUpcomingFromDom() {
     var up = {};
     try { up = JSON.parse(localStorage.getItem('hh_upcoming') || '{}') || {}; } catch (e) {}
+    if (!up.layout || typeof up.layout !== 'object') up.layout = {};
+    var dev = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
+    if (dev === 'mobile') dev = 'phone';
+    var L = up.layout[dev] ? Object.assign({}, up.layout[dev]) : {};
     function grab(id, xk, yk, fsk) {
       var el = doc.getElementById(id); if (!el) return;
-      if (el.style.left) up[xk] = Math.round(parseFloat(el.style.left));
-      if (el.style.top) up[yk] = Math.round(parseFloat(el.style.top));
-      if (fsk && el.style.fontSize) up[fsk] = Math.round(parseFloat(el.style.fontSize));
+      if (el.style.left) L[xk] = Math.round(parseFloat(el.style.left));
+      if (el.style.top) L[yk] = Math.round(parseFloat(el.style.top));
+      if (fsk && el.style.fontSize) L[fsk] = Math.round(parseFloat(el.style.fontSize));
+      if (dev === 'pc') {
+        if (el.style.left) up[xk] = L[xk];
+        if (el.style.top) up[yk] = L[yk];
+        if (fsk && el.style.fontSize) up[fsk] = L[fsk];
+      }
     }
     grab('upcoming-label', 'labelX', 'labelY', 'labelFs');
     grab('upcoming-title', 'titleX', 'titleY', 'titleFs');
     grab('upcoming-desc', 'descX', 'descY', 'descFs');
-    localStorage.setItem('hh_upcoming', JSON.stringify(up));
+    up.layout[dev] = L;
+    try { localStorage.setItem('hh_upcoming', JSON.stringify(up)); } catch (e) {}
     if (typeof write === 'function') write('hh_upcoming', up);
   }
 
-  // Bind text elements (Hero / Sponsor / Upcoming)
   function bindAll() {
     ['hero-label','hero-title','hero-desc','hero-sign'].forEach(function(id) {
       makeDrag(doc.getElementById(id), '#hero-section', saveHeroFromDom);
@@ -3015,7 +3138,6 @@ function enablePreviewDrag(iframe) {
     ['upcoming-label','upcoming-title','upcoming-desc'].forEach(function(id) {
       makeDrag(doc.getElementById(id), '#upcoming-banner', saveUpcomingFromDom);
     });
-    // Hero background image: pan (object-position)
     var himg = doc.getElementById('hero-img');
     if (himg && !himg._pvImgPan) {
       himg._pvImgPan = true;
@@ -3045,10 +3167,49 @@ function enablePreviewDrag(iframe) {
     }
   }
   bindAll();
-  // Retry after content paints (Firebase/localStorage async)
-  setTimeout(bindAll, 400);
-  setTimeout(bindAll, 1200);
+  setTimeout(bindAll, 500);
+  setTimeout(bindAll, 1500);
+  setTimeout(bindAll, 3000);
+  // expose for Save button
+  window._pvSaveHeroFromDom = saveHeroFromDom;
+  window._pvSaveSponsorFromDom = saveSponsorFromDom;
+  window._pvSaveUpcomingFromDom = saveUpcomingFromDom;
+  window._pvPreviewIframe = iframe;
 }
+
+function savePagePreviewLayout() {
+  try {
+    // Pull latest positions from iframe if available
+    if (typeof window._pvSaveHeroFromDom === 'function') window._pvSaveHeroFromDom();
+    if (typeof window._pvSaveSponsorFromDom === 'function') window._pvSaveSponsorFromDom();
+    if (typeof window._pvSaveUpcomingFromDom === 'function') window._pvSaveUpcomingFromDom();
+  } catch (e) { console.warn(e); }
+  try { if (typeof stashCurrentDeviceLayout === 'function') stashCurrentDeviceLayout(); } catch (e) {}
+  var dev = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
+  // Force Firebase sync of key layouts
+  try {
+    if (typeof write === 'function') {
+      var h = null, s = null, u = null;
+      try { h = JSON.parse(localStorage.getItem('hh_hero') || '{}'); } catch (e) {}
+      try { s = JSON.parse(localStorage.getItem('hh_sponsor') || '[]'); } catch (e) {}
+      try { u = JSON.parse(localStorage.getItem('hh_upcoming') || '{}'); } catch (e) {}
+      if (h) write('hh_hero', h);
+      if (s) write('hh_sponsor', s);
+      if (u) write('hh_upcoming', u);
+    }
+  } catch (e) {}
+  try { if (typeof forceSyncAllToFirebase === 'function') forceSyncAllToFirebase(); } catch (e) {}
+  var label = dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC');
+  toast('✓ ' + label + ' layout Save ပြီး · device အခြားကို မထိ');
+  try {
+    var stEl = document.getElementById('pv-edit-status');
+    if (stEl) stEl.textContent = '✓ ' + label + ' Save ပြီး';
+    var lb = document.getElementById('pv-save-device-label');
+    if (lb) lb.textContent = label;
+  } catch (e) {}
+}
+window.savePagePreviewLayout = savePagePreviewLayout;
+window.enablePreviewDrag = enablePreviewDrag;
 
 
 /* ---- Device-specific layout mode (pc / tablet / phone) ---- */
@@ -3251,16 +3412,34 @@ function setEditDevice(mode) {
 function setPagePreviewWidth(mode) {
   const w = $('page-preview-frame-wrap');
   if (!w) return;
+  var dev = 'pc';
   if (mode === 'mobile' || mode === 'phone') {
     w.style.maxWidth = '390px';
+    dev = 'phone';
     setEditDevice('phone');
   } else if (mode === 'tablet') {
     w.style.maxWidth = '768px';
+    dev = 'tablet';
     setEditDevice('tablet');
   } else {
     w.style.maxWidth = '100%';
+    dev = 'pc';
     setEditDevice('pc');
   }
+  try {
+    ['pv-btn-phone','pv-btn-tablet','pv-btn-pc'].forEach(function(id) {
+      var b = document.getElementById(id);
+      if (!b) return;
+      b.classList.remove('ring-2', 'ring-emerald-400');
+    });
+    var map = { phone: 'pv-btn-phone', tablet: 'pv-btn-tablet', pc: 'pv-btn-pc' };
+    var active = document.getElementById(map[dev]);
+    if (active) active.classList.add('ring-2', 'ring-emerald-400');
+    var lb = document.getElementById('pv-save-device-label');
+    if (lb) lb.textContent = dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC');
+    var stEl = document.getElementById('pv-edit-status');
+    if (stEl) stEl.textContent = '✏️ ' + (dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC')) + ' mode · ဖိဆွဲရွှေ့ပြီး Save နှိပ်ပါ';
+  } catch (e) {}
   try {
     setTimeout(function() {
       if (typeof refreshPagePreviewIframe === 'function') refreshPagePreviewIframe();
