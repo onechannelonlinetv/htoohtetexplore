@@ -2904,88 +2904,34 @@ function enablePreviewDrag(iframe) {
     } catch (e) {}
   }
 
-  function makeDrag(el, parentSel, onDone, opts) {
-    if (!el) return;
-    opts = opts || {};
-    // Always re-bind: public page may re-render from Firebase
-    el._pvDragBound = true;
-    el.classList.add('pv-drag');
-    var cs = win.getComputedStyle(el);
-    if (cs.position === 'static' || cs.position === 'relative') {
-      // keep absolute for free move inside banner/hero
-      el.style.position = 'absolute';
-    }
-    var existing = el.querySelector('.pv-resize');
-    if (!opts.noResize) {
-      if (!existing) {
-        var h = doc.createElement('span');
-        h.className = 'pv-resize';
-        h.title = 'ဆိုဒ်';
-        el.appendChild(h);
-      }
-    } else if (existing) {
-      try { existing.remove(); } catch (e) {}
-    }
-
-    // Remove old listeners by cloning if already had handlers (avoid double-fire)
-    if (el._pvDownHandler) {
-      try { el.removeEventListener('mousedown', el._pvDownHandler, true); } catch (e) {}
-      try { el.removeEventListener('touchstart', el._pvDownHandler, true); } catch (e) {}
-    }
-
-    var state = null;
-    function down(e) {
-      var t = e.target;
-      selectOnly(el);
-      var parent = parentSel ? doc.querySelector(parentSel) : (el.offsetParent || doc.body);
-      if (!parent) parent = doc.body;
-      var p = e.touches ? e.touches[0] : e;
-      if (t && t.classList && t.classList.contains('pv-resize')) {
-        state = {
-          type: 'resize', el: el, sy: p.clientY, sx: p.clientX,
-          fs: parseFloat(win.getComputedStyle(el).fontSize) || 14,
-          bw: el.offsetWidth, bh: el.offsetHeight,
-          isImg: !!opts.imageSize
-        };
-        e.preventDefault(); e.stopPropagation(); return;
-      }
-      var ox, oy;
-      if (el.style.left && String(el.style.left).indexOf('%') >= 0) ox = parseFloat(el.style.left);
-      if (el.style.top && String(el.style.top).indexOf('%') >= 0) oy = parseFloat(el.style.top);
-      if (ox == null || oy == null || isNaN(ox) || isNaN(oy)) {
-        var pct = pctFromRect(el, parent);
-        ox = pct.x; oy = pct.y;
-        el.style.left = ox + '%';
-        el.style.top = oy + '%';
-        el.style.right = 'auto';
-        el.style.bottom = 'auto';
-        el.style.transform = 'none';
-      }
-      state = { type: 'move', el: el, parent: parent, sx: p.clientX, sy: p.clientY, ox: ox, oy: oy };
-      e.preventDefault(); e.stopPropagation();
-    }
-    function move(e) {
+  // Shared drag state on iframe window
+  if (!win._hhPvDrag) win._hhPvDrag = { state: null };
+  if (!doc._hhPvMoveBound) {
+    doc._hhPvMoveBound = true;
+    function onMove(e) {
+      var state = win._hhPvDrag && win._hhPvDrag.state;
       if (!state) return;
       var p = e.touches ? e.touches[0] : e;
+      if (!p) return;
       if (state.type === 'resize') {
         if (state.isImg) {
-          var dw = p.clientX - state.sx;
-          var nh = Math.max(40, Math.min(900, state.bh + (p.clientY - state.sy)));
-          var nw = Math.max(40, Math.min(1200, state.bw + dw));
+          var nw = Math.max(36, Math.min(1200, state.bw + (p.clientX - state.sx)));
+          var nh = Math.max(36, Math.min(900, state.bh + (p.clientY - state.sy)));
           state.el.style.width = nw + 'px';
           state.el.style.height = nh + 'px';
           state.el.style.maxWidth = 'none';
         } else {
           var dy = p.clientY - state.sy;
-          state.el.style.fontSize = Math.max(8, Math.min(120, state.fs + dy * 0.35)) + 'px';
+          state.el.style.fontSize = Math.max(8, Math.min(120, state.fs + dy * 0.4)) + 'px';
         }
-        e.preventDefault(); return;
+        e.preventDefault();
+        return;
       }
       var pr = state.parent.getBoundingClientRect();
-      var nx = state.ox + ((p.clientX - state.sx) / (pr.width || 1)) * 100;
-      var ny = state.oy + ((p.clientY - state.sy) / (pr.height || 1)) * 100;
-      nx = Math.max(0, Math.min(95, nx));
-      ny = Math.max(0, Math.min(95, ny));
+      var nx = state.ox + ((p.clientX - state.sx) / Math.max(1, pr.width)) * 100;
+      var ny = state.oy + ((p.clientY - state.sy) / Math.max(1, pr.height)) * 100;
+      nx = Math.max(0, Math.min(96, nx));
+      ny = Math.max(0, Math.min(96, ny));
       state.el.style.left = nx + '%';
       state.el.style.top = ny + '%';
       state.el.style.right = 'auto';
@@ -2993,44 +2939,103 @@ function enablePreviewDrag(iframe) {
       state.el.style.transform = 'none';
       e.preventDefault();
     }
-    function up() {
+    function onUp() {
+      var state = win._hhPvDrag && win._hhPvDrag.state;
       if (!state) return;
-      state = null;
-      try { if (typeof onDone === 'function') onDone(); } catch (err) { console.warn(err); }
+      var cb = state.onDone;
+      win._hhPvDrag.state = null;
+      try { if (typeof cb === 'function') cb(); } catch (err) { console.warn(err); }
+    }
+    doc.addEventListener('mousemove', onMove, true);
+    doc.addEventListener('touchmove', onMove, { capture: true, passive: false });
+    doc.addEventListener('mouseup', onUp, true);
+    doc.addEventListener('touchend', onUp, true);
+    doc.addEventListener('touchcancel', onUp, true);
+  }
+
+  function makeDrag(el, parentSel, onDone, opts) {
+    if (!el) return;
+    opts = opts || {};
+    try {
+      el.classList.add('pv-drag');
+      el.style.pointerEvents = 'auto';
+      el.style.cursor = 'move';
+      el.style.zIndex = el.style.zIndex || '40';
+      var cs = win.getComputedStyle(el);
+      if (cs.position === 'static' || !el.style.position) {
+        el.style.position = 'absolute';
+      }
+      // clear centering transforms that break % drag
+      if (el.style.transform && el.style.transform.indexOf('translate') >= 0) {
+        // keep until first drag starts
+      }
+    } catch (e) {}
+
+    // Resize handle
+    var existing = el.querySelector(':scope > .pv-resize');
+    if (!opts.noResize) {
+      if (!existing) {
+        var h = doc.createElement('span');
+        h.className = 'pv-resize';
+        h.title = 'ဆိုဒ်';
+        el.appendChild(h);
+        existing = h;
+      }
+    } else if (existing) {
+      try { existing.remove(); } catch (e) {}
+    }
+
+    if (el._pvDownHandler) {
+      try { el.removeEventListener('mousedown', el._pvDownHandler, true); } catch (e) {}
+      try { el.removeEventListener('touchstart', el._pvDownHandler, true); } catch (e) {}
+    }
+
+    function down(e) {
+      var t = e.target;
+      try { selectOnly(el); } catch (err) {}
+      var parent = null;
+      if (parentSel) {
+        parent = el.closest ? el.closest(parentSel) : null;
+        if (!parent) parent = doc.querySelector(parentSel);
+      }
+      if (!parent) parent = el.offsetParent || el.parentElement || doc.body;
+      var p = e.touches ? e.touches[0] : e;
+      if (!p) return;
+
+      if (t && t.classList && t.classList.contains('pv-resize')) {
+        win._hhPvDrag.state = {
+          type: 'resize', el: el, sx: p.clientX, sy: p.clientY,
+          fs: parseFloat(win.getComputedStyle(el).fontSize) || 14,
+          bw: el.offsetWidth, bh: el.offsetHeight,
+          isImg: !!opts.imageSize, onDone: onDone
+        };
+        e.preventDefault(); e.stopPropagation();
+        return;
+      }
+
+      var ox, oy;
+      if (el.style.left && String(el.style.left).indexOf('%') >= 0) ox = parseFloat(el.style.left);
+      if (el.style.top && String(el.style.top).indexOf('%') >= 0) oy = parseFloat(el.style.top);
+      if (ox == null || oy == null || isNaN(ox) || isNaN(oy)) {
+        var pct = pctFromRect(el, parent);
+        ox = pct.x; oy = pct.y;
+      }
+      el.style.left = ox + '%';
+      el.style.top = oy + '%';
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+      el.style.transform = 'none';
+      el.style.margin = '0';
+
+      win._hhPvDrag.state = {
+        type: 'move', el: el, parent: parent,
+        sx: p.clientX, sy: p.clientY, ox: ox, oy: oy, onDone: onDone
+      };
+      e.preventDefault(); e.stopPropagation();
     }
     el._pvDownHandler = down;
     el.addEventListener('mousedown', down, true);
     el.addEventListener('touchstart', down, { capture: true, passive: false });
-    if (!doc._pvMoveBound) {
-      doc._pvMoveBound = true;
-      doc.addEventListener('mousemove', function(e) {
-        if (window._pvActiveMove) window._pvActiveMove(e);
-      }, true);
-      doc.addEventListener('touchmove', function(e) {
-        if (window._pvActiveMove) window._pvActiveMove(e);
-      }, { capture: true, passive: false });
-      doc.addEventListener('mouseup', function() {
-        if (window._pvActiveUp) window._pvActiveUp();
-      }, true);
-      doc.addEventListener('touchend', function() {
-        if (window._pvActiveUp) window._pvActiveUp();
-      }, true);
-    }
-    // route through shared handlers for this element while dragging
-    var prevDown = down;
-    el._pvDownHandler = function(e) {
-      window._pvActiveMove = move;
-      window._pvActiveUp = function() {
-        up();
-        window._pvActiveMove = null;
-        window._pvActiveUp = null;
-      };
-      prevDown(e);
-    };
-    el.removeEventListener('mousedown', down, true);
-    el.addEventListener('mousedown', el._pvDownHandler, true);
-    el.removeEventListener('touchstart', down, true);
-    el.addEventListener('touchstart', el._pvDownHandler, { capture: true, passive: false });
   }
 
   function saveHeroFromDom() {
@@ -3342,22 +3347,60 @@ function enablePreviewDrag(iframe) {
     makeDrag(doc.getElementById('hero-btn-wrap'), '#hero-section', saveHeroFromDom, { noResize: true });
     bindImgPan(doc.getElementById('hero-img'), '#hero-section', saveHeroFromDom);
 
+    // Section heading "Our Partner" / Official Sponsors title
+    var headText = doc.getElementById('sponsor-section-heading-text') || doc.getElementById('sponsor-section-heading');
+    if (headText) {
+      try {
+        headText.style.position = 'relative';
+        headText.style.display = 'inline-block';
+        headText.style.pointerEvents = 'auto';
+        headText.style.cursor = 'move';
+      } catch (e) {}
+      makeDrag(headText, '#sponsor-container, #sponsor-section-head, section', function() {
+        // heading text content only — optional position in meta
+        try {
+          var meta = {};
+          try { meta = JSON.parse(localStorage.getItem('hh_sponsor_meta') || '{}') || {}; } catch (e) {}
+          meta.heading = (headText.innerText || headText.textContent || '').trim();
+          localStorage.setItem('hh_sponsor_meta', JSON.stringify(meta));
+          if (typeof write === 'function') write('hh_sponsor_meta', meta);
+        } catch (e) {}
+      }, { noResize: true });
+      enableTextEdit(headText, function() {
+        try {
+          var meta = {};
+          try { meta = JSON.parse(localStorage.getItem('hh_sponsor_meta') || '{}') || {}; } catch (e) {}
+          meta.heading = (headText.innerText || headText.textContent || '').trim();
+          localStorage.setItem('hh_sponsor_meta', JSON.stringify(meta));
+          if (typeof write === 'function') write('hh_sponsor_meta', meta);
+        } catch (e) {}
+      });
+    }
+
     // Official Sponsor: text + logo + button + banner photo
     doc.querySelectorAll('.sp-banner .sp-badge, .sp-banner .sp-title, .sp-banner .sp-desc').forEach(function(el) {
-      try { el.style.pointerEvents = 'auto'; el.style.zIndex = '20'; } catch (e) {}
+      try { el.style.pointerEvents = 'auto'; el.style.zIndex = '30'; el.style.position = 'absolute'; } catch (e) {}
       makeDrag(el, '.sp-banner', saveSponsorFromDom);
       enableTextEdit(el, saveSponsorFromDom);
     });
     doc.querySelectorAll('.sp-banner .sp-logo').forEach(function(el) {
-      try { el.style.pointerEvents = 'auto'; el.style.zIndex = '25'; } catch (e) {}
+      try {
+        el.style.pointerEvents = 'auto';
+        el.style.zIndex = '35';
+        el.style.position = 'absolute';
+        // ensure resize works on the logo box
+        if (el.style.transform && el.style.transform.indexOf('translate') >= 0) {
+          /* cleared on first drag */
+        }
+      } catch (e) {}
       makeDrag(el, '.sp-banner', saveSponsorFromDom, { imageSize: true });
     });
     doc.querySelectorAll('.sp-banner .sp-link').forEach(function(el) {
       try {
         el.style.pointerEvents = 'auto';
-        el.style.zIndex = '25';
+        el.style.zIndex = '35';
         el.style.position = 'absolute';
-        // prevent navigating away while editing
+        el.style.cursor = 'move';
         if (!el._pvClickBlock) {
           el._pvClickBlock = true;
           el.addEventListener('click', function(ev) { ev.preventDefault(); ev.stopPropagation(); }, true);
@@ -3409,11 +3452,49 @@ function enablePreviewDrag(iframe) {
       makeDrag(el, '#upcoming-banner', saveUpcomingFromDom);
       enableTextEdit(el, saveUpcomingFromDom);
     });
+    // Ensure upcoming logo element exists if image data present
     var upLogo = doc.getElementById('upcoming-logo');
+    if (!upLogo) {
+      try {
+        var upData = {};
+        try { upData = JSON.parse(localStorage.getItem('hh_upcoming') || '{}') || {}; } catch (e) {}
+        if (upData.logo) {
+          var ban = doc.getElementById('upcoming-banner');
+          if (ban) {
+            upLogo = doc.createElement('img');
+            upLogo.id = 'upcoming-logo';
+            upLogo.src = upData.logo;
+            upLogo.alt = '';
+            upLogo.className = 'absolute z-20 object-contain';
+            upLogo.style.left = (upData.logoX != null ? upData.logoX : 88) + '%';
+            upLogo.style.top = (upData.logoY != null ? upData.logoY : 50) + '%';
+            upLogo.style.width = (upData.logoW != null ? upData.logoW : 72) + 'px';
+            upLogo.style.height = (upData.logoH != null ? upData.logoH : 72) + 'px';
+            upLogo.style.transform = 'none';
+            ban.appendChild(upLogo);
+          }
+        }
+      } catch (e) {}
+    }
     if (upLogo) {
-      try { upLogo.style.pointerEvents = 'auto'; upLogo.style.zIndex = '25'; } catch (e) {}
+      try {
+        upLogo.style.pointerEvents = 'auto';
+        upLogo.style.zIndex = '40';
+        upLogo.style.position = 'absolute';
+        upLogo.style.cursor = 'move';
+        upLogo.style.transform = 'none';
+        // convert centered logo to top-left % if needed
+        if (!upLogo.style.left || upLogo.style.left === '') upLogo.style.left = '80%';
+        if (!upLogo.style.top || upLogo.style.top === '') upLogo.style.top = '40%';
+      } catch (e) {}
       makeDrag(upLogo, '#upcoming-banner', saveUpcomingFromDom, { imageSize: true });
     }
+    // Also any img inside upcoming-banner that looks like a logo (not the bg)
+    doc.querySelectorAll('#upcoming-banner img:not(#upcoming-img)').forEach(function(el) {
+      if (el.id === 'upcoming-logo') return;
+      try { el.style.pointerEvents = 'auto'; el.style.position = 'absolute'; el.style.zIndex = '40'; } catch (e) {}
+      makeDrag(el, '#upcoming-banner', saveUpcomingFromDom, { imageSize: true });
+    });
     bindImgPan(doc.getElementById('upcoming-img'), '#upcoming-banner', saveUpcomingFromDom);
     var upBan = doc.getElementById('upcoming-banner');
     if (upBan && !upBan.querySelector('.pv-banner-resize')) {
@@ -3447,9 +3528,22 @@ function enablePreviewDrag(iframe) {
     }
   }
   bindAll();
-  setTimeout(bindAll, 500);
-  setTimeout(bindAll, 1500);
-  setTimeout(bindAll, 3000);
+  setTimeout(bindAll, 400);
+  setTimeout(bindAll, 1000);
+  setTimeout(bindAll, 2000);
+  setTimeout(bindAll, 4000);
+  // Re-bind when public page re-renders (Firebase)
+  try {
+    if (!doc._hhPvObs) {
+      doc._hhPvObs = true;
+      var obsTimer = null;
+      var obs = new MutationObserver(function() {
+        clearTimeout(obsTimer);
+        obsTimer = setTimeout(function() { try { bindAll(); } catch (e) {} }, 300);
+      });
+      obs.observe(doc.body, { childList: true, subtree: true });
+    }
+  } catch (e) {}
   // expose for Save button
   window._pvSaveHeroFromDom = saveHeroFromDom;
   window._pvSaveSponsorFromDom = saveSponsorFromDom;
