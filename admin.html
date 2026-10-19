@@ -3362,17 +3362,14 @@ function enablePreviewDrag(iframe) {
     var z = Math.max(50, Math.min(300, Math.round(zoomPct)));
     img.dataset.imgZoom = String(z);
     img.style.objectFit = 'cover';
-    // scale from center of object-position
     if (z === 100) {
       img.style.transform = 'none';
-      img.style.width = '100%';
-      img.style.height = '100%';
     } else {
       img.style.transformOrigin = (img.style.objectPosition || '50% 50%');
       img.style.transform = 'scale(' + (z / 100) + ')';
-      img.style.width = '100%';
-      img.style.height = '100%';
     }
+    img.style.width = '100%';
+    img.style.height = '100%';
   }
   function readCoverZoom(img) {
     if (!img) return 100;
@@ -3383,103 +3380,102 @@ function enablePreviewDrag(iframe) {
     return 100;
   }
 
-  /** Pan (object-position) + Zoom (scale) for banner cover photos — NOT frame size */
+  /**
+   * Cover photo adjust (NOT banner frame):
+   * - Mouse drag on empty banner area / image = pan (object-position)
+   * - Mouse wheel on banner = zoom
+   * No Cover +/- chip UI
+   */
   function bindImgPan(img, parentSel, onDone) {
     if (!img) return;
-    var parent = parentSel ? (img.closest ? img.closest(parentSel) : null) || doc.querySelector(parentSel) : (img.parentElement || doc.body);
+    var parent = null;
+    try {
+      if (parentSel && img.closest) parent = img.closest(parentSel);
+    } catch (e) {}
+    if (!parent && parentSel) parent = doc.querySelector(parentSel);
     if (!parent) parent = img.parentElement || doc.body;
 
-    // Always re-bind covers (Firebase re-render)
     img.classList.add('pv-img-drag');
-    img.style.pointerEvents = 'auto';
-    img.style.cursor = 'grab';
     img.style.objectFit = 'cover';
-    if (!img.dataset.imgZoom) {
-      var z0 = readCoverZoom(img);
-      img.dataset.imgZoom = String(z0);
+    if (!img.dataset.imgZoom) img.dataset.imgZoom = String(readCoverZoom(img));
+
+    // Remove old Cover chip if present
+    try {
+      parent.querySelectorAll('.pv-cover-chip').forEach(function(c) { c.remove(); });
+    } catch (e) {}
+
+    if (parent._pvCoverBound) return;
+    parent._pvCoverBound = true;
+    parent.dataset.pvCoverImg = '1';
+
+    var pan = null;
+
+    function isOverlay(t) {
+      if (!t || !t.closest) return false;
+      // text / logo / button / resize handles — let those drag themselves
+      if (t.closest('.pv-drag, .pv-resize, .pv-banner-resize, .sp-badge, .sp-title, .sp-desc, .sp-logo, .sp-link, #hero-label, #hero-title, #hero-desc, #hero-sign, #hero-btn-wrap, #hero-btn, #upcoming-label, #upcoming-title, #upcoming-desc, #upcoming-logo-wrap, a, button, input, textarea')) return true;
+      return false;
     }
 
-    // Cover adjust chip on banner (visible in preview only)
-    if (parent && !parent.querySelector(':scope > .pv-cover-chip')) {
-      var chip = doc.createElement('div');
-      chip.className = 'pv-cover-chip';
-      chip.innerHTML = '<span class="pv-cover-label">📷 Cover</span><button type="button" class="pv-cover-zoom-btn" title="Zoom out">−</button><button type="button" class="pv-cover-zoom-btn" title="Zoom in">+</button>';
-      chip.style.cssText = 'position:absolute;left:6px;bottom:6px;z-index:95;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.72);border:1px solid rgba(16,185,129,.7);border-radius:8px;padding:3px 6px;font-size:11px;color:#a7f3d0;pointer-events:auto;user-select:none;';
-      parent.style.position = parent.style.position || 'relative';
-      parent.appendChild(chip);
-      var btns = chip.querySelectorAll('.pv-cover-zoom-btn');
-      if (btns[0]) btns[0].onclick = function(e) {
-        e.preventDefault(); e.stopPropagation();
-        applyCoverZoom(img, readCoverZoom(img) - 10);
-        try { onDone && onDone(); } catch (err) {}
+    function startPan(e) {
+      var t = e.target;
+      if (isOverlay(t)) return;
+      // allow start from img, gradient, or empty banner padding
+      var p = e.touches ? e.touches[0] : e;
+      if (!p) return;
+      var op = (img.style.objectPosition || '50% 50%').replace(/%/g, '').split(/\s+/);
+      pan = {
+        sx: p.clientX, sy: p.clientY,
+        ox: parseFloat(op[0]) || 50,
+        oy: parseFloat(op[1]) || 50
       };
-      if (btns[1]) btns[1].onclick = function(e) {
-        e.preventDefault(); e.stopPropagation();
-        applyCoverZoom(img, readCoverZoom(img) + 10);
-        try { onDone && onDone(); } catch (err) {}
-      };
-      // Drag on chip label = pan cover
-      var panState = null;
-      chip.querySelector('.pv-cover-label').style.cursor = 'grab';
-      chip.querySelector('.pv-cover-label').addEventListener('mousedown', function(e) {
-        var op = (img.style.objectPosition || '50% 50%').replace(/%/g, '').split(/\s+/);
-        panState = { sx: e.clientX, sy: e.clientY, ox: parseFloat(op[0]) || 50, oy: parseFloat(op[1]) || 50 };
-        e.preventDefault(); e.stopPropagation();
-      });
-      doc.addEventListener('mousemove', function(e) {
-        if (!panState) return;
-        var pr = parent.getBoundingClientRect();
-        var nx = Math.max(0, Math.min(100, panState.ox + ((e.clientX - panState.sx) / Math.max(1, pr.width)) * 100));
-        var ny = Math.max(0, Math.min(100, panState.oy + ((e.clientY - panState.sy) / Math.max(1, pr.height)) * 100));
-        img.style.objectPosition = nx + '% ' + ny + '%';
-        img.style.transformOrigin = nx + '% ' + ny + '%';
-      }, true);
-      doc.addEventListener('mouseup', function() {
-        if (!panState) return;
-        panState = null;
-        try { onDone && onDone(); } catch (err) {}
-      }, true);
+      try { parent.style.cursor = 'grabbing'; img.style.cursor = 'grabbing'; } catch (err) {}
+      e.preventDefault();
+      e.stopPropagation();
     }
 
-    // Direct drag on image (when not clicking text overlays)
-    if (!img._pvImgPan) {
-      img._pvImgPan = true;
-      var ist = null;
-      img.addEventListener('mousedown', function(e) {
-        if (e.target.closest && e.target.closest('.pv-drag, .pv-cover-chip, .pv-resize, .pv-banner-resize')) return;
-        var op = (img.style.objectPosition || '50% 50%').replace(/%/g, '').split(/\s+/);
-        ist = { sx: e.clientX, sy: e.clientY, ox: parseFloat(op[0]) || 50, oy: parseFloat(op[1]) || 50 };
-        e.preventDefault(); e.stopPropagation();
-      }, true);
-      doc.addEventListener('mousemove', function(e) {
-        if (!ist) return;
-        var pr = parent.getBoundingClientRect();
-        var nx = Math.max(0, Math.min(100, ist.ox - ((e.clientX - ist.sx) / Math.max(1, pr.width)) * 100));
-        var ny = Math.max(0, Math.min(100, ist.oy - ((e.clientY - ist.sy) / Math.max(1, pr.height)) * 100));
-        img.style.objectPosition = nx + '% ' + ny + '%';
-        img.style.transformOrigin = nx + '% ' + ny + '%';
-        e.preventDefault();
-      }, true);
-      doc.addEventListener('mouseup', function() {
-        if (!ist) return;
-        ist = null;
-        try { onDone && onDone(); } catch (err) {}
-      }, true);
+    function movePan(e) {
+      if (!pan) return;
+      var p = e.touches ? e.touches[0] : e;
+      if (!p) return;
+      var pr = parent.getBoundingClientRect();
+      // drag direction matches image move (grab the photo)
+      var nx = Math.max(0, Math.min(100, pan.ox + ((p.clientX - pan.sx) / Math.max(1, pr.width)) * 100));
+      var ny = Math.max(0, Math.min(100, pan.oy + ((p.clientY - pan.sy) / Math.max(1, pr.height)) * 100));
+      img.style.objectPosition = nx + '% ' + ny + '%';
+      img.style.transformOrigin = nx + '% ' + ny + '%';
+      e.preventDefault();
     }
 
-    // Mouse wheel on banner = zoom cover photo
-    if (parent && !parent._pvCoverWheel) {
-      parent._pvCoverWheel = true;
-      parent.addEventListener('wheel', function(e) {
-        // only when over this banner
-        e.preventDefault();
-        var delta = e.deltaY > 0 ? -8 : 8;
-        applyCoverZoom(img, readCoverZoom(img) + delta);
-        try { onDone && onDone(); } catch (err) {}
-      }, { passive: false });
+    function endPan() {
+      if (!pan) return;
+      pan = null;
+      try { parent.style.cursor = ''; img.style.cursor = 'grab'; } catch (err) {}
+      try { if (typeof onDone === 'function') onDone(); } catch (err) {}
     }
+
+    parent.addEventListener('mousedown', startPan, true);
+    parent.addEventListener('touchstart', startPan, { capture: true, passive: false });
+    doc.addEventListener('mousemove', movePan, true);
+    doc.addEventListener('touchmove', movePan, { capture: true, passive: false });
+    doc.addEventListener('mouseup', endPan, true);
+    doc.addEventListener('touchend', endPan, true);
+
+    // Wheel = zoom cover photo
+    parent.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      var delta = e.deltaY > 0 ? -8 : 8;
+      applyCoverZoom(img, readCoverZoom(img) + delta);
+      try { if (typeof onDone === 'function') onDone(); } catch (err) {}
+    }, { passive: false });
+
+    // Hint cursor on empty areas
+    try {
+      img.style.cursor = 'grab';
+      var grad = parent.querySelector('.sp-grad, .absolute.inset-0');
+      if (grad && !grad.classList.contains('pv-drag')) grad.style.cursor = 'grab';
+    } catch (e) {}
   }
-
 
   function bindAll() {
     ['hero-label','hero-title','hero-desc','hero-sign'].forEach(function(id) {
