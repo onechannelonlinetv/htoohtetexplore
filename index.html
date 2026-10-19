@@ -474,20 +474,22 @@
   .sp-banner .sp-desc { max-width: 70%; }
   @media (max-width: 640px) {
     .sp-banner {
-      width: 100% !important;
       aspect-ratio: auto !important;
       border-radius: 0.75rem !important;
       transform: none !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
     }
     .sp-banner:not([data-sized="1"]) {
+      width: 100% !important;
       height: 140px !important;
       min-height: 140px !important;
       max-height: 170px !important;
     }
     .sp-banner[data-sized="1"] {
       max-height: none !important;
+      max-width: 100% !important;
+      /* width from admin widthPct — do not force 100% */
     }
     #sponsor-container {
       padding-left: 1rem !important;
@@ -2555,7 +2557,7 @@ function loadBlogData() {
         var _baseH = Number(sponsor.height) || Number(siteSettings.sponsorHeight) || 180;
         const h = Math.max(_spMode === 'phone' ? 100 : 120, _baseH);
         let wPct = sponsor.widthPct != null ? Number(sponsor.widthPct) : 100;
-        if (_spMode === 'phone') wPct = 100;
+        // widthPct from layout — keep admin value on phone
         if (!wPct || wPct < 40) wPct = 100;
         if (wPct > 100) wPct = 100;
         const shape = sponsor.shape || 'rounded';
@@ -2602,7 +2604,7 @@ function loadBlogData() {
         const linkHtml = (sponsor.link && btnLabel)
           ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:' + btnX + '%;top:' + btnY + '%;bottom:auto">' + safe(btnLabel) + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
           : '';
-        return '<div class="sp-banner" data-sized="1" data-shape="' + safe(shape) + '" style="width:' + wPct + '%;height:' + h + 'px;min-height:' + h + 'px;max-height:none;border-radius:' + radiusDesktop + '">' +
+        return '<div class="sp-banner" data-sized="1" data-shape="' + safe(shape) + '" style="width:' + wPct + '% !important;max-width:100%;margin-left:auto;margin-right:auto;height:' + h + 'px;min-height:' + h + 'px;max-height:none;border-radius:' + radiusDesktop + '">' +
           '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
           '<div class="sp-grad"></div>' +
           (sponsor.badge ? ('<span class="sp-badge inline-block ' + (badgeBg ? '' : 'accent-bg text-black ') + 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" style="' + badgeStyle + '">' + safe(sponsor.badge) + '</span>') : '') +
