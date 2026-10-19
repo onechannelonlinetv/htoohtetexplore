@@ -5601,12 +5601,13 @@ function updateUpcomingPreview() {
   let fw = parseInt($('up-frame-w')?.value || '100', 10);
   const dev = window._upEditDevice || 'pc';
   // Phone/Tablet: frame fits device shell like Hero (1:1 what live site shows)
-  if (dev === 'phone') fw = 100;
+  // keep fw from slider on phone/tablet
   if ($('val-up-frame-h')) $('val-up-frame-h').textContent = fh + 'px';
   if ($('val-up-frame-w')) $('val-up-frame-w').textContent = fw + '%';
   if ($('up-preview-dims')) {
-    var wLabel = (dev === 'phone') ? 'Phone 390px' : (dev === 'tablet' ? 'Tablet 768px' : (fw + '%'));
-    $('up-preview-dims').textContent = wLabel + ' × ' + fh + 'px · ' + (dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC'));
+    var dName = (dev === 'phone') ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC');
+    var shellW = (dev === 'phone') ? '390' : (dev === 'tablet' ? '768' : 'full');
+    $('up-preview-dims').textContent = dName + ' shell ' + shellW + ' · banner ' + fw + '% × ' + fh + 'px';
   }
   // Phone chrome bar
   var chromeBar = $('up-chrome-bar');
@@ -5643,13 +5644,9 @@ function updateUpcomingPreview() {
     box.style.setProperty('min-height', fh + 'px', 'important');
     box.style.setProperty('max-height', 'none', 'important');
     // inside shell: always full width of shell; outer width controlled by shell + fw on PC
-    if (dev === 'phone' || dev === 'tablet') {
-      box.style.setProperty('width', '100%', 'important');
-      box.style.setProperty('max-width', '100%', 'important');
-    } else {
-      box.style.setProperty('width', fw + '%', 'important');
-      box.style.setProperty('max-width', '100%', 'important');
-    }
+    // Frame W % works for all devices (relative to device shell)
+    box.style.setProperty('width', fw + '%', 'important');
+    box.style.setProperty('max-width', '100%', 'important');
     box.style.marginLeft = 'auto';
     box.style.marginRight = 'auto';
     box.style.borderRadius = (dev === 'phone') ? '12px' : '0.5rem';
@@ -6195,8 +6192,8 @@ function saveUpcoming() {
     var _upLogo = (typeof imageFieldValue === 'function' ? imageFieldValue('up-logo') : gv('up-logo', ''));
     var _upTitle = gv('up-title', '');
     var _upActive = $('up-active') ? !!$('up-active').checked : true;
-    if (!_upTitle) _upTitle = gv('up-heading', '') || (prevUp.title || '');
-    if (!_upTitle && _upImg) _upTitle = 'Upcoming';
+    // Do NOT auto-fill on-image title with heading / 'Upcoming' (user clears title = no text on image)
+    if (!_upTitle) _upTitle = (prevUp.title || '');
     if (_upImg || _upTitle || gv('up-desc', '') || gv('up-label', '')) _upActive = true;
 
     var dev = window._upEditDevice || 'pc';
@@ -6212,7 +6209,7 @@ function saveUpcoming() {
       imgPosX: gi('up-img-x', 50), imgPosY: gi('up-img-y', 50), imgZoom: gi('up-img-zoom', 100),
       logoX: gi('up-logo-x', 88), logoY: gi('up-logo-y', 50), logoW: gi('up-logo-w', 72), logoH: gi('up-logo-h', 72)
     };
-    if (dev === 'phone') metrics.frameW = 100;
+    // frameW allowed on phone/tablet
 
     // Preserve other devices' layouts
     var layout = Object.assign({}, prevUp.layout);
@@ -6226,7 +6223,7 @@ function saveUpcoming() {
           titleX: metrics.titleX, titleY: Math.min(52, metrics.titleY), titleFs: Math.max(14, Math.round(metrics.titleFs * 0.55)),
           descX: metrics.descX, descY: metrics.descY, descFs: Math.max(10, Math.round(metrics.descFs * 0.7)),
           frameH: Math.min(160, Math.max(110, Math.round(metrics.frameH * 0.55))),
-          frameW: 100,
+          frameW: metrics.frameW != null ? metrics.frameW : 100,
           imgPosX: metrics.imgPosX, imgPosY: metrics.imgPosY, imgZoom: metrics.imgZoom,
           logoX: metrics.logoX, logoY: metrics.logoY,
           logoW: Math.max(40, Math.round(metrics.logoW * 0.55)), logoH: Math.max(40, Math.round(metrics.logoH * 0.55))
