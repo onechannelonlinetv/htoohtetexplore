@@ -3161,12 +3161,23 @@ function enablePreviewDrag(iframe) {
       }
     }
     var bg = doc.querySelector('.sp-banner .sp-bg, .sp-banner img.sp-bg');
-    if (bg && bg.style.objectPosition) {
-      var parts = String(bg.style.objectPosition).replace(/%/g, '').split(/\s+/);
-      if (parts.length >= 2) {
-        L.imgPosX = Math.round(parseFloat(parts[0]));
-        L.imgPosY = Math.round(parseFloat(parts[1]));
-        if (dev === 'pc') { s.imgPosX = L.imgPosX; s.imgPosY = L.imgPosY; }
+    if (bg) {
+      if (bg.style.objectPosition) {
+        var parts = String(bg.style.objectPosition).replace(/%/g, '').split(/\s+/);
+        if (parts.length >= 2) {
+          L.imgPosX = Math.round(parseFloat(parts[0]));
+          L.imgPosY = Math.round(parseFloat(parts[1]));
+          if (dev === 'pc') { s.imgPosX = L.imgPosX; s.imgPosY = L.imgPosY; }
+        }
+      }
+      var z = bg.dataset.imgZoom ? parseInt(bg.dataset.imgZoom, 10) : 100;
+      if (bg.style.transform) {
+        var mm = String(bg.style.transform).match(/scale\(([\d.]+)\)/);
+        if (mm) z = Math.round(parseFloat(mm[1]) * 100);
+      }
+      if (z && !isNaN(z)) {
+        L.imgZoom = z;
+        if (dev === 'pc') s.imgZoom = z;
       }
     }
     var banner = doc.querySelector('.sp-banner');
@@ -3221,12 +3232,23 @@ function enablePreviewDrag(iframe) {
       }
     }
     var uimg = doc.getElementById('upcoming-img');
-    if (uimg && uimg.style.objectPosition) {
-      var parts = String(uimg.style.objectPosition).replace(/%/g, '').split(/\s+/);
-      if (parts.length >= 2) {
-        L.imgPosX = Math.round(parseFloat(parts[0]));
-        L.imgPosY = Math.round(parseFloat(parts[1]));
-        if (dev === 'pc') { up.imgPosX = L.imgPosX; up.imgPosY = L.imgPosY; }
+    if (uimg) {
+      if (uimg.style.objectPosition) {
+        var parts = String(uimg.style.objectPosition).replace(/%/g, '').split(/\s+/);
+        if (parts.length >= 2) {
+          L.imgPosX = Math.round(parseFloat(parts[0]));
+          L.imgPosY = Math.round(parseFloat(parts[1]));
+          if (dev === 'pc') { up.imgPosX = L.imgPosX; up.imgPosY = L.imgPosY; }
+        }
+      }
+      var z = uimg.dataset.imgZoom ? parseInt(uimg.dataset.imgZoom, 10) : 100;
+      if (uimg.style.transform) {
+        var mm = String(uimg.style.transform).match(/scale\(([\d.]+)\)/);
+        if (mm) z = Math.round(parseFloat(mm[1]) * 100);
+      }
+      if (z && !isNaN(z)) {
+        L.imgZoom = z;
+        if (dev === 'pc') up.imgZoom = z;
       }
     }
     var ban = doc.getElementById('upcoming-banner');
@@ -3335,36 +3357,129 @@ function enablePreviewDrag(iframe) {
     });
   }
 
+  function applyCoverZoom(img, zoomPct) {
+    if (!img) return;
+    var z = Math.max(50, Math.min(300, Math.round(zoomPct)));
+    img.dataset.imgZoom = String(z);
+    img.style.objectFit = 'cover';
+    // scale from center of object-position
+    if (z === 100) {
+      img.style.transform = 'none';
+      img.style.width = '100%';
+      img.style.height = '100%';
+    } else {
+      img.style.transformOrigin = (img.style.objectPosition || '50% 50%');
+      img.style.transform = 'scale(' + (z / 100) + ')';
+      img.style.width = '100%';
+      img.style.height = '100%';
+    }
+  }
+  function readCoverZoom(img) {
+    if (!img) return 100;
+    if (img.dataset.imgZoom) return parseInt(img.dataset.imgZoom, 10) || 100;
+    var t = img.style.transform || '';
+    var m = t.match(/scale\(([\d.]+)\)/);
+    if (m) return Math.round(parseFloat(m[1]) * 100);
+    return 100;
+  }
+
+  /** Pan (object-position) + Zoom (scale) for banner cover photos — NOT frame size */
   function bindImgPan(img, parentSel, onDone) {
-    if (!img || img._pvImgPan) return;
-    img._pvImgPan = true;
+    if (!img) return;
+    var parent = parentSel ? (img.closest ? img.closest(parentSel) : null) || doc.querySelector(parentSel) : (img.parentElement || doc.body);
+    if (!parent) parent = img.parentElement || doc.body;
+
+    // Always re-bind covers (Firebase re-render)
     img.classList.add('pv-img-drag');
     img.style.pointerEvents = 'auto';
     img.style.cursor = 'grab';
-    var ist = null;
-    img.addEventListener('mousedown', function(e) {
-      if (e.target.closest && e.target.closest('.pv-drag')) return;
-      var op = (img.style.objectPosition || '50% 50%').replace(/%/g, '').split(/\s+/);
-      ist = { sx: e.clientX, sy: e.clientY, ox: parseFloat(op[0]) || 50, oy: parseFloat(op[1]) || 50, el: img, parentSel: parentSel };
-      e.preventDefault(); e.stopPropagation();
-    }, true);
-    function onMove(e) {
-      if (!ist || ist.el !== img) return;
-      var parent = parentSel ? doc.querySelector(parentSel) : (img.parentElement || doc.body);
-      var pr = parent ? parent.getBoundingClientRect() : { width: 800, height: 400 };
-      var nx = Math.max(0, Math.min(100, ist.ox - ((e.clientX - ist.sx) / Math.max(1, pr.width)) * 100));
-      var ny = Math.max(0, Math.min(100, ist.oy - ((e.clientY - ist.sy) / Math.max(1, pr.height)) * 100));
-      img.style.objectPosition = nx + '% ' + ny + '%';
-      e.preventDefault();
+    img.style.objectFit = 'cover';
+    if (!img.dataset.imgZoom) {
+      var z0 = readCoverZoom(img);
+      img.dataset.imgZoom = String(z0);
     }
-    function onUp() {
-      if (!ist || ist.el !== img) return;
-      ist = null;
-      try { if (typeof onDone === 'function') onDone(); } catch (e) {}
+
+    // Cover adjust chip on banner (visible in preview only)
+    if (parent && !parent.querySelector(':scope > .pv-cover-chip')) {
+      var chip = doc.createElement('div');
+      chip.className = 'pv-cover-chip';
+      chip.innerHTML = '<span class="pv-cover-label">📷 Cover</span><button type="button" class="pv-cover-zoom-btn" title="Zoom out">−</button><button type="button" class="pv-cover-zoom-btn" title="Zoom in">+</button>';
+      chip.style.cssText = 'position:absolute;left:6px;bottom:6px;z-index:95;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.72);border:1px solid rgba(16,185,129,.7);border-radius:8px;padding:3px 6px;font-size:11px;color:#a7f3d0;pointer-events:auto;user-select:none;';
+      parent.style.position = parent.style.position || 'relative';
+      parent.appendChild(chip);
+      var btns = chip.querySelectorAll('.pv-cover-zoom-btn');
+      if (btns[0]) btns[0].onclick = function(e) {
+        e.preventDefault(); e.stopPropagation();
+        applyCoverZoom(img, readCoverZoom(img) - 10);
+        try { onDone && onDone(); } catch (err) {}
+      };
+      if (btns[1]) btns[1].onclick = function(e) {
+        e.preventDefault(); e.stopPropagation();
+        applyCoverZoom(img, readCoverZoom(img) + 10);
+        try { onDone && onDone(); } catch (err) {}
+      };
+      // Drag on chip label = pan cover
+      var panState = null;
+      chip.querySelector('.pv-cover-label').style.cursor = 'grab';
+      chip.querySelector('.pv-cover-label').addEventListener('mousedown', function(e) {
+        var op = (img.style.objectPosition || '50% 50%').replace(/%/g, '').split(/\s+/);
+        panState = { sx: e.clientX, sy: e.clientY, ox: parseFloat(op[0]) || 50, oy: parseFloat(op[1]) || 50 };
+        e.preventDefault(); e.stopPropagation();
+      });
+      doc.addEventListener('mousemove', function(e) {
+        if (!panState) return;
+        var pr = parent.getBoundingClientRect();
+        var nx = Math.max(0, Math.min(100, panState.ox + ((e.clientX - panState.sx) / Math.max(1, pr.width)) * 100));
+        var ny = Math.max(0, Math.min(100, panState.oy + ((e.clientY - panState.sy) / Math.max(1, pr.height)) * 100));
+        img.style.objectPosition = nx + '% ' + ny + '%';
+        img.style.transformOrigin = nx + '% ' + ny + '%';
+      }, true);
+      doc.addEventListener('mouseup', function() {
+        if (!panState) return;
+        panState = null;
+        try { onDone && onDone(); } catch (err) {}
+      }, true);
     }
-    doc.addEventListener('mousemove', onMove, true);
-    doc.addEventListener('mouseup', onUp, true);
+
+    // Direct drag on image (when not clicking text overlays)
+    if (!img._pvImgPan) {
+      img._pvImgPan = true;
+      var ist = null;
+      img.addEventListener('mousedown', function(e) {
+        if (e.target.closest && e.target.closest('.pv-drag, .pv-cover-chip, .pv-resize, .pv-banner-resize')) return;
+        var op = (img.style.objectPosition || '50% 50%').replace(/%/g, '').split(/\s+/);
+        ist = { sx: e.clientX, sy: e.clientY, ox: parseFloat(op[0]) || 50, oy: parseFloat(op[1]) || 50 };
+        e.preventDefault(); e.stopPropagation();
+      }, true);
+      doc.addEventListener('mousemove', function(e) {
+        if (!ist) return;
+        var pr = parent.getBoundingClientRect();
+        var nx = Math.max(0, Math.min(100, ist.ox - ((e.clientX - ist.sx) / Math.max(1, pr.width)) * 100));
+        var ny = Math.max(0, Math.min(100, ist.oy - ((e.clientY - ist.sy) / Math.max(1, pr.height)) * 100));
+        img.style.objectPosition = nx + '% ' + ny + '%';
+        img.style.transformOrigin = nx + '% ' + ny + '%';
+        e.preventDefault();
+      }, true);
+      doc.addEventListener('mouseup', function() {
+        if (!ist) return;
+        ist = null;
+        try { onDone && onDone(); } catch (err) {}
+      }, true);
+    }
+
+    // Mouse wheel on banner = zoom cover photo
+    if (parent && !parent._pvCoverWheel) {
+      parent._pvCoverWheel = true;
+      parent.addEventListener('wheel', function(e) {
+        // only when over this banner
+        e.preventDefault();
+        var delta = e.deltaY > 0 ? -8 : 8;
+        applyCoverZoom(img, readCoverZoom(img) + delta);
+        try { onDone && onDone(); } catch (err) {}
+      }, { passive: false });
+    }
   }
+
 
   function bindAll() {
     ['hero-label','hero-title','hero-desc','hero-sign'].forEach(function(id) {
