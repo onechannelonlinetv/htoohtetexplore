@@ -544,19 +544,21 @@
     }
     #hero-section #hero-title {
       line-height: 1.15 !important;
-      max-width: 90% !important;
-      display: -webkit-box !important;
-      -webkit-line-clamp: 3 !important;
-      -webkit-box-orient: vertical !important;
-      overflow: hidden !important;
+      max-width: 92% !important;
+      display: block !important;
+      -webkit-line-clamp: unset !important;
+      overflow: visible !important;
+      white-space: pre-wrap !important;
+      word-break: break-word !important;
     }
     #hero-section #hero-desc {
-      line-height: 1.3 !important;
-      max-width: 90% !important;
-      display: -webkit-box !important;
-      -webkit-line-clamp: 2 !important;
-      -webkit-box-orient: vertical !important;
-      overflow: hidden !important;
+      line-height: 1.35 !important;
+      max-width: 92% !important;
+      display: block !important;
+      -webkit-line-clamp: unset !important;
+      overflow: visible !important;
+      white-space: pre-wrap !important;
+      word-break: break-word !important;
     }
     #hero-section #hero-sign {
       max-width: 85% !important;
@@ -636,11 +638,11 @@
     }
     #hero-section #hero-desc {
       line-height: 1.4 !important;
-      max-width: 70% !important;
-      -webkit-line-clamp: 4;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      max-width: 92% !important;
+      -webkit-line-clamp: unset !important;
+      display: block !important;
+      overflow: visible !important;
+      white-space: pre-wrap !important;
     }
     .sp-banner {
       max-width: 100% !important;
@@ -2286,10 +2288,20 @@ function loadBlogData() {
   }
   if ($('hero-label')) setStyle($('hero-label'), 'max-width', _isPhone ? '92%' : '95%');
   if ($('hero-desc')) {
-    setStyle($('hero-desc'), 'max-width', _isPhone ? '90%' : '95%');
-    setStyle($('hero-desc'), 'white-space', 'pre-wrap');
-    setStyle($('hero-desc'), 'overflow', 'visible');
-    setStyle($('hero-desc'), '-webkit-line-clamp', 'unset');
+    var hd = $('hero-desc');
+    hd.style.setProperty('max-width', '95%', 'important');
+    hd.style.setProperty('white-space', 'pre-wrap', 'important');
+    hd.style.setProperty('overflow', 'visible', 'important');
+    hd.style.setProperty('-webkit-line-clamp', 'unset', 'important');
+    hd.style.setProperty('display', 'block', 'important');
+    hd.style.setProperty('word-break', 'break-word', 'important');
+  }
+  if ($('hero-title')) {
+    var ht = $('hero-title');
+    ht.style.setProperty('-webkit-line-clamp', 'unset', 'important');
+    ht.style.setProperty('overflow', 'visible', 'important');
+    ht.style.setProperty('display', 'block', 'important');
+    ht.style.setProperty('white-space', 'pre-wrap', 'important');
   }
   if ($('hero-title')) {
     setStyle($('hero-title'), 'max-width', _isPhone ? '90%' : '95%');
@@ -2340,12 +2352,63 @@ function loadBlogData() {
   if ($('hero-btn-wrap')) {
     if (hero.btnText && String(hero.btnText).trim()) {
       $('hero-btn-wrap').style.display = '';
-      if ($('hero-btn')) $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
+      $('hero-btn-wrap').style.zIndex = '30';
+      $('hero-btn-wrap').style.pointerEvents = 'auto';
+      if ($('hero-btn')) {
+        $('hero-btn').innerHTML = safe(hero.btnText) + ' <i class="fa-solid fa-arrow-right text-xs"></i>';
+        $('hero-btn').style.pointerEvents = 'auto';
+        $('hero-btn').style.position = 'relative';
+        $('hero-btn').style.zIndex = '31';
+      }
     } else {
       $('hero-btn-wrap').style.display = 'none';
     }
   }
-  if (hero.btnLink && $('hero-btn')) $('hero-btn').href = hero.btnLink;
+  if ($('hero-btn')) {
+    var _btnHref = (hero.btnLink && String(hero.btnLink).trim()) ? String(hero.btnLink).trim() : '#stories';
+    $('hero-btn').setAttribute('href', _btnHref);
+    // Mobile-friendly: hash / same-page links scroll reliably (iOS sometimes ignores bare href="#id")
+    if (!$('hero-btn')._hhNavBound) {
+      $('hero-btn')._hhNavBound = true;
+      $('hero-btn').addEventListener('click', function(ev) {
+        var href = (this.getAttribute('href') || '').trim();
+        if (!href) return;
+        // External absolute URL → let browser handle
+        if (/^https?:\/\//i.test(href) && href.indexOf(location.hostname) === -1) return;
+        // Same-page hash
+        var hash = '';
+        if (href.charAt(0) === '#') hash = href.slice(1);
+        else {
+          try {
+            var u = new URL(href, location.href);
+            if (u.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '') && u.hash) {
+              hash = u.hash.replace(/^#/, '');
+            }
+          } catch (e) {}
+        }
+        if (!hash) return;
+        // strip query from hash id
+        hash = decodeURIComponent(hash.split('?')[0].split('/')[0]);
+        var target = document.getElementById(hash) || document.querySelector('[name="' + hash + '"]');
+        // common aliases
+        if (!target && hash === 'gallery') target = document.getElementById('photo-gallery-section') || document.getElementById('gal-public-grid');
+        if (!target && hash === 'stories') target = document.getElementById('stories');
+        if (!target && hash === 'upcoming') target = document.getElementById('upcoming-section');
+        if (!target && hash === 'sponsor') target = document.getElementById('sponsor-container');
+        if (!target && hash === 'home') target = document.getElementById('hero-section') || document.getElementById('home');
+        if (target) {
+          ev.preventDefault();
+          try { closeMenu(); } catch (e) {}
+          try {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.pushState(null, '', '#' + hash);
+          } catch (e) {
+            location.hash = hash;
+          }
+        }
+      }, { passive: false });
+    }
+  }
   if (hero.sign) $('hero-sign').textContent = hero.sign;
   $('hero-section').classList.toggle('hidden', hero.active === false);
 
