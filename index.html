@@ -1080,7 +1080,7 @@
     <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
       <div id="hero-text-box" class="absolute inset-0 pointer-events-none" style="z-index:5;">
         <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%; display:none;"></span>
-        <h1 id="hero-title" class="absolute text-white font-black leading-tight pointer-events-auto" style="left:8%; top:28%; max-width:min(90%,36rem); font-size:clamp(1.4rem,4vw,2.4rem); display:none;"></h1>
+        <h1 id="hero-title" class="absolute text-white font-black leading-tight pointer-events-auto" style="left:8%; top:28%; max-width:min(90%,36rem); font-size:28px; line-height:1.15; display:none;"></h1>
         <p id="hero-desc" class="absolute text-emerald-100/80 leading-relaxed pointer-events-auto" style="left:8%; top:55%; font-size:14px; max-width:min(90%,36rem); display:none;"></p>
         <div id="hero-btn-wrap" class="absolute pointer-events-auto" style="left:8%; top:72%;">
           <a id="hero-btn" href="#stories" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full shadow-lg transition">
@@ -2090,24 +2090,32 @@ function loadBlogData() {
   }
   showHeroText($('hero-label'), hero.label, false);
   if (hero.labelColor && $('hero-label')) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
-  // Responsive: admin desktop size = max; phone scales smoothly (no hard CSS override)
+  // Desktop/tablet: exact admin size (matches admin live preview). Phone: scaled clamp.
+  var _isPhone = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
   if (hero.labelFs) {
     var lfs = parseInt(hero.labelFs, 10) || 12;
-    setStyle($('hero-label'), 'font-size', 'clamp(' + Math.max(9, Math.round(lfs * 0.65)) + 'px, 2.4vw, ' + lfs + 'px)');
+    if (_isPhone) setStyle($('hero-label'), 'font-size', 'clamp(' + Math.max(9, Math.round(lfs * 0.7)) + 'px, 2.6vw, ' + lfs + 'px)');
+    else setStyle($('hero-label'), 'font-size', lfs + 'px');
   }
   showHeroText($('hero-title'), hero.title, true);
   if (hero.titleColor) setStyle($('hero-title'), 'color', hero.titleColor);
   if (hero.titleFs) {
     var tfs = parseInt(hero.titleFs, 10) || 28;
-    setStyle($('hero-title'), 'font-size', 'clamp(' + Math.max(14, Math.round(tfs * 0.48)) + 'px, 4.2vw, ' + tfs + 'px)');
+    if (_isPhone) setStyle($('hero-title'), 'font-size', 'clamp(' + Math.max(16, Math.round(tfs * 0.55)) + 'px, 5vw, ' + tfs + 'px)');
+    else setStyle($('hero-title'), 'font-size', tfs + 'px');
   }
   if (hero.titleWeight) setStyle($('hero-title'), 'font-weight', hero.titleWeight);
   if (hero.titleStyle) setStyle($('hero-title'), 'font-style', hero.titleStyle);
+  // Match admin preview max-width so wrapping looks the same
+  if ($('hero-title')) setStyle($('hero-title'), 'max-width', 'min(90%, 36rem)');
+  if ($('hero-label')) setStyle($('hero-label'), 'max-width', 'min(90%, 36rem)');
+  if ($('hero-desc')) setStyle($('hero-desc'), 'max-width', 'min(90%, 36rem)');
   showHeroText($('hero-desc'), hero.desc, false);
   if (hero.descColor) setStyle($('hero-desc'), 'color', hero.descColor);
   if (hero.descFs) {
     var dfs = parseInt(hero.descFs, 10) || 14;
-    setStyle($('hero-desc'), 'font-size', 'clamp(' + Math.max(11, Math.round(dfs * 0.72)) + 'px, 2.8vw, ' + dfs + 'px)');
+    if (_isPhone) setStyle($('hero-desc'), 'font-size', 'clamp(' + Math.max(11, Math.round(dfs * 0.75)) + 'px, 3vw, ' + dfs + 'px)');
+    else setStyle($('hero-desc'), 'font-size', dfs + 'px');
   }
   if ($('hero-sign')) {
     if (hero.sign && String(hero.sign).trim()) {
