@@ -1683,6 +1683,20 @@ const I18N = {
     goodVibes: 'Good Vibes<br>Better Journeys'
   }
 };
+
+function getPreviewDeviceMode() {
+  try {
+    var d = document.documentElement.getAttribute('data-preview-device') || document.body.getAttribute('data-preview-device');
+    if (d === 'phone' || d === 'mobile') return 'phone';
+    if (d === 'tablet') return 'tablet';
+    if (d === 'pc' || d === 'desktop') return 'pc';
+  } catch (e) {}
+  try {
+    if (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) return 'phone';
+    if (window.matchMedia && window.matchMedia('(min-width: 641px) and (max-width: 1024px)').matches) return 'tablet';
+  } catch (e) {}
+  return 'pc';
+}
 let currentLang = localStorage.getItem('hh_lang') || 'mm';
 
 function t(key) {
@@ -2089,8 +2103,9 @@ function loadBlogData() {
   (function mergeHeroDeviceLayout() {
     try {
       if (!hero.layout || typeof hero.layout !== 'object') return;
-      var isPhone = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
-      var isTablet = window.matchMedia && window.matchMedia('(min-width: 641px) and (max-width: 1024px)').matches;
+      var _pdm = (typeof getPreviewDeviceMode === 'function') ? getPreviewDeviceMode() : 'pc';
+      var isPhone = _pdm === 'phone';
+      var isTablet = _pdm === 'tablet';
       var key = isPhone ? 'phone' : (isTablet ? 'tablet' : 'pc');
       var L = hero.layout[key];
       if (!L && key !== 'pc') L = hero.layout.pc; // fallback
@@ -2117,7 +2132,7 @@ function loadBlogData() {
   showHeroText($('hero-label'), hero.label, false);
   if (hero.labelColor && $('hero-label')) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
   // PC/Tablet: exact admin px. Phone: use layout.phone exact sizes if set; else scale.
-  var _isPhone = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+  var _isPhone = (typeof getPreviewDeviceMode === 'function' ? getPreviewDeviceMode() : 'pc') === 'phone';
   var _hasPhoneLayout = !!(hero.layout && hero.layout.phone);
   var _deskH = parseInt(hero.frameH, 10) || 480;
   var _phoneScale = Math.min(0.65, Math.max(0.42, 260 / _deskH));
@@ -3828,4 +3843,3 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
- 
