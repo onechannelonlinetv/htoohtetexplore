@@ -3461,9 +3461,13 @@ function updateHeroPreview() {
     var lv = ($('hero-label')?.value || '').trim();
     setHeroPrevText(label, lv, 'hero-label');
     label.style.color = $('hero-label-color')?.value || '#f5c518';
-    label.style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
+    // Real size = live site (WYSIWYG). Preview box is wide enough.
+    label.style.fontSize = lfs + 'px';
     label.style.fontWeight = $('hero-label-weight')?.value || '700';
     label.style.fontStyle = $('hero-label-style')?.value || 'normal';
+    label.style.letterSpacing = '0.2em';
+    label.style.textTransform = 'uppercase';
+    label.style.maxWidth = 'min(90%, 36rem)';
     label.style.left = lx + '%'; label.style.top = ly + '%';
     label.style.display = lv ? '' : 'none';
   }
@@ -3473,7 +3477,9 @@ function updateHeroPreview() {
     title.style.color = $('hero-title-color')?.value || '#ffffff';
     title.style.fontWeight = $('hero-title-weight')?.value || '900';
     title.style.fontStyle = $('hero-title-style')?.value || 'normal';
-    title.style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
+    title.style.fontSize = tfs + 'px';
+    title.style.lineHeight = '1.15';
+    title.style.maxWidth = 'min(90%, 36rem)';
     title.style.left = tx + '%'; title.style.top = ty + '%';
     title.style.display = raw ? '' : 'none';
   }
@@ -3481,9 +3487,11 @@ function updateHeroPreview() {
     var dv = ($('hero-desc')?.value || '').trim();
     setHeroPrevText(desc, dv, 'hero-desc');
     desc.style.color = $('hero-desc-color')?.value || 'rgba(255,255,255,0.7)';
-    desc.style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
+    desc.style.fontSize = dfs + 'px';
     desc.style.fontWeight = $('hero-desc-weight')?.value || '400';
     desc.style.fontStyle = $('hero-desc-style')?.value || 'normal';
+    desc.style.lineHeight = '1.35';
+    desc.style.maxWidth = 'min(90%, 36rem)';
     desc.style.left = dx + '%'; desc.style.top = dy + '%';
     desc.style.display = dv ? '' : 'none';
   }
