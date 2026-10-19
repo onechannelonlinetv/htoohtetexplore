@@ -1391,9 +1391,9 @@ header.sticky {
                 <img id="up-prev-logo" src="" alt="" class="w-full h-full object-contain">
                 <span class="sp-resize-handle" data-resize="up-logo" title="ဆိုဒ်"></span>
               </div>
-              <div id="up-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1 font-bold uppercase" style="left:6%;top:40%;color:#f5c518;font-size:11px;touch-action:none;">Featured<span class="sp-resize-handle" data-resize="up-label" title="ဆိုဒ်"></span></div>
-              <div id="up-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1 font-black text-white" style="left:6%;top:55%;font-size:14px;touch-action:none;max-width:85%;">Title<span class="sp-resize-handle" data-resize="up-title" title="ဆိုဒ်"></span></div>
-              <div id="up-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1 text-white/70" style="left:6%;top:72%;font-size:11px;touch-action:none;max-width:80%;">Desc<span class="sp-resize-handle" data-resize="up-desc" title="ဆိုဒ်"></span></div>
+              <div id="up-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1 font-bold uppercase" style="left:6%;top:40%;color:#f5c518;font-size:11px;touch-action:none;;display:none"><span class="sp-resize-handle" data-resize="up-label" title="ဆိုဒ်"></span></div>
+              <div id="up-prev-title" class="absolute z-10 cursor-move border border-dashed border-white/30 rounded px-1 font-black text-white" style="left:6%;top:55%;font-size:14px;touch-action:none;max-width:85%;;display:none"><span class="sp-resize-handle" data-resize="up-title" title="ဆိုဒ်"></span></div>
+              <div id="up-prev-desc" class="absolute z-10 cursor-move border border-dashed border-white/20 rounded px-1 text-white/70" style="left:6%;top:72%;font-size:11px;touch-action:none;max-width:80%;;display:none"><span class="sp-resize-handle" data-resize="up-desc" title="ဆိုဒ်"></span></div>
             </div>
             <p class="tiny">စာ / Logo = ဖိဆွဲရွှေ့ · ထောင့်စတုရန်း = အကြီးအသေး · နောက်ခံပုံ = ဖိဆွဲ ချိန်</p>
           </div>
@@ -4738,7 +4738,8 @@ function loadStoriesSectionForm() {
 function setUpPrevText(el, text, resizeKey) {
   if (!el) return;
   var handle = el.querySelector('.sp-resize-handle');
-  el.textContent = text || '';
+  var t = (text == null ? '' : String(text)).trim();
+  el.textContent = t;
   if (handle) el.appendChild(handle);
   else if (resizeKey) {
     var h = document.createElement('span');
@@ -4747,6 +4748,7 @@ function setUpPrevText(el, text, resizeKey) {
     h.title = 'ဆိုဒ်';
     el.appendChild(h);
   }
+  el.style.display = t ? '' : 'none';
 }
 function updateUpcomingPreview() {
   const box = $('up-live-preview');
@@ -4787,7 +4789,7 @@ function updateUpcomingPreview() {
   const title = $('up-prev-title');
   const desc = $('up-prev-desc');
   if (label) {
-    setUpPrevText(label, $('up-label')?.value || 'Featured', 'up-label');
+    setUpPrevText(label, $('up-label')?.value || '', 'up-label');
     label.style.color = $('up-label-color')?.value || '#f5c518';
     label.style.fontSize = pos('up-label-fs', 11) + 'px';
     label.style.fontWeight = $('up-label-weight')?.value || '700';
@@ -4796,7 +4798,7 @@ function updateUpcomingPreview() {
   }
   if ($('val-up-label-fs')) $('val-up-label-fs').textContent = pos('up-label-fs', 11) + 'px';
   if (title) {
-    setUpPrevText(title, $('up-title')?.value || 'Title', 'up-title');
+    setUpPrevText(title, $('up-title')?.value || '', 'up-title');
     title.style.color = $('up-title-color')?.value || '#ffffff';
     title.style.fontWeight = $('up-title-weight')?.value || '900';
     title.style.fontStyle = $('up-title-style')?.value || 'normal';
@@ -4806,7 +4808,7 @@ function updateUpcomingPreview() {
     title.style.left = tx + '%'; title.style.top = ty + '%';
   }
   if (desc) {
-    setUpPrevText(desc, $('up-desc')?.value || 'Desc', 'up-desc');
+    setUpPrevText(desc, $('up-desc')?.value || '', 'up-desc');
     desc.style.color = $('up-desc-color')?.value || '#cccccc';
     desc.style.fontWeight = $('up-desc-weight')?.value || '400';
     desc.style.fontStyle = $('up-desc-style')?.value || 'normal';
