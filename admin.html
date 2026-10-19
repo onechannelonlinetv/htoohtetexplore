@@ -2864,7 +2864,7 @@ function enablePreviewDrag(iframe) {
     doc.body.appendChild(hint);
   }
   var devLabel = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
-  hint.textContent = '✏️ ' + (devLabel === 'phone' ? 'Phone' : (devLabel === 'tablet' ? 'Tablet' : 'PC')) + ' · စာ=ဖိဆွဲ · ထောင့်အစိမ်း=ဆိုဒ် · Admin မှာ Save နှိပ်ပါ';
+  hint.textContent = '✏️ ' + (devLabel === 'phone' ? 'Phone' : (devLabel === 'tablet' ? 'Tablet' : 'PC')) + ' · ဖိဆွဲ=ရွှေ့ · နှစ်ချက်နှိပ်=စာပြင် (Enter=ကြောင်းသစ်) · Save နှိပ်ပါ';
 
   function pctFromRect(el, parent) {
     var er = el.getBoundingClientRect();
@@ -3124,9 +3124,100 @@ function enablePreviewDrag(iframe) {
     if (typeof write === 'function') write('hh_upcoming', up);
   }
 
+  function enableTextEdit(el, onSave) {
+    if (!el || el._pvEditBound) return;
+    el._pvEditBound = true;
+    el.title = (el.title || '') + ' · နှစ်ချက်နှိပ် = စာပြင် (Enter = ကြောင်းသစ်)';
+    el.addEventListener('dblclick', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      el.contentEditable = 'true';
+      el.classList.add('pv-selected');
+      el.style.outline = '2px solid #fbbf24';
+      el.style.cursor = 'text';
+      el.style.whiteSpace = 'pre-wrap';
+      el.focus();
+      try {
+        var range = doc.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        var sel = win.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch (err) {}
+    }, true);
+    el.addEventListener('keydown', function(e) {
+      if (el.contentEditable !== 'true') return;
+      // Allow Enter for newline; Stop drag keys from interfering
+      e.stopPropagation();
+      if (e.key === 'Escape') {
+        el.contentEditable = 'false';
+        el.style.cursor = 'move';
+        el.blur();
+      }
+    }, true);
+    el.addEventListener('blur', function() {
+      if (el.contentEditable !== 'true') return;
+      el.contentEditable = 'false';
+      el.style.cursor = 'move';
+      el.style.outline = '';
+      // Save text back to storage
+      try {
+        var txt = el.innerText || el.textContent || '';
+        var id = el.id || '';
+        if (id === 'hero-label' || id === 'hero-title' || id === 'hero-desc' || id === 'hero-sign') {
+          var hero = {};
+          try { hero = JSON.parse(localStorage.getItem('hh_hero') || '{}') || {}; } catch (e2) {}
+          if (id === 'hero-label') hero.label = txt;
+          if (id === 'hero-title') hero.title = txt;
+          if (id === 'hero-desc') hero.desc = txt;
+          if (id === 'hero-sign') hero.sign = txt;
+          localStorage.setItem('hh_hero', JSON.stringify(hero));
+          if (typeof write === 'function') write('hh_hero', hero);
+          // sync form fields if present
+          try {
+            if (id === 'hero-label' && $('hero-label')) $('hero-label').value = txt;
+            if (id === 'hero-title' && $('hero-title')) $('hero-title').value = txt;
+            if (id === 'hero-desc' && $('hero-desc')) $('hero-desc').value = txt;
+            if (id === 'hero-sign' && $('hero-sign')) $('hero-sign').value = txt;
+          } catch (e3) {}
+        }
+        if (id === 'upcoming-label' || id === 'upcoming-title' || id === 'upcoming-desc') {
+          var up = {};
+          try { up = JSON.parse(localStorage.getItem('hh_upcoming') || '{}') || {}; } catch (e2) {}
+          if (id === 'upcoming-label') up.label = txt;
+          if (id === 'upcoming-title') up.title = txt;
+          if (id === 'upcoming-desc') up.desc = txt;
+          localStorage.setItem('hh_upcoming', JSON.stringify(up));
+          if (typeof write === 'function') write('hh_upcoming', up);
+          try {
+            if (id === 'upcoming-label' && $('up-label')) $('up-label').value = txt;
+            if (id === 'upcoming-title' && $('up-title')) $('up-title').value = txt;
+            if (id === 'upcoming-desc' && $('up-desc')) $('up-desc').value = txt;
+          } catch (e3) {}
+        }
+        if (el.classList.contains('sp-title') || el.classList.contains('sp-desc') || el.classList.contains('sp-badge')) {
+          var list = [];
+          try { list = JSON.parse(localStorage.getItem('hh_sponsor') || '[]') || []; } catch (e2) {}
+          if (!Array.isArray(list)) list = [];
+          var s = list.find(function(x){ return x && x.active !== false; }) || list[0];
+          if (s) {
+            if (el.classList.contains('sp-title')) s.title = txt;
+            if (el.classList.contains('sp-desc')) s.desc = txt;
+            if (el.classList.contains('sp-badge')) s.badge = txt;
+            localStorage.setItem('hh_sponsor', JSON.stringify(list));
+            if (typeof write === 'function') write('hh_sponsor', list);
+          }
+        }
+      } catch (err) { console.warn(err); }
+      try { if (typeof onSave === 'function') onSave(); } catch (e4) {}
+    });
+  }
+
   function bindAll() {
     ['hero-label','hero-title','hero-desc','hero-sign'].forEach(function(id) {
-      makeDrag(doc.getElementById(id), '#hero-section', saveHeroFromDom);
+      var el = doc.getElementById(id);
+      makeDrag(el, '#hero-section', saveHeroFromDom);
+      enableTextEdit(el, saveHeroFromDom);
     });
     makeDrag(doc.getElementById('hero-btn-wrap'), '#hero-section', saveHeroFromDom, { noResize: true });
     doc.querySelectorAll('.sp-badge, .sp-title, .sp-desc').forEach(function(el) {
@@ -3136,7 +3227,12 @@ function enablePreviewDrag(iframe) {
       makeDrag(el, '.sp-banner', saveSponsorFromDom, { imageSize: true });
     });
     ['upcoming-label','upcoming-title','upcoming-desc'].forEach(function(id) {
-      makeDrag(doc.getElementById(id), '#upcoming-banner', saveUpcomingFromDom);
+      var el = doc.getElementById(id);
+      makeDrag(el, '#upcoming-banner', saveUpcomingFromDom);
+      enableTextEdit(el, saveUpcomingFromDom);
+    });
+    doc.querySelectorAll('.sp-badge, .sp-title, .sp-desc').forEach(function(el) {
+      enableTextEdit(el, saveSponsorFromDom);
     });
     var himg = doc.getElementById('hero-img');
     if (himg && !himg._pvImgPan) {
@@ -5764,9 +5860,14 @@ function saveUpcoming() {
     var _upTitle = gv('up-title', '');
     var _upActive = $('up-active') ? !!$('up-active').checked : true;
     if (_upImg || _upTitle || gv('up-desc', '')) _upActive = true;
-    write('hh_upcoming', {
+    var prevUp = {};
+    try { prevUp = (typeof read === 'function' ? read('hh_upcoming', {}) : JSON.parse(localStorage.getItem('hh_upcoming') || '{}')) || {}; } catch (e) { prevUp = {}; }
+    var _titleFinal = _upTitle || gv('up-heading', '') || (prevUp.title || '');
+    if (!_titleFinal && _upImg) _titleFinal = 'Upcoming';
+    if (_upImg || _titleFinal || gv('up-desc', '') || gv('up-label', '')) _upActive = true;
+    var payload = {
       active: _upActive,
-      heading: gv('up-heading', 'Upcoming'),
+      heading: gv('up-heading', 'Upcoming') || 'Upcoming',
       sectionTitle: gv('up-section-title', ''),
       label: gv('up-label', ''),
       labelColor: gv('up-label-color', '#f5c518'),
@@ -5775,7 +5876,7 @@ function saveUpcoming() {
       labelStyle: gv('up-label-style', 'normal'),
       labelX: gi('up-label-x', 6),
       labelY: gi('up-label-y', 40),
-      title: _upTitle,
+      title: _titleFinal,
       titleColor: gv('up-title-color', '#ffffff'),
       titleFs: gi('up-title-fs', 22),
       titleWeight: gv('up-title-weight', '900'),
@@ -5792,16 +5893,32 @@ function saveUpcoming() {
       frameH: gi('up-frame-h', 160),
       frameW: gi('up-frame-w', 100),
       overlayOpacity: gi('up-overlay', 55),
-      image: _upImg,
+      image: _upImg || prevUp.image || '',
       imgPosX: gi('up-img-x', 50),
       imgPosY: gi('up-img-y', 50),
       imgZoom: gi('up-img-zoom', 100),
-      logo: _upLogo,
+      logo: _upLogo || prevUp.logo || '',
       logoX: gi('up-logo-x', 88),
       logoY: gi('up-logo-y', 50),
       logoW: gi('up-logo-w', 72),
-      logoH: gi('up-logo-h', 72)
-    });
+      logoH: gi('up-logo-h', 72),
+      layout: (prevUp.layout && typeof prevUp.layout === 'object') ? prevUp.layout : {}
+    };
+    // Also stamp current device layout snapshot
+    try {
+      var dev = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
+      if (dev === 'mobile') dev = 'phone';
+      payload.layout[dev] = {
+        labelX: payload.labelX, labelY: payload.labelY, labelFs: payload.labelFs,
+        titleX: payload.titleX, titleY: payload.titleY, titleFs: payload.titleFs,
+        descX: payload.descX, descY: payload.descY, descFs: payload.descFs,
+        frameH: payload.frameH, frameW: payload.frameW,
+        imgPosX: payload.imgPosX, imgPosY: payload.imgPosY, imgZoom: payload.imgZoom,
+        logoX: payload.logoX, logoY: payload.logoY, logoW: payload.logoW, logoH: payload.logoH
+      };
+    } catch (e) {}
+    write('hh_upcoming', payload);
+    try { localStorage.setItem('hh_upcoming', JSON.stringify(payload)); } catch (e) {}
     if (typeof updateUpcomingPreview === 'function') updateUpcomingPreview();
     if (typeof renderUpcomingSavedCard === 'function') renderUpcomingSavedCard();
     toast(_upImg ? 'Upcoming သိမ်းပြီး (ပုံပါ)' : 'Upcoming သိမ်းပြီးပါပြီ');
