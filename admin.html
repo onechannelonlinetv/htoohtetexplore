@@ -2958,6 +2958,33 @@ function enablePreviewDrag(iframe) {
   function makeDrag(el, parentSel, onDone, opts) {
     if (!el) return;
     opts = opts || {};
+    // IMG cannot host children — wrap so resize handle works
+    try {
+      if (el.tagName === 'IMG' && opts.imageSize) {
+        var parent = el.parentElement;
+        if (parent && parent.classList && parent.classList.contains('pv-img-wrap')) {
+          el = parent;
+        } else if (parent) {
+          var wrap = doc.createElement('div');
+          wrap.className = 'pv-img-wrap';
+          wrap.style.position = 'absolute';
+          wrap.style.left = el.style.left || '0%';
+          wrap.style.top = el.style.top || '0%';
+          wrap.style.width = el.style.width || (el.offsetWidth + 'px') || '72px';
+          wrap.style.height = el.style.height || (el.offsetHeight + 'px') || '72px';
+          wrap.style.zIndex = '50';
+          wrap.style.transform = 'none';
+          el.style.width = '100%';
+          el.style.height = '100%';
+          el.style.position = 'static';
+          el.style.objectFit = 'contain';
+          el.style.pointerEvents = 'none';
+          parent.insertBefore(wrap, el);
+          wrap.appendChild(el);
+          el = wrap;
+        }
+      }
+    } catch (e) {}
     try {
       el.classList.add('pv-drag');
       el.style.pointerEvents = 'auto';
@@ -2967,21 +2994,17 @@ function enablePreviewDrag(iframe) {
       if (cs.position === 'static' || !el.style.position) {
         el.style.position = 'absolute';
       }
-      // clear centering transforms that break % drag
-      if (el.style.transform && el.style.transform.indexOf('translate') >= 0) {
-        // keep until first drag starts
-      }
     } catch (e) {}
 
-    // Resize handle
-    var existing = el.querySelector(':scope > .pv-resize');
+    // Resize handle (only on element that can have children)
+    var existing = null;
+    try { existing = el.querySelector(':scope > .pv-resize'); } catch (e) { existing = el.querySelector('.pv-resize'); }
     if (!opts.noResize) {
-      if (!existing) {
+      if (!existing && el.appendChild) {
         var h = doc.createElement('span');
         h.className = 'pv-resize';
         h.title = 'ဆိုဒ်';
-        el.appendChild(h);
-        existing = h;
+        try { el.appendChild(h); existing = h; } catch (e) {}
       }
     } else if (existing) {
       try { existing.remove(); } catch (e) {}
@@ -3130,9 +3153,11 @@ function enablePreviewDrag(iframe) {
     if (btn) {
       if (btn.style.left) L.btnX = Math.round(parseFloat(btn.style.left));
       if (btn.style.top) L.btnY = Math.round(parseFloat(btn.style.top));
+      if (btn.style.fontSize) L.btnFs = Math.round(parseFloat(btn.style.fontSize));
       if (dev === 'pc') {
         if (L.btnX != null) s.btnX = L.btnX;
         if (L.btnY != null) s.btnY = L.btnY;
+        if (L.btnFs != null) s.btnFs = L.btnFs;
       }
     }
     var bg = doc.querySelector('.sp-banner .sp-bg, .sp-banner img.sp-bg');
@@ -3182,7 +3207,7 @@ function enablePreviewDrag(iframe) {
     grab('upcoming-label', 'labelX', 'labelY', 'labelFs');
     grab('upcoming-title', 'titleX', 'titleY', 'titleFs');
     grab('upcoming-desc', 'descX', 'descY', 'descFs');
-    var logo = doc.getElementById('upcoming-logo');
+    var logo = doc.getElementById('upcoming-logo-wrap') || doc.getElementById('upcoming-logo');
     if (logo) {
       if (logo.style.left) L.logoX = Math.round(parseFloat(logo.style.left));
       if (logo.style.top) L.logoY = Math.round(parseFloat(logo.style.top));
@@ -3350,36 +3375,7 @@ function enablePreviewDrag(iframe) {
     makeDrag(doc.getElementById('hero-btn-wrap'), '#hero-section', saveHeroFromDom, { noResize: true });
     bindImgPan(doc.getElementById('hero-img'), '#hero-section', saveHeroFromDom);
 
-    // Section heading "Our Partner" / Official Sponsors title
-    var headText = doc.getElementById('sponsor-section-heading-text') || doc.getElementById('sponsor-section-heading');
-    if (headText) {
-      try {
-        headText.style.position = 'relative';
-        headText.style.display = 'inline-block';
-        headText.style.pointerEvents = 'auto';
-        headText.style.cursor = 'move';
-      } catch (e) {}
-      makeDrag(headText, '#sponsor-container, #sponsor-section-head, section', function() {
-        // heading text content only — optional position in meta
-        try {
-          var meta = {};
-          try { meta = JSON.parse(localStorage.getItem('hh_sponsor_meta') || '{}') || {}; } catch (e) {}
-          meta.heading = (headText.innerText || headText.textContent || '').trim();
-          localStorage.setItem('hh_sponsor_meta', JSON.stringify(meta));
-          if (typeof write === 'function') write('hh_sponsor_meta', meta);
-        } catch (e) {}
-      }, { noResize: true });
-      enableTextEdit(headText, function() {
-        try {
-          var meta = {};
-          try { meta = JSON.parse(localStorage.getItem('hh_sponsor_meta') || '{}') || {}; } catch (e) {}
-          meta.heading = (headText.innerText || headText.textContent || '').trim();
-          localStorage.setItem('hh_sponsor_meta', JSON.stringify(meta));
-          if (typeof write === 'function') write('hh_sponsor_meta', meta);
-        } catch (e) {}
-      });
-    }
-
+    // Section headings stay fixed — not draggable
     // Official Sponsor: text + logo + button + banner photo
     doc.querySelectorAll('.sp-banner .sp-badge, .sp-banner .sp-title, .sp-banner .sp-desc').forEach(function(el) {
       try { el.style.pointerEvents = 'auto'; el.style.zIndex = '30'; el.style.position = 'absolute'; } catch (e) {}
@@ -3409,7 +3405,8 @@ function enablePreviewDrag(iframe) {
           el.addEventListener('click', function(ev) { ev.preventDefault(); ev.stopPropagation(); }, true);
         }
       } catch (e) {}
-      makeDrag(el, '.sp-banner', saveSponsorFromDom, { noResize: true });
+      // Resize = font-size (Visit button size)
+      makeDrag(el, '.sp-banner', saveSponsorFromDom, { noResize: false });
     });
     doc.querySelectorAll('.sp-banner .sp-bg, .sp-banner img.sp-bg').forEach(function(el) {
       bindImgPan(el, '.sp-banner', saveSponsorFromDom);
@@ -3455,49 +3452,72 @@ function enablePreviewDrag(iframe) {
       makeDrag(el, '#upcoming-banner', saveUpcomingFromDom);
       enableTextEdit(el, saveUpcomingFromDom);
     });
-    // Ensure upcoming logo element exists if image data present
-    var upLogo = doc.getElementById('upcoming-logo');
-    if (!upLogo) {
+    // Upcoming logo WRAP (div) — img cannot hold resize handle
+    var upLogoWrap = doc.getElementById('upcoming-logo-wrap');
+    var upLogoImg = doc.getElementById('upcoming-logo');
+    if (!upLogoWrap) {
       try {
         var upData = {};
         try { upData = JSON.parse(localStorage.getItem('hh_upcoming') || '{}') || {}; } catch (e) {}
-        if (upData.logo) {
-          var ban = doc.getElementById('upcoming-banner');
-          if (ban) {
-            upLogo = doc.createElement('img');
-            upLogo.id = 'upcoming-logo';
-            upLogo.src = upData.logo;
-            upLogo.alt = '';
-            upLogo.className = 'absolute z-20 object-contain';
-            upLogo.style.left = (upData.logoX != null ? upData.logoX : 88) + '%';
-            upLogo.style.top = (upData.logoY != null ? upData.logoY : 50) + '%';
-            upLogo.style.width = (upData.logoW != null ? upData.logoW : 72) + 'px';
-            upLogo.style.height = (upData.logoH != null ? upData.logoH : 72) + 'px';
-            upLogo.style.transform = 'none';
-            ban.appendChild(upLogo);
+        var ban = doc.getElementById('upcoming-banner');
+        if (ban && (upData.logo || upLogoImg)) {
+          upLogoWrap = doc.createElement('div');
+          upLogoWrap.id = 'upcoming-logo-wrap';
+          upLogoWrap.className = 'absolute z-20';
+          upLogoWrap.style.position = 'absolute';
+          upLogoWrap.style.left = (upData.logoX != null ? upData.logoX : 80) + '%';
+          upLogoWrap.style.top = (upData.logoY != null ? upData.logoY : 40) + '%';
+          upLogoWrap.style.width = (upData.logoW != null ? upData.logoW : 72) + 'px';
+          upLogoWrap.style.height = (upData.logoH != null ? upData.logoH : 72) + 'px';
+          upLogoWrap.style.transform = 'none';
+          if (upLogoImg) {
+            // move existing img into wrap
+            upLogoImg.style.width = '100%';
+            upLogoImg.style.height = '100%';
+            upLogoImg.style.position = 'static';
+            upLogoImg.style.objectFit = 'contain';
+            upLogoImg.classList.add('pointer-events-none');
+            ban.insertBefore(upLogoWrap, upLogoImg);
+            upLogoWrap.appendChild(upLogoImg);
+          } else if (upData.logo) {
+            upLogoImg = doc.createElement('img');
+            upLogoImg.id = 'upcoming-logo';
+            upLogoImg.src = upData.logo;
+            upLogoImg.alt = '';
+            upLogoImg.className = 'w-full h-full object-contain pointer-events-none';
+            upLogoWrap.appendChild(upLogoImg);
+            ban.appendChild(upLogoWrap);
           }
         }
       } catch (e) {}
     }
-    if (upLogo) {
+    if (upLogoWrap) {
       try {
-        upLogo.style.pointerEvents = 'auto';
-        upLogo.style.zIndex = '40';
-        upLogo.style.position = 'absolute';
-        upLogo.style.cursor = 'move';
-        upLogo.style.transform = 'none';
-        // convert centered logo to top-left % if needed
-        if (!upLogo.style.left || upLogo.style.left === '') upLogo.style.left = '80%';
-        if (!upLogo.style.top || upLogo.style.top === '') upLogo.style.top = '40%';
+        upLogoWrap.style.pointerEvents = 'auto';
+        upLogoWrap.style.zIndex = '50';
+        upLogoWrap.style.position = 'absolute';
+        upLogoWrap.style.cursor = 'move';
+        upLogoWrap.style.transform = 'none';
+        upLogoWrap.style.boxSizing = 'border-box';
       } catch (e) {}
-      makeDrag(upLogo, '#upcoming-banner', saveUpcomingFromDom, { imageSize: true });
+      makeDrag(upLogoWrap, '#upcoming-banner', saveUpcomingFromDom, { imageSize: true });
+    } else if (upLogoImg && upLogoImg.tagName === 'IMG') {
+      // fallback: wrap on the fly
+      try {
+        var ban2 = doc.getElementById('upcoming-banner') || upLogoImg.parentElement;
+        var w2 = doc.createElement('div');
+        w2.id = 'upcoming-logo-wrap';
+        w2.className = 'absolute z-20';
+        w2.style.cssText = 'position:absolute;left:' + (upLogoImg.style.left || '80%') + ';top:' + (upLogoImg.style.top || '40%') + ';width:' + (upLogoImg.style.width || '72px') + ';height:' + (upLogoImg.style.height || '72px') + ';transform:none;z-index:50;cursor:move;';
+        upLogoImg.style.width = '100%';
+        upLogoImg.style.height = '100%';
+        upLogoImg.style.position = 'static';
+        upLogoImg.classList.add('pointer-events-none');
+        if (upLogoImg.parentNode) upLogoImg.parentNode.insertBefore(w2, upLogoImg);
+        w2.appendChild(upLogoImg);
+        makeDrag(w2, '#upcoming-banner', saveUpcomingFromDom, { imageSize: true });
+      } catch (e) {}
     }
-    // Also any img inside upcoming-banner that looks like a logo (not the bg)
-    doc.querySelectorAll('#upcoming-banner img:not(#upcoming-img)').forEach(function(el) {
-      if (el.id === 'upcoming-logo') return;
-      try { el.style.pointerEvents = 'auto'; el.style.position = 'absolute'; el.style.zIndex = '40'; } catch (e) {}
-      makeDrag(el, '#upcoming-banner', saveUpcomingFromDom, { imageSize: true });
-    });
     bindImgPan(doc.getElementById('upcoming-img'), '#upcoming-banner', saveUpcomingFromDom);
     var upBan = doc.getElementById('upcoming-banner');
     if (upBan && !upBan.querySelector('.pv-banner-resize')) {
