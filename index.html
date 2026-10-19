@@ -2656,7 +2656,7 @@ function loadBlogData() {
         var btnX = sponsor.btnX != null ? sponsor.btnX : 4;
         var btnY = sponsor.btnY != null ? sponsor.btnY : 88;
         const linkHtml = (sponsor.link && btnLabel)
-          ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-5 py-2.5 rounded-full transition" style="left:' + btnX + '% !important;top:' + btnY + '% !important;right:auto !important;bottom:auto !important;position:absolute !important;transform:none !important;">' + safe(btnLabel) + ' <i class="fa-solid fa-arrow-right text-xs"></i></a>'
+          ? '<a href="' + safe(sponsor.link) + '" target="_blank" rel="noopener" class="sp-link inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold rounded-full transition" style="left:' + btnX + '% !important;top:' + btnY + '% !important;right:auto !important;bottom:auto !important;position:absolute !important;transform:none !important;font-size:' + (sponsor.btnFs != null ? sponsor.btnFs : 14) + 'px !important;padding:' + Math.max(4, Math.round((sponsor.btnFs != null ? sponsor.btnFs : 14) * 0.45)) + 'px ' + Math.max(10, Math.round((sponsor.btnFs != null ? sponsor.btnFs : 14) * 1.1)) + 'px !important;">' + safe(btnLabel) + ' <i class="fa-solid fa-arrow-right" style="font-size:0.85em"></i></a>'
           : '';
         return '<div class="sp-banner" data-sized="1" data-shape="' + safe(shape) + '" style="width:' + wPct + '% !important;max-width:100%;margin-left:auto;margin-right:auto;height:' + h + 'px;min-height:' + h + 'px;max-height:none;border-radius:' + radiusDesktop + '">' +
           '<img class="sp-bg" src="' + safe(bgSrc) + '" alt="" style="object-position:' + bgPos + '">' +
@@ -2776,25 +2776,47 @@ function loadBlogData() {
       }
     }
     // Logo on upcoming banner if present
+    var upLogoWrap = $('upcoming-logo-wrap');
     var upLogoEl = $('upcoming-logo');
     if (up.logo && (String(up.logo).indexOf('http') === 0 || String(up.logo).indexOf('data:image/') === 0)) {
-      if (!upLogoEl) {
+      var banner = $('upcoming-banner');
+      if (!upLogoWrap && banner) {
+        upLogoWrap = document.createElement('div');
+        upLogoWrap.id = 'upcoming-logo-wrap';
+        upLogoWrap.className = 'absolute z-20';
+        upLogoWrap.style.boxSizing = 'border-box';
+        banner.appendChild(upLogoWrap);
+      }
+      if (upLogoWrap && !upLogoEl) {
         upLogoEl = document.createElement('img');
         upLogoEl.id = 'upcoming-logo';
         upLogoEl.alt = '';
-        upLogoEl.className = 'absolute z-20 object-contain';
-        var banner = $('upcoming-banner');
-        if (banner) banner.appendChild(upLogoEl);
+        upLogoEl.className = 'w-full h-full object-contain pointer-events-none';
+        upLogoWrap.appendChild(upLogoEl);
+      } else if (upLogoEl && upLogoWrap && upLogoEl.parentElement !== upLogoWrap) {
+        upLogoEl.className = 'w-full h-full object-contain pointer-events-none';
+        upLogoEl.style.width = '100%';
+        upLogoEl.style.height = '100%';
+        upLogoEl.style.position = 'static';
+        upLogoWrap.appendChild(upLogoEl);
       }
-      upLogoEl.src = up.logo;
-      upLogoEl.style.display = '';
-      upLogoEl.style.left = (up.logoX != null ? up.logoX : 88) + '%';
-      upLogoEl.style.top = (up.logoY != null ? up.logoY : 50) + '%';
-      upLogoEl.style.width = (up.logoW != null ? up.logoW : 72) + 'px';
-      upLogoEl.style.height = (up.logoH != null ? up.logoH : 72) + 'px';
-      upLogoEl.style.transform = 'none'; // top-left % for editor compatibility
-    } else if (upLogoEl) {
-      upLogoEl.style.display = 'none';
+      if (upLogoEl) upLogoEl.src = up.logo;
+      if (upLogoWrap) {
+        upLogoWrap.style.display = '';
+        upLogoWrap.style.position = 'absolute';
+        upLogoWrap.style.left = (up.logoX != null ? up.logoX : 88) + '%';
+        upLogoWrap.style.top = (up.logoY != null ? up.logoY : 50) + '%';
+        upLogoWrap.style.width = (up.logoW != null ? up.logoW : 72) + 'px';
+        upLogoWrap.style.height = (up.logoH != null ? up.logoH : 72) + 'px';
+        upLogoWrap.style.transform = 'none';
+        upLogoWrap.style.right = 'auto';
+        upLogoWrap.style.bottom = 'auto';
+        upLogoWrap.style.zIndex = '25';
+        upLogoWrap.style.pointerEvents = 'auto';
+      }
+    } else {
+      if (upLogoWrap) upLogoWrap.style.display = 'none';
+      else if (upLogoEl) upLogoEl.style.display = 'none';
     }
   }
 
