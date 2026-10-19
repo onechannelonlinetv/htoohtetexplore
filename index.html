@@ -530,34 +530,29 @@
       min-height: 220px !important;
       height: 100% !important;
     }
-    /* Phone hero text: prevent overflow past short banner */
+    /* Phone: keep admin positions; only limit overflow */
     #hero-section #hero-label {
-      max-width: 90% !important;
-      letter-spacing: 0.08em !important;
+      max-width: 92% !important;
       line-height: 1.25 !important;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
     #hero-section #hero-title {
-      line-height: 1.2 !important;
-      max-width: 88% !important;
+      line-height: 1.15 !important;
+      max-width: 90% !important;
       display: -webkit-box !important;
-      -webkit-line-clamp: 2 !important;
+      -webkit-line-clamp: 3 !important;
       -webkit-box-orient: vertical !important;
       overflow: hidden !important;
     }
     #hero-section #hero-desc {
       line-height: 1.3 !important;
-      max-width: 85% !important;
+      max-width: 90% !important;
       display: -webkit-box !important;
       -webkit-line-clamp: 2 !important;
       -webkit-box-orient: vertical !important;
       overflow: hidden !important;
     }
     #hero-section #hero-sign {
-      max-width: 80% !important;
-      font-size: 10px !important;
+      max-width: 85% !important;
     }
     #hero-img {
       object-fit: cover !important;
@@ -829,7 +824,9 @@
   }
   #hero-text-box {
     z-index: 5;
-    width: min(92%, var(--hero-text-maxw, 36rem));
+    inset: 0;
+    width: 100%;
+    height: 100%;
   }
   @media (max-width: 640px) {
     /* override admin desktop height — phone fit only */
@@ -1090,19 +1087,20 @@
     <img id="hero-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Hero" class="absolute inset-0 w-full h-full object-cover">
     <div id="hero-overlay-main" class="hero-overlay absolute inset-0"></div>
     <div id="hero-overlay-top" class="absolute inset-0"></div>
-    <div id="hero-content-wrap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full" style="min-height: var(--hero-min-h); position:relative;">
-      <div id="hero-text-box" class="absolute inset-0 pointer-events-none" style="z-index:5;">
-        <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%; display:none;"></span>
-        <h1 id="hero-title" class="absolute text-white font-black leading-tight pointer-events-auto" style="left:8%; top:28%; max-width:min(90%,36rem); font-size:28px; line-height:1.15; display:none;"></h1>
-        <p id="hero-desc" class="absolute text-emerald-100/80 leading-relaxed pointer-events-auto" style="left:8%; top:55%; font-size:14px; max-width:min(90%,36rem); display:none;"></p>
-        <div id="hero-btn-wrap" class="absolute pointer-events-auto" style="left:8%; top:72%;">
-          <a id="hero-btn" href="#stories" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full shadow-lg transition">
-            Explore My Journey <i class="fa-solid fa-arrow-right text-xs"></i>
-          </a>
-        </div>
-        <p id="hero-sign" class="absolute text-emerald-400/60 text-sm italic font-medium pointer-events-auto" style="left:8%; top:85%;">— Htoo Htet</p>
+    <!-- Text layer = full hero (same coordinate space as Admin Live Preview) -->
+    <div id="hero-text-box" class="absolute inset-0 z-10 pointer-events-none" style="z-index:5;">
+      <span id="hero-label" class="absolute accent-text font-bold tracking-[0.2em] uppercase pointer-events-auto" style="left:8%; top:18%; font-size:12px; max-width:90%; display:none;"></span>
+      <h1 id="hero-title" class="absolute text-white font-black leading-tight pointer-events-auto" style="left:8%; top:28%; max-width:min(90%,36rem); font-size:28px; line-height:1.15; display:none;"></h1>
+      <p id="hero-desc" class="absolute text-emerald-100/80 leading-relaxed pointer-events-auto" style="left:8%; top:55%; font-size:14px; max-width:min(90%,36rem); display:none;"></p>
+      <div id="hero-btn-wrap" class="absolute pointer-events-auto" style="left:8%; top:72%;">
+        <a id="hero-btn" href="#stories" class="inline-flex items-center gap-2 accent-bg hover:brightness-110 text-black font-bold text-sm px-6 py-3 rounded-full shadow-lg transition">
+          Explore My Journey <i class="fa-solid fa-arrow-right text-xs"></i>
+        </a>
       </div>
+      <p id="hero-sign" class="absolute text-emerald-400/60 text-sm italic font-medium pointer-events-auto" style="left:8%; top:85%; display:none;"></p>
     </div>
+    <!-- keep id for JS frame height helpers -->
+    <div id="hero-content-wrap" class="pointer-events-none absolute inset-0" style="min-height: var(--hero-min-h);" aria-hidden="true"></div>
   </section>
 
   <!-- PROUD SPONSORS (supports admin drag positions: x/y/size + hh_proud_meta) -->
@@ -2103,11 +2101,11 @@ function loadBlogData() {
   }
   showHeroText($('hero-label'), hero.label, false);
   if (hero.labelColor && $('hero-label')) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
-  // PC = exact admin size (matches preview). Phone = scale by hero height ratio + hard caps.
+  // PC/Tablet: exact admin px (WYSIWYG with Live Preview).
+  // Phone: same layout % ; font scaled by height ratio so text stays neat in short banner.
   var _isPhone = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
   var _deskH = parseInt(hero.frameH, 10) || 480;
-  var _phoneH = 260; // matches CSS max hero height on phone
-  var _phoneScale = Math.min(0.72, Math.max(0.38, _phoneH / _deskH));
+  var _phoneScale = Math.min(0.65, Math.max(0.42, 260 / _deskH));
   function phoneFs(adminPx, minPx, maxPx) {
     var n = Math.round((parseInt(adminPx, 10) || minPx) * _phoneScale);
     return Math.max(minPx, Math.min(maxPx, n));
@@ -2115,32 +2113,33 @@ function loadBlogData() {
   if (hero.labelFs) {
     var lfs = parseInt(hero.labelFs, 10) || 12;
     if (_isPhone) {
-      setStyle($('hero-label'), 'font-size', phoneFs(lfs, 9, 11) + 'px');
-      setStyle($('hero-label'), 'letter-spacing', '0.08em');
+      setStyle($('hero-label'), 'font-size', phoneFs(lfs, 9, 12) + 'px');
+      setStyle($('hero-label'), 'letter-spacing', '0.1em');
     } else {
       setStyle($('hero-label'), 'font-size', lfs + 'px');
+      setStyle($('hero-label'), 'letter-spacing', '0.2em');
     }
   }
   showHeroText($('hero-title'), hero.title, true);
   if (hero.titleColor) setStyle($('hero-title'), 'color', hero.titleColor);
   if (hero.titleFs) {
     var tfs = parseInt(hero.titleFs, 10) || 28;
-    if (_isPhone) setStyle($('hero-title'), 'font-size', phoneFs(tfs, 15, 20) + 'px');
+    if (_isPhone) setStyle($('hero-title'), 'font-size', phoneFs(tfs, 14, 20) + 'px');
     else setStyle($('hero-title'), 'font-size', tfs + 'px');
   }
   if (hero.titleWeight) setStyle($('hero-title'), 'font-weight', hero.titleWeight);
   if (hero.titleStyle) setStyle($('hero-title'), 'font-style', hero.titleStyle);
   if ($('hero-title')) {
-    setStyle($('hero-title'), 'max-width', _isPhone ? '88%' : 'min(90%, 36rem)');
-    setStyle($('hero-title'), 'line-height', _isPhone ? '1.2' : '1.15');
+    setStyle($('hero-title'), 'max-width', _isPhone ? '90%' : 'min(90%, 36rem)');
+    setStyle($('hero-title'), 'line-height', '1.15');
   }
-  if ($('hero-label')) setStyle($('hero-label'), 'max-width', _isPhone ? '90%' : 'min(90%, 36rem)');
-  if ($('hero-desc')) setStyle($('hero-desc'), 'max-width', _isPhone ? '85%' : 'min(90%, 36rem)');
+  if ($('hero-label')) setStyle($('hero-label'), 'max-width', _isPhone ? '92%' : 'min(90%, 36rem)');
+  if ($('hero-desc')) setStyle($('hero-desc'), 'max-width', _isPhone ? '90%' : 'min(90%, 36rem)');
   showHeroText($('hero-desc'), hero.desc, false);
   if (hero.descColor) setStyle($('hero-desc'), 'color', hero.descColor);
   if (hero.descFs) {
     var dfs = parseInt(hero.descFs, 10) || 14;
-    if (_isPhone) setStyle($('hero-desc'), 'font-size', phoneFs(dfs, 10, 12) + 'px');
+    if (_isPhone) setStyle($('hero-desc'), 'font-size', phoneFs(dfs, 10, 13) + 'px');
     else setStyle($('hero-desc'), 'font-size', dfs + 'px');
   }
   if ($('hero-sign')) {
@@ -2160,42 +2159,16 @@ function loadBlogData() {
     if (x != null) setStyle(el, 'left', x + '%');
     if (y != null) setStyle(el, 'top', y + '%');
   }
-  // Phone: compact stack so text fits inside short hero (no overflow past image)
-  if (_isPhone) {
-    var hasLabel = !!(hero.label && String(hero.label).trim());
-    var hasTitle = !!(hero.title && String(hero.title).trim());
-    var hasDesc = !!(hero.desc && String(hero.desc).trim());
-    var hasSign = !!(hero.sign && String(hero.sign).trim());
-    var lx = 4, ty = 12;
-    if (hasLabel) {
-      posEl('hero-label', 4, 10);
-      ty = 22;
-    }
-    if (hasTitle) {
-      posEl('hero-title', 4, ty);
-      ty = hasLabel ? 48 : 28;
-    }
-    if (hasDesc) {
-      posEl('hero-desc', 4, Math.min(ty, 58));
-      ty = Math.min(ty + 18, 72);
-    }
-    if (hasSign) posEl('hero-sign', 4, Math.min(ty, 78));
-  } else {
-    posEl('hero-label', hero.labelX != null ? hero.labelX : (hero.textX != null ? hero.textX : 8), hero.labelY != null ? hero.labelY : 18);
-    posEl('hero-title', hero.titleX != null ? hero.titleX : (hero.textX != null ? hero.textX : 8), hero.titleY != null ? hero.titleY : 28);
-    posEl('hero-desc', hero.descX != null ? hero.descX : 8, hero.descY != null ? hero.descY : 55);
-    posEl('hero-sign', hero.signX != null ? hero.signX : 8, hero.signY != null ? hero.signY : 85);
-  }
-  // Explore button: admin btnX/btnY on PC; phone always bottom-left
+  // Same % coordinates as Admin Live Preview (full hero width)
+  posEl('hero-label', hero.labelX != null ? hero.labelX : (hero.textX != null ? hero.textX : 8), hero.labelY != null ? hero.labelY : 18);
+  posEl('hero-title', hero.titleX != null ? hero.titleX : (hero.textX != null ? hero.textX : 8), hero.titleY != null ? hero.titleY : 28);
+  posEl('hero-desc', hero.descX != null ? hero.descX : 8, hero.descY != null ? hero.descY : 55);
+  posEl('hero-sign', hero.signX != null ? hero.signX : 8, hero.signY != null ? hero.signY : 85);
+  // Button: admin position; phone pins to bottom if default
   const btnWrap = $('hero-btn-wrap');
   const hasBtnPos = hero.btnX != null || hero.btnY != null;
   if (btnWrap) {
-    if (_isPhone) {
-      btnWrap.setAttribute('data-pos', 'default');
-      btnWrap.style.left = '4%';
-      btnWrap.style.top = 'auto';
-      btnWrap.style.bottom = '8%';
-    } else if (hasBtnPos) {
+    if (hasBtnPos) {
       btnWrap.removeAttribute('data-pos');
       posEl('hero-btn-wrap', hero.btnX != null ? hero.btnX : 4, hero.btnY != null ? hero.btnY : 88);
       btnWrap.style.bottom = '';
