@@ -665,6 +665,10 @@ header.sticky {
             <div class="flex flex-wrap items-center gap-3 px-1 mb-2">
               <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider shrink-0">Live Preview · Hero</span>
               <span class="tiny ml-auto" id="hero-preview-dims">100% × 360px</span>
+              <span class="text-[10px] font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-700/40" id="edit-device-badge">PC</span>
+              <button type="button" data-device-btn="pc" class="btn btn-muted text-[10px] py-1 px-2 ring-2 ring-emerald-400" onclick="setEditDevice('pc'); try{updateHeroPreview()}catch(e){}"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
+              <button type="button" data-device-btn="tablet" class="btn btn-muted text-[10px] py-1 px-2" onclick="setEditDevice('tablet'); try{updateHeroPreview()}catch(e){}"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
+              <button type="button" data-device-btn="phone" class="btn btn-muted text-[10px] py-1 px-2" onclick="setEditDevice('phone'); try{updateHeroPreview()}catch(e){}"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
               <button type="button" class="btn btn-muted text-[10px] py-1 px-2" onclick="var p=document.getElementById('hero-phone-wrap');if(p)p.classList.toggle('hidden')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone Preview</button>
             </div>
 
@@ -673,6 +677,7 @@ header.sticky {
               <div class="min-w-0 w-full">
                 <p class="text-[10px] font-bold text-slate-400 mb-1.5"><i class="fa-solid fa-desktop mr-1"></i>PC / Tablet</p>
                 <div id="hero-live-preview" class="relative overflow-hidden border border-slate-700 select-none" style="width:100%;max-width:100%;height:360px;background:linear-gradient(135deg,#0a1f18,#061510);cursor:grab;border-radius:12px;">
+                  <span id="hero-frame-resize" class="sp-resize-handle" data-resize="hero-frame" title="Banner height" style="right:4px;bottom:4px;width:18px;height:18px;z-index:80;cursor:ns-resize;"></span>
                   <div id="hero-prev-overlay" class="absolute inset-0 pointer-events-none z-[1]" style="pointer-events:none!important" style="background:linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.25), transparent)"></div>
                   <p class="absolute bottom-1 right-2 text-[9px] text-white/40 z-20 pointer-events-none">ဖိဆွဲရွှေ့ · ထောင့် = ဆိုဒ်</p>
                   <div id="hero-prev-label" class="absolute z-10 cursor-move border border-dashed border-yellow-400/40 rounded px-1.5 py-0.5 font-bold uppercase tracking-widest" style="left:8%;top:18%;color:#f5c518;font-size:10px;touch-action:none;display:none;"><span class="sp-resize-handle" data-resize="hero-label" title="ဆိုဒ်"></span></div>
@@ -1141,6 +1146,7 @@ header.sticky {
               <div>
                 <p class="text-[10px] font-bold text-slate-400 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-desktop"></i> PC / Desktop</p>
                 <div id="sponsor-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none" style="min-height:140px;height:160px;background:linear-gradient(90deg,#111,#333);cursor:grab;">
+                  <span class="sp-resize-handle" data-resize="sp-frame" title="Banner height" style="right:4px;bottom:4px;width:18px;height:18px;z-index:80;cursor:ns-resize;"></span>
                   <div id="sp-prev-overlay" class="absolute inset-0 pointer-events-none z-[1]" style="background:linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.25), transparent)"></div>
                   <span id="sp-prev-badge" class="absolute z-10 inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow-400 text-black cursor-move" style="left:4%;top:12%;">Official Sponsor<span class="sp-resize-handle" data-resize="badge" title="ဆိုဒ်"></span></span>
                   <div id="sp-prev-title" class="absolute z-10 text-base font-black text-white cursor-move" style="left:4%;top:38%;max-width:none;white-space:nowrap;">Sponsor Title<span class="sp-resize-handle" data-resize="title" title="ဆိုဒ်"></span></div>
@@ -1386,6 +1392,7 @@ header.sticky {
             <input type="hidden" id="up-logo-h" value="72">
 
             <div id="up-live-preview" class="relative overflow-hidden rounded-lg border border-slate-700 select-none mx-auto" style="width:100%;height:160px;background:#1a1a1a;cursor:grab;">
+              <span class="sp-resize-handle" data-resize="up-frame" title="Banner height" style="right:4px;bottom:4px;width:18px;height:18px;z-index:80;cursor:ns-resize;"></span>
               <div id="up-prev-overlay" class="absolute inset-0 pointer-events-none" style="z-index:1;background:linear-gradient(to top,rgba(0,0,0,.55),rgba(0,0,0,.15));"></div>
               <div id="up-prev-logo-wrap" class="absolute z-20 border border-dashed border-sky-400/50 rounded-lg overflow-hidden bg-black/30 cursor-move hidden" style="left:88%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%);touch-action:none;">
                 <img id="up-prev-logo" src="" alt="" class="w-full h-full object-contain">
@@ -3044,12 +3051,124 @@ function enablePreviewDrag(iframe) {
 }
 
 
+/* ---- Device-specific layout mode (pc / tablet / phone) ---- */
+window._editDevice = window._editDevice || 'pc';
+function getEditDevice() {
+  return window._editDevice || 'pc';
+}
+function setEditDevice(mode) {
+  // normalize: mobile -> phone
+  if (mode === 'mobile') mode = 'phone';
+  if (mode !== 'pc' && mode !== 'tablet' && mode !== 'phone') mode = 'pc';
+  // stash current form values into layout[prev] before switching
+  try { stashCurrentDeviceLayout(); } catch (e) {}
+  window._editDevice = mode;
+  try { applyDeviceLayoutToForm(mode); } catch (e) {}
+  try {
+    document.querySelectorAll('[data-device-btn]').forEach(function(b) {
+      b.classList.toggle('ring-2', b.getAttribute('data-device-btn') === mode);
+      b.classList.toggle('ring-emerald-400', b.getAttribute('data-device-btn') === mode);
+    });
+  } catch (e) {}
+  var badge = document.getElementById('edit-device-badge');
+  if (badge) badge.textContent = mode === 'phone' ? 'Phone' : (mode === 'tablet' ? 'Tablet' : 'PC');
+  // Visual width of hero live preview box
+  try {
+    var box = document.getElementById('hero-live-preview');
+    if (box) {
+      if (mode === 'phone') { box.style.maxWidth = '390px'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto'; }
+      else if (mode === 'tablet') { box.style.maxWidth = '768px'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto'; }
+      else { box.style.maxWidth = '100%'; box.style.marginLeft = ''; box.style.marginRight = ''; }
+    }
+  } catch (e) {}
+}
+
+var LAYOUT_POS_KEYS = [
+  'labelX','labelY','labelFs','titleX','titleY','titleFs','descX','descY','descFs',
+  'signX','signY','signFs','btnX','btnY','imgPosX','imgPosY','imgZoom',
+  'frameH','frameW','frameWUnit','frameAlign','overlayOpacity'
+];
+
+function extractLayoutFromForm() {
+  function gi2(id, d) {
+    var el = document.getElementById(id);
+    if (!el) return d;
+    var n = parseInt(el.value, 10);
+    return isNaN(n) ? d : n;
+  }
+  function gs(id, d) {
+    var el = document.getElementById(id);
+    return el ? (el.value || d) : d;
+  }
+  return {
+    labelX: gi2('hero-label-x', 8), labelY: gi2('hero-label-y', 18), labelFs: gi2('hero-label-fs', 12),
+    titleX: gi2('hero-title-x', 8), titleY: gi2('hero-title-y', 32), titleFs: gi2('hero-title-fs', 28),
+    descX: gi2('hero-desc-x', 8), descY: gi2('hero-desc-y', 55), descFs: gi2('hero-desc-fs', 14),
+    signX: gi2('hero-sign-x', 8), signY: gi2('hero-sign-y', 78), signFs: gi2('hero-sign-fs', 12),
+    btnX: gi2('hero-btn-x', 4), btnY: gi2('hero-btn-y', 88),
+    imgPosX: gi2('hero-img-x', 50), imgPosY: gi2('hero-img-y', 50), imgZoom: gi2('hero-img-zoom', 100),
+    frameH: gi2('hero-frame-h', 360), frameW: gi2('hero-frame-w', 100),
+    frameWUnit: gs('hero-frame-w-unit', '%'), frameAlign: gs('hero-frame-align', 'center'),
+    overlayOpacity: gi2('hero-overlay', 45)
+  };
+}
+
+function stashCurrentDeviceLayout() {
+  var hero = {};
+  try { hero = JSON.parse(localStorage.getItem('hh_hero') || '{}') || {}; } catch (e) { hero = {}; }
+  if (!hero.layout || typeof hero.layout !== 'object') hero.layout = {};
+  var dev = getEditDevice();
+  hero.layout[dev] = extractLayoutFromForm();
+  // also mirror into top-level when device is pc (backward compat)
+  if (dev === 'pc') {
+    var L = hero.layout.pc;
+    Object.keys(L).forEach(function(k) { hero[k] = L[k]; });
+  }
+  try { localStorage.setItem('hh_hero', JSON.stringify(hero)); } catch (e) {}
+}
+
+function applyDeviceLayoutToForm(mode) {
+  var hero = {};
+  try { hero = JSON.parse(localStorage.getItem('hh_hero') || '{}') || {}; } catch (e) { hero = {}; }
+  var L = (hero.layout && hero.layout[mode]) ? hero.layout[mode] : null;
+  // fallback: top-level = pc
+  if (!L) {
+    L = {
+      labelX: hero.labelX, labelY: hero.labelY, labelFs: hero.labelFs,
+      titleX: hero.titleX, titleY: hero.titleY, titleFs: hero.titleFs,
+      descX: hero.descX, descY: hero.descY, descFs: hero.descFs,
+      signX: hero.signX, signY: hero.signY, signFs: hero.signFs,
+      btnX: hero.btnX, btnY: hero.btnY,
+      imgPosX: hero.imgPosX, imgPosY: hero.imgPosY, imgZoom: hero.imgZoom,
+      frameH: hero.frameH, frameW: hero.frameW, frameWUnit: hero.frameWUnit,
+      frameAlign: hero.frameAlign, overlayOpacity: hero.overlayOpacity
+    };
+  }
+  function set(id, v) {
+    var el = document.getElementById(id);
+    if (el && v != null && v !== '' && !isNaN(v)) el.value = v;
+    else if (el && typeof v === 'string') el.value = v;
+  }
+  set('hero-label-x', L.labelX); set('hero-label-y', L.labelY); set('hero-label-fs', L.labelFs);
+  set('hero-title-x', L.titleX); set('hero-title-y', L.titleY); set('hero-title-fs', L.titleFs);
+  set('hero-desc-x', L.descX); set('hero-desc-y', L.descY); set('hero-desc-fs', L.descFs);
+  set('hero-sign-x', L.signX); set('hero-sign-y', L.signY); set('hero-sign-fs', L.signFs);
+  set('hero-btn-x', L.btnX); set('hero-btn-y', L.btnY);
+  set('hero-img-x', L.imgPosX); set('hero-img-y', L.imgPosY); set('hero-img-zoom', L.imgZoom);
+  set('hero-frame-h', L.frameH); set('hero-frame-w', L.frameW);
+  set('hero-frame-w-unit', L.frameWUnit); set('hero-frame-align', L.frameAlign);
+  set('hero-overlay', L.overlayOpacity);
+  try { updateHeroPreview(); } catch (e) {}
+  try { initHeroLineDrag(); } catch (e) {}
+}
+
 function setPagePreviewWidth(mode) {
   const w = $('page-preview-frame-wrap');
   if (!w) return;
-  if (mode === 'mobile') { w.style.maxWidth = '390px'; }
-  else if (mode === 'tablet') { w.style.maxWidth = '768px'; }
-  else { w.style.maxWidth = '100%'; }
+  if (mode === 'mobile' || mode === 'phone') { w.style.maxWidth = '390px'; setEditDevice('phone'); }
+  else if (mode === 'tablet') { w.style.maxWidth = '768px'; setEditDevice('tablet'); }
+  else { w.style.maxWidth = '100%'; setEditDevice('pc'); }
+  try { setTimeout(function(){ if (typeof refreshPagePreviewIframe==='function') refreshPagePreviewIframe(); }, 80); } catch(e){}
 }
 
 function showView(name, button) {
@@ -3782,7 +3901,8 @@ function initHeroLineDrag() {
     'hero-label': { input: 'hero-label-fs', min: 8, max: 72 },
     'hero-title': { input: 'hero-title-fs', min: 14, max: 140 },
     'hero-desc': { input: 'hero-desc-fs', min: 10, max: 80 },
-    'hero-sign': { input: 'hero-sign-fs', min: 8, max: 48 }
+    'hero-sign': { input: 'hero-sign-fs', min: 8, max: 48 },
+    'hero-frame': { input: 'hero-frame-h', min: 80, max: 900, frame: true }
   };
 
   // Always refresh styles so layers stay clickable
@@ -3848,8 +3968,9 @@ function initHeroLineDrag() {
         input: cfg.input,
         min: cfg.min,
         max: cfg.max,
+        frame: !!cfg.frame,
         sy: p.clientY,
-        ox: parseInt($(cfg.input).value || '12', 10)
+        ox: parseInt($(cfg.input).value || (cfg.frame ? '360' : '12'), 10)
       };
       e.preventDefault();
       e.stopPropagation();
@@ -3880,21 +4001,36 @@ function initHeroLineDrag() {
     if (!_heroDragState) return;
     var p = pt(e);
     if (_heroDragState.type === 'resize') {
-      var delta = Math.round((_heroDragState.sy - p.clientY) / 2);
+      // drag DOWN = bigger, UP = smaller (consistent with Upcoming / iframe)
+      var delta = Math.round((p.clientY - _heroDragState.sy) / 2);
       var nv = Math.max(_heroDragState.min, Math.min(_heroDragState.max, _heroDragState.ox + delta));
       if ($(_heroDragState.input)) $(_heroDragState.input).value = nv;
-      var lfs = parseInt($('hero-label-fs') && $('hero-label-fs').value || '12', 10);
-      var tfs = parseInt($('hero-title-fs') && $('hero-title-fs').value || '28', 10);
-      var dfs = parseInt($('hero-desc-fs') && $('hero-desc-fs').value || '14', 10);
-      var sfs = parseInt($('hero-sign-fs') && $('hero-sign-fs').value || '12', 10);
-      if ($('hero-prev-label')) $('hero-prev-label').style.fontSize = Math.max(8, Math.round(lfs * 0.75)) + 'px';
-      if ($('hero-prev-title')) $('hero-prev-title').style.fontSize = Math.max(12, Math.round(tfs * 0.55)) + 'px';
-      if ($('hero-prev-desc')) $('hero-prev-desc').style.fontSize = Math.max(9, Math.round(dfs * 0.75)) + 'px';
-      if ($('hero-prev-sign')) $('hero-prev-sign').style.fontSize = Math.max(8, Math.round(sfs * 0.75)) + 'px';
-      if ($('val-hero-label-fs')) $('val-hero-label-fs').textContent = lfs + 'px';
-      if ($('val-hero-title-fs')) $('val-hero-title-fs').textContent = tfs + 'px';
-      if ($('val-hero-desc-fs')) $('val-hero-desc-fs').textContent = dfs + 'px';
-      try { updatePhoneHeroPreview(); } catch (err) {}
+      if (_heroDragState.frame) {
+        // Banner frame height drag
+        var box = $('hero-live-preview');
+        if (box) box.style.height = nv + 'px';
+        if ($('val-hero-frame')) $('val-hero-frame').textContent = nv + 'px';
+        if ($('hero-preview-dims')) {
+          var fw = ($('hero-frame-w') && $('hero-frame-w').value) || '100';
+          var u = ($('hero-frame-w-unit') && $('hero-frame-w-unit').value) || '%';
+          $('hero-preview-dims').textContent = fw + u + ' × ' + nv + 'px';
+        }
+        try { updatePhoneHeroPreview(); } catch (err) {}
+      } else {
+        // Only update the one element being resized (not all texts)
+        var prevMap = {
+          'hero-label-fs': { el: 'hero-prev-label', scale: 0.75, min: 8, val: 'val-hero-label-fs' },
+          'hero-title-fs': { el: 'hero-prev-title', scale: 0.55, min: 12, val: 'val-hero-title-fs' },
+          'hero-desc-fs':  { el: 'hero-prev-desc',  scale: 0.75, min: 9,  val: 'val-hero-desc-fs' },
+          'hero-sign-fs':  { el: 'hero-prev-sign',  scale: 0.75, min: 8,  val: null }
+        };
+        var pm = prevMap[_heroDragState.input];
+        if (pm) {
+          if ($(pm.el)) $(pm.el).style.fontSize = Math.max(pm.min, Math.round(nv * pm.scale)) + 'px';
+          if (pm.val && $(pm.val)) $(pm.val).textContent = nv + 'px';
+        }
+        try { updatePhoneHeroPreview(); } catch (err) {}
+      }
     } else if (_heroDragState.type === 'move') {
       var st = _heroDragState;
       var nx = Math.max(-5, Math.min(105, st.origL + ((p.clientX - st.startX) / st.rectW) * 100));
@@ -4038,6 +4174,21 @@ function saveHero() {
     btnX: parseInt($('hero-btn-x')?.value || '4', 10),
     btnY: parseInt($('hero-btn-y')?.value || '88', 10)
   });
+  // Device-specific layout snapshot
+  try {
+    var _h = read('hh_hero', {}) || {};
+    if (!_h.layout || typeof _h.layout !== 'object') _h.layout = {};
+    var _dev = (typeof getEditDevice === 'function') ? getEditDevice() : 'pc';
+    if (typeof extractLayoutFromForm === 'function') {
+      _h.layout[_dev] = extractLayoutFromForm();
+      // keep top-level as PC when editing PC
+      if (_dev === 'pc') {
+        var L = _h.layout.pc;
+        Object.keys(L).forEach(function(k) { _h[k] = L[k]; });
+      }
+      write('hh_hero', _h);
+    }
+  } catch (e) { console.warn('layout stash', e); }
   updateHeroPreview();
   // Force immediate Firebase write for hero (login ပြန်ဝင်ရင် မပျောက်အောင်)
   try {
@@ -4743,7 +4894,8 @@ function initSponsorDrag() {
     badge: { input: 'admin-sponsor-badge-fs', min: 8, max: 48 },
     title: { input: 'admin-sponsor-title-fs', min: 12, max: 120 },
     desc: { input: 'admin-sponsor-desc-fs', min: 10, max: 64 },
-    logo: { input: 'sp-logo-size', min: 40, max: 280 }
+    logo: { input: 'sp-logo-size', min: 40, max: 280 },
+    'sp-frame': { input: 'admin-sponsor-height-local', min: 80, max: 800, frame: true }
   };
   function onStart(e) {
     const t = e.target;
@@ -4792,10 +4944,15 @@ function initSponsorDrag() {
       if (!_spDrag) return;
       const p = pt(e);
       if (_spDrag.type === 'resize') {
-        // drag down = bigger, up = smaller
-        const delta = Math.round((_spDrag.sy - p.clientY) / 3);
+        // drag DOWN = bigger, UP = smaller (consistent everywhere)
+        const delta = Math.round((p.clientY - _spDrag.sy) / 2);
         const nv = Math.max(_spDrag.min, Math.min(_spDrag.max, _spDrag.ox + delta));
         if ($(_spDrag.input)) $(_spDrag.input).value = nv;
+        if (_spDrag.input === 'admin-sponsor-height-local') {
+          const box = $('sponsor-live-preview');
+          if (box) { box.style.height = nv + 'px'; box.style.minHeight = nv + 'px'; }
+          if ($('val-sp-h-local')) $('val-sp-h-local').textContent = nv + 'px';
+        }
         updateSponsorPreview();
       } else if (_spDrag.type === 'text') {
         const nx = Math.max(-5, Math.min(105, Math.round(_spDrag.ox + ((p.clientX - _spDrag.sx) / _spDrag.rw) * 100)));
@@ -4998,6 +5155,9 @@ function initUpcomingDrag() {
         _upDrag.ow = parseInt($('up-logo-w')?.value || '72', 10);
         _upDrag.oh = parseInt($('up-logo-h')?.value || '72', 10);
       }
+      if (key === 'up-frame') {
+        _upDrag.ofs = parseInt($('up-frame-h')?.value || '160', 10);
+      }
       e.preventDefault(); e.stopPropagation();
       return;
     }
@@ -5070,8 +5230,15 @@ function initUpcomingDrag() {
           if ($('up-logo-h')) $('up-logo-h').value = Math.round(nh);
           const lw = $('up-prev-logo-wrap');
           if (lw) { lw.style.width = Math.round(nw) + 'px'; lw.style.height = Math.round(nh) + 'px'; }
+        } else if (_upDrag.key === 'up-frame') {
+          const nh = Math.max(80, Math.min(800, _upDrag.ofs + dy));
+          if ($('up-frame-h')) $('up-frame-h').value = Math.round(nh);
+          if ($('val-up-frame-h')) $('val-up-frame-h').textContent = Math.round(nh) + 'px';
+          const box = $('up-live-preview');
+          if (box) box.style.height = Math.round(nh) + 'px';
         } else {
-          const nfs = Math.max(8, Math.min(80, _upDrag.ofs + dy * 0.15));
+          // drag DOWN = bigger (dy positive)
+          const nfs = Math.max(8, Math.min(80, _upDrag.ofs + dy * 0.25));
           const idMap = { 'up-label': 'up-label-fs', 'up-title': 'up-title-fs', 'up-desc': 'up-desc-fs' };
           const fid = idMap[_upDrag.key];
           if (fid && $(fid)) $(fid).value = Math.round(nfs);
