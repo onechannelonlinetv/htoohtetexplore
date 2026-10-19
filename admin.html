@@ -5170,32 +5170,125 @@ function collectSponsorForm() {
   };
 }
 function saveCurrentSponsor() {
-  const data = collectSponsorForm();
-  if (!data.title && !data.img && !data.bgImage) {
+  const form = collectSponsorForm();
+  if (!form.title && !form.img && !form.bgImage) {
     toast('Title သို့မဟုတ် ပုံ ထည့်ပါ');
     return;
   }
+  var dev = window._spEditDevice || 'pc';
+  if (dev === 'mobile') dev = 'phone';
+  if (dev !== 'pc' && dev !== 'tablet' && dev !== 'phone') dev = 'pc';
+
   const list = getSponsorList();
   const editId = ($('admin-sponsor-edit-id').value || '').trim();
-  if (editId === '' || editId === 'new') {
-    list.push(data);
-  } else {
-    const idx = parseInt(editId, 10);
-    if (!isNaN(idx) && list[idx]) {
-      data.id = list[idx].id || data.id;
-      list[idx] = data;
-    } else {
-      list.push(data);
+  var prev = null;
+  var targetIdx = -1;
+  if (editId !== '' && editId !== 'new') {
+    targetIdx = parseInt(editId, 10);
+    if (!isNaN(targetIdx) && list[targetIdx]) prev = list[targetIdx];
+  }
+
+  // Metrics only for current device
+  var metrics = {
+    height: form.height, widthPct: form.widthPct,
+    titleFs: form.titleFs, descFs: form.descFs, badgeFs: form.badgeFs,
+    logoSize: form.logoSize,
+    badgeX: form.badgeX, badgeY: form.badgeY,
+    titleX: form.titleX, titleY: form.titleY,
+    descX: form.descX, descY: form.descY,
+    logoX: form.logoX, logoY: form.logoY,
+    btnX: form.btnX, btnY: form.btnY,
+    imgPosX: form.imgPosX, imgPosY: form.imgPosY
+  };
+
+  var layout = (prev && prev.layout && typeof prev.layout === 'object') ? Object.assign({}, prev.layout) : {};
+  layout[dev] = Object.assign({}, layout[dev] || {}, metrics);
+
+  // Seed phone/tablet from PC only when saving PC and missing
+  if (dev === 'pc') {
+    if (!layout.phone) {
+      layout.phone = {
+        height: Math.min(150, Math.max(110, Math.round((metrics.height||180)*0.5))),
+        widthPct: metrics.widthPct != null ? metrics.widthPct : 100,
+        titleFs: Math.max(14, Math.round((metrics.titleFs||22)*0.55)),
+        descFs: Math.max(10, Math.round((metrics.descFs||12)*0.7)),
+        badgeFs: Math.max(8, Math.round((metrics.badgeFs||10)*0.75)),
+        logoSize: Math.max(40, Math.round((metrics.logoSize||80)*0.55)),
+        badgeX: metrics.badgeX, badgeY: metrics.badgeY,
+        titleX: metrics.titleX, titleY: metrics.titleY,
+        descX: metrics.descX, descY: metrics.descY,
+        logoX: metrics.logoX, logoY: metrics.logoY,
+        btnX: metrics.btnX, btnY: metrics.btnY,
+        imgPosX: metrics.imgPosX, imgPosY: metrics.imgPosY
+      };
+    }
+    if (!layout.tablet) {
+      layout.tablet = {
+        height: Math.min(220, Math.max(140, Math.round((metrics.height||180)*0.75))),
+        widthPct: metrics.widthPct != null ? metrics.widthPct : 100,
+        titleFs: Math.max(16, Math.round((metrics.titleFs||22)*0.8)),
+        descFs: Math.max(11, Math.round((metrics.descFs||12)*0.85)),
+        badgeFs: Math.max(9, Math.round((metrics.badgeFs||10)*0.9)),
+        logoSize: Math.max(48, Math.round((metrics.logoSize||80)*0.8)),
+        badgeX: metrics.badgeX, badgeY: metrics.badgeY,
+        titleX: metrics.titleX, titleY: metrics.titleY,
+        descX: metrics.descX, descY: metrics.descY,
+        logoX: metrics.logoX, logoY: metrics.logoY,
+        btnX: metrics.btnX, btnY: metrics.btnY,
+        imgPosX: metrics.imgPosX, imgPosY: metrics.imgPosY
+      };
     }
   }
-  // persist height into settings (use max or first)
-  const s = read('hh_settings', {});
-  s.sponsorHeight = data.height || 180;
-  write('hh_settings', s);
+  if (!layout.pc && dev === 'pc') layout.pc = Object.assign({}, metrics);
+  if (!layout.pc && prev) {
+    layout.pc = {
+      height: prev.height != null ? prev.height : 180,
+      widthPct: prev.widthPct != null ? prev.widthPct : 100,
+      titleFs: prev.titleFs, descFs: prev.descFs, badgeFs: prev.badgeFs, logoSize: prev.logoSize,
+      badgeX: prev.badgeX, badgeY: prev.badgeY, titleX: prev.titleX, titleY: prev.titleY,
+      descX: prev.descX, descY: prev.descY, logoX: prev.logoX, logoY: prev.logoY,
+      btnX: prev.btnX, btnY: prev.btnY, imgPosX: prev.imgPosX, imgPosY: prev.imgPosY
+    };
+  }
+
+  // Top-level metrics = PC only (never overwrite PC with phone values)
+  var pcM = (dev === 'pc') ? metrics : (layout.pc || metrics);
+  var data = Object.assign({}, form, {
+    height: pcM.height, widthPct: pcM.widthPct,
+    titleFs: pcM.titleFs, descFs: pcM.descFs, badgeFs: pcM.badgeFs, logoSize: pcM.logoSize,
+    badgeX: pcM.badgeX, badgeY: pcM.badgeY, titleX: pcM.titleX, titleY: pcM.titleY,
+    descX: pcM.descX, descY: pcM.descY, logoX: pcM.logoX, logoY: pcM.logoY,
+    btnX: pcM.btnX, btnY: pcM.btnY, imgPosX: pcM.imgPosX, imgPosY: pcM.imgPosY,
+    layout: layout
+  });
+  // Content always from form
+  data.title = form.title; data.desc = form.desc; data.badge = form.badge;
+  data.img = form.img; data.bgImage = form.bgImage; data.link = form.link;
+  data.btnText = form.btnText; data.active = form.active; data.shape = form.shape;
+  data.badgeBg = form.badgeBg; data.badgeColor = form.badgeColor;
+  data.badgePad = form.badgePad; data.badgeRadius = form.badgeRadius; data.badgeWeight = form.badgeWeight;
+  data.titleColor = form.titleColor; data.titleWeight = form.titleWeight;
+  data.descColor = form.descColor; data.overlayOpacity = form.overlayOpacity;
+
+  if (targetIdx >= 0 && list[targetIdx]) {
+    data.id = list[targetIdx].id || data.id;
+    list[targetIdx] = data;
+  } else {
+    list.push(data);
+    // set edit id to new index
+    try { if ($('admin-sponsor-edit-id')) $('admin-sponsor-edit-id').value = String(list.length - 1); } catch (e) {}
+  }
+
+  if (dev === 'pc') {
+    const s = read('hh_settings', {});
+    s.sponsorHeight = data.height || 180;
+    write('hh_settings', s);
+  }
   writeSponsorList(list);
   updateSponsorPreview();
-  try { stashSponsorDeviceLayout(window._spEditDevice || 'pc'); } catch (e) {}
-  toast('Sponsor သိမ်းပြီး · ' + ((window._spEditDevice==='phone')?'Phone':(window._spEditDevice==='tablet')?'Tablet':'PC'));
+  try { if (typeof renderSponsorList === 'function') renderSponsorList(); } catch (e) {}
+  var dLabel = dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC');
+  toast('Sponsor သိမ်းပြီး · ' + dLabel + ' layout သီးသန့်');
 }
 function saveSponsor() { saveCurrentSponsor(); }
 
@@ -5329,7 +5422,7 @@ function updateSponsorPreview() {
     setTextKeepHandle(title, $('admin-sponsor-title')?.value.trim() || 'Sponsor Title', 'title');
     title.style.color = $('admin-sponsor-title-color')?.value || '#ffffff';
     const tfs = $('admin-sponsor-title-fs')?.value || 22;
-    title.style.fontSize = Math.max(11, Math.round(tfs * 0.9)) + 'px';
+    title.style.fontSize = tfs + 'px';
     title.style.fontWeight = $('admin-sponsor-title-weight')?.value || '900';
     const tx = parseInt($('sp-title-x')?.value || '0', 10);
     const ty = parseInt($('sp-title-y')?.value || '32', 10);
@@ -5343,7 +5436,7 @@ function updateSponsorPreview() {
     setTextKeepHandle(desc, $('admin-sponsor-desc')?.value.trim() || 'Description…', 'desc');
     desc.style.color = $('admin-sponsor-desc-color')?.value || '#cccccc';
     const dfs = $('admin-sponsor-desc-fs')?.value || 12;
-    desc.style.fontSize = Math.max(9, Math.round(dfs * 0.9)) + 'px';
+    desc.style.fontSize = dfs + 'px';
     const dx = parseInt($('sp-desc-x')?.value || '0', 10);
     const dy = parseInt($('sp-desc-y')?.value || '58', 10);
     desc.style.left = dx + '%';
@@ -5394,13 +5487,47 @@ function updateSponsorPreview() {
     ovSpEl.style.background = 'linear-gradient(to right, rgba(0,0,0,' + a + '), rgba(0,0,0,' + a2 + '), transparent)';
   }
   const h = parseInt($('admin-sponsor-height-local')?.value || '180', 10);
-  const wPct = parseInt($('admin-sponsor-width')?.value || '100', 10);
+  let wPct = parseInt($('admin-sponsor-width')?.value || '100', 10);
+  if (isNaN(wPct) || wPct < 20) wPct = 100;
+  if (wPct > 100) wPct = 100;
   const shape = $('admin-sponsor-shape')?.value || 'rounded';
+  const dev = window._spEditDevice || 'pc';
   if ($('val-sp-h-local')) $('val-sp-h-local').textContent = h + 'px';
   if ($('val-sp-w')) $('val-sp-w').textContent = wPct + '%';
+
+  // Device shell (like Upcoming / Hero)
+  var shell = $('sp-device-shell');
+  if (!shell && box && box.parentNode) {
+    shell = document.createElement('div');
+    shell.id = 'sp-device-shell';
+    box.parentNode.insertBefore(shell, box);
+    shell.appendChild(box);
+  }
+  var chromeLabel = $('sp-device-frame-label');
+  if (!chromeLabel && shell) {
+    chromeLabel = document.createElement('div');
+    chromeLabel.id = 'sp-device-frame-label';
+    chromeLabel.style.cssText = 'text-align:center;font-size:10px;font-weight:700;letter-spacing:.05em;color:#94a3b8;margin-bottom:6px;';
+    shell.insertBefore(chromeLabel, shell.firstChild);
+  }
+  if (shell) {
+    if (dev === 'phone') {
+      shell.style.cssText = 'width:100%;max-width:390px;margin:0 auto;border-radius:28px;border:3px solid #475569;padding:8px 6px;background:#0f172a;box-shadow:0 16px 48px rgba(0,0,0,.5);';
+      if (chromeLabel) { chromeLabel.style.display = 'block'; chromeLabel.textContent = '📱 PHONE · banner ' + wPct + '% × ' + h + 'px'; }
+    } else if (dev === 'tablet') {
+      shell.style.cssText = 'width:100%;max-width:768px;margin:0 auto;border-radius:16px;border:2px solid #475569;padding:8px;background:#0f172a;box-shadow:0 12px 36px rgba(0,0,0,.4);';
+      if (chromeLabel) { chromeLabel.style.display = 'block'; chromeLabel.textContent = '📟 TABLET · banner ' + wPct + '% × ' + h + 'px'; }
+    } else {
+      shell.style.cssText = 'width:100%;max-width:100%;margin:0;border:none;padding:0;background:transparent;box-shadow:none;';
+      if (chromeLabel) { chromeLabel.style.display = 'block'; chromeLabel.textContent = '🖥️ PC · ' + wPct + '% × ' + h + 'px'; }
+    }
+  }
+
   if (box) {
-    box.style.setProperty('height', Math.max(60, Math.round(h * 0.85)) + 'px', 'important');
-    box.style.setProperty('min-height', box.style.height, 'important');
+    // 1:1 height (no 0.85 shrink) so phone/tablet match live
+    box.style.setProperty('height', h + 'px', 'important');
+    box.style.setProperty('min-height', h + 'px', 'important');
+    box.style.setProperty('max-height', 'none', 'important');
     box.style.setProperty('width', wPct + '%', 'important');
     box.style.setProperty('max-width', '100%', 'important');
     box.style.marginLeft = 'auto';
@@ -5408,9 +5535,21 @@ function updateSponsorPreview() {
     const radiusMap = { square: '0px', soft: '16px', rounded: '16px', pill: '9999px', circle: '9999px' };
     box.style.borderRadius = radiusMap[shape] || '16px';
   }
-  if ($('sponsor-preview-dims')) $('sponsor-preview-dims').textContent = wPct + '% × ' + h + 'px';
+  if ($('sponsor-preview-dims')) {
+    var dName = dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC');
+    $('sponsor-preview-dims').textContent = dName + ' · ' + wPct + '% × ' + h + 'px';
+  }
+  // 1:1 font sizes in preview
+  try {
+    var tfs = parseInt($('admin-sponsor-title-fs')?.value || '22', 10);
+    var dfs = parseInt($('admin-sponsor-desc-fs')?.value || '12', 10);
+    var bfs = parseInt($('admin-sponsor-badge-fs')?.value || '10', 10);
+    if ($('sp-prev-title')) { $('sp-prev-title').style.fontSize = tfs + 'px'; $('sp-prev-title').style.whiteSpace = 'pre-wrap'; }
+    if ($('sp-prev-desc')) { $('sp-prev-desc').style.fontSize = dfs + 'px'; $('sp-prev-desc').style.whiteSpace = 'pre-wrap'; }
+    if ($('sp-prev-badge')) $('sp-prev-badge').style.fontSize = bfs + 'px';
+  } catch (e) {}
   initSponsorDrag();
-  updatePhoneSponsorPreview();
+  try { updatePhoneSponsorPreview(); } catch (e) {}
   try { refreshSidebarSitePreview(); } catch (e) {}
 }
 
@@ -6050,6 +6189,7 @@ function applyUpcomingDeviceToForm(mode) {
 function setSponsorEditDevice(mode) {
   if (mode === 'mobile') mode = 'phone';
   if (mode !== 'pc' && mode !== 'tablet' && mode !== 'phone') mode = 'pc';
+  // Only stash into layout[prev] — do not overwrite top-level when leaving phone
   try { stashSponsorDeviceLayout(window._spEditDevice || 'pc'); } catch (e) {}
   window._spEditDevice = mode;
   try { applySponsorDeviceToForm(mode); } catch (e) {}
@@ -6062,14 +6202,14 @@ function setSponsorEditDevice(mode) {
     var badge = document.getElementById('sp-device-badge');
     if (badge) badge.textContent = mode === 'phone' ? 'Phone' : (mode === 'tablet' ? 'Tablet' : 'PC');
   } catch (e) {}
-  try { if (typeof updateSponsorPreview === 'function') updateSponsorPreview(); } catch (e) {}
   try {
     var box = document.getElementById('sponsor-live-preview');
-    if (box) {
-      if (mode === 'phone') { box.style.maxWidth = '390px'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto'; }
-      else if (mode === 'tablet') { box.style.maxWidth = '768px'; box.style.marginLeft = 'auto'; box.style.marginRight = 'auto'; }
-      else { box.style.maxWidth = '100%'; }
-    }
+    if (box) box._spDragReady = false;
+  } catch (e) {}
+  try { if (typeof updateSponsorPreview === 'function') updateSponsorPreview(); } catch (e) {}
+  try {
+    var shell = document.getElementById('sp-device-shell');
+    if (shell) shell.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   } catch (e) {}
 }
 function stashSponsorDeviceLayout(dev) {
