@@ -8254,11 +8254,11 @@ function renderProudList() {
 function getProudMeta() {
   try {
     if (typeof read === 'function') {
-      var m = read('hh_proud_meta', {});
-      return m && typeof m === 'object' ? m : {};
+      var rm = read('hh_proud_meta', {});
+      return rm && typeof rm === 'object' ? rm : {};
     }
-    const m = JSON.parse(localStorage.getItem('hh_proud_meta') || '{}');
-    return m && typeof m === 'object' ? m : {};
+    var lm = JSON.parse(localStorage.getItem('hh_proud_meta') || '{}');
+    return lm && typeof lm === 'object' ? lm : {};
   } catch (e) { return {}; }
 }
 function saveProudMeta() {
