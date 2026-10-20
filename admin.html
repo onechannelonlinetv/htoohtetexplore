@@ -2966,6 +2966,18 @@ function enablePreviewDrag(iframe) {
   function makeDrag(el, parentSel, onDone, opts) {
     if (!el) return;
     opts = opts || {};
+    // Already bound with a single handle — just update onDone ref
+    if (el._pvBound && el.classList.contains('pv-drag')) {
+      el._pvOnDone = onDone;
+      // ensure only one handle remains
+      try {
+        var hs = el.querySelectorAll(':scope > .pv-resize, .pv-resize');
+        for (var i = 1; i < hs.length; i++) { try { hs[i].remove(); } catch (e) {} }
+      } catch (e) {}
+      return;
+    }
+    el._pvBound = true;
+    el._pvOnDone = onDone;
     // IMG cannot host children — wrap so resize handle works
     try {
       if (el.tagName === 'IMG' && opts.imageSize) {
@@ -3004,18 +3016,19 @@ function enablePreviewDrag(iframe) {
       }
     } catch (e) {}
 
-    // Resize handle (only on element that can have children)
-    var existing = null;
-    try { existing = el.querySelector(':scope > .pv-resize'); } catch (e) { existing = el.querySelector('.pv-resize'); }
-    if (!opts.noResize) {
-      if (!existing && el.appendChild) {
-        var h = doc.createElement('span');
-        h.className = 'pv-resize';
-        h.title = 'ဆိုဒ်';
-        try { el.appendChild(h); existing = h; } catch (e) {}
+    // Resize handle — only ONE; remove any extras
+    try {
+      var allH = el.querySelectorAll('.pv-resize');
+      for (var hi = 0; hi < allH.length; hi++) {
+        try { allH[hi].remove(); } catch (e) {}
       }
-    } else if (existing) {
-      try { existing.remove(); } catch (e) {}
+    } catch (e) {}
+    var existing = null;
+    if (!opts.noResize && el.appendChild) {
+      var h = doc.createElement('span');
+      h.className = 'pv-resize';
+      h.title = 'ဆိုဒ်';
+      try { el.appendChild(h); existing = h; } catch (e) {}
     }
 
     if (el._pvDownHandler) {
