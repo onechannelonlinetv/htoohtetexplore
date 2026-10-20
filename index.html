@@ -7,7 +7,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HTOO HTET | Travel Journal & Beyond</title>
 <meta name="description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet.">
-<meta name="hh-build" content="2026.10.19-menu-theme">
+<meta name="hh-build" content="2026.10.20-share-og">
+<!-- Open Graph / Telegram / Facebook / WhatsApp link preview -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="HTOO HTET">
+<meta property="og:title" content="HTOO HTET | Travel Journal & Beyond" id="meta-og-title">
+<meta property="og:description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet." id="meta-og-desc">
+<meta property="og:image" content="" id="meta-og-image">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="" id="meta-og-url">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HTOO HTET | Travel Journal & Beyond" id="meta-tw-title">
+<meta name="twitter:description" content="Discover the unseen beauty of Myanmar — roads, people, culture and nature with Htoo Htet." id="meta-tw-desc">
+<meta name="twitter:image" content="" id="meta-tw-image">
+<link rel="image_src" href="" id="meta-image-src">
 <meta name="theme-color" content="#061510">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1056,6 +1070,26 @@
 </style>
 </head>
 <body class="min-h-screen antialiased theme-forest mode-dark">
+<script>
+(function(){
+  try {
+    var base = location.href.replace(/[#?].*$/,'').replace(/\/[^\/]*$/, '/');
+    if (!/\/$/.test(base)) base = location.origin + location.pathname.replace(/\/[^\/]*$/, '/');
+    var img = base + 'icons/icon-512.png';
+    // Prefer current hero img src if absolute https
+    var heroDefault = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80';
+    var og = document.getElementById('meta-og-image');
+    var tw = document.getElementById('meta-tw-image');
+    var isrc = document.getElementById('meta-image-src');
+    var ou = document.getElementById('meta-og-url');
+    if (og && !og.getAttribute('content')) og.setAttribute('content', heroDefault);
+    if (tw && !tw.getAttribute('content')) tw.setAttribute('content', heroDefault);
+    if (isrc && !isrc.getAttribute('href')) isrc.setAttribute('href', heroDefault);
+    if (ou) ou.setAttribute('content', location.href.split('#')[0].split('?')[0]);
+  } catch(e){}
+})();
+</script>
+
 
 <!-- ================= HEADER ================= -->
 <header id="site-header" class="site-header sticky top-0 z-50 surface-bg/95 backdrop-blur-md border-b border-emerald-900/50">
@@ -1123,6 +1157,10 @@
       <a href="#about-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>About</span></a>
       <a href="#contact-page" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Contact</span></a>
       <a href="#privacy-policy" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Privacy Policy</span></a>
+      <button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white w-full text-left">
+        <i class="fa-solid fa-share-nodes text-emerald-400"></i>
+        <span id="menu-share-label">Share Website</span>
+      </button>
     </nav>
     <div class="mt-auto pt-5 border-t border-emerald-900/50">
       <div class="flex gap-2 mb-4 flex-wrap" id="social-links-mobile"></div>
@@ -1636,6 +1674,7 @@ const I18N = {
     like: 'Like',
     liked: 'Liked',
     share: 'Share',
+    shareWebsite: 'Share Website',
     comment: 'Comment',
     comments: 'Comments',
     leaveComment: 'Leave a comment',
@@ -1701,6 +1740,7 @@ const I18N = {
     postComment: 'ပို့မယ်',
     commentHint: 'အများဆုံး ၅၀၀ လုံး',
     noComments: 'မှတ်ချက် မရှိသေးပါ — ပထမဦးဆုံး ရေးပါ!',
+    shareWebsite: 'Website မျှဝေမယ်',
     shareCopied: 'Link ကူးပြီးပါပြီ!',
     shareFailed: 'Share မရပါ',
     commentNeedName: 'နာမည် ထည့်ပါ',
@@ -1878,6 +1918,7 @@ function applyLanguageUI() {
   if ($('article-back-text')) $('article-back-text').textContent = t('backHome');
   if ($('like-label')) $('like-label').textContent = (window._likedCurrent ? t('liked') : t('like'));
   if ($('share-label')) $('share-label').textContent = t('share');
+  if ($('menu-share-label')) $('menu-share-label').textContent = (typeof t === 'function' ? (t('shareWebsite') || t('share') + ' Website') : 'Share Website');
   if ($('comment-label')) $('comment-label').textContent = t('comment');
   if ($('comment-form-title')) $('comment-form-title').textContent = t('leaveComment');
   if ($('comment-name')) $('comment-name').placeholder = t('yourName');
@@ -2231,6 +2272,7 @@ function loadBlogData() {
   if (hero.image && (String(hero.image).indexOf('http') === 0 || String(hero.image).indexOf('data:image/') === 0) && String(hero.image).indexOf('Preview') === -1) {
     $('hero-img').src = hero.image;
   }
+  try { if (typeof updateShareMeta === 'function') updateShareMeta(); } catch (e) {}
   const hix = hero.imgPosX != null ? hero.imgPosX : 50;
   const hiy = hero.imgPosY != null ? hero.imgPosY : 50;
   if ($('hero-img')) $('hero-img').style.objectPosition = hix + '% ' + hiy + '%';
@@ -3981,6 +4023,97 @@ function toggleLike() {
     setEngageStatus(t('likeFailed'), true);
   });
 }
+
+function absoluteUrl(pathOrUrl) {
+  if (!pathOrUrl) return '';
+  var s = String(pathOrUrl).trim();
+  if (!s) return '';
+  if (s.indexOf('//') === 0) return (location.protocol || 'https:') + s;
+  if (/^https?:\/\//i.test(s)) return s;
+  if (s.charAt(0) === '/') {
+    return location.origin + s;
+  }
+  // relative
+  try {
+    return new URL(s, location.href).href;
+  } catch (e) {
+    return location.origin + '/' + s.replace(/^\.\//, '');
+  }
+}
+
+/** Update OG/Twitter meta so link previews use site hero/logo (crawlers need public https image) */
+function updateShareMeta() {
+  try {
+    var settings = {};
+    var hero = {};
+    try { settings = (typeof read === 'function') ? read('hh_settings', {}) : {}; } catch (e) {}
+    try { hero = (typeof read === 'function') ? read('hh_hero', {}) : {}; } catch (e) {}
+    var title = (settings.brandName || document.title || 'HTOO HTET').trim();
+    if (settings.tagline) title = title + (title.indexOf('|') >= 0 ? '' : ' | ' + settings.tagline);
+    var desc = (settings.metaDesc || settings.tagline || document.querySelector('meta[name="description"]') && document.querySelector('meta[name="description"]').getAttribute('content') || '').trim();
+    if (!desc) desc = 'Discover the unseen beauty of Myanmar with Htoo Htet.';
+    // Prefer: explicit share image → hero image → brand logo → default icon
+    var img = (settings.shareImage || settings.ogImage || hero.image || hero.bgImage || settings.logo || '').trim();
+    // Reject data URLs / blob for OG (Telegram needs public https)
+    if (img && (img.indexOf('data:') === 0 || img.indexOf('blob:') === 0)) img = '';
+    if (!img) {
+      var heroEl = document.getElementById('hero-img');
+      if (heroEl && heroEl.src && heroEl.src.indexOf('http') === 0 && heroEl.src.indexOf('data:') !== 0) img = heroEl.src;
+    }
+    if (!img) {
+      // site icon fallback (absolute)
+      img = absoluteUrl('icons/icon-512.png');
+    } else {
+      img = absoluteUrl(img);
+    }
+    var pageUrl = location.href.split('#')[0].split('?')[0];
+    function setMeta(sel, attr, val) {
+      var el = document.querySelector(sel);
+      if (el && val) el.setAttribute(attr, val);
+    }
+    setMeta('#meta-og-title', 'content', title);
+    setMeta('#meta-og-desc', 'content', desc);
+    setMeta('#meta-og-image', 'content', img);
+    setMeta('#meta-og-url', 'content', pageUrl);
+    setMeta('#meta-tw-title', 'content', title);
+    setMeta('#meta-tw-desc', 'content', desc);
+    setMeta('#meta-tw-image', 'content', img);
+    setMeta('#meta-image-src', 'href', img);
+    setMeta('meta[name="description"]', 'content', desc);
+    try { document.title = title; } catch (e) {}
+    // Store for shareSite
+    window._shareMeta = { title: title, text: desc, url: pageUrl, image: img };
+  } catch (e) { console.warn('updateShareMeta', e); }
+}
+
+async function shareSite() {
+  try { updateShareMeta(); } catch (e) {}
+  var m = window._shareMeta || {};
+  var title = m.title || document.title || 'HTOO HTET';
+  var text = m.text || '';
+  var url = m.url || (location.href.split('#')[0]);
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: title, text: text, url: url });
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      if (typeof toast === 'function') toast((typeof t === 'function' ? t('shareCopied') : 'Link copied!'));
+      else alert('Link copied: ' + url);
+      return;
+    }
+  } catch (e) {}
+  try {
+    prompt('Copy link:', url);
+  } catch (e) {}
+}
+window.shareSite = shareSite;
+window.updateShareMeta = updateShareMeta;
 
 async function shareArticle() {
   const url = location.href;
