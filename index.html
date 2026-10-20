@@ -580,7 +580,8 @@
       max-width: 100% !important;
     }
     #proud-public-frame {
-      max-height: 72px !important;
+      /* height from admin device layout */
+      max-height: none !important;
     }
 
     /* Phone: do NOT force left/top — admin layout + drag must win */
@@ -2491,6 +2492,8 @@ function loadBlogData() {
   let proudMeta = {};
   try { proudMeta = read('hh_proud_meta', {}) || {}; } catch (e) { proudMeta = {}; }
   if (!proudMeta || typeof proudMeta !== 'object') proudMeta = {};
+  // Device isolation for section metrics
+  var _pm = (typeof pickDeviceLayout === 'function') ? pickDeviceLayout(proudMeta) : proudMeta;
   const proudSec = $('proud-sponsors-section');
   const proudFrame = $('proud-public-frame');
   const proudList = $('proud-sponsors-list');
@@ -2498,47 +2501,65 @@ function loadBlogData() {
   const activeProud = (Array.isArray(proud) ? proud : []).filter(function(p) { return p && p.active !== false; });
   const proudSectionOn = proudMeta.active !== false;
   if (activeProud.length && proudSectionOn) {
-    if (proudSec) { proudSec.classList.remove('hidden'); proudSec.style.display = ''; }
-    const frameH = Number(proudMeta.frameH) || 100;
-    const logoH = Number(proudMeta.logoH) || 48;
-    const titleFs = Number(proudMeta.titleFs) || 12;
-    const titleX = proudMeta.titleX != null ? proudMeta.titleX : 3;
-    const titleY = proudMeta.titleY != null ? proudMeta.titleY : 36;
+    if (proudSec) {
+      proudSec.classList.remove('hidden');
+      proudSec.style.display = 'block';
+      proudSec.style.visibility = 'visible';
+      proudSec.style.opacity = '1';
+    }
+    const frameH = Number(_pm.frameH) || 100;
+    const logoH = Number(_pm.logoH) || 48;
+    const titleFs = Number(_pm.titleFs) || 12;
+    const titleX = _pm.titleX != null ? _pm.titleX : 3;
+    const titleY = _pm.titleY != null ? _pm.titleY : 36;
     if (proudFrame) {
-      proudFrame.style.height = frameH + 'px';
-      proudFrame.style.minHeight = frameH + 'px';
+      proudFrame.style.setProperty('height', frameH + 'px', 'important');
+      proudFrame.style.setProperty('min-height', frameH + 'px', 'important');
+      proudFrame.style.setProperty('max-height', 'none', 'important');
     }
     if (proudLabel) {
-      proudLabel.textContent = (proudMeta.title || proudLabel.textContent || 'Our Proud Sponsors').trim();
+      proudLabel.textContent = (proudMeta.title || 'Our Proud Sponsors').trim();
       proudLabel.style.left = titleX + '%';
       proudLabel.style.top = titleY + '%';
       proudLabel.style.fontSize = titleFs + 'px';
+      proudLabel.style.display = '';
     }
-    // use absolute layout if any item has x/y, else flex fallback
-    const hasPos = activeProud.some(function(p) { return p.x != null || p.y != null; });
+    // Merge per-logo device layout
+    const resolvedProud = activeProud.map(function(p) {
+      var out = Object.assign({}, p);
+      if (typeof pickDeviceLayout === 'function') {
+        var L = pickDeviceLayout(p);
+        if (L.x != null) out.x = L.x;
+        if (L.y != null) out.y = L.y;
+        if (L.size != null) out.size = L.size;
+      }
+      return out;
+    });
+    const hasPos = resolvedProud.some(function(p) { return p.x != null || p.y != null; });
     if (proudList) {
       if (hasPos) {
         proudList.className = 'absolute inset-0 z-20';
-        proudList.innerHTML = activeProud.map(function(p, idx) {
+        proudList.style.left = '';
+        proudList.innerHTML = resolvedProud.map(function(p, idx) {
           const sz = p.size || logoH;
           const x = p.x != null ? p.x : (28 + idx * 16);
           const y = p.y != null ? p.y : 18;
           const href = safe(p.link || '#');
           if (p.logo) {
-            return '<a href="' + href + '" target="_blank" rel="noopener" class="absolute opacity-90 hover:opacity-100 transition" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;">' +
-              '<img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="w-full h-full object-contain" onerror="this.style.display=\'none\'">' +
+            return '<a href="' + href + '" target="_blank" rel="noopener" class="proud-logo-item absolute opacity-90 hover:opacity-100 transition" data-proud-idx="' + idx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;">' +
+              '<img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="w-full h-full object-contain pointer-events-none" onerror="this.style.display=\'none\'">' +
               '</a>';
           }
-          return '<span class="absolute text-white/90 font-bold text-sm" style="left:' + x + '%;top:' + y + '%;">' + safe(p.name) + '</span>';
+          return '<span class="proud-logo-item absolute text-white/90 font-bold text-sm" data-proud-idx="' + idx + '" style="left:' + x + '%;top:' + y + '%;">' + safe(p.name) + '</span>';
         }).join('');
       } else {
-        proudList.className = 'absolute inset-0 z-20 flex items-center justify-end gap-6 sm:gap-8 overflow-x-auto px-4';
+        proudList.className = 'absolute inset-0 z-20 flex items-center justify-end gap-4 sm:gap-6 overflow-x-auto px-4';
         proudList.style.left = 'auto';
-        proudList.innerHTML = activeProud.map(function(p) {
+        proudList.innerHTML = resolvedProud.map(function(p) {
           const sz = p.size || logoH;
           if (p.logo) {
-            return '<a href="' + safe(p.link || '#') + '" target="_blank" rel="noopener" class="shrink-0 opacity-90 hover:opacity-100 transition" style="height:' + sz + 'px;">' +
-              '<img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="h-full w-auto object-contain" style="max-height:' + sz + 'px;" onerror="this.style.display=\'none\">' +
+            return '<a href="' + safe(p.link || '#') + '" target="_blank" rel="noopener" class="shrink-0 opacity-90 hover:opacity-100 transition" style="height:' + sz + 'px;width:auto;">' +
+              '<img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="h-full w-auto object-contain" style="max-height:' + sz + 'px;" onerror="this.style.display=\'none\'">' +
               '</a>';
           }
           return '<span class="text-white/90 font-bold text-sm shrink-0">' + safe(p.name) + '</span>';
