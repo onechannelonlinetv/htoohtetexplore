@@ -2535,36 +2535,23 @@ function loadBlogData() {
       }
       return out;
     });
-    const hasPos = resolvedProud.some(function(p) { return p.x != null || p.y != null; });
     if (proudList) {
-      if (hasPos) {
-        proudList.className = 'absolute inset-0 z-20';
-        proudList.style.left = '';
-        proudList.innerHTML = resolvedProud.map(function(p, idx) {
-          const sz = p.size || logoH;
-          const x = p.x != null ? p.x : (28 + idx * 16);
-          const y = p.y != null ? p.y : 18;
-          const href = safe(p.link || '#');
-          if (p.logo) {
-            return '<a href="' + href + '" target="_blank" rel="noopener" class="proud-logo-item absolute opacity-90 hover:opacity-100 transition" data-proud-idx="' + idx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;">' +
-              '<img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="w-full h-full object-contain pointer-events-none" onerror="this.style.display=\'none\'">' +
-              '</a>';
-          }
-          return '<span class="proud-logo-item absolute text-white/90 font-bold text-sm" data-proud-idx="' + idx + '" style="left:' + x + '%;top:' + y + '%;">' + safe(p.name) + '</span>';
-        }).join('');
-      } else {
-        proudList.className = 'absolute inset-0 z-20 flex items-center justify-end gap-4 sm:gap-6 overflow-x-auto px-4';
-        proudList.style.left = 'auto';
-        proudList.innerHTML = resolvedProud.map(function(p) {
-          const sz = p.size || logoH;
-          if (p.logo) {
-            return '<a href="' + safe(p.link || '#') + '" target="_blank" rel="noopener" class="shrink-0 opacity-90 hover:opacity-100 transition" style="height:' + sz + 'px;width:auto;">' +
-              '<img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="h-full w-auto object-contain" style="max-height:' + sz + 'px;" onerror="this.style.display=\'none\'">' +
-              '</a>';
-          }
-          return '<span class="text-white/90 font-bold text-sm shrink-0">' + safe(p.name) + '</span>';
-        }).join('');
-      }
+      // Always absolute so preview/admin drag works
+      proudList.className = 'absolute inset-0 z-20';
+      proudList.style.left = '';
+      proudList.style.right = '';
+      proudList.innerHTML = resolvedProud.map(function(p, idx) {
+        const sz = p.size || logoH;
+        const x = p.x != null ? p.x : (28 + idx * 18);
+        const y = p.y != null ? p.y : 22;
+        const href = safe(p.link || '#');
+        if (p.logo) {
+          return '<a href="' + href + '" target="_blank" rel="noopener" class="proud-logo-item absolute opacity-90 hover:opacity-100 transition" data-proud-idx="' + idx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;position:absolute;">' +
+            '<img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="w-full h-full object-contain pointer-events-none" draggable="false" onerror="this.style.display=\'none\'">' +
+            '</a>';
+        }
+        return '<span class="proud-logo-item absolute text-white/90 font-bold text-sm" data-proud-idx="' + idx + '" style="left:' + x + '%;top:' + y + '%;position:absolute;">' + safe(p.name) + '</span>';
+      }).join('');
     }
   } else if (proudSec) {
     proudSec.classList.add('hidden');
