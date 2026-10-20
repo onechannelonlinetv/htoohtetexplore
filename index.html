@@ -1855,9 +1855,16 @@ function applyLanguageUI() {
     sel.options[0].textContent = t('allCategories');
   }
 
-  // Proud label
+  // Proud label — keep admin custom title if set
   const proud = $('proud-label');
-  if (proud) proud.textContent = t('proudSponsors');
+  if (proud) {
+    var _pmTitle = '';
+    try {
+      var _pm = (typeof read === 'function') ? read('hh_proud_meta', {}) : {};
+      _pmTitle = (_pm && _pm.title) ? String(_pm.title).trim() : '';
+    } catch (e) {}
+    proud.textContent = _pmTitle || t('proudSponsors');
+  }
 
   // Sponsor link button text (keep icon)
   const spLink = $('sponsor-link');
@@ -4236,4 +4243,3 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
- 
