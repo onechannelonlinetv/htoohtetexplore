@@ -2969,10 +2969,14 @@ function enablePreviewDrag(iframe) {
     // Already bound with a single handle — just update onDone ref
     if (el._pvBound && el.classList.contains('pv-drag')) {
       el._pvOnDone = onDone;
-      // ensure only one handle remains
       try {
-        var hs = el.querySelectorAll(':scope > .pv-resize, .pv-resize');
-        for (var i = 1; i < hs.length; i++) { try { hs[i].remove(); } catch (e) {} }
+        var hs = el.querySelectorAll('.pv-resize');
+        // keep only the first direct child handle
+        var kept = false;
+        for (var i = 0; i < hs.length; i++) {
+          if (!kept && hs[i].parentElement === el) { kept = true; continue; }
+          try { hs[i].remove(); } catch (e) {}
+        }
       } catch (e) {}
       return;
     }
@@ -3332,18 +3336,20 @@ function enablePreviewDrag(iframe) {
     var active = list.filter(function(p){ return p && p.active !== false; });
     doc.querySelectorAll('.proud-logo-item, #proud-sponsors-list > a.absolute, #proud-sponsors-list > span.absolute').forEach(function(el, i) {
       var idx = el.getAttribute('data-proud-idx');
-      var p = (idx != null && active[idx]) ? active[idx] : active[i];
+      var p = (idx != null && active[parseInt(idx,10)]) ? active[parseInt(idx,10)] : active[i];
       if (!p) return;
       if (!p.layout || typeof p.layout !== 'object') p.layout = {};
       var pl = Object.assign({}, p.layout[dev] || {});
       if (el.style.left) pl.x = Math.round(parseFloat(el.style.left));
       if (el.style.top) pl.y = Math.round(parseFloat(el.style.top));
-      if (el.style.width) pl.size = Math.round(parseFloat(el.style.width));
+      if (el.style.width) { pl.w = Math.round(parseFloat(el.style.width)); pl.size = pl.w; }
+      if (el.style.height) pl.h = Math.round(parseFloat(el.style.height));
       p.layout[dev] = pl;
       if (dev === 'pc') {
         if (pl.x != null) p.x = pl.x;
         if (pl.y != null) p.y = pl.y;
-        if (pl.size != null) p.size = pl.size;
+        if (pl.w != null) { p.w = pl.w; p.size = pl.w; }
+        if (pl.h != null) p.h = pl.h;
       }
     });
     try { localStorage.setItem('hh_proud_sponsors', JSON.stringify(list)); } catch (e) {}
@@ -7853,13 +7859,14 @@ function updateProudPreview() {
     const x = p.x != null ? p.x : (28 + idx * 16);
     const y = p.y != null ? p.y : 18;
     if (p.logo) {
-      return '<div class="proud-logo-item absolute" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;cursor:grab;z-index:20;touch-action:none;">' +
-        '<div class="w-full flex flex-col items-center">' +
-        '<div class="proud-logo-box w-full flex items-center justify-center rounded-md bg-white/10 border border-emerald-600/40" style="width:' + sz + 'px;height:' + sz + 'px;">' +
+      var bw = (p.w != null ? p.w : (p.sizeW != null ? p.sizeW : sz));
+      var bh = (p.h != null ? p.h : (p.sizeH != null ? p.sizeH : sz));
+      return '<div class="proud-logo-item absolute" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;width:' + bw + 'px;height:' + bh + 'px;cursor:grab;z-index:20;touch-action:none;overflow:visible;">' +
+        '<div class="proud-logo-box w-full h-full flex items-center justify-center rounded-md bg-white/10 border border-emerald-600/40" style="width:100%;height:100%;">' +
         '<img src="' + safe(p.logo) + '" alt="" class="max-w-full max-h-full object-contain p-0.5" draggable="false">' +
         '</div>' +
-        '<span class="mt-0.5 text-[9px] font-bold text-emerald-200/90 text-center leading-tight max-w-full truncate px-0.5" style="width:' + sz + 'px" title="' + safe(p.name) + '">' + safe(p.name || '') + '</span>' +
-        '</div><span class="sp-resize-handle proud-resize" title="Resize"></span></div>';
+        '<span class="mt-0.5 text-[9px] font-bold text-emerald-200/90 text-center leading-tight max-w-full truncate px-0.5" title="' + safe(p.name) + '">' + safe(p.name || '') + '</span>' +
+        '<span class="sp-resize-handle proud-resize" title="Resize free"></span></div>';
     }
     return '<span class="proud-logo-item absolute text-xs font-bold text-white/90 cursor-grab px-1" data-idx="' + realIdx + '" style="left:' + x + '%;top:' + y + '%;z-index:20;touch-action:none;">' + safe(p.name) + '</span>';
   }).join('');
@@ -7952,18 +7959,19 @@ function initProudStagingDrag() {
     function startResize(e) {
       e.preventDefault(); e.stopPropagation();
       const start = _proudPointerPos(e);
-      const startSz = el.offsetWidth || window._proudStaging.size || 48;
+      const startW = el.offsetWidth || window._proudStaging.w || window._proudStaging.size || 48;
+      const startH = el.offsetHeight || window._proudStaging.h || window._proudStaging.size || 48;
       function move(ev) {
         const p = _proudPointerPos(ev);
-        // proportional: use the larger delta so width+height grow together
-        const dx = p.x - start.x;
-        const dy = p.y - start.y;
-        const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-        const nw = Math.max(24, Math.min(160, startSz + delta));
+        const nw = Math.max(24, Math.min(400, startW + (p.x - start.x)));
+        const nh = Math.max(24, Math.min(400, startH + (p.y - start.y)));
         el.style.width = nw + 'px';
+        el.style.height = nh + 'px';
         const box = el.querySelector('.proud-logo-box');
-        if (box) { box.style.width = nw + 'px'; box.style.height = nw + 'px'; }
+        if (box) { box.style.width = '100%'; box.style.height = '100%'; }
         window._proudStaging.size = nw;
+        window._proudStaging.w = nw;
+        window._proudStaging.h = nh;
       }
       function up() {
         document.removeEventListener('mousemove', move);
@@ -8194,18 +8202,16 @@ function initProudDrag() {
         e.preventDefault(); e.stopPropagation();
         const start = _proudPointerPos(e);
         const box = el.querySelector('.proud-logo-box');
-        const startSz = (box && box.offsetWidth) || el.offsetWidth || 48;
+        const startW = el.offsetWidth || 48;
+        const startH = el.offsetHeight || 48;
         function move(ev) {
           const p = _proudPointerPos(ev);
-          const dx = p.x - start.x;
-          const dy = p.y - start.y;
-          // proportional square: use dominant axis so width+height grow together
-          const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-          const nw = Math.max(24, Math.min(160, startSz + delta));
+          const nw = Math.max(24, Math.min(400, startW + (p.x - start.x)));
+          const nh = Math.max(24, Math.min(400, startH + (p.y - start.y)));
           el.style.width = nw + 'px';
-          if (box) { box.style.width = nw + 'px'; box.style.height = nw + 'px'; }
-          else { el.style.height = nw + 'px'; }
-          el._sz = nw;
+          el.style.height = nh + 'px';
+          if (box) { box.style.width = '100%'; box.style.height = '100%'; }
+          el._w = nw; el._h = nh;
         }
         function up() {
           document.removeEventListener('mousemove', move);
@@ -8213,7 +8219,12 @@ function initProudDrag() {
           document.removeEventListener('touchmove', move);
           document.removeEventListener('touchend', up);
           const items = getProud();
-          if (items[idx] && el._sz) { items[idx].size = Math.round(el._sz); write('hh_proud_sponsors', items); }
+          if (items[idx] && el._w) {
+            items[idx].w = Math.round(el._w);
+            items[idx].h = Math.round(el._h);
+            items[idx].size = Math.round(el._w); // backward compat
+            write('hh_proud_sponsors', items);
+          }
         }
         document.addEventListener('mousemove', move);
         document.addEventListener('mouseup', up);
