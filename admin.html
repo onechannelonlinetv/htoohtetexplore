@@ -997,6 +997,14 @@ header.sticky {
           <div class="fold-body space-y-3">
 
           <label class="toggle-row"><input type="checkbox" id="proud-section-active" checked onchange="saveProudMeta(); updateProudPreview();"><span class="text-sm font-semibold">Proud Sponsors Section ပြမယ် (On/Off)</span></label>
+          <div id="proud-device-btns" class="flex flex-wrap items-center gap-2 mt-2">
+            <span class="text-[11px] text-slate-400 font-bold uppercase">Device layout</span>
+            <button type="button" data-proud-dev="pc" class="btn btn-muted text-[10px] py-1 px-2 ring-2 ring-emerald-400" onclick="setProudEditDevice('pc')"><i class="fa-solid fa-desktop mr-1"></i>PC</button>
+            <button type="button" data-proud-dev="tablet" class="btn btn-muted text-[10px] py-1 px-2" onclick="setProudEditDevice('tablet')"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
+            <button type="button" data-proud-dev="phone" class="btn btn-muted text-[10px] py-1 px-2" onclick="setProudEditDevice('phone')"><i class="fa-solid fa-mobile-screen mr-1"></i>Phone</button>
+            <button type="button" class="btn btn-green text-[10px] py-1 px-2" onclick="saveProudDeviceLayout()"><i class="fa-solid fa-floppy-disk mr-1"></i>Save <span id="proud-save-dev-label">PC</span></button>
+            <span id="proud-dev-status" class="text-[11px] text-emerald-400/80"></span>
+          </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="md:col-span-2">
@@ -3268,6 +3276,67 @@ function enablePreviewDrag(iframe) {
     } catch (e) {}
   }
 
+  function saveProudFromDom() {
+    var meta = {};
+    try {
+      if (typeof read === 'function') meta = read('hh_proud_meta', {}) || {};
+      else meta = JSON.parse(localStorage.getItem('hh_proud_meta') || '{}') || {};
+    } catch (e) { meta = {}; }
+    if (!meta.layout || typeof meta.layout !== 'object') meta.layout = {};
+    var dev = (typeof getEditDevice === 'function' ? getEditDevice() : (window._editDevice || 'pc'));
+    if (dev === 'mobile') dev = 'phone';
+    var L = Object.assign({}, meta.layout[dev] || {});
+    var label = doc.getElementById('proud-label');
+    if (label) {
+      if (label.style.left) L.titleX = Math.round(parseFloat(label.style.left));
+      if (label.style.top) L.titleY = Math.round(parseFloat(label.style.top));
+      if (label.style.fontSize) L.titleFs = Math.round(parseFloat(label.style.fontSize));
+      var txt = (label.innerText || label.textContent || '').trim();
+      if (txt) meta.title = txt;
+    }
+    var frame = doc.getElementById('proud-public-frame');
+    if (frame) {
+      var fh = frame.offsetHeight || parseFloat(frame.style.height);
+      if (fh && !isNaN(fh)) L.frameH = Math.round(fh);
+    }
+    meta.layout[dev] = L;
+    if (dev === 'pc') {
+      if (L.titleX != null) meta.titleX = L.titleX;
+      if (L.titleY != null) meta.titleY = L.titleY;
+      if (L.titleFs != null) meta.titleFs = L.titleFs;
+      if (L.frameH != null) meta.frameH = L.frameH;
+    }
+    try { localStorage.setItem('hh_proud_meta', JSON.stringify(meta)); } catch (e) {}
+    if (typeof write === 'function') write('hh_proud_meta', meta);
+
+    // Logos
+    var list = [];
+    try {
+      if (typeof read === 'function') list = read('hh_proud_sponsors', []) || [];
+      else list = JSON.parse(localStorage.getItem('hh_proud_sponsors') || '[]') || [];
+    } catch (e) { list = []; }
+    if (!Array.isArray(list)) list = [];
+    var active = list.filter(function(p){ return p && p.active !== false; });
+    doc.querySelectorAll('.proud-logo-item, #proud-sponsors-list > a.absolute, #proud-sponsors-list > span.absolute').forEach(function(el, i) {
+      var idx = el.getAttribute('data-proud-idx');
+      var p = (idx != null && active[idx]) ? active[idx] : active[i];
+      if (!p) return;
+      if (!p.layout || typeof p.layout !== 'object') p.layout = {};
+      var pl = Object.assign({}, p.layout[dev] || {});
+      if (el.style.left) pl.x = Math.round(parseFloat(el.style.left));
+      if (el.style.top) pl.y = Math.round(parseFloat(el.style.top));
+      if (el.style.width) pl.size = Math.round(parseFloat(el.style.width));
+      p.layout[dev] = pl;
+      if (dev === 'pc') {
+        if (pl.x != null) p.x = pl.x;
+        if (pl.y != null) p.y = pl.y;
+        if (pl.size != null) p.size = pl.size;
+      }
+    });
+    try { localStorage.setItem('hh_proud_sponsors', JSON.stringify(list)); } catch (e) {}
+    if (typeof write === 'function') write('hh_proud_sponsors', list);
+  }
+
   function enableTextEdit(el, onSave) {
     if (!el || el._pvEditBound) return;
     el._pvEditBound = true;
@@ -3664,6 +3733,28 @@ function enablePreviewDrag(iframe) {
       } catch (e) {}
     }
     bindImgPan(doc.getElementById('upcoming-img'), '#upcoming-banner', saveUpcomingFromDom);
+
+    // Proud Sponsors: title + logos (device-isolated via saveProudFromDom)
+    try {
+      var proudLabel = doc.getElementById('proud-label');
+      if (proudLabel) {
+        makeDrag(proudLabel, '#proud-public-frame', saveProudFromDom, { noResize: true });
+        enableTextEdit(proudLabel, saveProudFromDom);
+      }
+      doc.querySelectorAll('.proud-logo-item, #proud-sponsors-list > a, #proud-sponsors-list > span').forEach(function(el) {
+        try {
+          el.style.pointerEvents = 'auto';
+          el.style.position = 'absolute';
+          el.style.zIndex = '30';
+          // prevent navigation while editing
+          if (el.tagName === 'A' && !el._pvClickBlock) {
+            el._pvClickBlock = true;
+            el.addEventListener('click', function(ev) { ev.preventDefault(); ev.stopPropagation(); }, true);
+          }
+        } catch (e) {}
+        makeDrag(el, '#proud-public-frame', saveProudFromDom, { imageSize: true });
+      });
+    } catch (e) {}
     var upBan = doc.getElementById('upcoming-banner');
     if (upBan && !upBan.querySelector('.pv-banner-resize')) {
       try {
@@ -3716,6 +3807,7 @@ function enablePreviewDrag(iframe) {
   window._pvSaveHeroFromDom = saveHeroFromDom;
   window._pvSaveSponsorFromDom = saveSponsorFromDom;
   window._pvSaveUpcomingFromDom = saveUpcomingFromDom;
+  window._pvSaveProudFromDom = saveProudFromDom;
   window._pvPreviewIframe = iframe;
 }
 
@@ -3725,6 +3817,7 @@ function savePagePreviewLayout() {
     if (typeof window._pvSaveHeroFromDom === 'function') window._pvSaveHeroFromDom();
     if (typeof window._pvSaveSponsorFromDom === 'function') window._pvSaveSponsorFromDom();
     if (typeof window._pvSaveUpcomingFromDom === 'function') window._pvSaveUpcomingFromDom();
+    if (typeof window._pvSaveProudFromDom === 'function') window._pvSaveProudFromDom();
   } catch (e) { console.warn(e); }
   try { if (typeof stashCurrentDeviceLayout === 'function') stashCurrentDeviceLayout(); } catch (e) {}
   var dev = (typeof getEditDevice === 'function' ? getEditDevice() : 'pc');
@@ -7860,10 +7953,111 @@ function saveProudMetaFields(extra) {
   const frameH = parseInt(($('proud-frame-h') && $('proud-frame-h').value) || '100', 10) || 100;
   const titleFs = parseInt(($('proud-title-fs') && $('proud-title-fs').value) || '12', 10) || 12;
   const sectionActive = $('proud-section-active') ? $('proud-section-active').checked : true;
-  const next = Object.assign({}, m, { title: title, logoH: logoH, frameH: frameH, titleFs: titleFs, active: sectionActive }, extra || {});
+  const next = Object.assign({}, m, { title: title, active: sectionActive }, extra || {});
+  // Content fields always top-level; metrics go to layout[device]
+  var dev = window._proudEditDevice || 'pc';
+  if (dev === 'mobile') dev = 'phone';
+  if (!next.layout || typeof next.layout !== 'object') next.layout = {};
+  var metrics = { logoH: logoH, frameH: frameH, titleFs: titleFs };
+  if (extra && extra.titleX != null) metrics.titleX = extra.titleX;
+  if (extra && extra.titleY != null) metrics.titleY = extra.titleY;
+  if (next.titleX != null && metrics.titleX == null) metrics.titleX = next.titleX;
+  if (next.titleY != null && metrics.titleY == null) metrics.titleY = next.titleY;
+  // read title pos from form if present via extra
+  next.layout[dev] = Object.assign({}, next.layout[dev] || {}, metrics);
+  if (dev === 'pc') {
+    next.logoH = logoH; next.frameH = frameH; next.titleFs = titleFs;
+    if (metrics.titleX != null) next.titleX = metrics.titleX;
+    if (metrics.titleY != null) next.titleY = metrics.titleY;
+  }
   if (typeof write === 'function') write('hh_proud_meta', next);
   else localStorage.setItem('hh_proud_meta', JSON.stringify(next));
 }
+
+window._proudEditDevice = window._proudEditDevice || 'pc';
+function setProudEditDevice(mode) {
+  if (mode === 'mobile') mode = 'phone';
+  if (mode !== 'pc' && mode !== 'tablet' && mode !== 'phone') mode = 'pc';
+  // stash current before switch
+  try { saveProudMetaFields({}); } catch (e) {}
+  try { stashProudLogosToDevice(window._proudEditDevice || 'pc'); } catch (e) {}
+  window._proudEditDevice = mode;
+  try {
+    document.querySelectorAll('[data-proud-dev]').forEach(function(b) {
+      var on = b.getAttribute('data-proud-dev') === mode;
+      b.classList.toggle('ring-2', on);
+      b.classList.toggle('ring-emerald-400', on);
+    });
+    var lb = document.getElementById('proud-save-dev-label');
+    if (lb) lb.textContent = mode === 'phone' ? 'Phone' : (mode === 'tablet' ? 'Tablet' : 'PC');
+  } catch (e) {}
+  try { applyProudDeviceToForm(mode); } catch (e) {}
+  try { updateProudPreview(); } catch (e) {}
+}
+function applyProudDeviceToForm(mode) {
+  var m = getProudMeta();
+  var L = (m.layout && m.layout[mode]) ? m.layout[mode] : {};
+  // fall back to top-level for pc / missing
+  function v(k, d) {
+    if (L[k] != null) return L[k];
+    if (mode === 'pc' && m[k] != null) return m[k];
+    return d;
+  }
+  if ($('proud-frame-h')) {
+    $('proud-frame-h').value = v('frameH', 100);
+    if ($('val-proud-frame-h')) $('val-proud-frame-h').textContent = v('frameH', 100) + 'px';
+  }
+  if ($('proud-logo-h')) {
+    $('proud-logo-h').value = v('logoH', 48);
+    if ($('val-proud-logo-h')) $('val-proud-logo-h').textContent = v('logoH', 48) + 'px';
+  }
+  if ($('proud-title-fs')) {
+    $('proud-title-fs').value = v('titleFs', 12);
+    if ($('val-proud-title-fs')) $('val-proud-title-fs').textContent = v('titleFs', 12) + 'px';
+  }
+  // Apply per-logo layout from items
+  try {
+    var items = getProud();
+    items.forEach(function(p) {
+      if (!p || !p.layout || !p.layout[mode]) return;
+      var pl = p.layout[mode];
+      if (pl.x != null) p.x = pl.x;
+      if (pl.y != null) p.y = pl.y;
+      if (pl.size != null) p.size = pl.size;
+    });
+  } catch (e) {}
+}
+function stashProudLogosToDevice(dev) {
+  if (!dev) dev = window._proudEditDevice || 'pc';
+  try {
+    var items = getProud();
+    items.forEach(function(p) {
+      if (!p) return;
+      if (!p.layout || typeof p.layout !== 'object') p.layout = {};
+      p.layout[dev] = Object.assign({}, p.layout[dev] || {}, {
+        x: p.x, y: p.y, size: p.size
+      });
+    });
+    write('hh_proud_sponsors', items);
+  } catch (e) {}
+}
+function saveProudDeviceLayout() {
+  try { saveProudMetaFields({}); } catch (e) {}
+  try { stashProudLogosToDevice(window._proudEditDevice || 'pc'); } catch (e) {}
+  try {
+    if (typeof forceSyncAllToFirebase === 'function') forceSyncAllToFirebase();
+  } catch (e) {}
+  var dev = window._proudEditDevice || 'pc';
+  var label = dev === 'phone' ? 'Phone' : (dev === 'tablet' ? 'Tablet' : 'PC');
+  toast('✓ Proud ' + label + ' layout Save ပြီး');
+  try {
+    var st = document.getElementById('proud-dev-status');
+    if (st) st.textContent = '✓ ' + label + ' saved';
+  } catch (e) {}
+}
+window.setProudEditDevice = setProudEditDevice;
+window.saveProudDeviceLayout = saveProudDeviceLayout;
+window.stashProudLogosToDevice = stashProudLogosToDevice;
 
 function initProudDrag() {
   const frame = $('proud-live-frame');
@@ -8004,6 +8198,10 @@ function renderProudList() {
 
 function getProudMeta() {
   try {
+    if (typeof read === 'function') {
+      var m = read('hh_proud_meta', {});
+      return m && typeof m === 'object' ? m : {};
+    }
     const m = JSON.parse(localStorage.getItem('hh_proud_meta') || '{}');
     return m && typeof m === 'object' ? m : {};
   } catch (e) { return {}; }
