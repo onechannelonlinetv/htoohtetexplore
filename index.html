@@ -2539,6 +2539,8 @@ function loadBlogData() {
         if (L.x != null) out.x = L.x;
         if (L.y != null) out.y = L.y;
         if (L.size != null) out.size = L.size;
+        if (L.w != null) out.w = L.w;
+        if (L.h != null) out.h = L.h;
       }
       return out;
     });
@@ -2549,11 +2551,13 @@ function loadBlogData() {
       proudList.style.right = '';
       proudList.innerHTML = resolvedProud.map(function(p, idx) {
         const sz = p.size || logoH;
+        const w = (p.w != null ? p.w : (p.sizeW != null ? p.sizeW : sz));
+        const h = (p.h != null ? p.h : (p.sizeH != null ? p.sizeH : sz));
         const x = p.x != null ? p.x : (28 + idx * 18);
         const y = p.y != null ? p.y : 22;
         const href = safe(p.link || '#');
         if (p.logo) {
-          return '<a href="' + href + '" target="_blank" rel="noopener" class="proud-logo-item absolute opacity-90 hover:opacity-100 transition" data-proud-idx="' + idx + '" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;position:absolute;">' +
+          return '<a href="' + href + '" target="_blank" rel="noopener" class="proud-logo-item absolute opacity-90 hover:opacity-100 transition" data-proud-idx="' + idx + '" style="left:' + x + '%;top:' + y + '%;width:' + w + 'px;height:' + h + 'px;position:absolute;overflow:visible;">' +
             '<img src="' + safe(p.logo) + '" alt="' + safe(p.name) + '" class="w-full h-full object-contain pointer-events-none" draggable="false" onerror="this.style.display=\'none\'">' +
             '</a>';
         }
