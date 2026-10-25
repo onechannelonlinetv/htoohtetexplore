@@ -1657,7 +1657,7 @@ header.sticky {
           <input id="editing-post-id" type="hidden">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label class="label">Title (မြန်မာ) *</label><input id="admin-post-title" class="field" placeholder="ပုဂံ - ရှေးဟောင်းဘုရားများ" oninput="autoSlug();updatePostPreview()"></div>
-            <div><label class="label">Title (English)</label><input id="admin-post-title-en" class="field" placeholder="Bagan - Ancient Temples" oninput="updatePostPreview()"><p class="tiny mt-1">EN ရွေးရင် ဒီစာ ပေါ်မယ် · ဗလာဆို မြန်မာစာ သုံးမယ်</p></div>
+            <div><label class="label">Title (English)</label><input id="admin-post-title-en" class="field" placeholder="Bagan - Ancient Temples" oninput="autoSlug();updatePostPreview()"><p class="tiny mt-1">EN ရွေးရင် ဒီစာ ပေါ်မယ် · ဗလာဆို မြန်မာစာ သုံးမယ်</p></div>
             <div class="md:col-span-2"><label class="label">Slug * <span class="tiny">(URL)</span></label><input id="admin-post-slug" class="field" placeholder="bagan-ancient-temples" oninput="this.dataset.manual='1'"><p class="tiny mt-1">Title ကနေ auto ဖန်တီး — ကိုယ်တိုင်ပြင်လို့ရ</p></div>
             <div class="md:col-span-2">
               <label class="label">Cover Image *</label>
@@ -9110,16 +9110,28 @@ function refreshPostSectionOptions() {
   if ([...sel.options].some(o => o.value === current)) sel.value = current;
 }
 function slugify(text) {
-  return String(text || '').toLowerCase()
+  var s = String(text || '').toLowerCase().trim();
+  // Prefer ASCII URL-safe slug (for clean share links)
+  var ascii = s
+    .replace(/[^a-z0-9\s-_]/g, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  if (ascii && /^[a-z0-9]/.test(ascii)) return ascii;
+  // Fallback: keep Myanmar-friendly slug (public site will share via post id instead)
+  return s
     .replace(/[^\w\u1000-\u109f\s-]/g, '')
     .replace(/[\s_]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '') || 'post';
 }
 function autoSlug() {
-  const title = $('admin-post-title').value;
+  // Prefer English title for clean shareable URL slug
+  var en = ($('admin-post-title-en') && $('admin-post-title-en').value || '').trim();
+  var mm = ($('admin-post-title') && $('admin-post-title').value || '').trim();
   const slugEl = $('admin-post-slug');
-  if (!slugEl.dataset.manual) slugEl.value = slugify(title);
+  if (!slugEl || slugEl.dataset.manual) return;
+  slugEl.value = slugify(en || mm);
 }
 
 const DEFAULT_POST_CATEGORIES = ['Travel Story', 'Guide', 'Food', 'Culture', 'Adventure'];
