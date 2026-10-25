@@ -896,6 +896,21 @@
   }
 
   
+  /* About / Contact / Privacy page mode — survives loadBlogData re-render */
+  body.legal-page-open #home > *:not(#about-section):not(#contact-page):not(#privacy-policy) {
+    display: none !important;
+  }
+  body.legal-page-open #about-section,
+  body.legal-page-open #contact-page,
+  body.legal-page-open #privacy-policy {
+    display: block !important;
+  }
+  body.legal-page-open #about-section.hidden,
+  body.legal-page-open #contact-page.hidden,
+  body.legal-page-open #privacy-policy.hidden {
+    display: none !important;
+  }
+
   /* Menu drawer — follows active theme (forest / ocean / sunset / navy) + safe area */
   #site-menu {
     --menu-bg: color-mix(in srgb, var(--brand-bg) 92%, black);
@@ -1310,13 +1325,10 @@
     </div>
   </section>
 
-  <!-- ABOUT (Menu နှိပ်မှ စာမျက်နှာ) -->
-  <section id="about-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+  <!-- ABOUT -->
+  <section id="about-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
     <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
-      <div class="flex items-center justify-between gap-3 mb-3">
-        <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white">About Htoo Htet</h2>
-        <button type="button" onclick="closeLegalPage()" class="text-xs font-bold text-emerald-400 hover:text-emerald-200 px-3 py-1.5 rounded-lg border border-emerald-800/50 hover:bg-emerald-900/40">← Back</button>
-      </div>
+      <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3">About Htoo Htet</h2>
       <p id="about-desc" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl">
         မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
       </p>
@@ -1476,8 +1488,8 @@
     <div class="mt-8 pt-5 border-t border-emerald-900/50 text-[11px] text-emerald-500/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
       <span>© <span id="footer-year"></span> <span id="footer-copy-name">HTOO HTET</span>. All rights reserved.</span>
       <span class="flex flex-wrap gap-3">
-        <a href="#contact-page" class="hover:text-emerald-300 transition">Contact</a>
-        <a href="#privacy-policy" class="hover:text-emerald-300 transition">Privacy Policy</a>
+        <a href="#contact-page" onclick="openLegalPage('contact');return false;" class="hover:text-emerald-300 transition">Contact</a>
+        <a href="#privacy-policy" onclick="openLegalPage('privacy');return false;" class="hover:text-emerald-300 transition">Privacy Policy</a>
       </span>
     </div>
   </div>
@@ -1626,13 +1638,7 @@ $('search-close').addEventListener('click', () => {
 });
 searchInput.addEventListener('input', () => renderStoryCards());
 
-window._hhRemote = window._hhRemote || {};
 function read(key, fallback) {
-  try {
-    if (window._hhRemote && Object.prototype.hasOwnProperty.call(window._hhRemote, key) && window._hhRemote[key] != null) {
-      return window._hhRemote[key];
-    }
-  } catch (e) {}
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
 }
 
@@ -2186,11 +2192,18 @@ function renderMenu() {
   });
   const mob = $('mobile-nav');
   const foot = $('footer-links');
+  function menuClickAttr(href) {
+    var h = String(href || '').toLowerCase();
+    if (h.indexOf('about') >= 0) return "closeMenu();openLegalPage('about');return false;";
+    if (h.indexOf('contact') >= 0) return "closeMenu();openLegalPage('contact');return false;";
+    if (h.indexOf('privacy') >= 0) return "closeMenu();openLegalPage('privacy');return false;";
+    return 'closeMenu()';
+  }
   var html = menu.map(function(m) {
-    return '<a href="' + safe(m.href || '#') + '" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold">' +
+    var href = m.href || '#';
+    return '<a href="' + safe(href) + '" onclick="' + menuClickAttr(href) + '" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold">' +
       '<i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>' + safe(m.label) + '</span></a>';
   }).join('');
-  // Always append Website Share (not a page link — shares homepage)
   var shareLabel = (typeof t === 'function' ? t('shareWebsite') : '') || 'Share Website';
   html += '<button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold w-full text-left">' +
     '<i class="fa-solid fa-share-nodes text-emerald-400"></i><span id="menu-share-label">' + safe(shareLabel) + '</span></button>';
@@ -2203,7 +2216,8 @@ function renderMenu() {
   }
   if (foot) {
     foot.innerHTML = menu.map(function(m) {
-      return '<li><a href="' + safe(m.href || '#') + '" class="hover:text-yellow-400 transition">' + safe(m.label) + '</a></li>';
+      var href = m.href || '#';
+      return '<li><a href="' + safe(href) + '" onclick="' + menuClickAttr(href) + '">' + safe(m.label) + '</a></li>';
     }).join('');
   }
 }
@@ -2953,26 +2967,7 @@ function loadBlogData() {
     else $('about-desc').textContent = (typeof t === 'function' ? t('aboutDesc') : '');
   }
   if (about.descColor) $('about-desc').style.color = about.descColor;
-  // About is menu-page only — do not show as homepage strip
-
-  try {
-    var ct = read('hh_contact', {}) || {};
-    var cTitle = (ct.title || '').trim();
-    var cIntro = (ct.intro || '').trim();
-    var cEmail = (ct.email || siteSettings.contactEmail || '').trim();
-    var cLoc = (ct.location || siteSettings.contactLocation || '').trim();
-    if (cTitle && $('contact-page-title')) $('contact-page-title').textContent = cTitle;
-    if (cIntro && $('contact-page-intro')) $('contact-page-intro').textContent = cIntro;
-    if (cEmail) {
-      if ($('contact-page-email')) { $('contact-page-email').textContent = cEmail; $('contact-page-email').href = 'mailto:' + cEmail; }
-      if ($('contact-email')) { $('contact-email').textContent = cEmail; $('contact-email').href = 'mailto:' + cEmail; }
-      if ($('privacy-contact-email')) { $('privacy-contact-email').textContent = cEmail; $('privacy-contact-email').href = 'mailto:' + cEmail; }
-    }
-    if (cLoc) {
-      if ($('contact-page-location')) $('contact-page-location').textContent = cLoc;
-      if ($('contact-location')) $('contact-location').textContent = cLoc;
-    }
-  } catch (e) {}
+  $('about-section').classList.toggle('hidden', about.active === false);
 
   if (siteSettings.storiesHeading) $('stories-heading').textContent = siteSettings.storiesHeading;
   if (siteSettings.storiesSub) $('stories-sub').textContent = siteSettings.storiesSub;
@@ -3891,29 +3886,37 @@ function parseYoutubeUrl(url) {
   return null;
 }
 
-const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_youtube','hh_about','hh_contact','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets'];
 let publicFirebaseReady = false;
 let publicDb = null;
 try {
   firebase.initializeApp(firebaseConfig);
   publicDb = firebase.database();
-  var _lastUpdatedAt = 0;
+  var _lastRemoteHash = '';
   var _remoteApplyTimer = null;
   function applyRemoteSiteData(data, force) {
     data = data || {};
-    try { window._hhRemote = data; } catch (e) {}
+    var changed = false;
     DATA_KEYS.forEach(function(key) {
       if (!Object.prototype.hasOwnProperty.call(data, key) || data[key] == null) return;
-      try { localStorage.setItem(key, JSON.stringify(data[key])); } catch (e) {}
+      var next = '';
+      try { next = JSON.stringify(data[key]); } catch (e) { return; }
+      var prev = null;
+      try { prev = localStorage.getItem(key); } catch (e) {}
+      if (force || prev !== next) {
+        try { localStorage.setItem(key, next); changed = true; } catch (e) {}
+      }
     });
     publicFirebaseReady = true;
-    try { loadBlogData(); } catch (e) { console.error(e); }
+    if (changed || force) {
+      try { loadBlogData(); } catch (e) { console.error(e); }
+    }
   }
   function scheduleRemoteApply(data) {
     clearTimeout(_remoteApplyTimer);
     _remoteApplyTimer = setTimeout(function() {
-      applyRemoteSiteData(data || {}, true);
-    }, 40);
+      applyRemoteSiteData(data || {}, false);
+    }, 80);
   }
   function refreshFromFirebase() {
     if (!publicDb) return;
@@ -3924,35 +3927,28 @@ try {
       try { loadBlogData(); } catch (e) {}
     });
   }
-  window.refreshFromFirebase = refreshFromFirebase;
   publicDb.ref('siteData').on('value', function(snap) {
     scheduleRemoteApply(snap.val() || {});
   }, function(err) {
     console.error(err);
     try { loadBlogData(); } catch (e) {}
   });
-  try {
-    publicDb.ref('siteData/_updatedAt').on('value', function(snap) {
-      var t = Number(snap.val() || 0);
-      if (t && t !== _lastUpdatedAt) {
-        _lastUpdatedAt = t;
-        refreshFromFirebase();
-      }
-    });
-  } catch (e) {}
+  // Also listen per-key so partial updates never get missed on mobile
   DATA_KEYS.forEach(function(key) {
     try {
       publicDb.ref('siteData/' + key).on('value', function(snap) {
         var val = snap.val();
         if (val == null) return;
         try {
-          if (!window._hhRemote) window._hhRemote = {};
-          window._hhRemote[key] = val;
-          try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
-          clearTimeout(window._hhKeyReload);
-          window._hhKeyReload = setTimeout(function() {
-            try { loadBlogData(); } catch (e) {}
-          }, 60);
+          var next = JSON.stringify(val);
+          var prev = localStorage.getItem(key);
+          if (prev !== next) {
+            localStorage.setItem(key, next);
+            clearTimeout(window._hhKeyReload);
+            window._hhKeyReload = setTimeout(function() {
+              try { loadBlogData(); } catch (e) {}
+            }, 100);
+          }
         } catch (e) {}
       });
     } catch (e) {}
@@ -3966,11 +3962,12 @@ try {
   window.addEventListener('online', function() {
     refreshFromFirebase();
   });
-  // PWA / phone: poll every 3s while app is open
+  // Mobile browsers often drop the websocket — poll while visible
   setInterval(function() {
     if (!publicDb || document.visibilityState !== 'visible') return;
+    try { publicDb.ref('.info/connected').once('value'); } catch (e) {}
     try { refreshFromFirebase(); } catch (e) {}
-  }, 3000);
+  }, 20000);
 } catch (e) { console.error(e); }
 
 /* ---- Engagement: Like / Share / Comment ---- */
@@ -4346,40 +4343,32 @@ function submitComment() {
 }
 
 
-/* ---- About / Contact / Privacy as separate pages ---- */
+/* ---- Contact / Privacy Policy as separate pages ---- */
 function openLegalPage(which) {
   var contact = document.getElementById('contact-page');
   var privacy = document.getElementById('privacy-policy');
-  var about = document.getElementById('about-section');
   var home = document.getElementById('home');
   if (!contact || !privacy) return;
   try { closeArticle(); } catch (e) {}
   try { closeGalleryPage(); } catch (e) {}
   try { closeMenu(); } catch (e) {}
+  // hide main home blocks, show only the selected legal section
   if (home) {
     Array.prototype.forEach.call(home.children, function(child) {
-      if (child.id === 'contact-page' || child.id === 'privacy-policy' || child.id === 'about-section') return;
+      if (child.id === 'contact-page' || child.id === 'privacy-policy') return;
       child.setAttribute('data-legal-hidden', '1');
       child.style.display = 'none';
     });
   }
-  function hideAll() {
-    if (contact) { contact.classList.add('hidden'); contact.style.display = 'none'; }
-    if (privacy) { privacy.classList.add('hidden'); privacy.style.display = 'none'; }
-    if (about) { about.classList.add('hidden'); about.style.display = 'none'; }
-  }
-  hideAll();
   if (which === 'privacy') {
+    contact.classList.add('hidden');
+    contact.style.display = 'none';
     privacy.classList.remove('hidden');
     privacy.style.display = '';
     try { privacy.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
-  } else if (which === 'about') {
-    if (about) {
-      about.classList.remove('hidden');
-      about.style.display = '';
-      try { about.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
-    }
   } else {
+    privacy.classList.add('hidden');
+    privacy.style.display = 'none';
     contact.classList.remove('hidden');
     contact.style.display = '';
     try { contact.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
@@ -4389,11 +4378,9 @@ function openLegalPage(which) {
 function closeLegalPage() {
   var contact = document.getElementById('contact-page');
   var privacy = document.getElementById('privacy-policy');
-  var about = document.getElementById('about-section');
   var home = document.getElementById('home');
   if (contact) { contact.classList.add('hidden'); contact.style.display = 'none'; }
   if (privacy) { privacy.classList.add('hidden'); privacy.style.display = 'none'; }
-  if (about) { about.classList.add('hidden'); about.style.display = 'none'; }
   if (home) {
     Array.prototype.forEach.call(home.children, function(child) {
       if (child.getAttribute('data-legal-hidden') === '1') {
@@ -4404,8 +4391,7 @@ function closeLegalPage() {
   }
   document.body.classList.remove('legal-page-open');
   try {
-    var h = (location.hash || '').toLowerCase();
-    if (h === '#contact-page' || h === '#privacy-policy' || h === '#about-section' || h === '#about' || h === '#contact') {
+    if (location.hash === '#contact-page' || location.hash === '#privacy-policy') {
       history.pushState('', '', location.pathname + location.search);
     }
   } catch (e) {}
@@ -4421,10 +4407,7 @@ function tryOpenLegalFromHash() {
     openLegalPage('privacy');
     return true;
   }
-  if (h === '#about-section' || h === '#about') {
-    openLegalPage('about');
-    return true;
-  }
+  // not a legal hash — ensure legal pages closed if we were on one
   if (document.body.classList.contains('legal-page-open')) {
     closeLegalPage();
   }
@@ -4549,51 +4532,11 @@ document.addEventListener('keydown', e => {
 </div>
 
 <script>
-/* PWA / Add-to-Home: auto-update shell + soft reload when new SW is ready */
-(function() {
-  if (!('serviceWorker' in navigator)) return;
-  var reloading = false;
-  function softReload() {
-    if (reloading) return;
-    reloading = true;
-    try { location.reload(); } catch (e) {}
-  }
-  navigator.serviceWorker.addEventListener('controllerchange', function() {
-    softReload();
-  });
-  navigator.serviceWorker.addEventListener('message', function(ev) {
-    if (ev && ev.data && ev.data.type === 'HH_SW_UPDATED') softReload();
-  });
-  function checkSW() {
-    try {
-      navigator.serviceWorker.getRegistration('./sw.js').then(function(reg) {
-        if (!reg) return;
-        try { reg.update(); } catch (e) {}
-        if (reg.waiting) {
-          try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
-          softReload();
-        }
-      }).catch(function(){});
-    } catch (e) {}
-  }
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js?v=3').then(function(reg) {
-      try { reg.update(); } catch (e) {}
-      setInterval(function() { try { reg.update(); } catch (e) {} }, 60 * 1000);
-    }).catch(function(){});
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
   });
-  document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible') {
-      checkSW();
-      try { if (typeof refreshFromFirebase === 'function') refreshFromFirebase(); } catch (e) {}
-    }
-  });
-  window.addEventListener('pageshow', function() {
-    checkSW();
-    try { if (typeof refreshFromFirebase === 'function') refreshFromFirebase(); } catch (e) {}
-  });
-  window.addEventListener('focus', function() { checkSW(); });
-})();
+}
 </script>
 
 <div id="hh-admin-back-bar" class="hidden fixed bottom-4 left-1/2 z-[9999] -translate-x-1/2 rounded-full border border-emerald-500/40 bg-slate-950/95 px-4 py-2 shadow-xl backdrop-blur" style="padding-bottom:max(8px,env(safe-area-inset-bottom))">
