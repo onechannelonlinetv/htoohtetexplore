@@ -896,21 +896,6 @@
   }
 
   
-  /* About / Contact / Privacy page mode — survives loadBlogData re-render */
-  body.legal-page-open #home > *:not(#about-section):not(#contact-page):not(#privacy-policy) {
-    display: none !important;
-  }
-  body.legal-page-open #about-section,
-  body.legal-page-open #contact-page,
-  body.legal-page-open #privacy-policy {
-    display: block !important;
-  }
-  body.legal-page-open #about-section.hidden,
-  body.legal-page-open #contact-page.hidden,
-  body.legal-page-open #privacy-policy.hidden {
-    display: none !important;
-  }
-
   /* Menu drawer — follows active theme (forest / ocean / sunset / navy) + safe area */
   #site-menu {
     --menu-bg: color-mix(in srgb, var(--brand-bg) 92%, black);
@@ -1310,8 +1295,8 @@
           </a>
         </div>
         <div class="shrink-0">
-          <a id="youtube-video-link" href="#" target="_blank" rel="noopener" class="block w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl">
-            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-95 transition duration-300 group-hover:scale-105">
+          <a id="youtube-video-link" href="#" target="_blank" rel="noopener" class="block w-full max-w-[18rem] sm:max-w-[20rem] aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl mx-auto lg:mx-0">
+            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover object-center opacity-90 group-hover:opacity-100 transition duration-300 group-hover:scale-105">
             <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20 pointer-events-none"></div>
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
               <div class="w-12 h-12 rounded-full bg-red-600/95 flex items-center justify-center shadow-xl mb-2 group-hover:scale-110 transition">
@@ -1488,8 +1473,8 @@
     <div class="mt-8 pt-5 border-t border-emerald-900/50 text-[11px] text-emerald-500/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
       <span>© <span id="footer-year"></span> <span id="footer-copy-name">HTOO HTET</span>. All rights reserved.</span>
       <span class="flex flex-wrap gap-3">
-        <a href="#contact-page" onclick="openLegalPage('contact');return false;" class="hover:text-emerald-300 transition">Contact</a>
-        <a href="#privacy-policy" onclick="openLegalPage('privacy');return false;" class="hover:text-emerald-300 transition">Privacy Policy</a>
+        <a href="#contact-page" class="hover:text-emerald-300 transition">Contact</a>
+        <a href="#privacy-policy" class="hover:text-emerald-300 transition">Privacy Policy</a>
       </span>
     </div>
   </div>
@@ -2192,18 +2177,11 @@ function renderMenu() {
   });
   const mob = $('mobile-nav');
   const foot = $('footer-links');
-  function menuClickAttr(href) {
-    var h = String(href || '').toLowerCase();
-    if (h.indexOf('about') >= 0) return "closeMenu();openLegalPage('about');return false;";
-    if (h.indexOf('contact') >= 0) return "closeMenu();openLegalPage('contact');return false;";
-    if (h.indexOf('privacy') >= 0) return "closeMenu();openLegalPage('privacy');return false;";
-    return 'closeMenu()';
-  }
   var html = menu.map(function(m) {
-    var href = m.href || '#';
-    return '<a href="' + safe(href) + '" onclick="' + menuClickAttr(href) + '" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold">' +
+    return '<a href="' + safe(m.href || '#') + '" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold">' +
       '<i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>' + safe(m.label) + '</span></a>';
   }).join('');
+  // Always append Website Share (not a page link — shares homepage)
   var shareLabel = (typeof t === 'function' ? t('shareWebsite') : '') || 'Share Website';
   html += '<button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold w-full text-left">' +
     '<i class="fa-solid fa-share-nodes text-emerald-400"></i><span id="menu-share-label">' + safe(shareLabel) + '</span></button>';
@@ -2216,8 +2194,7 @@ function renderMenu() {
   }
   if (foot) {
     foot.innerHTML = menu.map(function(m) {
-      var href = m.href || '#';
-      return '<li><a href="' + safe(href) + '" onclick="' + menuClickAttr(href) + '">' + safe(m.label) + '</a></li>';
+      return '<li><a href="' + safe(m.href || '#') + '" class="hover:text-yellow-400 transition">' + safe(m.label) + '</a></li>';
     }).join('');
   }
 }
@@ -2923,25 +2900,53 @@ function loadBlogData() {
     else if (social.yt) $('youtube-link').href = social.yt;
     if (yt.bgImage) $('youtube-bg').src = yt.bgImage;
 
-    // Video / playlist from admin: show that video's thumbnail; click opens YouTube (no autoplay embed)
+    // Video / playlist: same YouTube cover on phone + PC (16:9 maxres → fallback)
     var parsed = (typeof parseYoutubeUrl === 'function') ? parseYoutubeUrl(yt.videoUrl || '') : null;
     var watchUrl = '';
     var autoThumb = '';
+    var thumbFallbacks = [];
     if (parsed) {
       if (parsed.type === 'playlist') {
         watchUrl = 'https://www.youtube.com/playlist?list=' + encodeURIComponent(parsed.id);
       } else {
         watchUrl = 'https://www.youtube.com/watch?v=' + encodeURIComponent(parsed.id);
         if (parsed.list) watchUrl += '&list=' + encodeURIComponent(parsed.list);
-        autoThumb = 'https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg';
+        // maxres = real 16:9 cover (PC မှာ မှန်တဲ့ပုံ) · hqdefault မှာ အပေါ်အောက်အမဲပါ
+        autoThumb = 'https://i.ytimg.com/vi/' + parsed.id + '/maxresdefault.jpg';
+        thumbFallbacks = [
+          'https://i.ytimg.com/vi/' + parsed.id + '/sddefault.jpg',
+          'https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg',
+          'https://i.ytimg.com/vi/' + parsed.id + '/mqdefault.jpg'
+        ];
       }
     }
-    var thumbSrc = (yt.thumb && String(yt.thumb).trim()) || autoThumb || '';
-    if (thumbSrc && $('youtube-thumb')) $('youtube-thumb').src = thumbSrc;
+    var customThumb = (yt.thumb && String(yt.thumb).trim()) || '';
+    var thumbSrc = customThumb || autoThumb || '';
+    var thumbEl = $('youtube-thumb');
+    if (thumbEl && thumbSrc) {
+      thumbEl.onerror = function() {
+        if (customThumb) {
+          // custom failed → try YouTube auto
+          customThumb = '';
+          if (autoThumb) { this.src = autoThumb; return; }
+        }
+        if (thumbFallbacks && thumbFallbacks.length) {
+          this.src = thumbFallbacks.shift();
+          return;
+        }
+        this.onerror = null;
+      };
+      if (thumbEl.getAttribute('data-hh-yt') !== thumbSrc) {
+        thumbEl.setAttribute('data-hh-yt', thumbSrc);
+        thumbEl.src = thumbSrc;
+      }
+    }
     var vLink = $('youtube-video-link');
     if (vLink) {
       vLink.href = watchUrl || yt.link || (social && social.yt) || 'https://www.youtube.com';
       vLink.setAttribute('aria-label', parsed && parsed.type === 'playlist' ? 'Open playlist on YouTube' : 'Open video on YouTube');
+      // Same 16:9 frame phone + PC
+      vLink.className = 'block w-full max-w-[18rem] sm:max-w-[20rem] aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl mx-auto lg:mx-0';
     }
     var cap = $('youtube-thumb-caption');
     if (cap) {
