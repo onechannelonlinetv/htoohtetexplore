@@ -9266,12 +9266,18 @@ function savePost() {
   const author = $('admin-post-author').value.trim() || 'Htoo Htet';
   const seoTitle = $('admin-post-seo-title').value.trim() || title;
   const metaDesc = $('admin-post-meta').value.trim() || desc;
-  const titleEn = ($('admin-post-title-en') && $('admin-post-title-en').value || '').trim();
-  const descEn = ($('admin-post-desc-en') && $('admin-post-desc-en').value || '').trim();
+  let titleEn = ($('admin-post-title-en') && $('admin-post-title-en').value || '').trim();
+  let descEn = ($('admin-post-desc-en') && $('admin-post-desc-en').value || '').trim();
   const contentEnRaw = ($('admin-post-content-en') && $('admin-post-content-en').value || '').trim();
-  const contentEn = contentEnRaw ? expandContentCids(contentEnRaw) : '';
+  let contentEn = contentEnRaw ? expandContentCids(contentEnRaw) : '';
+  // Safety: if Myanmar boxes have no Myanmar script but EN boxes do, swap before save
+  var _hasMm = function(s) { return /[\u1000-\u109F]/.test(String(s || '')); };
+  var _title = title, _desc = desc, _content = content;
+  if (!_hasMm(_title) && _hasMm(titleEn)) { var _t = _title; _title = titleEn; titleEn = _t; }
+  if (!_hasMm(_desc) && _hasMm(descEn)) { var _d = _desc; _desc = descEn; descEn = _d; }
+  if (!_hasMm(_content) && _hasMm(contentEn)) { var _c = _content; _content = contentEn; contentEn = _c; }
   const data = {
-    title, titleEn, slug, img, desc, descEn, content, contentEn, location, category, author,
+    title: _title, titleEn, slug, img, desc: _desc, descEn, content: _content, contentEn, location, category, author,
     travelDate: $('admin-post-travel-date').value || '',
     seoTitle, metaDesc,
     sectionId: $('admin-post-section').value,
@@ -9296,18 +9302,27 @@ function editPost(id) {
   showView('addpost');
   refreshPostSectionOptions();
   $('editing-post-id').value = p.id;
-  $('admin-post-title').value = p.title || '';
-  if ($('admin-post-title-en')) $('admin-post-title-en').value = p.titleEn || '';
-  $('admin-post-slug').value = p.slug || slugify(p.title || '');
+  // Detect swapped MM/EN fields (Myanmar script only in *En boxes) so editor shows correctly
+  var _hasMm = function(s) { return /[\u1000-\u109F]/.test(String(s || '')); };
+  var _mmT = p.title || '', _enT = p.titleEn || '';
+  var _mmD = p.desc || '', _enD = p.descEn || '';
+  var _mmC = p.content || '', _enC = p.contentEn || '';
+  if (!_hasMm(_mmT) && _hasMm(_enT)) { var _t = _mmT; _mmT = _enT; _enT = _t; }
+  if (!_hasMm(_mmD) && _hasMm(_enD)) { var _d = _mmD; _mmD = _enD; _enD = _d; }
+  if (!_hasMm(_mmC) && _hasMm(_enC)) { var _c = _mmC; _mmC = _enC; _enC = _c; }
+  $('admin-post-title').value = _mmT;
+  if ($('admin-post-title-en')) $('admin-post-title-en').value = _enT;
+  $('admin-post-slug').value = p.slug || slugify(_mmT || p.title || '');
   $('admin-post-slug').dataset.manual = '1';
   setImageFieldValue('admin-post-img', p.img || '');
   $('admin-post-location').value = p.location || '';
-  $('admin-post-desc').value = p.desc || '';
-  if ($('admin-post-desc-en')) $('admin-post-desc-en').value = p.descEn || '';
+  $('admin-post-desc').value = _mmD;
+  if ($('admin-post-desc-en')) $('admin-post-desc-en').value = _enD;
   // Compact long Base64 already in content so textarea stays readable
-  $('admin-post-content').value = compactContentDataUrls(p.content || '');
-  if ($('admin-post-content-en')) $('admin-post-content-en').value = compactContentDataUrls(p.contentEn || '');
+  $('admin-post-content').value = compactContentDataUrls(_mmC);
+  if ($('admin-post-content-en')) $('admin-post-content-en').value = compactContentDataUrls(_enC);
   if (typeof updateContentPreview === 'function') updateContentPreview();
+  if (typeof updatePostPreview === 'function') updatePostPreview();
   fillPostCategorySelect(p.category || 'Travel Story');
   $('admin-post-travel-date').value = p.travelDate || '';
   $('admin-post-author').value = p.author || 'Htoo Htet';
