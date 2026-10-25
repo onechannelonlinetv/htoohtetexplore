@@ -1310,7 +1310,7 @@
     </div>
   </section>
 
-  <!-- ABOUT (Menu နှိပ်မှ စာမျက်နှာအဖြစ် ပေါ်) -->
+  <!-- ABOUT (Menu နှိပ်မှ စာမျက်နှာ) -->
   <section id="about-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
     <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
       <div class="flex items-center justify-between gap-3 mb-3">
@@ -1626,7 +1626,13 @@ $('search-close').addEventListener('click', () => {
 });
 searchInput.addEventListener('input', () => renderStoryCards());
 
+window._hhRemote = window._hhRemote || {};
 function read(key, fallback) {
+  try {
+    if (window._hhRemote && Object.prototype.hasOwnProperty.call(window._hhRemote, key) && window._hhRemote[key] != null) {
+      return window._hhRemote[key];
+    }
+  } catch (e) {}
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
 }
 
@@ -2947,9 +2953,8 @@ function loadBlogData() {
     else $('about-desc').textContent = (typeof t === 'function' ? t('aboutDesc') : '');
   }
   if (about.descColor) $('about-desc').style.color = about.descColor;
-  // About = menu page only (not homepage strip). active===false → menu link can still exist; page shows empty-safe defaults.
+  // About is menu-page only — do not show as homepage strip
 
-  // Contact page from hh_contact (Admin → Contact)
   try {
     var ct = read('hh_contact', {}) || {};
     var cTitle = (ct.title || '').trim();
@@ -3892,31 +3897,23 @@ let publicDb = null;
 try {
   firebase.initializeApp(firebaseConfig);
   publicDb = firebase.database();
-  var _lastRemoteHash = '';
+  var _lastUpdatedAt = 0;
   var _remoteApplyTimer = null;
   function applyRemoteSiteData(data, force) {
     data = data || {};
-    var changed = false;
+    try { window._hhRemote = data; } catch (e) {}
     DATA_KEYS.forEach(function(key) {
       if (!Object.prototype.hasOwnProperty.call(data, key) || data[key] == null) return;
-      var next = '';
-      try { next = JSON.stringify(data[key]); } catch (e) { return; }
-      var prev = null;
-      try { prev = localStorage.getItem(key); } catch (e) {}
-      if (force || prev !== next) {
-        try { localStorage.setItem(key, next); changed = true; } catch (e) {}
-      }
+      try { localStorage.setItem(key, JSON.stringify(data[key])); } catch (e) {}
     });
     publicFirebaseReady = true;
-    if (changed || force) {
-      try { loadBlogData(); } catch (e) { console.error(e); }
-    }
+    try { loadBlogData(); } catch (e) { console.error(e); }
   }
   function scheduleRemoteApply(data) {
     clearTimeout(_remoteApplyTimer);
     _remoteApplyTimer = setTimeout(function() {
-      applyRemoteSiteData(data || {}, false);
-    }, 80);
+      applyRemoteSiteData(data || {}, true);
+    }, 40);
   }
   function refreshFromFirebase() {
     if (!publicDb) return;
@@ -3927,28 +3924,35 @@ try {
       try { loadBlogData(); } catch (e) {}
     });
   }
+  window.refreshFromFirebase = refreshFromFirebase;
   publicDb.ref('siteData').on('value', function(snap) {
     scheduleRemoteApply(snap.val() || {});
   }, function(err) {
     console.error(err);
     try { loadBlogData(); } catch (e) {}
   });
-  // Also listen per-key so partial updates never get missed on mobile
+  try {
+    publicDb.ref('siteData/_updatedAt').on('value', function(snap) {
+      var t = Number(snap.val() || 0);
+      if (t && t !== _lastUpdatedAt) {
+        _lastUpdatedAt = t;
+        refreshFromFirebase();
+      }
+    });
+  } catch (e) {}
   DATA_KEYS.forEach(function(key) {
     try {
       publicDb.ref('siteData/' + key).on('value', function(snap) {
         var val = snap.val();
         if (val == null) return;
         try {
-          var next = JSON.stringify(val);
-          var prev = localStorage.getItem(key);
-          if (prev !== next) {
-            localStorage.setItem(key, next);
-            clearTimeout(window._hhKeyReload);
-            window._hhKeyReload = setTimeout(function() {
-              try { loadBlogData(); } catch (e) {}
-            }, 100);
-          }
+          if (!window._hhRemote) window._hhRemote = {};
+          window._hhRemote[key] = val;
+          try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+          clearTimeout(window._hhKeyReload);
+          window._hhKeyReload = setTimeout(function() {
+            try { loadBlogData(); } catch (e) {}
+          }, 60);
         } catch (e) {}
       });
     } catch (e) {}
@@ -3962,12 +3966,11 @@ try {
   window.addEventListener('online', function() {
     refreshFromFirebase();
   });
-  // Mobile browsers often drop the websocket — poll while visible
+  // PWA / phone: poll every 3s while app is open
   setInterval(function() {
     if (!publicDb || document.visibilityState !== 'visible') return;
-    try { publicDb.ref('.info/connected').once('value'); } catch (e) {}
     try { refreshFromFirebase(); } catch (e) {}
-  }, 20000);
+  }, 3000);
 } catch (e) { console.error(e); }
 
 /* ---- Engagement: Like / Share / Comment ---- */
@@ -4343,7 +4346,7 @@ function submitComment() {
 }
 
 
-/* ---- About / Contact / Privacy as separate pages (Menu နှိပ်မှ) ---- */
+/* ---- About / Contact / Privacy as separate pages ---- */
 function openLegalPage(which) {
   var contact = document.getElementById('contact-page');
   var privacy = document.getElementById('privacy-policy');
@@ -4546,11 +4549,51 @@ document.addEventListener('keydown', e => {
 </div>
 
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js').catch(function(){});
+/* PWA / Add-to-Home: auto-update shell + soft reload when new SW is ready */
+(function() {
+  if (!('serviceWorker' in navigator)) return;
+  var reloading = false;
+  function softReload() {
+    if (reloading) return;
+    reloading = true;
+    try { location.reload(); } catch (e) {}
+  }
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    softReload();
   });
-}
+  navigator.serviceWorker.addEventListener('message', function(ev) {
+    if (ev && ev.data && ev.data.type === 'HH_SW_UPDATED') softReload();
+  });
+  function checkSW() {
+    try {
+      navigator.serviceWorker.getRegistration('./sw.js').then(function(reg) {
+        if (!reg) return;
+        try { reg.update(); } catch (e) {}
+        if (reg.waiting) {
+          try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+          softReload();
+        }
+      }).catch(function(){});
+    } catch (e) {}
+  }
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js?v=3').then(function(reg) {
+      try { reg.update(); } catch (e) {}
+      setInterval(function() { try { reg.update(); } catch (e) {} }, 60 * 1000);
+    }).catch(function(){});
+  });
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      checkSW();
+      try { if (typeof refreshFromFirebase === 'function') refreshFromFirebase(); } catch (e) {}
+    }
+  });
+  window.addEventListener('pageshow', function() {
+    checkSW();
+    try { if (typeof refreshFromFirebase === 'function') refreshFromFirebase(); } catch (e) {}
+  });
+  window.addEventListener('focus', function() { checkSW(); });
+})();
 </script>
 
 <div id="hh-admin-back-bar" class="hidden fixed bottom-4 left-1/2 z-[9999] -translate-x-1/2 rounded-full border border-emerald-500/40 bg-slate-950/95 px-4 py-2 shadow-xl backdrop-blur" style="padding-bottom:max(8px,env(safe-area-inset-bottom))">
