@@ -4082,31 +4082,71 @@ function absoluteUrl(pathOrUrl) {
   }
 }
 
+/** Pick best public https image for OG; also keep raw (data/http) for Web Share files */
+function pickShareImageCandidates() {
+  var settings = {};
+  var hero = {};
+  try { settings = (typeof read === 'function') ? read('hh_settings', {}) : {}; } catch (e) {}
+  try { hero = (typeof read === 'function') ? read('hh_hero', {}) : {}; } catch (e) {}
+  var list = [];
+  function add(u) {
+    u = String(u || '').trim();
+    if (!u) return;
+    if (list.indexOf(u) >= 0) return;
+    list.push(u);
+  }
+  // 1) What is actually shown on screen (most accurate)
+  try {
+    var heroEl = document.getElementById('hero-img');
+    if (heroEl && heroEl.currentSrc) add(heroEl.currentSrc);
+    if (heroEl && heroEl.src) add(heroEl.src);
+  } catch (e) {}
+  // 2) Admin / settings
+  add(settings.shareImage);
+  add(settings.ogImage);
+  add(hero.image);
+  add(hero.bgImage);
+  add(settings.logo);
+  add(settings.logoUrl);
+  // 3) First story cover that looks real
+  try {
+    if (typeof allStoryPosts !== 'undefined' && allStoryPosts && allStoryPosts.length) {
+      for (var i = 0; i < Math.min(allStoryPosts.length, 8); i++) {
+        if (allStoryPosts[i] && allStoryPosts[i].img) add(allStoryPosts[i].img);
+      }
+    }
+  } catch (e) {}
+  return list;
+}
+
+function isHttpImage(u) {
+  u = String(u || '');
+  return /^https?:\/\//i.test(u) && u.indexOf('data:') !== 0;
+}
+function isShareableImage(u) {
+  u = String(u || '');
+  return isHttpImage(u) || u.indexOf('data:image/') === 0;
+}
+
 /** Update OG/Twitter meta so link previews use site hero/logo (crawlers need public https image) */
 function updateShareMeta() {
   try {
     var settings = {};
-    var hero = {};
     try { settings = (typeof read === 'function') ? read('hh_settings', {}) : {}; } catch (e) {}
-    try { hero = (typeof read === 'function') ? read('hh_hero', {}) : {}; } catch (e) {}
     var title = (settings.brandName || document.title || 'HTOO HTET').trim();
     if (settings.tagline) title = title + (title.indexOf('|') >= 0 ? '' : ' | ' + settings.tagline);
     var desc = (settings.metaDesc || settings.tagline || document.querySelector('meta[name="description"]') && document.querySelector('meta[name="description"]').getAttribute('content') || '').trim();
     if (!desc) desc = 'Discover the unseen beauty of Myanmar with Htoo Htet.';
-    // Prefer: explicit share image → hero image → brand logo → default icon
-    var img = (settings.shareImage || settings.ogImage || hero.image || hero.bgImage || settings.logo || '').trim();
-    // Reject data URLs / blob for OG (Telegram needs public https)
-    if (img && (img.indexOf('data:') === 0 || img.indexOf('blob:') === 0)) img = '';
-    if (!img) {
-      var heroEl = document.getElementById('hero-img');
-      if (heroEl && heroEl.src && heroEl.src.indexOf('http') === 0 && heroEl.src.indexOf('data:') !== 0) img = heroEl.src;
+    var candidates = pickShareImageCandidates();
+    var httpImg = '';
+    var anyImg = '';
+    for (var i = 0; i < candidates.length; i++) {
+      var c = candidates[i];
+      if (!anyImg && isShareableImage(c)) anyImg = c;
+      if (!httpImg && isHttpImage(c)) httpImg = c;
     }
-    if (!img) {
-      // site icon fallback (absolute)
-      img = absoluteUrl('icons/icon-512.png');
-    } else {
-      img = absoluteUrl(img);
-    }
+    // OG meta: only public https (Facebook/Telegram crawlers reject data:)
+    var ogImg = httpImg ? absoluteUrl(httpImg) : absoluteUrl('icons/icon-512.png');
     var pageUrl = location.href.split('#')[0].split('?')[0];
     function setMeta(sel, attr, val) {
       var el = document.querySelector(sel);
@@ -4114,17 +4154,57 @@ function updateShareMeta() {
     }
     setMeta('#meta-og-title', 'content', title);
     setMeta('#meta-og-desc', 'content', desc);
-    setMeta('#meta-og-image', 'content', img);
+    setMeta('#meta-og-image', 'content', ogImg);
     setMeta('#meta-og-url', 'content', pageUrl);
     setMeta('#meta-tw-title', 'content', title);
     setMeta('#meta-tw-desc', 'content', desc);
-    setMeta('#meta-tw-image', 'content', img);
-    setMeta('#meta-image-src', 'href', img);
+    setMeta('#meta-tw-image', 'content', ogImg);
+    setMeta('#meta-image-src', 'href', ogImg);
     setMeta('meta[name="description"]', 'content', desc);
     try { document.title = title; } catch (e) {}
-    // Store for shareSite
-    window._shareMeta = { title: title, text: desc, url: pageUrl, image: img };
+    // anyImg may be data: — used for mobile Web Share file attachment
+    window._shareMeta = { title: title, text: desc, url: pageUrl, image: ogImg, rawImage: anyImg || ogImg };
   } catch (e) { console.warn('updateShareMeta', e); }
+}
+
+/** Attach image file when the browser supports Web Share Level 2 */
+async function sharePayload(title, text, url, rawImage) {
+  var payload = { title: title || '', text: text || '', url: url || '' };
+  if (rawImage && navigator.share && navigator.canShare) {
+    try {
+      var file = null;
+      if (String(rawImage).indexOf('data:image/') === 0) {
+        var parts = String(rawImage).split(',');
+        var mime = (parts[0].match(/:(.*?);/) || [])[1] || 'image/jpeg';
+        var bin = atob(parts[1] || '');
+        var arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        var ext = mime.indexOf('png') >= 0 ? 'png' : 'jpg';
+        file = new File([arr], 'share.' + ext, { type: mime });
+      } else if (isHttpImage(rawImage)) {
+        var res = await fetch(rawImage, { mode: 'cors' });
+        if (res.ok) {
+          var blob = await res.blob();
+          var ext2 = (blob.type || '').indexOf('png') >= 0 ? 'png' : 'jpg';
+          file = new File([blob], 'share.' + ext2, { type: blob.type || 'image/jpeg' });
+        }
+      }
+      if (file) {
+        var withFiles = { title: payload.title, text: payload.text, url: payload.url, files: [file] };
+        if (navigator.canShare(withFiles)) {
+          await navigator.share(withFiles);
+          return true;
+        }
+      }
+    } catch (e) {
+      // fall through to text+url share
+    }
+  }
+  if (navigator.share) {
+    await navigator.share(payload);
+    return true;
+  }
+  return false;
 }
 
 async function shareSite() {
@@ -4133,13 +4213,10 @@ async function shareSite() {
   var title = m.title || document.title || 'HTOO HTET';
   var text = m.text || '';
   var url = m.url || (location.href.split('#')[0].split('?')[0]);
-  // Website share = homepage only (never article hash)
   try { url = url.split('#')[0].split('?')[0]; } catch (e) {}
+  var rawImage = m.rawImage || m.image || '';
   try {
-    if (navigator.share) {
-      await navigator.share({ title: title, text: text, url: url });
-      return;
-    }
+    if (await sharePayload(title, text, url, rawImage)) return;
   } catch (e) {
     if (e && e.name === 'AbortError') return;
   }
@@ -4169,15 +4246,14 @@ function updateArticleShareMeta(post, index) {
     } catch (e) { brand = 'HTOO HTET'; }
     var fullTitle = brand ? (title + ' | ' + brand) : title;
     var desc = postLocalized(post, 'desc') || post.desc || post.descEn || title;
-    var img = (post.img || '').trim();
-    if (img && (img.indexOf('data:') === 0 || img.indexOf('blob:') === 0)) img = '';
-    if (img) img = absoluteUrl(img);
-    if (!img) {
-      try {
-        var el = document.getElementById('article-image');
-        if (el && el.src && el.src.indexOf('http') === 0) img = el.src;
-      } catch (e) {}
-    }
+    var raw = '';
+    try {
+      var el = document.getElementById('article-image');
+      if (el && (el.currentSrc || el.src)) raw = el.currentSrc || el.src;
+    } catch (e) {}
+    if (!raw) raw = String(post.img || '').trim();
+    var httpImg = isHttpImage(raw) ? absoluteUrl(raw) : '';
+    if (!httpImg && isHttpImage(post.img)) httpImg = absoluteUrl(post.img);
     var base = location.href.split('#')[0].split('?')[0];
     var key = articleShareKey(post, index);
     var pageUrl = base + '#article/' + encodeURIComponent(key);
@@ -4187,17 +4263,23 @@ function updateArticleShareMeta(post, index) {
     }
     setMeta('#meta-og-title', 'content', fullTitle);
     setMeta('#meta-og-desc', 'content', desc);
-    if (img) {
-      setMeta('#meta-og-image', 'content', img);
-      setMeta('#meta-tw-image', 'content', img);
-      setMeta('#meta-image-src', 'href', img);
+    if (httpImg) {
+      setMeta('#meta-og-image', 'content', httpImg);
+      setMeta('#meta-tw-image', 'content', httpImg);
+      setMeta('#meta-image-src', 'href', httpImg);
     }
     setMeta('#meta-og-url', 'content', pageUrl);
     setMeta('#meta-tw-title', 'content', fullTitle);
     setMeta('#meta-tw-desc', 'content', desc);
     setMeta('meta[name="description"]', 'content', desc);
     try { document.title = fullTitle; } catch (e) {}
-    window._articleShareMeta = { title: fullTitle, text: desc, url: pageUrl, image: img || '' };
+    window._articleShareMeta = {
+      title: fullTitle,
+      text: desc,
+      url: pageUrl,
+      image: httpImg || '',
+      rawImage: isShareableImage(raw) ? raw : (httpImg || '')
+    };
   } catch (e) { console.warn('updateArticleShareMeta', e); }
 }
 
@@ -4216,9 +4298,10 @@ async function shareArticle() {
     if (post) url = base + '#article/' + encodeURIComponent(articleShareKey(post, idx));
     else url = base;
   }
+  var rawImage = m.rawImage || m.image || (post && post.img) || '';
   try {
-    if (navigator.share) {
-      await navigator.share({ title: title, text: text, url: url });
+    if (await sharePayload(title, text, url, rawImage)) {
+      setEngageStatus(t('shareCopied'), false);
       return;
     }
   } catch (e) {
