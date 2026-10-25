@@ -395,6 +395,7 @@ header.sticky {
           <button class="navbtn" data-view="sections" onclick="showView('sections',this)"><i class="fa-solid fa-layer-group w-4"></i> Custom Rows</button>
           <button class="navbtn" data-view="youtube" onclick="showView('youtube',this)"><i class="fa-brands fa-youtube w-4"></i> YouTube Section</button>
           <button class="navbtn" data-view="about" onclick="showView('about',this)"><i class="fa-solid fa-circle-info w-4"></i> About</button>
+          <button class="navbtn" data-view="contact" onclick="showView('contact',this)"><i class="fa-solid fa-envelope w-4"></i> Contact</button>
           <button class="navbtn" data-view="social" onclick="showView('social',this)"><i class="fa-solid fa-share-nodes w-4"></i> Social Links</button>
           <button class="navbtn" data-view="comments" onclick="showView('comments',this)"><i class="fa-solid fa-comments w-4"></i> Comments</button>
         </nav>
@@ -454,6 +455,7 @@ header.sticky {
         <button class="navbtn" onclick="showView('menu')"><i class="fa-solid fa-bars"></i>Menu</button>
         <button class="navbtn" onclick="showView('sections')"><i class="fa-solid fa-layer-group"></i>Rows</button>
         <button class="navbtn" onclick="showView('about')"><i class="fa-solid fa-circle-info"></i>About</button>
+        <button class="navbtn" onclick="showView('contact')"><i class="fa-solid fa-envelope"></i>Contact</button>
         <button class="navbtn" onclick="showView('social')"><i class="fa-solid fa-share-nodes"></i>Social</button>
         <button class="navbtn text-rose-300" onclick="signOutAdmin()"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
       </div>
@@ -1984,7 +1986,34 @@ header.sticky {
           <div><label class="label">Description (မြန်မာ)</label><textarea id="about-desc" class="field min-h-28" oninput="updateAboutPreview()"></textarea></div>
           <div><label class="label">Description (English)</label><textarea id="about-desc-en" class="field min-h-24" placeholder="English about text..."></textarea></div>
           <div><label class="label">Description အရောင်</label><input id="about-desc-color" type="color" value="#a7f3d0" class="h-11 w-full rounded-lg border border-slate-600 cursor-pointer bg-transparent" oninput="updateAboutPreview()"></div>
+          <p class="tiny text-slate-400">Website မှာ Menu → About နှိပ်မှ စာမျက်နှာအဖြစ် ပေါ်မယ် (homepage အောက်မှာ အမြဲမပြ)</p>
           <button onclick="saveAbout()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save About</button>
+        </div>
+      </section>
+
+      <section id="view-contact" class="view space-y-3">
+        <div class="panel editor-shell fold-panel open p-4 sm:p-5 lg:p-6 space-y-4">
+          <div class="fold-head" onclick="toggleFold(this)">
+            <div><div class="fold-title">Contact</div><div class="fold-hint">▼ နှိပ် → ဖြန့် · ပြန်နှိပ် → သိမ်း</div></div>
+            <span class="fold-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="fold-body space-y-3">
+            <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-4">
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · Contact</span>
+              <div class="mt-3 rounded-xl border border-slate-700 p-4 bg-slate-900/50 space-y-2">
+                <h3 id="contact-prev-title" class="text-lg font-black text-white">Contact</h3>
+                <p id="contact-prev-intro" class="text-sm text-slate-300 leading-relaxed">မေးခွန်း၊ အကြံပြုချက်…</p>
+                <p class="text-sm"><span class="text-slate-400">Email:</span> <span id="contact-prev-email" class="text-emerald-300">htoohtet@gmail.com</span></p>
+                <p class="text-sm"><span class="text-slate-400">Location:</span> <span id="contact-prev-location" class="text-emerald-100">Yangon, Myanmar</span></p>
+              </div>
+            </div>
+            <div><label class="label">Title</label><input id="contact-title" class="field" placeholder="Contact / ဆက်သွယ်ရန်" oninput="updateContactPreview()"></div>
+            <div><label class="label">Intro စာသား</label><textarea id="contact-intro" class="field min-h-20" placeholder="မေးခွန်း၊ အကြံပြုချက်…" oninput="updateContactPreview()"></textarea></div>
+            <div><label class="label">Email *</label><input id="contact-email" class="field" type="email" placeholder="you@example.com" oninput="updateContactPreview()"></div>
+            <div><label class="label">Location</label><input id="contact-location" class="field" placeholder="Yangon, Myanmar" oninput="updateContactPreview()"></div>
+            <p class="tiny text-slate-400">Menu / Footer → Contact နှိပ်ရင် ဒီအချက်အလက်များ ပေါ်မယ်</p>
+            <button onclick="saveContact()" class="btn btn-green"><i class="fa-solid fa-floppy-disk mr-2"></i>Save Contact</button>
+          </div>
         </div>
       </section>
 
@@ -2061,7 +2090,7 @@ const firebaseConfig = {
   measurementId: "G-2WNFC5MMEJ"
 };
 const FIREBASE_ADMIN_UID = 'aEd0gacSLgVgs445C4wfyBuFwBH3';
-const DATA_KEYS = ['hh_settings','hh_hero','hh_hero_list','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
+const DATA_KEYS = ['hh_settings','hh_hero','hh_hero_list','hh_menu','hh_proud_sponsors','hh_proud_meta','hh_sponsor','hh_sponsor_meta','hh_upcoming','hh_gallery','hh_latest','hh_youtube','hh_about','hh_contact','hh_social','hh_posts','hh_home_sections','hh_theme_presets','hh_categories'];
 
 const $ = id => document.getElementById(id);
 const safe = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2218,30 +2247,11 @@ function forceSyncAllToFirebase() {
     if (raw === null) return;
     try { payload[k] = JSON.parse(raw); } catch (e) { payload[k] = raw; }
   });
-  payload._updatedAt = Date.now();
   adminDb.ref('siteData').update(payload).then(function() {
-    return adminDb.ref('siteData/_updatedAt').set(payload._updatedAt);
-  }).then(function() {
-    toast('✓ Firebase Sync ပြီး — ဖုန်း ၃ စက္ကန့်အတွင်း ပေါ်မယ်');
+    toast('✓ Firebase Sync ပြီး — ဖုန်းမှာ refresh လုပ်ပါ');
   }).catch(function(err) {
     console.error(err);
-    toast('Bulk Sync မရ — တစ်ခုချင်း ပြန်တင်နေ…', true);
-    var chain = Promise.resolve();
-    DATA_KEYS.forEach(function(k) {
-      if (!Object.prototype.hasOwnProperty.call(payload, k)) return;
-      chain = chain.then(function() {
-        return adminDb.ref('siteData/' + k).set(payload[k]).catch(function(e) {
-          console.warn('sync fail', k, e);
-        });
-      });
-    });
-    return chain.then(function() {
-      return adminDb.ref('siteData/_updatedAt').set(Date.now());
-    }).then(function() {
-      toast('✓ Key-by-key Sync ပြီး');
-    }).catch(function(e2) {
-      toast('Sync မရ: ' + ((e2 && e2.message) || e2), true);
-    });
+    toast('Sync မရ: ' + ((err && err.message) || err));
   });
 }
 
@@ -4483,6 +4493,14 @@ function loadAll() {
   if ($('about-desc-en')) $('about-desc-en').value = ab.descEn || '';
   if ($('about-desc-color')) $('about-desc-color').value = ab.descColor || '#a7f3d0';
   if (typeof updateAboutPreview === 'function') updateAboutPreview();
+
+  const ct = read('hh_contact', {});
+  const _set = read('hh_settings', {});
+  if ($('contact-title')) $('contact-title').value = ct.title || 'Contact';
+  if ($('contact-intro')) $('contact-intro').value = ct.intro || '';
+  if ($('contact-email')) $('contact-email').value = ct.email || _set.contactEmail || '';
+  if ($('contact-location')) $('contact-location').value = ct.location || _set.contactLocation || '';
+  if (typeof updateContactPreview === 'function') updateContactPreview();
 
   const social = read('hh_social', {});
   $('admin-fb').value = social.fb || '';
@@ -7270,6 +7288,31 @@ function saveAbout() {
   updateAboutPreview();
   toast('About သိမ်းပြီးပါပြီ။');
 }
+function updateContactPreview() {
+  if ($('contact-prev-title')) $('contact-prev-title').textContent = ($('contact-title') && $('contact-title').value.trim()) || 'Contact';
+  if ($('contact-prev-intro')) $('contact-prev-intro').textContent = ($('contact-intro') && $('contact-intro').value.trim()) || 'မေးခွန်း၊ အကြံပြုချက်…';
+  if ($('contact-prev-email')) $('contact-prev-email').textContent = ($('contact-email') && $('contact-email').value.trim()) || 'htoohtet@gmail.com';
+  if ($('contact-prev-location')) $('contact-prev-location').textContent = ($('contact-location') && $('contact-location').value.trim()) || 'Yangon, Myanmar';
+}
+function saveContact() {
+  write('hh_contact', {
+    title: ($('contact-title') && $('contact-title').value || '').trim() || 'Contact',
+    intro: ($('contact-intro') && $('contact-intro').value || '').trim(),
+    email: ($('contact-email') && $('contact-email').value || '').trim(),
+    location: ($('contact-location') && $('contact-location').value || '').trim()
+  });
+  // Keep settings in sync for footer legacy fields
+  try {
+    var s = read('hh_settings', {});
+    if ($('contact-email') && $('contact-email').value.trim()) s.contactEmail = $('contact-email').value.trim();
+    if ($('contact-location') && $('contact-location').value.trim()) s.contactLocation = $('contact-location').value.trim();
+    write('hh_settings', s);
+  } catch (e) {}
+  updateContactPreview();
+  toast('Contact သိမ်းပြီးပါပြီ။');
+}
+window.updateContactPreview = updateContactPreview;
+window.saveContact = saveContact;
 function parseContentBlocks(raw) {
   var text = String(raw || '').replace(/\r\n/g, '\n');
   var blocks = [];
