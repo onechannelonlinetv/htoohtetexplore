@@ -2181,6 +2181,10 @@ function renderMenu() {
     return '<a href="' + safe(m.href || '#') + '" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold">' +
       '<i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>' + safe(m.label) + '</span></a>';
   }).join('');
+  // Always append Website Share (not a page link — shares homepage)
+  var shareLabel = (typeof t === 'function' ? t('shareWebsite') : '') || 'Share Website';
+  html += '<button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold w-full text-left">' +
+    '<i class="fa-solid fa-share-nodes text-emerald-400"></i><span id="menu-share-label">' + safe(shareLabel) + '</span></button>';
   if (mob) {
     mob.innerHTML = html;
     mob.style.display = 'flex';
