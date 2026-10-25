@@ -3636,6 +3636,21 @@ document.addEventListener('keydown', function(e) {
 
 
 window._openArticleIndex = null;
+
+/** Clean share/hash key: prefer ASCII slug, else post id (never raw Myanmar in URL) */
+function articleShareKey(post, index) {
+  if (!post) return String(index != null ? index : '');
+  var s = String(post.slug || '').trim();
+  // Accept only URL-safe ASCII slugs
+  if (s && /^[a-zA-Z0-9][a-zA-Z0-9\-_]*$/.test(s)) return s;
+  if (post.id != null && String(post.id).trim() !== '') return String(post.id);
+  // last resort: strip non-ascii from slug or use index
+  var ascii = s.replace(/[^a-zA-Z0-9\-_]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  if (ascii && /^[a-zA-Z0-9]/.test(ascii)) return ascii;
+  return String(index != null ? index : 'post');
+}
+window.articleShareKey = articleShareKey;
+
 function openArticle(index) {
   const post = allStoryPosts[index];
   if (!post) return;
@@ -3712,11 +3727,14 @@ function openArticle(index) {
   document.body.classList.add('article-open');
   window.scrollTo({ top: 0, behavior: 'auto' });
   try {
-    history.pushState({ article: index }, '', '#article/' + encodeURIComponent(post.slug || String(index)));
+    history.pushState({ article: index }, '', '#article/' + encodeURIComponent(articleShareKey(post, index)));
   } catch (e) {}
+  try { updateArticleShareMeta(post, index); } catch (e) {}
 }
 function closeArticle() {
   window._openArticleIndex = null;
+  window._articleShareMeta = null;
+  try { if (typeof updateShareMeta === 'function') updateShareMeta(); } catch (e) {}
   try { closeLightbox(); } catch (e) {}
   if (_engageUnsub) { try { _engageUnsub(); } catch (e) {} _engageUnsub = null; }
   currentPostId = null;
@@ -4110,7 +4128,9 @@ async function shareSite() {
   var m = window._shareMeta || {};
   var title = m.title || document.title || 'HTOO HTET';
   var text = m.text || '';
-  var url = m.url || (location.href.split('#')[0]);
+  var url = m.url || (location.href.split('#')[0].split('?')[0]);
+  // Website share = homepage only (never article hash)
+  try { url = url.split('#')[0].split('?')[0]; } catch (e) {}
   try {
     if (navigator.share) {
       await navigator.share({ title: title, text: text, url: url });
@@ -4134,28 +4154,84 @@ async function shareSite() {
 window.shareSite = shareSite;
 window.updateShareMeta = updateShareMeta;
 
+function updateArticleShareMeta(post, index) {
+  try {
+    if (!post) return;
+    var title = postLocalized(post, 'title') || post.title || 'Travel Story';
+    var brand = '';
+    try {
+      var settings = (typeof read === 'function') ? read('hh_settings', {}) : {};
+      brand = (settings.brandName || 'HTOO HTET').trim();
+    } catch (e) { brand = 'HTOO HTET'; }
+    var fullTitle = brand ? (title + ' | ' + brand) : title;
+    var desc = postLocalized(post, 'desc') || post.desc || post.descEn || title;
+    var img = (post.img || '').trim();
+    if (img && (img.indexOf('data:') === 0 || img.indexOf('blob:') === 0)) img = '';
+    if (img) img = absoluteUrl(img);
+    if (!img) {
+      try {
+        var el = document.getElementById('article-image');
+        if (el && el.src && el.src.indexOf('http') === 0) img = el.src;
+      } catch (e) {}
+    }
+    var base = location.href.split('#')[0].split('?')[0];
+    var key = articleShareKey(post, index);
+    var pageUrl = base + '#article/' + encodeURIComponent(key);
+    function setMeta(sel, attr, val) {
+      var el = document.querySelector(sel);
+      if (el && val) el.setAttribute(attr, val);
+    }
+    setMeta('#meta-og-title', 'content', fullTitle);
+    setMeta('#meta-og-desc', 'content', desc);
+    if (img) {
+      setMeta('#meta-og-image', 'content', img);
+      setMeta('#meta-tw-image', 'content', img);
+      setMeta('#meta-image-src', 'href', img);
+    }
+    setMeta('#meta-og-url', 'content', pageUrl);
+    setMeta('#meta-tw-title', 'content', fullTitle);
+    setMeta('#meta-tw-desc', 'content', desc);
+    setMeta('meta[name="description"]', 'content', desc);
+    try { document.title = fullTitle; } catch (e) {}
+    window._articleShareMeta = { title: fullTitle, text: desc, url: pageUrl, image: img || '' };
+  } catch (e) { console.warn('updateArticleShareMeta', e); }
+}
+
 async function shareArticle() {
-  const url = location.href;
-  const title = currentPostTitle || document.title;
+  var idx = window._openArticleIndex;
+  var post = (typeof idx === 'number' && idx >= 0 && allStoryPosts[idx]) ? allStoryPosts[idx] : null;
+  if (post) {
+    try { updateArticleShareMeta(post, idx); } catch (e) {}
+  }
+  var m = window._articleShareMeta || {};
+  var title = m.title || currentPostTitle || document.title;
+  var text = m.text || title;
+  var url = m.url || '';
+  if (!url) {
+    var base = location.href.split('#')[0].split('?')[0];
+    if (post) url = base + '#article/' + encodeURIComponent(articleShareKey(post, idx));
+    else url = base;
+  }
   try {
     if (navigator.share) {
-      await navigator.share({ title: title, url: url, text: title });
+      await navigator.share({ title: title, text: text, url: url });
       return;
     }
   } catch (e) {
     if (e && e.name === 'AbortError') return;
   }
   try {
-    await navigator.clipboard.writeText(url);
-    setEngageStatus(t('shareCopied'), false);
-  } catch (e2) {
-    // fallback prompt
-    try {
-      window.prompt('Copy link:', url);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
       setEngageStatus(t('shareCopied'), false);
-    } catch (e3) {
-      setEngageStatus(t('shareFailed'), true);
+      return;
     }
+  } catch (e2) {}
+  try {
+    window.prompt('Copy link:', url);
+    setEngageStatus(t('shareCopied'), false);
+  } catch (e3) {
+    setEngageStatus(t('shareFailed'), true);
   }
 }
 
