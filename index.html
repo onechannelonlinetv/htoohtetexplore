@@ -4167,39 +4167,9 @@ function updateShareMeta() {
   } catch (e) { console.warn('updateShareMeta', e); }
 }
 
-/** Attach image file when the browser supports Web Share Level 2 */
-async function sharePayload(title, text, url, rawImage) {
+/** Share link only (title + text + url). Never attach files — avoids "share.jpg" file dialog on Windows. */
+async function sharePayload(title, text, url) {
   var payload = { title: title || '', text: text || '', url: url || '' };
-  if (rawImage && navigator.share && navigator.canShare) {
-    try {
-      var file = null;
-      if (String(rawImage).indexOf('data:image/') === 0) {
-        var parts = String(rawImage).split(',');
-        var mime = (parts[0].match(/:(.*?);/) || [])[1] || 'image/jpeg';
-        var bin = atob(parts[1] || '');
-        var arr = new Uint8Array(bin.length);
-        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-        var ext = mime.indexOf('png') >= 0 ? 'png' : 'jpg';
-        file = new File([arr], 'share.' + ext, { type: mime });
-      } else if (isHttpImage(rawImage)) {
-        var res = await fetch(rawImage, { mode: 'cors' });
-        if (res.ok) {
-          var blob = await res.blob();
-          var ext2 = (blob.type || '').indexOf('png') >= 0 ? 'png' : 'jpg';
-          file = new File([blob], 'share.' + ext2, { type: blob.type || 'image/jpeg' });
-        }
-      }
-      if (file) {
-        var withFiles = { title: payload.title, text: payload.text, url: payload.url, files: [file] };
-        if (navigator.canShare(withFiles)) {
-          await navigator.share(withFiles);
-          return true;
-        }
-      }
-    } catch (e) {
-      // fall through to text+url share
-    }
-  }
   if (navigator.share) {
     await navigator.share(payload);
     return true;
@@ -4216,7 +4186,7 @@ async function shareSite() {
   try { url = url.split('#')[0].split('?')[0]; } catch (e) {}
   var rawImage = m.rawImage || m.image || '';
   try {
-    if (await sharePayload(title, text, url, rawImage)) return;
+    if (await sharePayload(title, text, url)) return;
   } catch (e) {
     if (e && e.name === 'AbortError') return;
   }
@@ -4300,7 +4270,7 @@ async function shareArticle() {
   }
   var rawImage = m.rawImage || m.image || (post && post.img) || '';
   try {
-    if (await sharePayload(title, text, url, rawImage)) {
+    if (await sharePayload(title, text, url)) {
       setEngageStatus(t('shareCopied'), false);
       return;
     }
