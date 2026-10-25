@@ -1295,8 +1295,8 @@
           </a>
         </div>
         <div class="shrink-0">
-          <a id="youtube-video-link" href="#" target="_blank" rel="noopener" class="block w-full max-w-[18rem] sm:max-w-[20rem] aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl mx-auto lg:mx-0">
-            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover object-center opacity-90 group-hover:opacity-100 transition duration-300 group-hover:scale-105">
+          <a id="youtube-video-link" href="#" target="_blank" rel="noopener" class="block w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl">
+            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-95 transition duration-300 group-hover:scale-105">
             <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20 pointer-events-none"></div>
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
               <div class="w-12 h-12 rounded-full bg-red-600/95 flex items-center justify-center shadow-xl mb-2 group-hover:scale-110 transition">
@@ -1310,10 +1310,13 @@
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section id="about-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+  <!-- ABOUT — Menu နှိပ်မှသာ ပေါ် (homepage မှာ auto မပြ) -->
+  <section id="about-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
     <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
-      <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3">About Htoo Htet</h2>
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white">About Htoo Htet</h2>
+        <button type="button" onclick="closeLegalPage()" class="text-xs font-bold text-emerald-400 hover:text-emerald-200 px-3 py-1.5 rounded-lg border border-emerald-800/50 hover:bg-emerald-900/40">← Back</button>
+      </div>
       <p id="about-desc" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl">
         မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
       </p>
@@ -2900,53 +2903,25 @@ function loadBlogData() {
     else if (social.yt) $('youtube-link').href = social.yt;
     if (yt.bgImage) $('youtube-bg').src = yt.bgImage;
 
-    // Video / playlist: same YouTube cover on phone + PC (16:9 maxres → fallback)
+    // Video / playlist from admin: show that video's thumbnail; click opens YouTube (no autoplay embed)
     var parsed = (typeof parseYoutubeUrl === 'function') ? parseYoutubeUrl(yt.videoUrl || '') : null;
     var watchUrl = '';
     var autoThumb = '';
-    var thumbFallbacks = [];
     if (parsed) {
       if (parsed.type === 'playlist') {
         watchUrl = 'https://www.youtube.com/playlist?list=' + encodeURIComponent(parsed.id);
       } else {
         watchUrl = 'https://www.youtube.com/watch?v=' + encodeURIComponent(parsed.id);
         if (parsed.list) watchUrl += '&list=' + encodeURIComponent(parsed.list);
-        // maxres = real 16:9 cover (PC မှာ မှန်တဲ့ပုံ) · hqdefault မှာ အပေါ်အောက်အမဲပါ
-        autoThumb = 'https://i.ytimg.com/vi/' + parsed.id + '/maxresdefault.jpg';
-        thumbFallbacks = [
-          'https://i.ytimg.com/vi/' + parsed.id + '/sddefault.jpg',
-          'https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg',
-          'https://i.ytimg.com/vi/' + parsed.id + '/mqdefault.jpg'
-        ];
+        autoThumb = 'https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg';
       }
     }
-    var customThumb = (yt.thumb && String(yt.thumb).trim()) || '';
-    var thumbSrc = customThumb || autoThumb || '';
-    var thumbEl = $('youtube-thumb');
-    if (thumbEl && thumbSrc) {
-      thumbEl.onerror = function() {
-        if (customThumb) {
-          // custom failed → try YouTube auto
-          customThumb = '';
-          if (autoThumb) { this.src = autoThumb; return; }
-        }
-        if (thumbFallbacks && thumbFallbacks.length) {
-          this.src = thumbFallbacks.shift();
-          return;
-        }
-        this.onerror = null;
-      };
-      if (thumbEl.getAttribute('data-hh-yt') !== thumbSrc) {
-        thumbEl.setAttribute('data-hh-yt', thumbSrc);
-        thumbEl.src = thumbSrc;
-      }
-    }
+    var thumbSrc = (yt.thumb && String(yt.thumb).trim()) || autoThumb || '';
+    if (thumbSrc && $('youtube-thumb')) $('youtube-thumb').src = thumbSrc;
     var vLink = $('youtube-video-link');
     if (vLink) {
       vLink.href = watchUrl || yt.link || (social && social.yt) || 'https://www.youtube.com';
       vLink.setAttribute('aria-label', parsed && parsed.type === 'playlist' ? 'Open playlist on YouTube' : 'Open video on YouTube');
-      // Same 16:9 frame phone + PC
-      vLink.className = 'block w-full max-w-[18rem] sm:max-w-[20rem] aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl mx-auto lg:mx-0';
     }
     var cap = $('youtube-thumb-caption');
     if (cap) {
@@ -2972,7 +2947,10 @@ function loadBlogData() {
     else $('about-desc').textContent = (typeof t === 'function' ? t('aboutDesc') : '');
   }
   if (about.descColor) $('about-desc').style.color = about.descColor;
-  $('about-section').classList.toggle('hidden', about.active === false);
+  // About = menu page only — never auto-show on homepage
+  if ($('about-section') && !document.body.classList.contains('legal-page-open')) {
+    $('about-section').classList.add('hidden');
+  }
 
   if (siteSettings.storiesHeading) $('stories-heading').textContent = siteSettings.storiesHeading;
   if (siteSettings.storiesSub) $('stories-sub').textContent = siteSettings.storiesSub;
@@ -4348,32 +4326,37 @@ function submitComment() {
 }
 
 
-/* ---- Contact / Privacy Policy as separate pages ---- */
+/* ---- About / Contact / Privacy as separate pages ---- */
 function openLegalPage(which) {
   var contact = document.getElementById('contact-page');
   var privacy = document.getElementById('privacy-policy');
+  var about = document.getElementById('about-section');
   var home = document.getElementById('home');
   if (!contact || !privacy) return;
   try { closeArticle(); } catch (e) {}
   try { closeGalleryPage(); } catch (e) {}
   try { closeMenu(); } catch (e) {}
-  // hide main home blocks, show only the selected legal section
   if (home) {
     Array.prototype.forEach.call(home.children, function(child) {
-      if (child.id === 'contact-page' || child.id === 'privacy-policy') return;
+      if (child.id === 'contact-page' || child.id === 'privacy-policy' || child.id === 'about-section') return;
       child.setAttribute('data-legal-hidden', '1');
       child.style.display = 'none';
     });
   }
+  if (contact) { contact.classList.add('hidden'); contact.style.display = 'none'; }
+  if (privacy) { privacy.classList.add('hidden'); privacy.style.display = 'none'; }
+  if (about) { about.classList.add('hidden'); about.style.display = 'none'; }
   if (which === 'privacy') {
-    contact.classList.add('hidden');
-    contact.style.display = 'none';
     privacy.classList.remove('hidden');
     privacy.style.display = '';
     try { privacy.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+  } else if (which === 'about') {
+    if (about) {
+      about.classList.remove('hidden');
+      about.style.display = '';
+      try { about.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    }
   } else {
-    privacy.classList.add('hidden');
-    privacy.style.display = 'none';
     contact.classList.remove('hidden');
     contact.style.display = '';
     try { contact.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
@@ -4383,9 +4366,11 @@ function openLegalPage(which) {
 function closeLegalPage() {
   var contact = document.getElementById('contact-page');
   var privacy = document.getElementById('privacy-policy');
+  var about = document.getElementById('about-section');
   var home = document.getElementById('home');
   if (contact) { contact.classList.add('hidden'); contact.style.display = 'none'; }
   if (privacy) { privacy.classList.add('hidden'); privacy.style.display = 'none'; }
+  if (about) { about.classList.add('hidden'); about.style.display = 'none'; }
   if (home) {
     Array.prototype.forEach.call(home.children, function(child) {
       if (child.getAttribute('data-legal-hidden') === '1') {
@@ -4396,7 +4381,8 @@ function closeLegalPage() {
   }
   document.body.classList.remove('legal-page-open');
   try {
-    if (location.hash === '#contact-page' || location.hash === '#privacy-policy') {
+    var h = (location.hash || '').toLowerCase();
+    if (h === '#contact-page' || h === '#privacy-policy' || h === '#about-section' || h === '#about' || h === '#contact') {
       history.pushState('', '', location.pathname + location.search);
     }
   } catch (e) {}
@@ -4412,7 +4398,10 @@ function tryOpenLegalFromHash() {
     openLegalPage('privacy');
     return true;
   }
-  // not a legal hash — ensure legal pages closed if we were on one
+  if (h === '#about-section' || h === '#about') {
+    openLegalPage('about');
+    return true;
+  }
   if (document.body.classList.contains('legal-page-open')) {
     closeLegalPage();
   }
