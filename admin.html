@@ -1893,24 +1893,13 @@ header.sticky {
 
           <div class="rounded-xl border-2 border-dashed border-emerald-700/40 bg-[#050a12] p-3">
             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Live Preview · YouTube</span>
-            <div id="yt-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700" style="min-height:120px; background:linear-gradient(90deg,#1a0505,#000);">
-              <div class="relative z-10 flex flex-col sm:flex-row items-center gap-4 p-4">
-                <div class="flex-1 w-full text-center sm:text-left">
-                  <div class="flex items-center gap-2 mb-2 justify-center sm:justify-start">
-                    <span class="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center"><i class="fa-brands fa-youtube text-white text-xs"></i></span>
-                    <span id="yt-prev-label" class="text-red-400 text-xs font-bold">Watch My YouTube</span>
-                  </div>
-                  <div id="yt-prev-title" class="text-sm font-black text-white">Channel Title</div>
-                  <div id="yt-prev-desc" class="text-[10px] text-white/60 mt-1 line-clamp-2">Description</div>
-                  <div class="mt-3 inline-flex items-center gap-2 bg-red-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full">Visit Channel <i class="fa-solid fa-arrow-right text-[9px]"></i></div>
-                </div>
-                <div id="yt-prev-thumb-wrap" class="shrink-0 w-full sm:w-44 h-24 rounded-lg overflow-hidden border border-emerald-700/40 bg-black relative hidden">
-                  <img id="yt-prev-thumb" src="" alt="" class="absolute inset-0 w-full h-full object-cover">
-                  <div class="absolute inset-0 flex items-center justify-center">
-                    <span class="w-10 h-10 rounded-full bg-red-600/95 flex items-center justify-center shadow-lg"><i class="fa-solid fa-play text-white text-sm"></i></span>
-                  </div>
-                </div>
+            <div id="yt-live-preview" class="relative mt-2 overflow-hidden rounded-lg border border-slate-700 p-4" style="min-height:100px; background:linear-gradient(90deg,#1a0505,#000);">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center"><i class="fa-brands fa-youtube text-white text-xs"></i></span>
+                <span id="yt-prev-label" class="text-red-400 text-xs font-bold">Watch My YouTube</span>
               </div>
+              <div id="yt-prev-title" class="text-sm font-black text-white">Channel Title</div>
+              <div id="yt-prev-desc" class="text-[10px] text-white/60 mt-1 line-clamp-2">Description</div>
             </div>
           </div>
 
@@ -2229,11 +2218,30 @@ function forceSyncAllToFirebase() {
     if (raw === null) return;
     try { payload[k] = JSON.parse(raw); } catch (e) { payload[k] = raw; }
   });
+  payload._updatedAt = Date.now();
   adminDb.ref('siteData').update(payload).then(function() {
-    toast('✓ Firebase Sync ပြီး — ဖုန်းမှာ refresh လုပ်ပါ');
+    return adminDb.ref('siteData/_updatedAt').set(payload._updatedAt);
+  }).then(function() {
+    toast('✓ Firebase Sync ပြီး — ဖုန်း ၃ စက္ကန့်အတွင်း ပေါ်မယ်');
   }).catch(function(err) {
     console.error(err);
-    toast('Sync မရ: ' + ((err && err.message) || err));
+    toast('Bulk Sync မရ — တစ်ခုချင်း ပြန်တင်နေ…', true);
+    var chain = Promise.resolve();
+    DATA_KEYS.forEach(function(k) {
+      if (!Object.prototype.hasOwnProperty.call(payload, k)) return;
+      chain = chain.then(function() {
+        return adminDb.ref('siteData/' + k).set(payload[k]).catch(function(e) {
+          console.warn('sync fail', k, e);
+        });
+      });
+    });
+    return chain.then(function() {
+      return adminDb.ref('siteData/_updatedAt').set(Date.now());
+    }).then(function() {
+      toast('✓ Key-by-key Sync ပြီး');
+    }).catch(function(e2) {
+      toast('Sync မရ: ' + ((e2 && e2.message) || e2), true);
+    });
   });
 }
 
@@ -7191,48 +7199,26 @@ function youtubeEmbedSrc(parsed) {
   return src;
 }
 function updateYoutubePreview() {
-  if ($('yt-prev-label')) $('yt-prev-label').textContent = ($('yt-label') && $('yt-label').value.trim()) || 'Watch My YouTube';
+  if ($('yt-prev-label')) $('yt-prev-label').textContent = $('yt-label')?.value || 'Watch My YouTube';
   if ($('yt-prev-title')) {
-    var tt = ($('yt-title') && $('yt-title').value.trim()) || '';
-    $('yt-prev-title').textContent = tt || 'Channel Title';
-    $('yt-prev-title').style.color = ($('yt-title-color') && $('yt-title-color').value) || '#ffffff';
-    $('yt-prev-title').style.fontWeight = ($('yt-title-weight') && $('yt-title-weight').value) || '900';
-    if ($('yt-title-fs')) {
-      var fs = parseInt($('yt-title-fs').value || '22', 10);
-      $('yt-prev-title').style.fontSize = fs + 'px';
-      if ($('val-yt-title-fs')) $('val-yt-title-fs').textContent = fs + 'px';
-    }
+    $('yt-prev-title').textContent = $('yt-title')?.value || 'Channel Title';
+    $('yt-prev-title').style.color = $('yt-title-color')?.value || '#ffffff';
+    $('yt-prev-title').style.fontWeight = $('yt-title-weight')?.value || '900';
   }
-  if ($('yt-prev-desc')) {
-    var dd = ($('yt-desc') && $('yt-desc').value.trim()) || '';
-    $('yt-prev-desc').textContent = dd || 'Description';
-  }
+  if ($('yt-prev-desc')) $('yt-prev-desc').textContent = $('yt-desc')?.value || 'Description';
   const bg = imageFieldValue('yt-bg');
   const box = $('yt-live-preview');
   if (box) applyLiveBg(box, bg);
-  const parsed = parseYoutubeUrl(($('yt-video-url') && $('yt-video-url').value) || '');
-  var thumbSrc = (parsed && parsed.type === 'video') ? ('https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg') : '';
-  var custom = (typeof imageFieldValue === 'function' ? imageFieldValue('yt-thumb') : '') || '';
-  var img = custom || thumbSrc || '';
-  // Live Preview card — right side thumb (same as public site)
-  var wrap = $('yt-prev-thumb-wrap');
-  var prevThumb = $('yt-prev-thumb');
-  if (wrap && prevThumb) {
-    if (img) {
-      prevThumb.src = img;
-      wrap.classList.remove('hidden');
-    } else {
-      prevThumb.removeAttribute('src');
-      wrap.classList.add('hidden');
-    }
-  }
-  // Larger embed preview under the URL field
   const ep = $('yt-embed-preview');
   if (ep) {
+    const parsed = parseYoutubeUrl($('yt-video-url')?.value || '');
     if (parsed) {
       ep.classList.remove('hidden');
+      var thumbSrc = (parsed.type === 'video') ? ('https://i.ytimg.com/vi/' + parsed.id + '/hqdefault.jpg') : '';
+      var custom = (typeof imageFieldValue === 'function' ? imageFieldValue('yt-thumb') : '') || '';
+      var img = custom || thumbSrc || '';
       ep.innerHTML = '<div class="relative w-full min-h-[160px] bg-black flex items-center justify-center">' +
-        (img ? '<img src="' + img.replace(/"/g, '&quot;') + '" class="absolute inset-0 w-full h-full object-cover opacity-80" alt="">' : '') +
+        (img ? '<img src="' + img + '" class="absolute inset-0 w-full h-full object-cover opacity-80" alt="">' : '') +
         '<div class="relative z-10 text-center"><div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-play text-white"></i></div><p class="text-[11px] text-white/90 font-bold">Play → YouTube မှာ ဖွင့်မယ်</p></div></div>';
     } else {
       ep.classList.add('hidden');
