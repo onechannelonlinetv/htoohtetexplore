@@ -2985,11 +2985,21 @@ function formatDate(ts) {
 
 function postLocalized(post, field) {
   if (!post) return '';
+  var base = post[field] || '';
+  var en = post[field + 'En'] || post[field + '_en'] || '';
+  var hasMm = function(s) { return /[\u1000-\u109F]/.test(String(s || '')); };
   if (typeof currentLang !== 'undefined' && currentLang === 'en') {
-    var en = post[field + 'En'] || post[field + '_en'];
+    // Prefer English field; fall back to base only if EN empty
     if (en && String(en).trim()) return en;
+    return base;
   }
-  return post[field] || '';
+  // Myanmar mode: prefer field that actually contains Myanmar script
+  // (guards against title/content saved in the wrong language box)
+  if (base && String(base).trim()) {
+    if (!hasMm(base) && hasMm(en)) return en;
+    return base;
+  }
+  return en || '';
 }
 /**
  * Fix stored content where newlines were saved as the two characters "\n"
@@ -3647,14 +3657,23 @@ function openArticle(index) {
   var mmBody = normalizeArticleContent(post.content || post.body || '');
   var enBody = normalizeArticleContent(post.contentEn || post.content_en || '');
   var primaryBody;
+  var hasMmScript = function(s) { return /[\u1000-\u109F]/.test(String(s || '')); };
   if (typeof currentLang !== 'undefined' && currentLang === 'en') {
     // Always reuse Myanmar [img]/[gallery] positions; EN field is text-only
     // so image order/placement matches the Myanmar article exactly
     primaryBody = mergeContentImages(enBody, mmBody);
+    if (!String(primaryBody || '').trim()) primaryBody = mmBody;
   } else {
-    primaryBody = mmBody;
+    // Myanmar mode: use Myanmar body; if it has no Myanmar script but EN does,
+    // the content was likely saved in the wrong field — prefer the Myanmar-script one
+    if (mmBody && String(mmBody).trim()) {
+      if (!hasMmScript(mmBody) && hasMmScript(enBody)) primaryBody = enBody;
+      else primaryBody = mmBody;
+    } else {
+      primaryBody = enBody;
+    }
   }
-  let body = primaryBody || post.desc || '';
+  let body = primaryBody || post.desc || post.descEn || '';
   $('article-body').innerHTML = formatArticleBody(body);
 
   // Related: same category first, then others — up to 3
