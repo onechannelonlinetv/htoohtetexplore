@@ -1623,11 +1623,11 @@ $('search-close').addEventListener('click', () => {
 });
 searchInput.addEventListener('input', () => renderStoryCards());
 
-/* Remote cache: phone localStorage full/stale ဖြစ်ရင် Firebase data ကို ဒီကနေ ဖတ် */
+/* Phone: Firebase data ကို memory မှာ ထား — localStorage ပြည့်/ဟောင်းရင်လည်း realtime ရအောင် */
 window._hhRemote = window._hhRemote || {};
 function read(key, fallback) {
   try {
-    if (Object.prototype.hasOwnProperty.call(window._hhRemote, key) && window._hhRemote[key] != null) {
+    if (window._hhRemote && Object.prototype.hasOwnProperty.call(window._hhRemote, key) && window._hhRemote[key] != null) {
       return window._hhRemote[key];
     }
   } catch (e) {}
@@ -3876,35 +3876,23 @@ let publicDb = null;
 try {
   firebase.initializeApp(firebaseConfig);
   publicDb = firebase.database();
-  var _lastRemoteHash = '';
+  var _lastUpdatedAt = 0;
   var _remoteApplyTimer = null;
   function applyRemoteSiteData(data, force) {
     data = data || {};
-    var changed = false;
-    // Always keep in-memory remote snapshot (phone localStorage may be full/stale)
     try { window._hhRemote = data; } catch (e) {}
     DATA_KEYS.forEach(function(key) {
       if (!Object.prototype.hasOwnProperty.call(data, key) || data[key] == null) return;
-      var next = '';
-      try { next = JSON.stringify(data[key]); } catch (e) { return; }
-      var prev = null;
-      try { prev = localStorage.getItem(key); } catch (e) {}
-      if (force || prev !== next) {
-        try { localStorage.setItem(key, next); } catch (e) { /* quota — still use _hhRemote */ }
-        changed = true;
-      }
+      try { localStorage.setItem(key, JSON.stringify(data[key])); } catch (e) {}
     });
     publicFirebaseReady = true;
-    // Always re-render on remote push so phone UI matches admin immediately
-    if (changed || force || true) {
-      try { loadBlogData(); } catch (e) { console.error(e); }
-    }
+    try { loadBlogData(); } catch (e) { console.error(e); }
   }
   function scheduleRemoteApply(data) {
     clearTimeout(_remoteApplyTimer);
     _remoteApplyTimer = setTimeout(function() {
       applyRemoteSiteData(data || {}, true);
-    }, 50);
+    }, 40);
   }
   function refreshFromFirebase() {
     if (!publicDb) return;
@@ -3915,13 +3903,24 @@ try {
       try { loadBlogData(); } catch (e) {}
     });
   }
+  // Full tree listener
   publicDb.ref('siteData').on('value', function(snap) {
     scheduleRemoteApply(snap.val() || {});
   }, function(err) {
     console.error(err);
     try { loadBlogData(); } catch (e) {}
   });
-  // Per-key listeners — mobile partial updates
+  // Lightweight heartbeat — admin Save တိုင်း _updatedAt ပြောင်း → ဖုန်း ချက်ချင်း ဆွဲ
+  try {
+    publicDb.ref('siteData/_updatedAt').on('value', function(snap) {
+      var t = Number(snap.val() || 0);
+      if (t && t !== _lastUpdatedAt) {
+        _lastUpdatedAt = t;
+        refreshFromFirebase();
+      }
+    });
+  } catch (e) {}
+  // Per-key listeners
   DATA_KEYS.forEach(function(key) {
     try {
       publicDb.ref('siteData/' + key).on('value', function(snap) {
@@ -3934,7 +3933,7 @@ try {
           clearTimeout(window._hhKeyReload);
           window._hhKeyReload = setTimeout(function() {
             try { loadBlogData(); } catch (e) {}
-          }, 80);
+          }, 60);
         } catch (e) {}
       });
     } catch (e) {}
@@ -3948,11 +3947,11 @@ try {
   window.addEventListener('online', function() {
     refreshFromFirebase();
   });
-  // Mobile: websocket often drops — poll every 8s while tab visible
+  // Phone: poll every 3s while visible (websocket drop ခံနိုင်)
   setInterval(function() {
     if (!publicDb || document.visibilityState !== 'visible') return;
     try { refreshFromFirebase(); } catch (e) {}
-  }, 8000);
+  }, 3000);
 } catch (e) { console.error(e); }
 
 /* ---- Engagement: Like / Share / Comment ---- */
