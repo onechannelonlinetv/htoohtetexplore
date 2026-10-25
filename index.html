@@ -1623,7 +1623,14 @@ $('search-close').addEventListener('click', () => {
 });
 searchInput.addEventListener('input', () => renderStoryCards());
 
+/* Remote cache: phone localStorage full/stale ဖြစ်ရင် Firebase data ကို ဒီကနေ ဖတ် */
+window._hhRemote = window._hhRemote || {};
 function read(key, fallback) {
+  try {
+    if (Object.prototype.hasOwnProperty.call(window._hhRemote, key) && window._hhRemote[key] != null) {
+      return window._hhRemote[key];
+    }
+  } catch (e) {}
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
 }
 
@@ -3874,6 +3881,8 @@ try {
   function applyRemoteSiteData(data, force) {
     data = data || {};
     var changed = false;
+    // Always keep in-memory remote snapshot (phone localStorage may be full/stale)
+    try { window._hhRemote = data; } catch (e) {}
     DATA_KEYS.forEach(function(key) {
       if (!Object.prototype.hasOwnProperty.call(data, key) || data[key] == null) return;
       var next = '';
@@ -3881,19 +3890,21 @@ try {
       var prev = null;
       try { prev = localStorage.getItem(key); } catch (e) {}
       if (force || prev !== next) {
-        try { localStorage.setItem(key, next); changed = true; } catch (e) {}
+        try { localStorage.setItem(key, next); } catch (e) { /* quota — still use _hhRemote */ }
+        changed = true;
       }
     });
     publicFirebaseReady = true;
-    if (changed || force) {
+    // Always re-render on remote push so phone UI matches admin immediately
+    if (changed || force || true) {
       try { loadBlogData(); } catch (e) { console.error(e); }
     }
   }
   function scheduleRemoteApply(data) {
     clearTimeout(_remoteApplyTimer);
     _remoteApplyTimer = setTimeout(function() {
-      applyRemoteSiteData(data || {}, false);
-    }, 80);
+      applyRemoteSiteData(data || {}, true);
+    }, 50);
   }
   function refreshFromFirebase() {
     if (!publicDb) return;
@@ -3910,22 +3921,20 @@ try {
     console.error(err);
     try { loadBlogData(); } catch (e) {}
   });
-  // Also listen per-key so partial updates never get missed on mobile
+  // Per-key listeners — mobile partial updates
   DATA_KEYS.forEach(function(key) {
     try {
       publicDb.ref('siteData/' + key).on('value', function(snap) {
         var val = snap.val();
         if (val == null) return;
         try {
-          var next = JSON.stringify(val);
-          var prev = localStorage.getItem(key);
-          if (prev !== next) {
-            localStorage.setItem(key, next);
-            clearTimeout(window._hhKeyReload);
-            window._hhKeyReload = setTimeout(function() {
-              try { loadBlogData(); } catch (e) {}
-            }, 100);
-          }
+          if (!window._hhRemote) window._hhRemote = {};
+          window._hhRemote[key] = val;
+          try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+          clearTimeout(window._hhKeyReload);
+          window._hhKeyReload = setTimeout(function() {
+            try { loadBlogData(); } catch (e) {}
+          }, 80);
         } catch (e) {}
       });
     } catch (e) {}
@@ -3939,12 +3948,11 @@ try {
   window.addEventListener('online', function() {
     refreshFromFirebase();
   });
-  // Mobile browsers often drop the websocket — poll while visible
+  // Mobile: websocket often drops — poll every 8s while tab visible
   setInterval(function() {
     if (!publicDb || document.visibilityState !== 'visible') return;
-    try { publicDb.ref('.info/connected').once('value'); } catch (e) {}
     try { refreshFromFirebase(); } catch (e) {}
-  }, 20000);
+  }, 8000);
 } catch (e) { console.error(e); }
 
 /* ---- Engagement: Like / Share / Comment ---- */
