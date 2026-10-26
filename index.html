@@ -2310,12 +2310,25 @@ function loadBlogData() {
     if (!el) return;
     var raw = (htmlOrText == null ? '' : String(htmlOrText));
     var v = raw.trim();
-    if (!v) { el.innerHTML = ''; el.style.display = 'none'; return; }
+    // Keep admin preview resize handles (.pv-resize) across re-renders
+    var kept = [];
+    try {
+      Array.prototype.slice.call(el.querySelectorAll('.pv-resize, .sp-resize-handle')).forEach(function(h) {
+        if (h.parentElement === el) kept.push(h);
+      });
+    } catch (e) {}
+    if (!v) {
+      el.innerHTML = '';
+      kept.forEach(function(h) { try { el.appendChild(h); } catch (e) {} });
+      el.style.display = kept.length ? '' : 'none';
+      return;
+    }
     el.style.display = '';
     el.style.whiteSpace = 'pre-wrap';
     el.style.overflow = 'visible';
     el.style.webkitLineClamp = 'unset';
     if (asHtml) el.innerHTML = raw; else el.textContent = raw;
+    kept.forEach(function(h) { try { el.appendChild(h); } catch (e) {} });
   }
   showHeroText($('hero-label'), hero.label, false);
   if (hero.labelColor && $('hero-label')) { setStyle($('hero-label'), 'color', hero.labelColor); $('hero-label').classList.remove('accent-text'); }
@@ -2791,13 +2804,24 @@ function loadBlogData() {
       var el = $(id); if (!el) return;
       var t = (text == null ? '' : String(text));
       var has = !!String(t).trim();
+      var kept = [];
+      try {
+        Array.prototype.slice.call(el.querySelectorAll('.pv-resize, .sp-resize-handle')).forEach(function(h) {
+          if (h.parentElement === el) kept.push(h);
+        });
+      } catch (e) {}
       el.style.display = has ? '' : 'none';
-      if (!has) { el.textContent = ''; return; }
+      if (!has) {
+        el.textContent = '';
+        kept.forEach(function(h) { try { el.appendChild(h); } catch (e) {} });
+        return;
+      }
       el.style.whiteSpace = 'pre-wrap';
       el.style.overflow = 'visible';
       el.style.webkitLineClamp = 'unset';
       el.style.maxWidth = el.style.maxWidth || '95%';
       el.textContent = t; // pre-wrap keeps newlines / long lines
+      kept.forEach(function(h) { try { el.appendChild(h); } catch (e) {} });
       if (styleFn) styleFn(el);
     }
     // On-image title: hide if empty or only the generic word "Upcoming" (section heading is separate)
