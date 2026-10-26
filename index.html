@@ -4135,6 +4135,9 @@ function pickShareImageCandidates() {
   add(hero.bgImage);
   add(settings.logo);
   add(settings.logoUrl);
+  // site-wide share image (GitHub static file for Facebook)
+  try { add(absoluteUrl('og-image.jpg')); } catch (e) {}
+  add('https://onechannelonlinetv.github.io/htoohtetexplore/og-image.jpg');
   // 3) First story cover that looks real
   try {
     if (typeof allStoryPosts !== 'undefined' && allStoryPosts && allStoryPosts.length) {
@@ -4173,8 +4176,26 @@ function updateShareMeta() {
       if (!httpImg && isHttpImage(c)) httpImg = c;
     }
     // OG meta: only public https (Facebook/Telegram crawlers reject data:)
-    var ogImg = httpImg ? absoluteUrl(httpImg) : absoluteUrl('icons/icon-512.png');
+    // Prefer live https image → existing static og:image meta → og-image.jpg on site → icon
+    var ogImg = '';
+    if (httpImg) {
+      ogImg = absoluteUrl(httpImg);
+    } else {
+      try {
+        var existing = document.getElementById('meta-og-image');
+        var ex = existing && existing.getAttribute('content');
+        if (ex && /^https?:\/\//i.test(ex) && ex.indexOf('data:') !== 0) ogImg = ex;
+      } catch (e) {}
+      if (!ogImg) ogImg = absoluteUrl('og-image.jpg');
+      if (!ogImg) ogImg = absoluteUrl('icons/icon-512.png');
+    }
     var pageUrl = location.href.split('#')[0].split('?')[0];
+    // Homepage share must stay on clean site URL (no hash)
+    try {
+      if (!location.hash || location.hash.indexOf('#article/') !== 0) {
+        pageUrl = pageUrl.replace(/\/index\.html$/i, '/');
+      }
+    } catch (e) {}
     function setMeta(sel, attr, val) {
       var el = document.querySelector(sel);
       if (el && val) el.setAttribute(attr, val);
