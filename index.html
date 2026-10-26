@@ -814,10 +814,48 @@
   #drawer-overlay.drawer-overlay {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.55);
   }
   #drawer-overlay:not(.opacity-0) {
     opacity: 1;
+  }
+  /* Phone: full-screen premium menu */
+  @media (max-width: 767px) {
+    #site-menu {
+      width: 100% !important;
+      max-width: 100% !important;
+      left: 0 !important;
+      right: 0 !important;
+      border-left: none !important;
+      border-radius: 0 !important;
+      padding-top: max(16px, calc(env(safe-area-inset-top, 0px) + 10px)) !important;
+      background: color-mix(in srgb, var(--brand-bg) 96%, black) !important;
+    }
+    #site-menu .menu-link {
+      min-height: 52px;
+      border: 1px solid color-mix(in srgb, var(--brand-accent) 18%, transparent) !important;
+      background: color-mix(in srgb, var(--brand-card) 55%, transparent) !important;
+    }
+    #site-menu .menu-link.menu-active {
+      background: color-mix(in srgb, var(--brand-accent) 22%, var(--brand-card)) !important;
+      border-color: color-mix(in srgb, var(--brand-accent) 45%, transparent) !important;
+      box-shadow: inset 3px 0 0 var(--brand-accent);
+    }
+    #site-menu .menu-link i {
+      color: var(--brand-accent, #34d399) !important;
+      width: 1.25rem;
+      text-align: center;
+    }
+  }
+  /* PC: keep side drawer */
+  @media (min-width: 768px) {
+    #site-menu {
+      width: min(86vw, 340px) !important;
+    }
+    #site-menu .menu-link.menu-active {
+      background: color-mix(in srgb, var(--brand-accent) 18%, transparent) !important;
+      box-shadow: inset 3px 0 0 var(--brand-accent);
+    }
   }
   @media (max-width: 380px) {
     #lang-toggle { min-width: 2.25rem; padding-left: 0.4rem; padding-right: 0.4rem; font-size: 10px; }
@@ -1136,35 +1174,31 @@
     </div>
   </div>
 
-  <!-- Drawer menu (all nav items live here) -->
-  <div id="drawer-overlay" class="drawer-overlay fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity" onclick="closeMenu()"></div>
-  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out px-5 sm:px-6 pb-5 sm:pb-6 flex flex-col border-l border-emerald-900/50">
-    <div class="menu-top-row flex items-center justify-between gap-3">
-      <div id="mobile-brand-name" class="font-black text-white text-base leading-tight truncate pr-2"></div>
-      <button type="button" onclick="closeMenu()" class="w-11 h-11 shrink-0 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center" aria-label="Close menu"><i class="fa-solid fa-xmark text-lg"></i></button>
+  <!-- Menu: phone = full-screen premium · PC = side drawer -->
+  <div id="drawer-overlay" class="drawer-overlay fixed inset-0 z-40 bg-black/60 opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeMenu()"></div>
+  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-all duration-300 ease-out px-5 sm:px-6 pb-5 sm:pb-6 flex flex-col border-l border-emerald-900/50">
+    <div class="menu-top-row flex items-center justify-between gap-3 pt-1">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <img id="menu-brand-logo" src="" alt="" class="w-9 h-9 rounded-full object-cover border border-emerald-700/40 shrink-0 hidden">
+        <div id="mobile-brand-name" class="font-black text-white text-base leading-tight truncate pr-2"></div>
+      </div>
+      <button type="button" onclick="closeMenu()" class="w-11 h-11 shrink-0 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center hover:bg-emerald-800/70 transition" aria-label="Close menu"><i class="fa-solid fa-xmark text-lg"></i></button>
     </div>
-    <!-- Light/Dark only (language is in header) -->
-    <div class="menu-top-controls flex items-center justify-end gap-2 mb-5 pb-4 border-b border-emerald-900/40">
-      <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="h-10 w-12 rounded-xl text-white/95 hover:bg-emerald-900/50 flex items-center justify-center transition border border-emerald-800/40 shrink-0">
-        <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
-      </button>
-    </div>
-    <nav id="mobile-nav" class="flex flex-col gap-1 text-[15px] font-semibold text-white flex-1 overflow-y-auto min-h-[200px]">
-      <a href="#home" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Home</span></a>
-      <a href="#stories" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Travel Stories</span></a>
-      <a href="#photo-gallery-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Photo Gallery</span></a>
-      <a href="#youtube-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>YouTube</span></a>
-      <a href="#about-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>About</span></a>
-      <a href="#contact-page" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Contact</span></a>
-      <a href="#privacy-policy" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Privacy Policy</span></a>
-      <button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white w-full text-left">
-        <i class="fa-solid fa-share-nodes text-emerald-400"></i>
-        <span id="menu-share-label">Share Website</span>
-      </button>
+    <nav id="mobile-nav" class="flex flex-col gap-2 text-[15px] font-semibold text-white flex-1 overflow-y-auto min-h-[200px] mt-5">
+      <a href="#home" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3.5 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-house text-emerald-400 w-5 text-center"></i><span>Home</span></a>
     </nav>
-    <div class="mt-auto pt-5 border-t border-emerald-900/50">
-      <div class="flex gap-2 mb-4 flex-wrap" id="social-links-mobile"></div>
-      <p id="mobile-tagline" class="text-[11px] text-emerald-500/70">Discover Myanmar, one journey at a time.</p>
+    <div class="mt-auto pt-4 border-t border-emerald-900/50 space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-2.5 text-white font-semibold flex-1 text-left border border-emerald-800/40">
+          <i class="fa-solid fa-share-nodes text-emerald-400"></i>
+          <span id="menu-share-label">Share Website</span>
+        </button>
+        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="h-11 w-12 rounded-xl text-white/95 hover:bg-emerald-900/50 flex items-center justify-center transition border border-emerald-800/40 shrink-0">
+          <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+      </div>
+      <div class="flex gap-2 flex-wrap" id="social-links-mobile"></div>
+      <p id="mobile-tagline" class="text-[11px] text-emerald-500/70 text-center">Discover Myanmar, one journey at a time.</p>
     </div>
   </aside>
 </header>
@@ -1295,8 +1329,8 @@
           </a>
         </div>
         <div class="shrink-0">
-          <a id="youtube-video-link" href="#" target="_blank" rel="noopener" class="block w-64 sm:w-80 lg:w-96 aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl shrink-0">
-            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover object-center opacity-90 group-hover:opacity-100 transition duration-300 group-hover:scale-105">
+          <a id="youtube-video-link" href="#" target="_blank" rel="noopener" class="block w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl">
+            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-95 transition duration-300 group-hover:scale-105">
             <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20 pointer-events-none"></div>
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
               <div class="w-12 h-12 rounded-full bg-red-600/95 flex items-center justify-center shadow-xl mb-2 group-hover:scale-110 transition">
@@ -2157,6 +2191,25 @@ function translateMenuLabel(lab) {
   var key = map[lab];
   return key ? t(key) : lab;
 }
+function menuIconFor(href, label) {
+  var h = String(href || '').toLowerCase();
+  var lab = String(label || '').toLowerCase();
+  if (h.indexOf('home') >= 0 || lab === 'home' || lab.indexOf('ပင်မ') >= 0) return 'fa-house';
+  if (h.indexOf('stor') >= 0 || lab.indexOf('travel') >= 0 || lab.indexOf('ခရီး') >= 0) return 'fa-map';
+  if (h.indexOf('gallery') >= 0 || h.indexOf('photo') >= 0 || lab.indexOf('photo') >= 0 || lab.indexOf('ဓာတ်') >= 0) return 'fa-image';
+  if (h.indexOf('youtube') >= 0 || lab.indexOf('youtube') >= 0) return 'fa-play';
+  if (h.indexOf('about') >= 0 || lab.indexOf('about') >= 0 || lab.indexOf('အကြောင်း') >= 0) return 'fa-circle-info';
+  if (h.indexOf('contact') >= 0 || lab.indexOf('contact') >= 0 || lab.indexOf('ဆက်သွယ်') >= 0) return 'fa-envelope';
+  if (h.indexOf('privacy') >= 0) return 'fa-shield-halved';
+  return 'fa-chevron-right';
+}
+function menuClickAttr(href) {
+  var h = String(href || '').toLowerCase();
+  if (h.indexOf('about') >= 0) return "closeMenu();openLegalPage('about');return false;";
+  if (h.indexOf('contact') >= 0) return "closeMenu();openLegalPage('contact');return false;";
+  if (h.indexOf('privacy') >= 0) return "closeMenu();openLegalPage('privacy');return false;";
+  return 'closeMenu()';
+}
 function renderMenu() {
   var raw = Array.isArray(siteMenu) ? siteMenu : [];
   var menu = raw.filter(function(m) {
@@ -2175,16 +2228,21 @@ function renderMenu() {
   if (!menu.length) menu = defaultMenuItems().map(function(m) {
     return { label: translateMenuLabel(m.label), href: m.href };
   });
+  var hash = (location.hash || '#home').toLowerCase();
+  if (!hash || hash === '#') hash = '#home';
   const mob = $('mobile-nav');
   const foot = $('footer-links');
   var html = menu.map(function(m) {
-    return '<a href="' + safe(m.href || '#') + '" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold">' +
-      '<i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>' + safe(m.label) + '</span></a>';
+    var href = m.href || '#';
+    var icon = menuIconFor(href, m.label);
+    var active = false;
+    var hl = href.toLowerCase();
+    if (hl === '#home' || hl === '#') active = (hash === '#home' || hash === '' || hash === '#');
+    else if (hash && hl && hash.indexOf(hl.replace('#','')) >= 0) active = true;
+    else if (hash === hl) active = true;
+    return '<a href="' + safe(href) + '" onclick="' + menuClickAttr(href) + '" class="menu-link rounded-xl px-4 py-3.5 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold' + (active ? ' menu-active' : '') + '">' +
+      '<i class="fa-solid ' + icon + ' text-emerald-400 w-5 text-center text-sm"></i><span>' + safe(m.label) + '</span></a>';
   }).join('');
-  // Always append Website Share (not a page link — shares homepage)
-  var shareLabel = (typeof t === 'function' ? t('shareWebsite') : '') || 'Share Website';
-  html += '<button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold w-full text-left">' +
-    '<i class="fa-solid fa-share-nodes text-emerald-400"></i><span id="menu-share-label">' + safe(shareLabel) + '</span></button>';
   if (mob) {
     mob.innerHTML = html;
     mob.style.display = 'flex';
@@ -2192,11 +2250,23 @@ function renderMenu() {
     mob.style.opacity = '1';
     mob.style.minHeight = '180px';
   }
+  var shareLabel = (typeof t === 'function' ? t('shareWebsite') : '') || 'Share Website';
+  if ($('menu-share-label')) $('menu-share-label').textContent = shareLabel;
   if (foot) {
     foot.innerHTML = menu.map(function(m) {
-      return '<li><a href="' + safe(m.href || '#') + '" class="hover:text-yellow-400 transition">' + safe(m.label) + '</a></li>';
+      var href = m.href || '#';
+      return '<li><a href="' + safe(href) + '" onclick="' + menuClickAttr(href) + '">' + safe(m.label) + '</a></li>';
     }).join('');
   }
+  // Menu logo from site settings
+  try {
+    var logo = (siteSettings && siteSettings.logoUrl) || (read('hh_settings', {}).logoUrl) || '';
+    var logoEl = $('menu-brand-logo');
+    if (logoEl && logo && (String(logo).indexOf('http') === 0 || String(logo).indexOf('data:') === 0)) {
+      logoEl.src = logo;
+      logoEl.classList.remove('hidden');
+    }
+  } catch (e) {}
 }
 
 function loadBlogData() {
