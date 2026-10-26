@@ -1150,13 +1150,13 @@
       </button>
     </div>
     <nav id="mobile-nav" class="flex flex-col gap-1 text-[15px] font-semibold text-white flex-1 overflow-y-auto min-h-[200px]">
-      <a href="#home" onclick="return goMenu('#home')" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Home</span></a>
-      <a href="#stories" onclick="return goMenu('#stories')" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Travel Stories</span></a>
-      <a href="#photo-gallery-section" onclick="return goMenu('#photo-gallery-section')" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Photo Gallery</span></a>
-      <a href="#youtube-section" onclick="return goMenu('#youtube-section')" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>YouTube</span></a>
-      <a href="#about-section" onclick="return goMenu('#about-section')" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>About</span></a>
-      <a href="#contact-page" onclick="return goMenu('#contact-page')" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Contact</span></a>
-      <a href="#privacy-policy" onclick="return goMenu('#privacy-policy')" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Privacy Policy</span></a>
+      <a href="#home" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Home</span></a>
+      <a href="#stories" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Travel Stories</span></a>
+      <a href="#photo-gallery-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Photo Gallery</span></a>
+      <a href="#youtube-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>YouTube</span></a>
+      <a href="#about-section" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>About</span></a>
+      <a href="#contact-page" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Contact</span></a>
+      <a href="#privacy-policy" onclick="closeMenu()" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white"><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>Privacy Policy</span></a>
       <button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white w-full text-left">
         <i class="fa-solid fa-share-nodes text-emerald-400"></i>
         <span id="menu-share-label">Share Website</span>
@@ -1310,10 +1310,13 @@
     </div>
   </section>
 
-  <!-- ABOUT -->
+  <!-- ABOUT — Menu only + Back -->
   <section id="about-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
     <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
-      <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3">About Htoo Htet</h2>
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white">About Htoo Htet</h2>
+        <button type="button" onclick="closeLegalPage()" class="shrink-0 text-xs font-bold text-emerald-400 hover:text-emerald-200 px-3 py-1.5 rounded-lg border border-emerald-800/50 hover:bg-emerald-900/40">← Back</button>
+      </div>
       <p id="about-desc" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl">
         မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
       </p>
@@ -1615,23 +1618,11 @@ function goMenu(href) {
   setTimeout(function () {
     var h = href.toLowerCase();
     try {
-      if (h.indexOf('about') >= 0) {
-        if (typeof openLegalPage === 'function') openLegalPage('about');
-        return;
-      }
-      if (h.indexOf('contact') >= 0) {
-        if (typeof openLegalPage === 'function') openLegalPage('contact');
-        return;
-      }
-      if (h.indexOf('privacy') >= 0) {
-        if (typeof openLegalPage === 'function') openLegalPage('privacy');
-        return;
-      }
+      if (h.indexOf('about') >= 0) { if (typeof openLegalPage === 'function') openLegalPage('about'); return; }
+      if (h.indexOf('contact') >= 0) { if (typeof openLegalPage === 'function') openLegalPage('contact'); return; }
+      if (h.indexOf('privacy') >= 0) { if (typeof openLegalPage === 'function') openLegalPage('privacy'); return; }
       var id = href.replace(/^#/, '');
-      if (!id || id === 'home') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
+      if (!id || id === 'home') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
       var el = document.getElementById(id);
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       else location.hash = href;
@@ -2210,22 +2201,15 @@ function renderMenu() {
   });
   const mob = $('mobile-nav');
   const foot = $('footer-links');
-  function _menuIcon(href, label) {
-    var h = String(href || '').toLowerCase(), lab = String(label || '').toLowerCase();
-    if (h.indexOf('home') >= 0 || lab === 'home') return 'fa-house';
-    if (h.indexOf('stor') >= 0 || lab.indexOf('travel') >= 0 || lab.indexOf('ခရီး') >= 0) return 'fa-map';
-    if (h.indexOf('gallery') >= 0 || h.indexOf('photo') >= 0 || lab.indexOf('photo') >= 0) return 'fa-image';
-    if (h.indexOf('youtube') >= 0 || lab.indexOf('youtube') >= 0) return 'fa-play';
-    if (h.indexOf('about') >= 0 || lab.indexOf('about') >= 0) return 'fa-circle-info';
-    if (h.indexOf('contact') >= 0 || lab.indexOf('contact') >= 0) return 'fa-envelope';
-    return 'fa-chevron-right';
-  }
   var html = menu.map(function(m) {
     var href = m.href || '#home';
-    var icon = _menuIcon(href, m.label);
-    return '<a href="' + safe(href) + '" onclick="return goMenu(\'' + String(href).replace(/'/g, '') + '\')" class="menu-link rounded-xl px-4 py-3.5 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold">' +
-      '<i class="fa-solid ' + icon + ' text-emerald-400 w-5 text-center text-sm"></i><span>' + safe(m.label) + '</span></a>';
+    return '<a href="' + safe(href) + '" onclick="return goMenu(\'' + String(href).replace(/'/g, '') + '\')" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold">' +
+      '<i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i><span>' + safe(m.label) + '</span></a>';
   }).join('');
+  // Always append Website Share (not a page link — shares homepage)
+  var shareLabel = (typeof t === 'function' ? t('shareWebsite') : '') || 'Share Website';
+  html += '<button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold w-full text-left">' +
+    '<i class="fa-solid fa-share-nodes text-emerald-400"></i><span id="menu-share-label">' + safe(shareLabel) + '</span></button>';
   if (mob) {
     mob.innerHTML = html;
     mob.style.display = 'flex';
@@ -2233,12 +2217,9 @@ function renderMenu() {
     mob.style.opacity = '1';
     mob.style.minHeight = '180px';
   }
-  var shareLabel = (typeof t === 'function' ? t('shareWebsite') : '') || 'Share Website';
-  if ($('menu-share-label')) $('menu-share-label').textContent = shareLabel;
   if (foot) {
     foot.innerHTML = menu.map(function(m) {
-      var href = m.href || '#';
-      return '<li><a href="' + safe(href) + '" onclick="return goMenu(\'' + String(href).replace(/'/g, '') + '\')">' + safe(m.label) + '</a></li>';
+      return '<li><a href="' + safe(m.href || '#') + '" class="hover:text-yellow-400 transition">' + safe(m.label) + '</a></li>';
     }).join('');
   }
 }
@@ -2988,7 +2969,6 @@ function loadBlogData() {
     else $('about-desc').textContent = (typeof t === 'function' ? t('aboutDesc') : '');
   }
   if (about.descColor) $('about-desc').style.color = about.descColor;
-  // About homepage auto မပြ
   if ($('about-section') && !document.body.classList.contains('legal-page-open')) {
     $('about-section').classList.add('hidden');
   }
