@@ -1295,8 +1295,8 @@
           </a>
         </div>
         <div class="shrink-0">
-          <a id="youtube-video-link" href="#" target="_blank" rel="noopener" class="block w-60 sm:w-72 h-36 sm:h-40 rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl">
-            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-95 transition duration-300 group-hover:scale-105">
+          <a id="youtube-video-link" href="#" target="_blank" rel="noopener" class="block w-64 sm:w-80 lg:w-96 aspect-video rounded-xl overflow-hidden border-2 border-emerald-700/40 shadow-2xl relative group transition hover:border-red-500/60 hover:-translate-y-1 hover:shadow-2xl shrink-0">
+            <img id="youtube-thumb" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="" class="absolute inset-0 w-full h-full object-cover object-center opacity-90 group-hover:opacity-100 transition duration-300 group-hover:scale-105">
             <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20 pointer-events-none"></div>
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
               <div class="w-12 h-12 rounded-full bg-red-600/95 flex items-center justify-center shadow-xl mb-2 group-hover:scale-110 transition">
@@ -1310,13 +1310,10 @@
     </div>
   </section>
 
-  <!-- ABOUT — Menu နှိပ်မှသာ ပေါ် (homepage မှာ auto မပြ) -->
-  <section id="about-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+  <!-- ABOUT -->
+  <section id="about-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
     <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
-      <div class="flex items-center justify-between gap-3 mb-3">
-        <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white">About Htoo Htet</h2>
-        <button type="button" onclick="closeLegalPage()" class="text-xs font-bold text-emerald-400 hover:text-emerald-200 px-3 py-1.5 rounded-lg border border-emerald-800/50 hover:bg-emerald-900/40">← Back</button>
-      </div>
+      <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3">About Htoo Htet</h2>
       <p id="about-desc" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl">
         မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
       </p>
@@ -2947,10 +2944,7 @@ function loadBlogData() {
     else $('about-desc').textContent = (typeof t === 'function' ? t('aboutDesc') : '');
   }
   if (about.descColor) $('about-desc').style.color = about.descColor;
-  // About = menu page only — never auto-show on homepage
-  if ($('about-section') && !document.body.classList.contains('legal-page-open')) {
-    $('about-section').classList.add('hidden');
-  }
+  $('about-section').classList.toggle('hidden', about.active === false);
 
   if (siteSettings.storiesHeading) $('stories-heading').textContent = siteSettings.storiesHeading;
   if (siteSettings.storiesSub) $('stories-sub').textContent = siteSettings.storiesSub;
@@ -4326,37 +4320,32 @@ function submitComment() {
 }
 
 
-/* ---- About / Contact / Privacy as separate pages ---- */
+/* ---- Contact / Privacy Policy as separate pages ---- */
 function openLegalPage(which) {
   var contact = document.getElementById('contact-page');
   var privacy = document.getElementById('privacy-policy');
-  var about = document.getElementById('about-section');
   var home = document.getElementById('home');
   if (!contact || !privacy) return;
   try { closeArticle(); } catch (e) {}
   try { closeGalleryPage(); } catch (e) {}
   try { closeMenu(); } catch (e) {}
+  // hide main home blocks, show only the selected legal section
   if (home) {
     Array.prototype.forEach.call(home.children, function(child) {
-      if (child.id === 'contact-page' || child.id === 'privacy-policy' || child.id === 'about-section') return;
+      if (child.id === 'contact-page' || child.id === 'privacy-policy') return;
       child.setAttribute('data-legal-hidden', '1');
       child.style.display = 'none';
     });
   }
-  if (contact) { contact.classList.add('hidden'); contact.style.display = 'none'; }
-  if (privacy) { privacy.classList.add('hidden'); privacy.style.display = 'none'; }
-  if (about) { about.classList.add('hidden'); about.style.display = 'none'; }
   if (which === 'privacy') {
+    contact.classList.add('hidden');
+    contact.style.display = 'none';
     privacy.classList.remove('hidden');
     privacy.style.display = '';
     try { privacy.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
-  } else if (which === 'about') {
-    if (about) {
-      about.classList.remove('hidden');
-      about.style.display = '';
-      try { about.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
-    }
   } else {
+    privacy.classList.add('hidden');
+    privacy.style.display = 'none';
     contact.classList.remove('hidden');
     contact.style.display = '';
     try { contact.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
@@ -4366,11 +4355,9 @@ function openLegalPage(which) {
 function closeLegalPage() {
   var contact = document.getElementById('contact-page');
   var privacy = document.getElementById('privacy-policy');
-  var about = document.getElementById('about-section');
   var home = document.getElementById('home');
   if (contact) { contact.classList.add('hidden'); contact.style.display = 'none'; }
   if (privacy) { privacy.classList.add('hidden'); privacy.style.display = 'none'; }
-  if (about) { about.classList.add('hidden'); about.style.display = 'none'; }
   if (home) {
     Array.prototype.forEach.call(home.children, function(child) {
       if (child.getAttribute('data-legal-hidden') === '1') {
@@ -4381,8 +4368,7 @@ function closeLegalPage() {
   }
   document.body.classList.remove('legal-page-open');
   try {
-    var h = (location.hash || '').toLowerCase();
-    if (h === '#contact-page' || h === '#privacy-policy' || h === '#about-section' || h === '#about' || h === '#contact') {
+    if (location.hash === '#contact-page' || location.hash === '#privacy-policy') {
       history.pushState('', '', location.pathname + location.search);
     }
   } catch (e) {}
@@ -4398,10 +4384,7 @@ function tryOpenLegalFromHash() {
     openLegalPage('privacy');
     return true;
   }
-  if (h === '#about-section' || h === '#about') {
-    openLegalPage('about');
-    return true;
-  }
+  // not a legal hash — ensure legal pages closed if we were on one
   if (document.body.classList.contains('legal-page-open')) {
     closeLegalPage();
   }
