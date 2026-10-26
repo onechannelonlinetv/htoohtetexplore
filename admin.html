@@ -2981,6 +2981,12 @@ function enablePreviewDrag(iframe) {
       if (!state) return;
       var cb = state.onDone;
       win._hhPvDrag.state = null;
+      try {
+        if (state.el) {
+          state.el.style.pointerEvents = 'auto';
+          state.el.classList.add('pv-drag');
+        }
+      } catch (e) {}
       try { if (typeof cb === 'function') cb(); } catch (err) { console.warn(err); }
     }
     doc.addEventListener('mousemove', onMove, true);
@@ -2988,6 +2994,13 @@ function enablePreviewDrag(iframe) {
     doc.addEventListener('mouseup', onUp, true);
     doc.addEventListener('touchend', onUp, true);
     doc.addEventListener('touchcancel', onUp, true);
+    // Also listen on window so release outside iframe still ends drag
+    try {
+      win.addEventListener('mouseup', onUp, true);
+      win.addEventListener('touchend', onUp, true);
+      win.addEventListener('pointerup', onUp, true);
+      win.addEventListener('pointercancel', onUp, true);
+    } catch (e) {}
   }
 
   function makeDrag(el, parentSel, onDone, opts) {
@@ -4706,6 +4719,18 @@ function setHeroPrevText(el, text, resizeKey) {
 }
 
 function updateHeroPreview() {
+  // While dragging/resizing a hero text layer, skip full rebuild (it destroys handles & freezes further drag)
+  if (window._heroDragState || window._heroDragging) {
+    try {
+      // still sync frame size / bg if needed without wiping text layers
+      var b = $('hero-live-preview');
+      if (b && $('hero-frame-h')) {
+        var fh = parseInt($('hero-frame-h').value || '360', 10);
+        if (!isNaN(fh)) b.style.height = fh + 'px';
+      }
+    } catch (e) {}
+    return;
+  }
   const box = $('hero-live-preview');
   const label = $('hero-prev-label');
   const title = $('hero-prev-title');
@@ -5054,10 +5079,41 @@ function initHeroLineDrag() {
     }
     function clearDrag() {
       var st = window._heroDragState;
+      window._heroDragging = false;
       if (st && st.type === 'move' && st.el) {
-        st.el.style.cursor = 'grab';
-        st.el.style.outline = '';
+        try {
+          st.el.style.cursor = 'grab';
+          st.el.style.outline = '';
+          st.el.style.pointerEvents = 'auto';
+        } catch (e) {}
       }
+      // Ensure no layer stuck in contentEditable / blocked pointer state
+      try {
+        ['hero-prev-label','hero-prev-title','hero-prev-desc','hero-prev-sign'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          if (el.contentEditable === 'true' || el.getAttribute('contenteditable') === 'true') {
+            el.contentEditable = 'false';
+            el.removeAttribute('contenteditable');
+            el.style.cursor = 'grab';
+            el.style.outline = '';
+            el.style.userSelect = 'none';
+            el.style.webkitUserSelect = 'none';
+          }
+          el.style.pointerEvents = 'auto';
+          // ensure resize handle exists
+          if (!el.querySelector('.sp-resize-handle')) {
+            var key = id.replace('hero-prev-', 'hero-');
+            var h = document.createElement('span');
+            h.className = 'sp-resize-handle';
+            h.setAttribute('data-resize', key);
+            h.title = 'ဆိုဒ်';
+            h.style.pointerEvents = 'auto';
+            h.style.zIndex = '80';
+            el.appendChild(h);
+          }
+        });
+      } catch (e) {}
       if (st) {
         try { stashCurrentDeviceLayout(); } catch (e) {}
       }
@@ -5094,7 +5150,7 @@ function initHeroLineDrag() {
           };
           if (vmap[st.input] && $(vmap[st.input])) $(vmap[st.input]).textContent = nv + 'px';
         }
-        try { updatePhoneHeroPreview(); } catch (err) {}
+        // skip updatePhoneHeroPreview during live resize (was freezing subsequent drags)
         if (e.cancelable) e.preventDefault();
         return;
       }
@@ -5165,6 +5221,7 @@ function initHeroLineDrag() {
       }
       // find parent text layer for live font update
       var prevEl = hit.el.parentElement;
+      window._heroDragging = true;
       window._heroDragState = {
         type: 'resize',
         input: cfg.input,
@@ -5183,6 +5240,7 @@ function initHeroLineDrag() {
     var el = hit.el;
     var cfg = map[el.id];
     if (!cfg) return;
+    window._heroDragging = true;
     window._heroDragState = {
       type: 'move',
       el: el,
