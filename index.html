@@ -814,7 +814,7 @@
   #drawer-overlay.drawer-overlay {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.75);
   }
   #drawer-overlay:not(.opacity-0) {
     opacity: 1;
@@ -825,41 +825,33 @@
       max-width: 100% !important;
       left: 0 !important;
       right: 0 !important;
+      height: 100% !important;
       height: 100dvh !important;
-      max-height: 100dvh !important;
       border-left: none !important;
       background: #0a1628 !important;
       overflow: hidden !important;
-      overscroll-behavior: none !important;
-      padding-top: max(12px, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
-      padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+      z-index: 80 !important;
     }
     body.theme-forest #site-menu { background: #061510 !important; }
     body.theme-ocean #site-menu { background: #0a1628 !important; }
     body.theme-sunset #site-menu { background: #1a120b !important; }
     #site-menu #mobile-nav {
+      flex: 1 1 auto !important;
+      min-height: 120px !important;
       overflow-y: auto !important;
       overscroll-behavior: contain !important;
-      min-height: 0 !important;
-      flex: 1 1 auto !important;
     }
     #site-menu .menu-link {
-      min-height: 52px;
+      min-height: 50px;
       border: 1px solid rgba(16, 185, 129, 0.2) !important;
       background: rgba(12, 32, 48, 0.95) !important;
     }
     #site-menu .menu-link.menu-active {
-      background: rgba(16, 185, 129, 0.3) !important;
-      box-shadow: inset 3px 0 0 var(--brand-accent, #34d399);
+      background: rgba(16, 185, 129, 0.28) !important;
+      box-shadow: inset 3px 0 0 #34d399;
     }
-    #site-menu .menu-link i { color: var(--brand-accent, #34d399) !important; width: 1.25rem; text-align: center; }
-    body.menu-open {
-      overflow: hidden !important;
-      position: fixed !important;
-      width: 100% !important;
-      height: 100% !important;
-      touch-action: none !important;
-    }
+    #site-menu .menu-link i { color: #34d399 !important; width: 1.25rem; text-align: center; }
+    body.menu-open { overflow: hidden !important; }
   }
   @media (max-width: 380px) {
     #lang-toggle { min-width: 2.25rem; padding-left: 0.4rem; padding-right: 0.4rem; font-size: 10px; }
@@ -1179,20 +1171,27 @@
   </div>
 
   <!-- Menu -->
-  <div id="drawer-overlay" class="drawer-overlay fixed inset-0 z-40 bg-black/70 opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeMenu()"></div>
-  <aside id="site-menu" class="fixed z-50 top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out px-5 sm:px-6 pb-5 sm:pb-6 flex flex-col border-l border-emerald-900/50">
+  <div id="drawer-overlay" class="drawer-overlay fixed inset-0 z-[70] bg-black/75 opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeMenu()"></div>
+  <aside id="site-menu" class="fixed z-[80] top-0 right-0 h-full w-[min(86vw,320px)] surface-bg shadow-2xl translate-x-full transition-transform duration-300 ease-out px-5 sm:px-6 pb-5 sm:pb-6 flex flex-col border-l border-emerald-900/50">
     <div class="menu-top-row flex items-center justify-between gap-3 shrink-0">
       <div id="mobile-brand-name" class="font-black text-white text-base leading-tight truncate pr-2"></div>
       <button type="button" onclick="closeMenu()" class="w-11 h-11 shrink-0 rounded-xl bg-emerald-900/60 text-white flex items-center justify-center" aria-label="Close menu"><i class="fa-solid fa-xmark text-lg"></i></button>
     </div>
-    <nav id="mobile-nav" class="flex flex-col gap-2 text-[15px] font-semibold text-white flex-1 overflow-y-auto mt-4 min-h-0"></nav>
+    <nav id="mobile-nav" class="flex flex-col gap-2 text-[15px] font-semibold text-white flex-1 overflow-y-auto mt-4 min-h-0">
+      <a href="#home" onclick="return goMenu('#home')" class="menu-link rounded-xl px-4 py-3.5 flex items-center gap-3 text-white"><i class="fa-solid fa-house text-emerald-400 w-5 text-center"></i><span>Home</span></a>
+      <a href="#stories" onclick="return goMenu('#stories')" class="menu-link rounded-xl px-4 py-3.5 flex items-center gap-3 text-white"><i class="fa-solid fa-map text-emerald-400 w-5 text-center"></i><span>Travel Stories</span></a>
+      <a href="#photo-gallery-section" onclick="return goMenu('#photo-gallery-section')" class="menu-link rounded-xl px-4 py-3.5 flex items-center gap-3 text-white"><i class="fa-solid fa-image text-emerald-400 w-5 text-center"></i><span>Photo Gallery</span></a>
+      <a href="#youtube-section" onclick="return goMenu('#youtube-section')" class="menu-link rounded-xl px-4 py-3.5 flex items-center gap-3 text-white"><i class="fa-solid fa-play text-emerald-400 w-5 text-center"></i><span>YouTube</span></a>
+      <a href="#about-section" onclick="return goMenu('#about-section')" class="menu-link rounded-xl px-4 py-3.5 flex items-center gap-3 text-white"><i class="fa-solid fa-circle-info text-emerald-400 w-5 text-center"></i><span>About</span></a>
+      <a href="#contact-page" onclick="return goMenu('#contact-page')" class="menu-link rounded-xl px-4 py-3.5 flex items-center gap-3 text-white"><i class="fa-solid fa-envelope text-emerald-400 w-5 text-center"></i><span>Contact</span></a>
+    </nav>
     <div class="mt-auto pt-4 border-t border-emerald-900/50 space-y-3 shrink-0">
       <div class="flex items-center gap-2">
-        <button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 hover:bg-emerald-900/50 flex items-center gap-2.5 text-white font-semibold flex-1 text-left border border-emerald-800/40">
+        <button type="button" id="menu-share-btn" onclick="shareSite(); closeMenu();" class="menu-link rounded-xl px-4 py-3 flex items-center gap-2.5 text-white font-semibold flex-1 text-left border border-emerald-800/40">
           <i class="fa-solid fa-share-nodes text-emerald-400"></i>
           <span id="menu-share-label">Share Website</span>
         </button>
-        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="h-11 w-12 rounded-xl text-white/95 hover:bg-emerald-900/50 flex items-center justify-center transition border border-emerald-800/40 shrink-0">
+        <button id="mode-toggle" type="button" aria-label="Dark/Light" title="Dark / Light" onclick="toggleUserMode()" class="h-11 w-12 rounded-xl text-white/95 flex items-center justify-center border border-emerald-800/40 shrink-0">
           <i id="mode-toggle-icon" class="fa-solid fa-moon text-sm"></i>
         </button>
       </div>
@@ -1343,13 +1342,10 @@
     </div>
   </section>
 
-  <!-- ABOUT — Menu မှသာ -->
-  <section id="about-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+  <!-- ABOUT -->
+  <section id="about-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
     <div class="rounded-2xl surface-bg border border-emerald-800/40 p-6 sm:p-9">
-      <div class="flex items-center justify-between gap-3 mb-3">
-        <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white">About Htoo Htet</h2>
-        <button type="button" onclick="closeLegalPage()" class="text-xs font-bold text-emerald-400 hover:text-emerald-200 px-3 py-1.5 rounded-lg border border-emerald-800/50 hover:bg-emerald-900/40">← Back</button>
-      </div>
+      <h2 id="about-title" class="text-xl sm:text-2xl font-black text-white mb-3">About Htoo Htet</h2>
       <p id="about-desc" class="text-sm sm:text-base text-emerald-100/75 leading-relaxed max-w-3xl">
         မြန်မာနိုင်ငံရဲ့ လမ်းမများ၊ လူများ၊ ယဉ်ကျေးမှုနဲ့ သဘာဝအလှတွေကို ခရီးသွားမှတ်တမ်းများဖြင့် မျှဝေနေပါတယ်။
       </p>
@@ -1624,47 +1620,45 @@ let allStoryPosts = [];
 let siteSettings = {};
 let siteMenu = [];
 
-var _menuScrollY = 0;
 function toggleMenu() {
   const menu = $('site-menu'), overlay = $('drawer-overlay');
-  const open = menu.classList.contains('translate-x-full');
-  if (open) {
+  if (!menu) return;
+  const willOpen = menu.classList.contains('translate-x-full');
+  if (willOpen) {
     try { renderMenu(); } catch (e) {}
-    try { _menuScrollY = window.scrollY || window.pageYOffset || 0; } catch (e) { _menuScrollY = 0; }
-    try { document.body.style.top = '-' + _menuScrollY + 'px'; } catch (e) {}
   }
-  menu.classList.toggle('translate-x-full', !open);
-  overlay.classList.toggle('opacity-0', !open);
-  overlay.classList.toggle('pointer-events-none', !open);
-  document.body.classList.toggle('overflow-hidden', open);
-  document.body.classList.toggle('menu-open', open);
-  if (!open) {
-    try {
-      document.body.style.top = '';
-      window.scrollTo(0, _menuScrollY || 0);
-    } catch (e) {}
+  menu.classList.toggle('translate-x-full', !willOpen);
+  if (overlay) {
+    overlay.classList.toggle('opacity-0', !willOpen);
+    overlay.classList.toggle('pointer-events-none', !willOpen);
   }
+  document.body.classList.toggle('overflow-hidden', willOpen);
+  document.body.classList.toggle('menu-open', willOpen);
 }
 function closeMenu() {
-  $('site-menu').classList.add('translate-x-full');
-  $('drawer-overlay').classList.add('opacity-0', 'pointer-events-none');
+  var menu = $('site-menu');
+  var overlay = $('drawer-overlay');
+  if (menu) menu.classList.add('translate-x-full');
+  if (overlay) {
+    overlay.classList.add('opacity-0', 'pointer-events-none');
+  }
   document.body.classList.remove('overflow-hidden');
   document.body.classList.remove('menu-open');
-  try { document.body.style.top = ''; } catch (e) {}
 }
-/** Menu item → correct section / page */
 function goMenu(href) {
-  href = String(href || '').trim() || '#home';
+  href = String(href || '#home').trim();
   closeMenu();
-  var h = href.toLowerCase();
   setTimeout(function() {
+    var h = href.toLowerCase();
     try {
       if (h.indexOf('about') >= 0) {
         if (typeof openLegalPage === 'function') openLegalPage('about');
+        else location.hash = '#about-section';
         return;
       }
       if (h.indexOf('contact') >= 0) {
         if (typeof openLegalPage === 'function') openLegalPage('contact');
+        else location.hash = '#contact-page';
         return;
       }
       if (h.indexOf('privacy') >= 0) {
@@ -1673,22 +1667,22 @@ function goMenu(href) {
       }
       var id = href.replace(/^#/, '');
       if (!id || id === 'home') {
-        try { history.pushState('', '', location.pathname + location.search); } catch (e) {}
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
       var el = document.getElementById(id);
       if (el) {
-        try { history.pushState('', '', '#' + id); } catch (e) {}
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
         location.hash = href;
       }
     } catch (e) {}
-  }, 60);
+  }, 50);
   return false;
 }
 window.goMenu = goMenu;
+window.closeMenu = closeMenu;
+window.toggleMenu = toggleMenu;
 
 const searchPanel = $('search-panel');
 const searchInput = $('header-search-input');
@@ -2246,40 +2240,33 @@ function menuIconFor(href, label) {
   if (h.indexOf('youtube') >= 0 || lab.indexOf('youtube') >= 0) return 'fa-play';
   if (h.indexOf('about') >= 0 || lab.indexOf('about') >= 0 || lab.indexOf('အကြောင်း') >= 0) return 'fa-circle-info';
   if (h.indexOf('contact') >= 0 || lab.indexOf('contact') >= 0 || lab.indexOf('ဆက်သွယ်') >= 0) return 'fa-envelope';
-  if (h.indexOf('privacy') >= 0) return 'fa-shield-halved';
   return 'fa-chevron-right';
 }
 function renderMenu() {
   var raw = Array.isArray(siteMenu) ? siteMenu : [];
   var menu = raw.filter(function(m) {
     if (!m) return false;
-    var lab = String(m.label || m.title || m.name || '').trim();
-    return !!lab;
+    return !!String(m.label || m.title || m.name || '').trim();
   }).map(function(m) {
     var base = String(m.label || m.title || m.name || '').trim();
     var en = String(m.labelEn || m.titleEn || '').trim();
     var label = (typeof currentLang !== 'undefined' && currentLang === 'en' && en) ? en : translateMenuLabel(base);
-    return {
-      label: label,
-      href: String(m.href || m.link || m.url || '#').trim() || '#'
-    };
+    return { label: label, href: String(m.href || m.link || m.url || '#').trim() || '#' };
   });
-  if (!menu.length) menu = defaultMenuItems().map(function(m) {
-    return { label: translateMenuLabel(m.label), href: m.href };
-  });
-  var hash = (location.hash || '#home').toLowerCase();
-  if (!hash || hash === '#') hash = '#home';
-  const mob = $('mobile-nav');
-  const foot = $('footer-links');
+  if (!menu.length) {
+    menu = defaultMenuItems().map(function(m) {
+      return { label: translateMenuLabel(m.label), href: m.href };
+    });
+  }
+  var hash = (location.hash || '#home').toLowerCase() || '#home';
+  var mob = $('mobile-nav');
+  var foot = $('footer-links');
   var html = menu.map(function(m) {
-    var href = m.href || '#';
+    var href = m.href || '#home';
     var icon = menuIconFor(href, m.label);
-    var active = false;
     var hl = href.toLowerCase();
-    if (hl === '#home' || hl === '#') active = (hash === '#home' || hash === '' || hash === '#');
-    else if (hash === hl) active = true;
-    else if (hl.length > 1 && hash.indexOf(hl.replace('#', '')) >= 0) active = true;
-    return '<a href="' + safe(href) + '" onclick="return goMenu(\'' + safe(href).replace(/'/g, '') + '\')" class="menu-link rounded-xl px-4 py-3.5 hover:bg-emerald-900/50 flex items-center gap-3 text-white font-semibold' + (active ? ' menu-active' : '') + '">' +
+    var active = (hl === '#home' || hl === '#') ? (hash === '#home' || hash === '#' || !hash) : (hash === hl || hash.indexOf(hl.replace('#', '')) >= 0);
+    return '<a href="' + safe(href) + '" onclick="return goMenu(\'' + String(href).replace(/'/g, '') + '\')" class="menu-link rounded-xl px-4 py-3.5 flex items-center gap-3 text-white font-semibold' + (active ? ' menu-active' : '') + '">' +
       '<i class="fa-solid ' + icon + ' text-emerald-400 w-5 text-center text-sm"></i><span>' + safe(m.label) + '</span></a>';
   }).join('');
   if (mob) {
@@ -2293,7 +2280,7 @@ function renderMenu() {
   if (foot) {
     foot.innerHTML = menu.map(function(m) {
       var href = m.href || '#';
-      return '<li><a href="' + safe(href) + '" onclick="return goMenu(\'' + safe(href).replace(/'/g, '') + '\')">' + safe(m.label) + '</a></li>';
+      return '<li><a href="' + safe(href) + '" onclick="return goMenu(\'' + String(href).replace(/'/g, '') + '\')">' + safe(m.label) + '</a></li>';
     }).join('');
   }
 }
@@ -3043,9 +3030,7 @@ function loadBlogData() {
     else $('about-desc').textContent = (typeof t === 'function' ? t('aboutDesc') : '');
   }
   if (about.descColor) $('about-desc').style.color = about.descColor;
-  if ($('about-section') && !document.body.classList.contains('legal-page-open')) {
-    $('about-section').classList.add('hidden');
-  }
+  $('about-section').classList.toggle('hidden', about.active === false);
 
   if (siteSettings.storiesHeading) $('stories-heading').textContent = siteSettings.storiesHeading;
   if (siteSettings.storiesSub) $('stories-sub').textContent = siteSettings.storiesSub;
@@ -4421,37 +4406,32 @@ function submitComment() {
 }
 
 
-/* ---- About / Contact / Privacy pages ---- */
+/* ---- Contact / Privacy Policy as separate pages ---- */
 function openLegalPage(which) {
   var contact = document.getElementById('contact-page');
   var privacy = document.getElementById('privacy-policy');
-  var about = document.getElementById('about-section');
   var home = document.getElementById('home');
   if (!contact || !privacy) return;
   try { closeArticle(); } catch (e) {}
   try { closeGalleryPage(); } catch (e) {}
   try { closeMenu(); } catch (e) {}
+  // hide main home blocks, show only the selected legal section
   if (home) {
     Array.prototype.forEach.call(home.children, function(child) {
-      if (child.id === 'contact-page' || child.id === 'privacy-policy' || child.id === 'about-section') return;
+      if (child.id === 'contact-page' || child.id === 'privacy-policy') return;
       child.setAttribute('data-legal-hidden', '1');
       child.style.display = 'none';
     });
   }
-  if (contact) { contact.classList.add('hidden'); contact.style.display = 'none'; }
-  if (privacy) { privacy.classList.add('hidden'); privacy.style.display = 'none'; }
-  if (about) { about.classList.add('hidden'); about.style.display = 'none'; }
   if (which === 'privacy') {
+    contact.classList.add('hidden');
+    contact.style.display = 'none';
     privacy.classList.remove('hidden');
     privacy.style.display = '';
     try { privacy.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
-  } else if (which === 'about') {
-    if (about) {
-      about.classList.remove('hidden');
-      about.style.display = '';
-      try { about.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
-    }
   } else {
+    privacy.classList.add('hidden');
+    privacy.style.display = 'none';
     contact.classList.remove('hidden');
     contact.style.display = '';
     try { contact.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
@@ -4461,11 +4441,9 @@ function openLegalPage(which) {
 function closeLegalPage() {
   var contact = document.getElementById('contact-page');
   var privacy = document.getElementById('privacy-policy');
-  var about = document.getElementById('about-section');
   var home = document.getElementById('home');
   if (contact) { contact.classList.add('hidden'); contact.style.display = 'none'; }
   if (privacy) { privacy.classList.add('hidden'); privacy.style.display = 'none'; }
-  if (about) { about.classList.add('hidden'); about.style.display = 'none'; }
   if (home) {
     Array.prototype.forEach.call(home.children, function(child) {
       if (child.getAttribute('data-legal-hidden') === '1') {
@@ -4476,8 +4454,7 @@ function closeLegalPage() {
   }
   document.body.classList.remove('legal-page-open');
   try {
-    var h = (location.hash || '').toLowerCase();
-    if (h === '#contact-page' || h === '#privacy-policy' || h === '#about-section' || h === '#about' || h === '#contact') {
+    if (location.hash === '#contact-page' || location.hash === '#privacy-policy') {
       history.pushState('', '', location.pathname + location.search);
     }
   } catch (e) {}
@@ -4485,10 +4462,18 @@ function closeLegalPage() {
 }
 function tryOpenLegalFromHash() {
   var h = (location.hash || '').toLowerCase();
-  if (h === '#contact-page' || h === '#contact') { openLegalPage('contact'); return true; }
-  if (h === '#privacy-policy' || h === '#privacy') { openLegalPage('privacy'); return true; }
-  if (h === '#about-section' || h === '#about') { openLegalPage('about'); return true; }
-  if (document.body.classList.contains('legal-page-open')) closeLegalPage();
+  if (h === '#contact-page' || h === '#contact') {
+    openLegalPage('contact');
+    return true;
+  }
+  if (h === '#privacy-policy' || h === '#privacy') {
+    openLegalPage('privacy');
+    return true;
+  }
+  // not a legal hash — ensure legal pages closed if we were on one
+  if (document.body.classList.contains('legal-page-open')) {
+    closeLegalPage();
+  }
   return false;
 }
 window.openLegalPage = openLegalPage;
