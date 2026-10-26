@@ -52,11 +52,18 @@ body{background:#070d19;color:#e5edf7;font-family:system-ui,-apple-system,"Segoe
 #sp-prev-badge,#sp-prev-title,#sp-prev-desc{position:absolute}
 #sp-prev-badge .sp-resize-handle,#sp-prev-title .sp-resize-handle,#sp-prev-desc .sp-resize-handle{pointer-events:auto}
 
-#hero-live-preview [id^="hero-prev-"]{z-index:50!important;pointer-events:auto!important;cursor:grab!important}
-#hero-live-preview .sp-resize-handle{z-index:60!important;pointer-events:auto!important}
+#hero-live-preview [id^="hero-prev-"]{z-index:50!important;pointer-events:auto!important;cursor:grab!important;max-width:92%!important;box-sizing:border-box;}
+#hero-live-preview [id^="hero-prev-"].pv-selected,
+#hero-live-preview [id^="hero-prev-"]:active{z-index:70!important;}
+#hero-live-preview .sp-resize-handle{z-index:80!important;pointer-events:auto!important}
 
-#up-live-preview [id^="up-prev-"]{z-index:50!important;pointer-events:auto!important;cursor:grab!important}
-#up-live-preview .sp-resize-handle{z-index:60!important;pointer-events:auto!important}
+#up-live-preview [id^="up-prev-"]{z-index:50!important;pointer-events:auto!important;cursor:grab!important;max-width:92%!important;box-sizing:border-box;}
+#up-live-preview [id^="up-prev-"].pv-selected,
+#up-live-preview [id^="up-prev-"]:active{z-index:70!important;}
+#up-live-preview .sp-resize-handle{z-index:80!important;pointer-events:auto!important}
+#sponsor-live-preview [id^="sp-prev-"]{max-width:92%!important;box-sizing:border-box;}
+#sponsor-live-preview [id^="sp-prev-"].pv-selected,
+#sponsor-live-preview [id^="sp-prev-"]:active{z-index:70!important;}
 #up-device-shell{transition:max-width .25s ease,padding .2s ease,border-radius .2s ease}
 
 #content-live-preview img{max-width:100%;border-radius:10px;display:block;margin:8px 0}
@@ -2982,6 +2989,42 @@ function enablePreviewDrag(iframe) {
       var cb = state.onDone;
       win._hhPvDrag.state = null;
       try { if (typeof cb === 'function') cb(); } catch (err) { console.warn(err); }
+      // loadBlogData may strip handles or rebuild sponsor DOM — restore + rebind
+      try {
+        setTimeout(function() {
+          try {
+            doc.querySelectorAll('.pv-drag').forEach(function(el) {
+              if (!el || !el.appendChild) return;
+              if (el.getAttribute('data-no-resize') === '1') return;
+              var has = false;
+              try {
+                var kids = el.querySelectorAll('.pv-resize');
+                for (var i = 0; i < kids.length; i++) {
+                  if (kids[i].parentElement === el) { has = true; break; }
+                }
+              } catch (e) {}
+              if (!has) {
+                var h = doc.createElement('span');
+                h.className = 'pv-resize';
+                h.title = 'ဆိုဒ်';
+                el.appendChild(h);
+              }
+              try {
+                el.style.pointerEvents = 'auto';
+                el.classList.add('pv-drag');
+              } catch (e) {}
+            });
+          } catch (e) {}
+          try {
+            if (iframe && typeof enablePreviewDrag === 'function') enablePreviewDrag(iframe);
+          } catch (e) {}
+        }, 180);
+        setTimeout(function() {
+          try {
+            if (iframe && typeof enablePreviewDrag === 'function') enablePreviewDrag(iframe);
+          } catch (e) {}
+        }, 600);
+      } catch (e) {}
     }
     doc.addEventListener('mousemove', onMove, true);
     doc.addEventListener('touchmove', onMove, { capture: true, passive: false });
@@ -2993,17 +3036,25 @@ function enablePreviewDrag(iframe) {
   function makeDrag(el, parentSel, onDone, opts) {
     if (!el) return;
     opts = opts || {};
-    // Already bound with a single handle — just update onDone ref
+    // Already bound — update onDone and restore handle if loadBlogData stripped it
     if (el._pvBound && el.classList.contains('pv-drag')) {
       el._pvOnDone = onDone;
       try {
         var hs = el.querySelectorAll('.pv-resize');
-        // keep only the first direct child handle
         var kept = false;
         for (var i = 0; i < hs.length; i++) {
           if (!kept && hs[i].parentElement === el) { kept = true; continue; }
           try { hs[i].remove(); } catch (e) {}
         }
+        // Handle was removed by textContent/innerHTML rewrite — put it back
+        if (!kept && !opts.noResize && el.appendChild) {
+          var hRest = doc.createElement('span');
+          hRest.className = 'pv-resize';
+          hRest.title = 'ဆိုဒ်';
+          el.appendChild(hRest);
+        }
+        if (opts.noResize) el.setAttribute('data-no-resize', '1');
+        el.style.pointerEvents = 'auto';
       } catch (e) {}
       return;
     }
@@ -3055,7 +3106,9 @@ function enablePreviewDrag(iframe) {
       }
     } catch (e) {}
     var existing = null;
-    if (!opts.noResize && el.appendChild) {
+    if (opts.noResize) {
+      try { el.setAttribute('data-no-resize', '1'); } catch (e) {}
+    } else if (el.appendChild) {
       var h = doc.createElement('span');
       h.className = 'pv-resize';
       h.title = 'ဆိုဒ်';
